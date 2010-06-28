@@ -107,6 +107,31 @@ public class AccountBean implements Serializable {
     // user preferences fields
     private FxLanguage defaultInputLanguage;
 
+    /**
+     * @return true if the edit tab should be opened
+     * @since 3.1.4
+     */
+    public boolean isOpenTab() {
+        return account != null && account.getId() >= 0;
+    }
+
+    /**
+     * Opens the edit user in a tab
+     * @return the name where to navigate
+     * @since 3.1.4
+     */
+    public String openEditTab() {
+        if (!isOpenTab()) return null;
+        return editUser(false);
+    }
+
+    public String getLastEditName() {
+        if (account == null)
+            return null;
+        return account.getName();
+    }
+
+
     public List<Role> getRoles() {
         if (roles == null) {
             return new ArrayList<Role>(0);
@@ -555,9 +580,21 @@ public class AccountBean implements Serializable {
      * @return the next page to render
      */
     public String editUser() {
+        return editUser(true);
+    }
+
+    /**
+     * Loads the user specified by the parameter accountIdFilter.
+     *
+     * @param loadAccount load the account or use the savestate
+     * @return the next page to render
+     * @since 3.1.4
+     */
+    public String editUser(boolean loadAccount) {
         try {
             ensureAccountIdSet();
-            this.account = new AccountEditBean(getAccountEngine().load(this.accountIdFilter));
+            if (loadAccount)
+                this.account = new AccountEditBean(getAccountEngine().load(this.accountIdFilter));
             this.showOldPassword = FxJsfUtils.getRequest().getUserTicket().getUserId() == account.getId();
             List<Role> r = getAccountEngine().getRoles(this.accountIdFilter, RoleLoadMode.FROM_USER_ONLY);
             this.roles = new Long[r.size()];
@@ -616,7 +653,7 @@ public class AccountBean implements Serializable {
      */
     public String overview() {
         //keep filter but reset account data
-        resetAccount();
+//        resetAccount();
         return "accountOverview";
     }
 
@@ -839,8 +876,8 @@ public class AccountBean implements Serializable {
                     StringUtils.join(ArrayUtils.toObject(userGroupIds), ',');
             List<Account> result = listCache.get(cacheKey);
             if (result == null) {
-                result = getAccountEngine().loadAll(account.getName(), account.getLoginName(),
-                        account.getEmail(), isActiveFilter() ? true : null, isValidatedFilter() ? true : null, _mandatorFilter,
+                result = getAccountEngine().loadAll(null, null,
+                        null, isActiveFilter() ? true : null, isValidatedFilter() ? true : null, _mandatorFilter,
                         null, userGroupIds, 0, -1);
                 listCache.put(cacheKey, result);
             }

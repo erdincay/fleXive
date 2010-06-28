@@ -20,7 +20,9 @@
         <t:saveState id="sortColumn" value="#{aclBean.sortColumn}"/>
         <t:saveState id="sortOrder" value="#{aclBean.sortOrder}"/>
 
-        <adm:tab label="#{fxMessageBean['ACL.label.edit,#{aclBean.acl.name}']}" active="true" id="tab1"/>
+        <adm:tab label="#{fxMessageBean['ACL.label.overview']}" active="false" id="tab1"
+                action="overview"  bean="#{aclBean}" />
+        <adm:tab label="#{fxMessageBean['ACL.label.edit,#{aclBean.acl.name}']}" active="true" id="tab2"/>
 
         <fx:formRow label="#{fxMessageBean['ACL.field.mandator']}" id="mandator" >
             <h:inputText id="mandator" value="#{mandatorBean.mandatorsById[aclBean.acl.mandatorId].name}"

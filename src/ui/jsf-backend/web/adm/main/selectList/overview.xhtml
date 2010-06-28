@@ -22,6 +22,11 @@
             <h:inputHidden id="sortOrder" value="#{selectListBean.sortOrder}"/>
 
            <adm:tab label="#{fxMessageBean['SelectList.tab.overview']}" active="true" id="tab1"/>
+            <c:if test="#{selectListBean.openTab}">
+                <t:saveState id="ssSelectList" value="#{selectListBean.currentData}"/>
+                <adm:tab label="#{fxMessageBean['SelectList.tab.editSelectList,#{selectListBean.selectListName}']}" active="false" id="tab2"
+                        action="openEditTab"  bean="#{selectListBean}" onclick="storeDataTablePosition('frm');"/>
+            </c:if>
 
             <a4j:outputPanel id="selectListPanel">
                 <adm:sortableTable id="table" onPageChange="DTpageChange"

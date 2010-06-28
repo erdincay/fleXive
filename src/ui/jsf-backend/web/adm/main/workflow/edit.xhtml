@@ -24,7 +24,9 @@
             
             <h:inputHidden value="#{workflowBean.workflow.id}"/>
         	
-            <adm:tab label="#{fxMessageBean['Workflow.tabtitle.edit,#{workflowBean.workflow.name}']}" active="true" id="tab1"/>
+            <adm:tab labelKey="Workflow.tabtitle.overview" active="false" id="tab1"
+                    bean="#{workflowBean}" action="overview"/>
+            <adm:tab label="#{fxMessageBean['Workflow.tabtitle.edit,#{workflowBean.workflow.name}']}" active="true" id="tab2"/>
 
 			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.basicData']}">
 				<fx:formRow label="#{fxMessageBean['Workflow.field.name']}" id="workflowName">

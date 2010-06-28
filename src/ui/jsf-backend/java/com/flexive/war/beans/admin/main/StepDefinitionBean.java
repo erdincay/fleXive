@@ -54,20 +54,52 @@ import java.io.Serializable;
 public class StepDefinitionBean implements Serializable {
     private static final long serialVersionUID = -3654298727780108311L;
 
-    private long stepDefinitionId = -1;
-    private StepDefinitionEdit stepDefinition;
-    private boolean uniqueTargetSelected;
+    private StepDefinitionHolder currentData = new StepDefinitionHolder();
+    private static final String STEP_DEFINITION_OVERVIEW = "stepDefinitionOverview";
+    private static final String STEP_DEFINITION_EDIT = "stepDefinitionEdit";
+
+    private static class StepDefinitionHolder{
+        private long stepDefinitionId = -1;
+        private StepDefinitionEdit stepDefinition;
+        private boolean uniqueTargetSelected;
+    }
 
     private int overviewPageNumber;
     private int overviewRows;
 
     /**
-     * Step definition overview.
+     * @return true if the edit tab should be opened
+     * @since 3.1.4
+     */
+    public boolean isOpenTab() {
+        return currentData != null && currentData.stepDefinition != null && currentData.stepDefinition.getId() >= 0;
+    }
+
+    /**
+     * Opens the edit mandator in a tab
+     * @return the name where to navigate
+     * @since 3.1.4
+     */
+    public String openEditTab() {
+        if (!isOpenTab()) return edit();
+        return STEP_DEFINITION_EDIT;
+    }
+
+    /**
+     * Navigate back to the overview and remembers the changes of the mandator
      *
-     * @return the overview page
+     * @return overview page
      */
     public String overview() {
-        return "stepDefinitionOverview";
+        return STEP_DEFINITION_OVERVIEW;
+    }
+
+    public StepDefinitionHolder getCurrentData() {
+        return currentData;
+    }
+
+    public void setCurrentData(StepDefinitionHolder currentData) {
+        this.currentData = currentData;
     }
 
     /**
@@ -76,9 +108,9 @@ public class StepDefinitionBean implements Serializable {
      * @return the edit form
      */
     public String edit() {
-        stepDefinition =CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).asEditable();
+        currentData.stepDefinition =CacheAdmin.getEnvironment().getStepDefinition(currentData.stepDefinitionId).asEditable();
         initUniqueTargetSelected();
-        return "stepDefinitionEdit";
+        return STEP_DEFINITION_EDIT;
     }
 
     /**
@@ -88,6 +120,7 @@ public class StepDefinitionBean implements Serializable {
      */
     public String delete() {
         try {
+            long stepDefinitionId = currentData.stepDefinitionId;
             String name = CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).getName();
             getWorkflowStepDefinitionEngine().remove(stepDefinitionId);
             new FxFacesMsgInfo("StepDefinition.nfo.deleted", name).addToContext();
@@ -104,12 +137,12 @@ public class StepDefinitionBean implements Serializable {
      */
     public String create() {
         try {
-            stepDefinitionId = getWorkflowStepDefinitionEngine().create(stepDefinition);
-            new FxFacesMsgInfo("StepDefinition.nfo.created", stepDefinition.getName()).addToContext();
+            currentData.stepDefinitionId = getWorkflowStepDefinitionEngine().create(currentData.stepDefinition);
+            new FxFacesMsgInfo("StepDefinition.nfo.created", currentData.stepDefinition.getName()).addToContext();
             return overview();
         } catch (Exception e) {
             new FxFacesMsgErr(e, "StepDefinition.err.create", e).addToContext();
-            return "stepDefinitionEdit";
+            return STEP_DEFINITION_EDIT;
         }
     }
 
@@ -120,6 +153,7 @@ public class StepDefinitionBean implements Serializable {
      */
     public String save() {
         try {
+            StepDefinitionEdit stepDefinition = currentData.stepDefinition;
             if (!isUniqueTargetSelected())
                 stepDefinition.setUniqueTargetId(-1);
             getWorkflowStepDefinitionEngine().update(stepDefinition);
@@ -136,24 +170,24 @@ public class StepDefinitionBean implements Serializable {
     }
 
     public long getStepDefinitionId() {
-        return stepDefinitionId;
+        return currentData.stepDefinitionId;
     }
 
     public void setStepDefinitionId(long stepDefinitionId) {
-        this.stepDefinitionId = stepDefinitionId;
+        this.currentData.stepDefinitionId = stepDefinitionId;
     }
 
     public StepDefinitionEdit getStepDefinition() {
-        if (stepDefinition != null) {
-            return stepDefinition;
+        if (currentData.stepDefinition != null) {
+            return currentData.stepDefinition;
         }
-        stepDefinition = new StepDefinitionEdit(new StepDefinition(-1, new FxString(""), null, -1));
-        uniqueTargetSelected = stepDefinition.getUniqueTargetId() !=-1;
-        return stepDefinition;
+        currentData.stepDefinition = new StepDefinitionEdit(new StepDefinition(-1, new FxString(""), null, -1));
+        currentData.uniqueTargetSelected = currentData.stepDefinition.getUniqueTargetId() !=-1;
+        return currentData.stepDefinition;
     }
 
     public void setStepDefinition(StepDefinitionEdit stepDefinition) {
-        this.stepDefinition = stepDefinition;
+        this.currentData.stepDefinition = stepDefinition;
         initUniqueTargetSelected();
     }
 
@@ -161,7 +195,7 @@ public class StepDefinitionBean implements Serializable {
         List<StepDefinition> sdList = CacheAdmin.getFilteredEnvironment().getStepDefinitions();
         List<StepDefinition> filteredList = new ArrayList<StepDefinition>(sdList.size());
         for (StepDefinition sd : sdList)
-            if (sd.getId() != stepDefinition.getId()) {
+            if (sd.getId() != currentData.stepDefinition.getId()) {
                 filteredList.add(sd);
             }
         //if list is empty, add empty element
@@ -169,15 +203,15 @@ public class StepDefinitionBean implements Serializable {
     }
 
     public boolean isUniqueTargetSelected() {
-        return uniqueTargetSelected;
+        return currentData.uniqueTargetSelected;
     }
 
     public void setUniqueTargetSelected(boolean b) {
-        uniqueTargetSelected=b;
+        currentData.uniqueTargetSelected=b;
     }
 
     private void initUniqueTargetSelected() {
-        uniqueTargetSelected = getStepDefinition().getUniqueTargetId() !=-1;
+        currentData.uniqueTargetSelected = getStepDefinition().getUniqueTargetId() !=-1;
     }
 
     public int getOverviewPageNumber() {

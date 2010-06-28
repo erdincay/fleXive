@@ -16,7 +16,12 @@
             <h:inputHidden id="currentPage" value="#{stepDefinitionBean.overviewPageNumber}"/>
             <h:inputHidden id="rowsPerPage" value="#{stepDefinitionBean.overviewRows}"/>
 
-            <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.overview']}" active="true" id="tab1"/>
+            <adm:tab labelKey="StepDefinition.tabtitle.overview" active="true" id="tab1"/>
+            <c:if test="#{stepDefinitionBean.openTab}">
+                <t:saveState id="ssStepDefinition" value="#{stepDefinitionBean.currentData}"/>
+                <adm:tab labelKey="StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}" active="false" id="tab2"
+                        action="openEditTab"  bean="#{stepDefinitionBean}" onclick="storeDataTablePosition('frm');"/>
+            </c:if>
 
             <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{stepDefinitionBean.overviewPageNumber}" rowsPerPage="#{stepDefinitionBean.overviewRows}">
                 <table id="table">

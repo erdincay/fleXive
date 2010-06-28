@@ -19,6 +19,11 @@
             <h:inputHidden id="sortOrder" value="#{userGroupBean.sortOrder}"/>
 
             <adm:tab labelKey="UserGroup.tabtitle.overview" active="true" id="tab1"/>
+            <c:if test="#{userGroupBean.openTab}">
+                <t:saveState id="ssUserGroup" value="#{userGroupBean.currentData}"/>
+                <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.edit,#{userGroupBean.tmpName}']}" active="false" id="tab2"
+                        action="openEditTab"  bean="#{userGroupBean}" onclick="storeDataTablePosition('frm');"/>
+            </c:if>
 
             <!-- Mandator select is only shown for global supervisors -->
             <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
@@ -81,14 +86,14 @@
                                 <td>
                                     <adm:commandIcon labelKey="User.button.edit" location="content"
                                                     icon="edit"  action="edit"  bean="#{userGroupBean}"
-                                                    onclick="storeDataTablePosition('frm')"
+                                                    onclick="storeDataTablePosition('frm');"
                                                     id="editButton_#{group.id}">
                                         <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>
                                     </adm:commandIcon>
                                     <ui:fragment rendered="#{!group.system}">
                                         <adm:commandIcon labelKey="User.button.delete" location="content"
                                                          icon="delete" action="delete" bean="#{userGroupBean}"
-                                                         onclick="storeDataTablePosition('frm')"
+                                                         onclick="storeDataTablePosition('frm');"
                                                          id="deleteButton_#{group.id}"
                                                          confirmKey="UserGroup.confirm.delete,#{group.name}">
                                             <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>

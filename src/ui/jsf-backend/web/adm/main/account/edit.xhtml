@@ -15,7 +15,9 @@
 <ui:define name="body">
 
     <a4j:form id="frm">
-        <adm:tab label="#{fxMessageBean['Account.label.edit,#{accountBean.account.name}']}" active="true" id="tab1"/>
+        <adm:tab label="#{fxMessageBean['Account.label.overview']}" active="false" id="tab1"
+                 bean="#{accountBean}" action="overview"/>
+        <adm:tab label="#{fxMessageBean['Account.label.edit,#{accountBean.account.name}']}" active="true" id="tab2"/>
         <t:saveState id="ssAccount" value="#{accountBean.account}"/>
         <t:saveState id="ssGroups" value="#{accountBean.groups}"/>
         <t:saveState id="currentPage" value="#{accountBean.overviewPageNumber}"/>

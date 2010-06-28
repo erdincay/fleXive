@@ -21,6 +21,8 @@
         
         <h:form id="frm">
 
+            <adm:tab labelKey="UserGroup.tabtitle.overview" active="false" id="tab1"
+                    bean="#{userGroupBean}" action="overview"/>
             <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.edit,#{userGroupBean.name}']}" active="true" id="createGroupTable"/>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.mandator']}" id="mandator">

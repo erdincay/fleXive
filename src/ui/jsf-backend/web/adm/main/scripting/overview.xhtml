@@ -23,6 +23,11 @@
 
 
             <adm:tab label="#{fxMessageBean['Script.tabtitle.overview']}" active="true" id="tab1"/>
+            <c:if test="#{scriptBean.openTab}">
+                <t:saveState id="ssScript" value="#{scriptBean.currentData}"/>
+                <adm:tab labelKey="Script.tabtitle.edit,#{scriptBean.sinfo.name}" active="false" id="tab2"
+                        action="openEditTab"  bean="#{scriptBean}" onclick="storeDataTablePosition('frm');"/>
+            </c:if>
 
             <h:panelGrid columns="4">
                 #{fxMessageBean['Script.field.scriptScope']}:&nbsp;

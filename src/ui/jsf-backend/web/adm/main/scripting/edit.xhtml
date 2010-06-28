@@ -25,6 +25,10 @@
     <ui:define name="body">
         <h:form id="frm">
             <a4j:region>
+                <adm:tab labelKey="UserGroup.tabtitle.overview" active="false" id="tab01"
+                         bean="#{scriptBean}" action="overview" ajax="true" />
+                <adm:tab labelKey="Script.tabtitle.edit,#{scriptBean.sinfo.name}" active="true"
+                         id="tab02"/>
                 <t:saveState id="ssInputFieldEnabled" value="#{scriptBean.inputFieldEnabled}"/>
                 <t:saveState id="ssVerifyButtonEnabled" value="#{scriptBean.verifyButtonEnabled}"/>
                 <t:saveState id="ssExecuteButtonEnabled" value="#{scriptBean.executeButtonEnabled}"/>
@@ -38,17 +42,15 @@
                 <t:saveState id="sortColumn" value="#{scriptBean.sortColumn}"/>
                 <t:saveState id="sortOrder" value="#{scriptBean.sortOrder}"/>
 
-                <adm:tab label="#{fxMessageBean['Script.tabtitle.edit,#{scriptBean.sinfo.name}']}" active="true"
-                         id="tab1"/>
 
                 <fx:formRow labelKey="Script.field.name" id="name" relativeWidth="100">
                     <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30"
                                  readonly="#{!fxSystemBean.isInRole['ScriptManagement']}">
                         <a4j:support event="onkeyup"
-                                     reRender="scriptnameerror, all, verifyPanel, executePanel, importPanel"
                                      eventsQueue="main" requestDelay="500" action="#{scriptBean.verifyScriptName}"
+                                     reRender="scriptnameerror, mainPanel, verifyPanel, executePanel, importPanel"
                                      oncomplete="ajaxButtonRequest();
-                                     activateEditArea('frm:code', #{scriptBean.inputFieldEnabled}, '#{scriptBean.userLang}', '#{scriptBean.language}')"/>
+                                     activateEditArea('frm:code', #{scriptBean.inputFieldEnabled}, '#{scriptBean.userLang}', '#{scriptBean.language}')" />
                     </h:inputText>
                     <h:outputText id="scriptnameerror" value="#{scriptBean.nameErrorMsg}"
                                   style="color:red; padding-left:4px"/>
@@ -56,7 +58,7 @@
                     <h:inputHidden value="#{scriptBean.id}"/>
                 </fx:formRow>
 
-                <a4j:outputPanel id="all" layout="block">
+                <a4j:outputPanel id="mainPanel" layout="block">
                     <fx:formRow labelKey="Script.field.event.default" id="event">
                         <h:selectOneListbox id="event" value="#{scriptBean.sinfo.event}" size="1"
                                             disabled="#{!fxSystemBean.isInRole['ScriptManagement'] or !scriptBean.inputFieldEnabled}">
@@ -164,4 +166,4 @@
     </ui:define>
     </body>
 </ui:composition>
-</html>
+        </html>

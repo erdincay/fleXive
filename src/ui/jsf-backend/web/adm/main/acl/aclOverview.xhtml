@@ -20,6 +20,11 @@
     <h:form id="frm">
 
         <adm:tab label="#{fxMessageBean['ACL.label.overview']}" active="true" id="tab1"/>
+        <c:if test="${aclBean.openTab}">
+            <t:saveState id="ssAcc" value="#{aclBean.currentACL}"/>
+            <adm:tab label="#{fxMessageBean['ACL.label.edit,#{aclBean.acl.name}']}" active="false" id="tab2"
+                     action="openEditTab"  bean="#{aclBean}" onclick="storeDataTablePosition('listForm');"/>
+        </c:if>
         <t:saveState id="ssMandator" value="#{aclBean.mandator}"/>
         <!-- Mandator select is only shown for global supervisors -->
         <c:if test="${fxSystemBean.userTicket.globalSupervisor}">

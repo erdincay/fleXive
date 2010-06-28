@@ -13,7 +13,12 @@
 
     <ui:define name="body">
         <h:form id="frm">
-            <adm:tab label="#{fxMessageBean['Workflow.tabtitle.overview']}" active="true" id="tab1"/>
+            <adm:tab labelKey="Workflow.tabtitle.overview" active="true" id="tab1"/>
+            <c:if test="#{workflowBean.openTab}">
+                 <t:saveState id="ssWorkflow" value="#{workflowBean.currentWorkflow}"/>
+                 <adm:tab label="#{fxMessageBean['Workflow.tabtitle.edit,#{workflowBean.workflow.name}']}" active="false" id="tab2"
+                         action="openEditTab"  bean="#{workflowBean}" onclick="storeDataTablePosition('frm');"/>
+             </c:if>
 
             <h:inputHidden id="currentPage" value="#{workflowBean.overviewPageNumber}"/>
             <h:inputHidden id="rowsPerPage" value="#{workflowBean.overviewRows}"/>

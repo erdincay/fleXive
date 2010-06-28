@@ -23,6 +23,11 @@
             <h:inputHidden id="sortOrder" value="#{accountBean.sortOrder}"/>
 
             <adm:tab label="#{fxMessageBean['Account.label.overview']}" active="true" id="tab1"/>
+            <c:if test="${accountBean.openTab}">
+                <t:saveState id="ssAcc" value="#{accountBean.account}"/>
+                <adm:tab label="#{fxMessageBean['Account.label.edit,#{accountBean.lastEditName}']}" active="false" id="tab2"
+                         action="openEditTab"  bean="#{accountBean}" onclick="storeDataTablePosition('listForm');"/>
+            </c:if>
 
             <!-- Mandator select is only shown for global supervisors -->
             <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
@@ -99,14 +104,14 @@
                                     <adm:commandIcon labelKey="User.button.edit" location="content"
                                                     icon="edit"  action="editUser"  bean="#{accountBean}"
                                                     lockscreen="false"
-                                                    onclick="storeDataTablePosition('listForm')"
+                                                    onclick="storeDataTablePosition('listForm');"
                                                     id="editButton_#{item.id}">
                                         <f:setPropertyActionListener target="#{accountBean.accountIdFilter}" value="#{item.id}"/>
                                     </adm:commandIcon>
                                     <ui:fragment rendered="#{!item.systemInternalAccount}">
                                         <adm:commandIcon labelKey="User.button.delete" location="content"
                                                          icon="delete" action="deleteUser" bean="#{accountBean}"
-                                                         onclick="storeDataTablePosition('listForm')"
+                                                         onclick="storeDataTablePosition('listForm');"
                                                          id="deleteButton_#{item.id}" confirmKey="User.confirm.delete">
                                             <f:setPropertyActionListener target="#{accountBean.accountIdFilter}"
                                                                          value="#{item.id}"/>

@@ -58,33 +58,81 @@ import java.util.List;
 public class AclBean implements Serializable {
     private static final long serialVersionUID = -3767461611278032535L;
 
-    private long id;
-    private long mandator;
-    private ACL acl = null;
-    private List<ACLAssignmentEdit> assignments;
+    private AclHolder currentACL = new AclHolder();
+
     private long assignmentId;
     private static final String ID_CACHE_KEY = AclBean.class + "_id";
-    private String selectedIds;
 
     private int overviewPageNumber;
     private int overviewRows;
     private String sortColumn;
     private String sortOrder;
+    private static final String ACL_EDIT = "aclEdit";
 
+
+    /**
+     * Holder class for an ACL object + its fields
+     *
+     * @since 3.1.4
+     */
+    private static class AclHolder implements Serializable{
+        private long id = -1;
+        private long mandator;
+        private ACL acl = null;
+        private List<ACLAssignmentEdit> assignments;
+        private String selectedIds;
+    }
+
+    /**
+     * @return true if the edit tab should be opened
+     * @since 3.1.4
+     */
+    public boolean isOpenTab() {
+        return currentACL != null && currentACL.id >= 0;
+    }
+
+    /**
+     * Opens the edit user in a tab
+     * @return the name where to navigate
+     * @since 3.1.4
+     */
+    public String openEditTab() {
+        if (!isOpenTab()) return edit();
+        return ACL_EDIT;
+    }
+
+    public AclHolder getCurrentACL() {
+        return currentACL;
+    }
+
+    public void setCurrentACL(AclHolder currentACL) {
+        this.currentACL = currentACL;
+    }
+
+    /**
+     * Navigate back to the overview and remembers the changes of the acl
+     *
+     * @return overview page
+     * @since 3.1.4
+     */
+    public String overview() {
+//        tmpACL = currentACL;
+        return "aclOverview";
+    }
 
     public String getSelectedIds() {
-        return selectedIds;
+        return currentACL.selectedIds;
     }
 
     public void setSelectedIds(String selectedIds) {
-        this.selectedIds = selectedIds;
+        this.currentACL.selectedIds = selectedIds;
     }
 
     public long[] getSelectedIdsAsLong() {
-        if (selectedIds == null || selectedIds.trim().length() == 0) {
+        if (currentACL.selectedIds == null || currentACL.selectedIds.trim().length() == 0) {
             return new long[0];
         } else {
-            String ids[] = selectedIds.split(",");
+            String ids[] = currentACL.selectedIds.split(",");
             long result[] = new long[ids.length];
             int pos = 0;
             for (String id : ids) {
@@ -119,54 +167,54 @@ public class AclBean implements Serializable {
     }
 
     public AclBean() {
-        this.acl = new ACL();
+        this.currentACL.acl = new ACL();
     }
 
     public ACL getAcl() {
-        return acl;
+        return currentACL.acl;
     }
 
     public void setAcl(ACL acl) {
-        this.acl = acl;
+        this.currentACL.acl = acl;
     }
 
 
     public long getMandator() {
-        return mandator;
+        return currentACL.mandator;
     }
 
     public void setMandator(long mandator) {
-        this.mandator = mandator;
+        this.currentACL.mandator = mandator;
     }
 
     public long getId() {
-        return id;
+        return currentACL.id;
     }
 
     public void setId(long id) {
-        this.id = id;
+        this.currentACL.id = id;
         FxJsfUtils.setSessionAttribute(ID_CACHE_KEY, id);
     }
 
     public List<ACLAssignmentEdit> getAssignments() {
-        if (assignments == null) {
-            assignments = new ArrayList<ACLAssignmentEdit>(5);
+        if (currentACL.assignments == null) {
+            currentACL.assignments = new ArrayList<ACLAssignmentEdit>(5);
         }
-        return assignments;
+        return currentACL.assignments;
     }
 
     public void setAssignments(List<ACLAssignmentEdit> assignments) {
-        this.assignments = assignments;
+        this.currentACL.assignments = assignments;
     }
 
     public void addAssignment() {
-        getAssignments().add(new ACLAssignmentEdit(acl));
+        getAssignments().add(new ACLAssignmentEdit(currentACL.acl));
     }
 
     public void removeAssignment() {
-        for (ACLAssignmentEdit ass : assignments) {
+        for (ACLAssignmentEdit ass : currentACL.assignments) {
             if (ass.getId() == assignmentId) {
-                assignments.remove(ass);
+                currentACL.assignments.remove(ass);
                 return;
             }
         }
@@ -212,7 +260,7 @@ public class AclBean implements Serializable {
     public String delete() {
         try {
             ensureIdSet();
-            getAclEngine().remove(id);
+            getAclEngine().remove(currentACL.id);
             new FxFacesMsgInfo("ACL.nfo.deleted").addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
@@ -258,6 +306,7 @@ public class AclBean implements Serializable {
             // create the acl
             final UserTicket ticket = FxContext.getUserTicket();
             long mandatorId = (ticket.isGlobalSupervisor()) ? getMandator() : ticket.getMandatorId();
+            ACL acl = currentACL.acl;
             setId(getAclEngine().create(acl.getName(), acl.getLabel(), mandatorId,
                     acl.getColor(), acl.getDescription(), acl.getCategory()));
             new FxFacesMsgInfo("ACL.nfo.created", acl.getName()).addToContext();
@@ -277,13 +326,13 @@ public class AclBean implements Serializable {
     public String edit() {
         try {
             ensureIdSet();
-            acl = getAclEngine().load(id);
-            final List<ACLAssignment> _assignments = getAclEngine().loadAssignments(id);
-            assignments = new ArrayList<ACLAssignmentEdit>(_assignments.size() + 5);
+            currentACL.acl = getAclEngine().load(currentACL.id);
+            final List<ACLAssignment> _assignments = getAclEngine().loadAssignments(currentACL.id);
+            currentACL.assignments = new ArrayList<ACLAssignmentEdit>(_assignments.size() + 5);
             for (ACLAssignment ass : _assignments)
-                assignments.add(new ACLAssignmentEdit(ass));
-            id = acl.getId();
-            return "aclEdit";
+                currentACL.assignments.add(new ACLAssignmentEdit(ass));
+            currentACL.id = currentACL.acl.getId();
+            return ACL_EDIT;
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
             return "aclOverview";
@@ -291,8 +340,8 @@ public class AclBean implements Serializable {
     }
 
     private void ensureIdSet() {
-        if (this.id <= 0) {
-            this.id = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
+        if (this.currentACL.id <= 0) {
+            this.currentACL.id = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
         }
     }
 
@@ -309,13 +358,14 @@ public class AclBean implements Serializable {
                         ass.getMayRelate(), ass.getMayDelete(), ass.getMayExport(),
                         ass.getMayCreate(), ass.getACLCategory(), ass.getLifeCycleInfo()));
             }
-            getAclEngine().update(id, acl.getName(), acl.getLabel(), acl.getColor(), acl.getDescription(), list);
-            this.acl = getAclEngine().load(id);
+            ACL acl = currentACL.acl;
+            getAclEngine().update(currentACL.id, acl.getName(), acl.getLabel(), acl.getColor(), acl.getDescription(), list);
+            this.currentACL.acl = getAclEngine().load(currentACL.id);
             new FxFacesMsgInfo("ACL.nfo.saved", acl.getName()).addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
-        return "aclEdit";
+        return ACL_EDIT;
     }
 
     /**

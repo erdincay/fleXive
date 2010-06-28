@@ -68,25 +68,36 @@ import java.util.*;
 public class ScriptBean implements Serializable {
     private static final long serialVersionUID = -3764559730042052584L;
 
-    private long id = -1;
-    private String name;
-    private String desc;
-    private String code;
-    private boolean active;
-    private FxScriptInfoEdit sinfo;
-    private FxScriptMapping mapping;
-    private Map<Long, String> typeMappingNames;
-    private Map<Long, String> assignmentMappingNames;
-    private FxScriptScope selectedScope = null;
-    private long selectedScriptEventId = -1;
-    private FxScriptRunInfo currentRunInfo;
-    private String nameErrorMsg;
-    private boolean inputFieldEnabled = false;
-    private boolean verifyButtonEnabled = false;
-    private boolean executeButtonEnabled = false;
-    private long executionTime;
-    private String userLang = "en";
-    private String language = "groovy";
+    private ScriptHolder currentData = new ScriptHolder();
+    private static final String SCRIPT_EDIT = "scriptEdit";
+    private static final String SCRIPT_OVERVIEW = "scriptOverview";
+
+    /**
+     * A holder class for a Script object
+     * @since 3.1.4
+     */
+    private static class ScriptHolder implements Serializable {
+        private long id = -1;
+        private String name;
+        private String desc;
+        private String code;
+        private boolean active;
+        private FxScriptInfoEdit sinfo;
+        private FxScriptMapping mapping;
+        private Map<Long, String> typeMappingNames;
+        private Map<Long, String> assignmentMappingNames;
+        private FxScriptScope selectedScope = null;
+        private long selectedScriptEventId = -1;
+        private FxScriptRunInfo currentRunInfo;
+        private String nameErrorMsg;
+        private boolean inputFieldEnabled = false;
+        private boolean verifyButtonEnabled = false;
+        private boolean executeButtonEnabled = false;
+        private long executionTime;
+        private String userLang = "en";
+        private String language = "groovy";
+    }
+
     private int overviewPageNumber = 1;
     private int overviewRowNumber = 10;
     private String sortColumn;
@@ -96,16 +107,51 @@ public class ScriptBean implements Serializable {
     
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
+    /**
+     * @return true if the edit tab should be opened
+     * @since 3.1.4
+     */
+    public boolean isOpenTab() {
+        return currentData != null && currentData.id  >= 0;
+    }
+
+    /**
+     * Opens the edit mandator in a tab
+     * @return the name where to navigate
+     * @since 3.1.4
+     */
+    public String openEditTab() {
+        if (!isOpenTab()) return editScript();
+        return SCRIPT_EDIT;
+    }
+
+    public ScriptHolder getCurrentData() {
+        return currentData;
+    }
+
+    public void setCurrentData(ScriptHolder currentData) {
+        this.currentData = currentData;
+    }
+
+    /**
+     * Navigate back to the overview and remembers the changes of the mandator
+     *
+     * @return overview page
+     * @since 3.1.4
+     */
+    public String overview() {
+        return SCRIPT_OVERVIEW;
+    }
 
     // constructor
     public ScriptBean() {
-        this.sinfo = new FxScriptInfo().asEditable();
+        this.currentData.sinfo = new FxScriptInfo().asEditable();
     }
 
     public FxScriptScope getSelectedScope() {
-        if (selectedScope == null)
-            selectedScope = FxScriptScope.All;
-        return selectedScope;
+        if (currentData.selectedScope == null)
+            currentData.selectedScope = FxScriptScope.All;
+        return currentData.selectedScope;
     }
 
     public List<SelectItem> getEventsForScope() {
@@ -124,7 +170,7 @@ public class ScriptBean implements Serializable {
         }
 
         if (!selectedEventFound)
-            this.selectedScriptEventId = -1;
+            this.currentData.selectedScriptEventId = -1;
 
         return eventsForScope;
     }
@@ -146,15 +192,15 @@ public class ScriptBean implements Serializable {
     }
 
     public void setSelectedScope(FxScriptScope selectedScope) {
-        this.selectedScope = selectedScope;
+        this.currentData.selectedScope = selectedScope;
     }
 
     public long getSelectedScriptEventId() {
-        return selectedScriptEventId;
+        return currentData.selectedScriptEventId;
     }
 
     public void setSelectedScriptEventId(long selectedScriptEventId) {
-        this.selectedScriptEventId = selectedScriptEventId;
+        this.currentData.selectedScriptEventId = selectedScriptEventId;
     }
 
     /**
@@ -175,27 +221,27 @@ public class ScriptBean implements Serializable {
     }
 
     public long getId() {
-        return id;
+        return currentData.id;
     }
 
     public void setId(long id) {
-        this.id = id;
+        this.currentData.id = id;
     }
 
     public boolean isActive() {
-        return active;
+        return currentData.active;
     }
 
     public void setActive(boolean active) {
-        this.active = active;
+        this.currentData.active = active;
     }
 
     public void setLanguage(String language) {
-        this.language = language;
+        this.currentData.language = language;
     }
 
     public String getLanguage() {
-        return language;
+        return currentData.language;
     }
 
     /**
@@ -205,70 +251,73 @@ public class ScriptBean implements Serializable {
      */
     public String editScript() {
         ensureScriptIdSet();
-        setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
+        setSinfo(CacheAdmin.getEnvironment().getScript(currentData.id).asEditable());
         try {
-            this.mapping = getScriptingEngine().loadScriptMapping(id);
-            this.typeMappingNames = new HashMap<Long, String>();
+            this.currentData.mapping = getScriptingEngine().loadScriptMapping(currentData.id);
+            HashMap<Long, String> typeMappingNames = new HashMap<Long, String>();
+            currentData.typeMappingNames = typeMappingNames;
             // we need the type names for the user interface and the type ids for the links
-            for (FxScriptMappingEntry entry : this.mapping.getMappedTypes()) {
-                this.typeMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getType(entry.getId()).getName());
+            for (FxScriptMappingEntry entry : this.currentData.mapping.getMappedTypes()) {
+                typeMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getType(entry.getId()).getName());
                 for (long id : entry.getDerivedIds())
-                    this.typeMappingNames.put(id, CacheAdmin.getEnvironment().getType(id).getName());
+                    typeMappingNames.put(id, CacheAdmin.getEnvironment().getType(id).getName());
             }
-            this.assignmentMappingNames = new HashMap<Long, String>();
-            for (FxScriptMappingEntry entry : this.mapping.getMappedAssignments()) {
-                this.assignmentMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getAssignment(entry.getId()).getXPath());
+            HashMap<Long, String> assignmentMappingNames = new HashMap<Long, String>();
+            currentData.assignmentMappingNames = assignmentMappingNames;
+            for (FxScriptMappingEntry entry : this.currentData.mapping.getMappedAssignments()) {
+                assignmentMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getAssignment(entry.getId()).getXPath());
                 for (long id : entry.getDerivedIds())
-                    this.assignmentMappingNames.put(id, CacheAdmin.getEnvironment().getAssignment(id).getXPath());
+                    assignmentMappingNames.put(id, CacheAdmin.getEnvironment().getAssignment(id).getXPath());
             }
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         } catch (SQLException e) {
             new FxFacesMsgErr("Script.err.loadMap").addToContext();
         }
+        FxScriptInfoEdit sinfo = currentData.sinfo;
         setName(sinfo.getName());
         setDesc(sinfo.getDescription());
         setCode(sinfo.getCode());
         setActive(sinfo.isActive());
         verifyScriptName();
-        return "scriptEdit";
+        return SCRIPT_EDIT;
     }
 
     public FxScriptInfo getSinfo() {
-        return sinfo;
+        return currentData.sinfo;
     }
 
     public void setSinfo(FxScriptInfoEdit sinfo) {
-        this.sinfo = sinfo;
+        this.currentData.sinfo = sinfo;
     }
 
     public String getName() {
-        return name;
+        return currentData.name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.currentData.name = name;
     }
 
     public String getDesc() {
-        return desc;
+        return currentData.desc;
     }
 
     public void setDesc(String desc) {
-        this.desc = desc;
+        this.currentData.desc = desc;
     }
 
     public String getCode() {
-        return code;
+        return currentData.code;
     }
 
     public void setCode(String code) {
-        this.code = code;
+        this.currentData.code = code;
     }
 
     private void ensureScriptIdSet() {
-        if (this.id <= 0) {
-            this.id = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
+        if (this.currentData.id <= 0) {
+            this.currentData.id = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
         }
     }
 
@@ -298,19 +347,19 @@ public class ScriptBean implements Serializable {
         final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptManagement)) {
             new FxFacesMsgErr("Script.err.deletePerm").addToContext();
-            return "scriptOverview";
+            return SCRIPT_OVERVIEW;
         }
 
         ensureScriptIdSet();
         try {
-            getScriptingEngine().remove(id);
+            getScriptingEngine().remove(currentData.id);
             // display updated script list  -->handled via a4j now
             //updateScriptList();  -->handled via a4j now
             new FxFacesMsgInfo("Script.nfo.deleted").addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
-        return "scriptOverview";
+        return SCRIPT_OVERVIEW;
     }
 
     /**
@@ -323,25 +372,26 @@ public class ScriptBean implements Serializable {
         final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptExecution)) {
             new FxFacesMsgErr("Script.err.runPerm").addToContext();
-            return "scriptOverview";
+            return SCRIPT_OVERVIEW;
         }
 
         ensureScriptIdSet();
         try {
-            getScriptingEngine().runScript(id);
-            new FxFacesMsgInfo("Script.nfo.executed", CacheAdmin.getEnvironment().getScript(id).getName()).addToContext();
+            getScriptingEngine().runScript(currentData.id);
+            new FxFacesMsgInfo("Script.nfo.executed", CacheAdmin.getEnvironment().getScript(currentData.id).getName()).addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         } catch (Throwable t) {
             new FxFacesMsgErr("Script.err.run").addToContext();
         }
-        return "scriptOverview";
+        return SCRIPT_OVERVIEW;
     }
 
     /**
      * Runs the given script code in the console
      */
     public void runScriptInConsole() {
+        FxScriptInfoEdit sinfo = currentData.sinfo;
         if (StringUtils.isBlank(sinfo.getCode())) {
             new FxFacesMsgErr("Script.err.noCodeProvided").addToContext();
         } else {
@@ -354,7 +404,7 @@ public class ScriptBean implements Serializable {
                 final String msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
                 result = new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
             } finally {
-                executionTime = System.currentTimeMillis() - start;
+                currentData.executionTime = System.currentTimeMillis() - start;
             }
         }
     }
@@ -374,7 +424,7 @@ public class ScriptBean implements Serializable {
      * @return long executionTime
      */
     public long getExecutionTime() {
-        return executionTime;
+        return currentData.executionTime;
     }
 
     /**
@@ -386,9 +436,10 @@ public class ScriptBean implements Serializable {
         final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptManagement)) {
             new FxFacesMsgErr("Script.err.createPerm").addToContext();
-            return "scriptOverview";
+            return SCRIPT_OVERVIEW;
         }
 
+        FxScriptInfoEdit sinfo = currentData.sinfo;
         if (StringUtils.isBlank(sinfo.getName()) || sinfo.getEvent() == null) {
             new FxFacesMsgErr("Script.err.createMiss").addToContext();
             return "scriptCreate";
@@ -398,7 +449,7 @@ public class ScriptBean implements Serializable {
             if (!isRenderCachedSelect())
                 sinfo.setCached(false);
             setId(getScriptingEngine().createScript(sinfo).getId());
-            setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
+            setSinfo(CacheAdmin.getEnvironment().getScript(currentData.id).asEditable());
             // display updated script list
             //updateScriptList();
             new FxFacesMsgInfo("Script.nfo.created", sinfo.getName()).addToContext();
@@ -406,7 +457,7 @@ public class ScriptBean implements Serializable {
             new FxFacesMsgErr(e).addToContext();
             return "scriptCreate";
         }
-        return "scriptOverview";
+        return SCRIPT_OVERVIEW;
     }
 
 
@@ -425,7 +476,8 @@ public class ScriptBean implements Serializable {
         ensureScriptIdSet();
 
         try {
-            getScriptingEngine().updateScriptInfo(new FxScriptInfoEdit(id, sinfo.getEvent(), sinfo.getName(),
+            FxScriptInfoEdit sinfo = currentData.sinfo;
+            getScriptingEngine().updateScriptInfo(new FxScriptInfoEdit(currentData.id, sinfo.getEvent(), sinfo.getName(),
                     sinfo.getDescription(), sinfo.getCode(), sinfo.isActive(),
                     isRenderCachedSelect() && sinfo.isCached()));
             //updateScriptList(); needed (see mandators) ???
@@ -443,10 +495,10 @@ public class ScriptBean implements Serializable {
      * @return returns the List<Map.Entry<Long, String>> of type mapping names
      */
     public List<Map.Entry<Long, String>> getTypeMappingNames() {
-        if (this.typeMappingNames == null)
-            this.typeMappingNames = new HashMap<Long, String>();
-        ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.typeMappingNames.entrySet().size());
-        for (Map.Entry<Long, String> entry : this.typeMappingNames.entrySet()) {
+        if (this.currentData.typeMappingNames == null)
+            this.currentData.typeMappingNames = new HashMap<Long, String>();
+        ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.currentData.typeMappingNames.entrySet().size());
+        for (Map.Entry<Long, String> entry : this.currentData.typeMappingNames.entrySet()) {
             list.add(entry);
         }
         return list;
@@ -458,17 +510,17 @@ public class ScriptBean implements Serializable {
      * @return returns the List<Map.Entry<Long, String>> of assignment mapping names
      */
     public List<Map.Entry<Long, String>> getAssignmentMappingNames() {
-        if (this.assignmentMappingNames == null)
-            this.assignmentMappingNames = new HashMap<Long, String>();
-        ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.assignmentMappingNames.entrySet().size());
-        for (Map.Entry<Long, String> entry : this.assignmentMappingNames.entrySet()) {
+        if (this.currentData.assignmentMappingNames == null)
+            this.currentData.assignmentMappingNames = new HashMap<Long, String>();
+        ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.currentData.assignmentMappingNames.entrySet().size());
+        for (Map.Entry<Long, String> entry : this.currentData.assignmentMappingNames.entrySet()) {
             list.add(entry);
         }
         return list;
     }
 
     public FxScriptMapping getMapping() {
-        return mapping;
+        return currentData.mapping;
     }
 
     public List<WrappedRunOnceInfo> getRunOnceInformation() {
@@ -484,11 +536,11 @@ public class ScriptBean implements Serializable {
     }
 
     public FxScriptRunInfo getCurrentRunInfo() {
-        return currentRunInfo;
+        return currentData.currentRunInfo;
     }
 
     public void setCurrentRunInfo(FxScriptRunInfo currentRunInfo) {
-        this.currentRunInfo = currentRunInfo;
+        this.currentData.currentRunInfo = currentRunInfo;
     }
 
     /**
@@ -506,7 +558,7 @@ public class ScriptBean implements Serializable {
         }
         if (oid != -1) {
             // this specifies the script to work on...
-            this.id = oid;
+            this.currentData.id = oid;
         }
     }
 
@@ -539,7 +591,7 @@ public class ScriptBean implements Serializable {
      * @param nameErrorMsg String containing the error message
      */
     public void setNameErrorMsg(String nameErrorMsg) {
-        this.nameErrorMsg = nameErrorMsg;
+        this.currentData.nameErrorMsg = nameErrorMsg;
     }
 
     /**
@@ -548,7 +600,7 @@ public class ScriptBean implements Serializable {
      * @return Returns the error message
      */
     public String getNameErrorMsg() {
-        return this.nameErrorMsg;
+        return this.currentData.nameErrorMsg;
     }
 
     /**
@@ -557,51 +609,52 @@ public class ScriptBean implements Serializable {
      * @param inputFieldEnabled boolean value enabling or disabling the input fields
      */
     public void setInputFieldEnabled(boolean inputFieldEnabled) {
-        this.inputFieldEnabled = inputFieldEnabled;
+        this.currentData.inputFieldEnabled = inputFieldEnabled;
     }
 
     /**
      * @return boolean inputFieldDisabled
      */
     public boolean isInputFieldEnabled() {
-        return this.inputFieldEnabled;
+        return this.currentData.inputFieldEnabled;
     }
 
     /**
      * @param verifyButtonEnabled Sets the verifyButtonEnabled
      */
     public void setVerifyButtonEnabled(boolean verifyButtonEnabled) {
-        this.verifyButtonEnabled = verifyButtonEnabled;
+        this.currentData.verifyButtonEnabled = verifyButtonEnabled;
     }
 
     /**
      * @return Returns true to enable the syntax check button
      */
     public boolean isVerifyButtonEnabled() {
-        return this.verifyButtonEnabled;
+        return this.currentData.verifyButtonEnabled;
     }
 
     /**
      * @param executeButtonEnabled sets the execute/ run script button
      */
     public void setExecuteButtonEnabled(boolean executeButtonEnabled) {
-        this.executeButtonEnabled = executeButtonEnabled;
+        this.currentData.executeButtonEnabled = executeButtonEnabled;
     }
 
     /**
      * @return returns true if the script event is set to FxScriptEvent.Manual
      */
     public boolean isExecuteButtonEnabled() {
-        return executeButtonEnabled;
+        return currentData.executeButtonEnabled;
     }
 
     /**
      * Check the current script event and set a default if necessary
      */
     public void checkScriptEvent() {
+        FxScriptInfoEdit sinfo = currentData.sinfo;
         if (sinfo.getEvent() == null)
             sinfo.setEvent(FxScriptEvent.Manual); // set a default
-        executeButtonEnabled = sinfo.getEvent() == FxScriptEvent.Manual;
+        currentData.executeButtonEnabled = sinfo.getEvent() == FxScriptEvent.Manual;
     }
 
     /**
@@ -609,27 +662,27 @@ public class ScriptBean implements Serializable {
      * - sets the various boolean field / button enablers
      */
     public void verifyScriptName() {
-        final String name = sinfo.getName();
+        final String name = currentData.sinfo.getName();
         if (StringUtils.isBlank(name)) {
-            nameErrorMsg = null;
-            inputFieldEnabled = false;
-            verifyButtonEnabled = false;
-            executeButtonEnabled = false;
+            currentData.nameErrorMsg = null;
+            currentData.inputFieldEnabled = false;
+            currentData.verifyButtonEnabled = false;
+            currentData.executeButtonEnabled = false;
         } else if (!FxSharedUtils.isGroovyScript(name) && !checkScriptEngineExtensions(name)) {
-            nameErrorMsg = (MessageBean.getInstance().getMessage("Script.err.name"));
-            inputFieldEnabled = false;
-            verifyButtonEnabled = false;
-            executeButtonEnabled = false;
+            currentData.nameErrorMsg = (MessageBean.getInstance().getMessage("Script.err.name"));
+            currentData.inputFieldEnabled = false;
+            currentData.verifyButtonEnabled = false;
+            currentData.executeButtonEnabled = false;
         } else {
-            nameErrorMsg = null;
-            inputFieldEnabled = true;
+            currentData.nameErrorMsg = null;
+            currentData.inputFieldEnabled = true;
             checkScriptEvent();
             // separately enable the Groovy syntax verification button
             if (FxSharedUtils.isGroovyScript(name)) {
-                verifyButtonEnabled = true;
-                language = "gy";
+                currentData.verifyButtonEnabled = true;
+                currentData.language = "gy";
             } else // set language = extension
-                language = name.substring(name.lastIndexOf(".") + 1, name.length());
+                currentData.language = name.substring(name.lastIndexOf(".") + 1, name.length());
 
         }
     }
@@ -659,6 +712,7 @@ public class ScriptBean implements Serializable {
      * Verifies the syntax of a given groovy script
      */
     public void checkScriptSyntax() {
+        FxScriptInfoEdit sinfo = currentData.sinfo;
         checkScriptSyntax(sinfo.getName(), sinfo.getCode());
     }
 
@@ -689,6 +743,7 @@ public class ScriptBean implements Serializable {
      * @throws FxApplicationException if the code could not be loaded
      */
     public void addDefaultImports() throws FxApplicationException {
+        FxScriptInfoEdit sinfo = currentData.sinfo;
         String code = sinfo.getCode();
         final String name = sinfo.getName();
         if (StringUtils.isNotBlank(name)) {
@@ -720,18 +775,19 @@ public class ScriptBean implements Serializable {
      * @param userLang set the current user's language
      */
     public void setUserLang(String userLang) {
-        this.userLang = userLang;
+        this.currentData.userLang = userLang;
     }
 
     /**
      * @return returns the current user's language
      */
     public String getUserLang() {
-        userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
-        return userLang;
+        currentData.userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
+        return currentData.userLang;
     }
 
     public boolean isRenderCachedSelect() {
+        FxScriptInfoEdit sinfo = currentData.sinfo;
         return sinfo != null && StringUtils.isNotBlank(sinfo.getName()) && FxSharedUtils.isGroovyScript(sinfo.getName());
     }
 }

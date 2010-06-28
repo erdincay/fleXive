@@ -21,14 +21,18 @@
         <t:saveState value="#{stepDefinitionBean.overviewRows}"/>
 
         <a4j:form id="frm">
+            <c:if test="${stepDefinitionBean.stepDefinition.id > -1}">
+                <adm:tab labelKey="StepDefinition.tabtitle.overview" active="false" id="tab0"
+                        bean="#{stepDefinitionBean}" action="overview"/>
+            </c:if>
             <a4j:region>
                 <h:inputHidden value="#{stepDefinitionBean.stepDefinition.id}"/>
 
                 <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id == -1}">
-                    <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.create']}" active="true" id="tab1"/>
+                    <adm:tab labelKey="#StepDefinition.tabtitle.create" active="true" id="tab1"/>
                 </ui:fragment>
                 <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id != -1}">
-                    <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}']}" active="true" id="tab2">
+                    <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}']}" active="true" id="tab3">
                         <f:param value="#{stepDefinition.label}"/>
                     </adm:tab>
                 </ui:fragment>

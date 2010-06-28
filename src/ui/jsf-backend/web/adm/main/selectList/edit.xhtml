@@ -39,7 +39,9 @@
             <h:inputHidden id="rowsPerPage" value="#{selectListBean.overviewRows}"/>
 
 
-            <adm:tab label="#{fxMessageBean['SelectList.tab.editSelectList,#{selectListBean.selectListName}']}" active="true" id="tab1"/>
+            <adm:tab label="#{fxMessageBean['SelectList.tab.overview']}" active="false" id="tab1"
+                     bean="#{selectListBean}" action="overview"/>
+            <adm:tab label="#{fxMessageBean['SelectList.tab.editSelectList,#{selectListBean.selectListName}']}" active="true" id="tab2"/>
 
             <div style="float:right">
                 <fx:fxValueInputLanguageSelect id="updateLanguages"/>

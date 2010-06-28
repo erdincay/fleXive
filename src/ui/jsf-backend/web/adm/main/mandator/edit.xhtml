@@ -13,7 +13,8 @@
 
     <ui:define name="body">
         <h:form id="frm">
-            <adm:tab label="#{fxMessageBean['Mandator.tabtitle.edit,#{mandatorBean.mandator.name}']}" active="true" id="tab1"/>
+            <adm:tab label="#{fxMessageBean['Mandator.tabtitle.overview']}" active="false" id="tab1"  action="overview"  bean="#{mandatorBean}" />
+            <adm:tab label="#{fxMessageBean['Mandator.tabtitle.edit,#{mandatorBean.mandator.name}']}" active="true" id="tab2"/>
 
                 <fx:formRow labelKey="Mandator.field.name" id="name" newLine="true">
                     <h:inputText id="name" value="#{mandatorBean.mandator.name}"/>

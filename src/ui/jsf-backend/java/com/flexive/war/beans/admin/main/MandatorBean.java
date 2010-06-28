@@ -61,6 +61,7 @@ public class MandatorBean implements Serializable {
     private Mandator mandator;
 
     private static final String ID_CACHE_KEY = MandatorBean.class + "_id";
+    private static final String MANDATOR_EDIT = "mandatorEdit";
 
     // constructor
     public MandatorBean() {
@@ -68,6 +69,34 @@ public class MandatorBean implements Serializable {
         this.mandator = new Mandator();
     }
 
+    /**
+     * @return true if the edit tab should be opened
+     * @since 3.1.4
+     */
+    public boolean isOpenTab() {
+        return mandator != null && mandator.getName().length() >= 0;
+    }
+
+    /**
+     * Opens the edit mandator in a tab
+     * @return the name where to navigate
+     * @since 3.1.4
+     */
+    public String openEditTab() {
+        if (!isOpenTab()) return editMandator();
+        return MANDATOR_EDIT;
+    }
+
+
+    /**
+     * Navigate back to the overview and remembers the changes of the mandator
+     *
+     * @return overview page
+     * @since 3.1.4
+     */
+    public String overview() {
+        return "mandatorOverview";
+    }
 
     /**
      * Returns a hashtable holding all mandators with their ID (String) as key.
@@ -161,7 +190,7 @@ public class MandatorBean implements Serializable {
         setMandator(CacheAdmin.getEnvironment().getMandator(id));
         setName(mandator.getName());
         setActive(mandator.isActive());
-        return "mandatorEdit";
+        return MANDATOR_EDIT;
 
     }
 
@@ -226,7 +255,7 @@ public class MandatorBean implements Serializable {
             // do not accept an empty string as name...
             if (mandator.getName().length() < 1) {
                 new FxFacesMsgErr("Mandator.err.nameEmpty").addToContext();
-                return "mandatorEdit";
+                return MANDATOR_EDIT;
             }
             // check if the value changed - if yes, call the corresponding method to activate or deactivate the mandator
             if (active != mandator.isActive()) {

@@ -72,24 +72,35 @@ public class SelectListBean implements Serializable {
     //used to filter out the select lists with id's 0 up to DELIMITER and prevent them from being edited
     private static final long SYSTEM_INTERNAL_LISTS_DELIMITER = 0;
     private final static long UNSELECTED_ID = -100000L;
-    private FxSelectListEdit selectList = null;
-    private long selectListId = UNSELECTED_ID;
-    private String selectListName = null;
-    private FxString selectListLabel = new FxString("");
-    private FxString selectListDescription = new FxString("");
-    private boolean selectListAllowDynamicCreation = true;
-    private String selectListBreadcrumbSeparator = " > ";
-    private boolean selectListOnlySameLevelSelect = false;
 
-    private long listItemId = UNSELECTED_ID;
-    private String itemName = null;
-    private FxString itemLabel = new FxString("");
-    private ACL itemACL = null;
-    private String itemData = null;
-    private String itemColor = FxFormatUtils.DEFAULT_COLOR;
+    private SelectListHolder currentData = new SelectListHolder();
+    private static final String SELECT_LIST_OVERVIEW = "selectListOverview";
 
-    private int rowsPerPage = 10;
-    private int currentPage = 1;
+    /**
+     * A holder class for a SelectList object
+     * @since 3.1.4
+     */
+    private static class SelectListHolder {
+        private FxSelectListEdit selectList = null;
+        private long selectListId = UNSELECTED_ID;
+        private String selectListName = null;
+        private FxString selectListLabel = new FxString("");
+        private FxString selectListDescription = new FxString("");
+        private boolean selectListAllowDynamicCreation = true;
+        private String selectListBreadcrumbSeparator = " > ";
+        private boolean selectListOnlySameLevelSelect = false;
+
+        private long listItemId = UNSELECTED_ID;
+        private String itemName = null;
+        private FxString itemLabel = new FxString("");
+        private ACL itemACL = null;
+        private String itemData = null;
+        private String itemColor = FxFormatUtils.DEFAULT_COLOR;
+
+        private int rowsPerPage = 10;
+        private int currentPage = 1;
+    }
+
     private int overviewRows = 10;
     private int overviewCurrentPage = 1;
     private String sortColumn;
@@ -102,16 +113,51 @@ public class SelectListBean implements Serializable {
 
     private FxSharedUtils.ItemPositionSorter sorter = new FxSharedUtils.ItemPositionSorter();
 
+    /**
+     * @return true if the edit tab should be opened
+     * @since 3.1.4
+     */
+    public boolean isOpenTab() {
+        return currentData != null && currentData.selectListId >= 0;
+    }
+
+    /**
+     * Opens the edit user in a tab
+     * @return the name where to navigate
+     * @since 3.1.4
+     */
+    public String openEditTab() {
+        if (!isOpenTab()) return null;
+        return initEditing(false);
+    }
+
+    /**
+     * Opens the overview tab
+     * @return the name where to navigate
+     * @since 3.1.4
+     */
+    public String overview() {
+        return SELECT_LIST_OVERVIEW;
+    }
+
+    public SelectListHolder getCurrentData() {
+        return currentData;
+    }
+
+    public void setCurrentData(SelectListHolder currentData) {
+        this.currentData = currentData;
+    }
+
     //for new lists
     private long newCreateItemACL;
     private long newDefaultItemACL;
 
     public int getRowsPerPage() {
-        return rowsPerPage;
+        return currentData.rowsPerPage;
     }
 
     public void setRowsPerPage(int rowsPerPage) {
-        this.rowsPerPage = rowsPerPage;
+        this.currentData.rowsPerPage = rowsPerPage;
     }
 
     public String getSortColumn() {
@@ -131,11 +177,11 @@ public class SelectListBean implements Serializable {
     }
 
     public int getCurrentPage() {
-        return currentPage;
+        return currentData.currentPage;
     }
 
     public void setCurrentPage(int currentPage) {
-        this.currentPage = currentPage;
+        this.currentData.currentPage = currentPage;
     }
 
     public int getOverviewRows() {
@@ -200,109 +246,109 @@ public class SelectListBean implements Serializable {
     }
 
     public FxString getItemLabel() {
-        return itemLabel;
+        return currentData.itemLabel;
     }
 
     public void setItemLabel(FxString itemLabel) {
-        this.itemLabel = itemLabel;
+        this.currentData.itemLabel = itemLabel;
     }
 
     public String getItemName() {
-        return itemName;
+        return currentData.itemName;
     }
 
     public void setItemName(String itemName) {
         if (itemName != null)
             itemName = itemName.trim();
-        this.itemName = itemName;
+        this.currentData.itemName = itemName;
     }
 
     public ACL getItemACL() {
-        return itemACL;
+        return currentData.itemACL;
     }
 
     public void setItemACL(ACL itemACL) {
-        this.itemACL = itemACL;
+        this.currentData.itemACL = itemACL;
     }
 
     public String getItemData() {
-        return itemData;
+        return currentData.itemData;
     }
 
     public void setItemData(String itemData) {
-        this.itemData = itemData;
+        this.currentData.itemData = itemData;
     }
 
     public String getItemColor() {
-        return itemColor;
+        return currentData.itemColor;
     }
 
     public void setItemColor(String itemColor) {
-        this.itemColor = itemColor;
+        this.currentData.itemColor = itemColor;
     }
 
     public long getListItemId() {
-        return listItemId;
+        return currentData.listItemId;
     }
 
     public void setListItemId(long listItemId) {
-        this.listItemId = listItemId;
+        this.currentData.listItemId = listItemId;
     }
 
     public long getSelectListId() {
-        return selectListId;
+        return currentData.selectListId;
     }
 
     public void setSelectListId(long selectListId) {
-        this.selectListId = selectListId;
+        this.currentData.selectListId = selectListId;
     }
 
     public String getSelectListName() {
-        return selectListName;
+        return currentData.selectListName;
     }
 
     public void setSelectListName(String selectListName) {
-        this.selectListName = selectListName;
+        this.currentData.selectListName = selectListName;
     }
 
     public FxString getSelectListLabel() {
-        return selectListLabel;
+        return currentData.selectListLabel;
     }
 
     public void setSelectListLabel(FxString selectListLabel) {
-        this.selectListLabel = selectListLabel;
+        this.currentData.selectListLabel = selectListLabel;
     }
 
     public FxString getSelectListDescription() {
-        return selectListDescription;
+        return currentData.selectListDescription;
     }
 
     public void setSelectListDescription(FxString selectListDescription) {
-        this.selectListDescription = selectListDescription;
+        this.currentData.selectListDescription = selectListDescription;
     }
 
     public boolean isSelectListAllowDynamicCreation() {
-        return selectListAllowDynamicCreation;
+        return currentData.selectListAllowDynamicCreation;
     }
 
     public void setSelectListAllowDynamicCreation(boolean selectListAllowDynamicCreation) {
-        this.selectListAllowDynamicCreation = selectListAllowDynamicCreation;
+        this.currentData.selectListAllowDynamicCreation = selectListAllowDynamicCreation;
     }
 
     public long getSelectListCreateItemACL() {
-        return selectList.getCreateItemACL().getId();
+        return currentData.selectList.getCreateItemACL().getId();
     }
 
     public void setSelectListCreateItemACL(long id) {
-        selectList.setCreateItemACL(CacheAdmin.getEnvironment().getACL(id));
+        currentData.selectList.setCreateItemACL(CacheAdmin.getEnvironment().getACL(id));
     }
 
     public long getSelectListDefaultItemACL() {
-        return selectList.getNewItemACL().getId();
+        return currentData.selectList.getNewItemACL().getId();
     }
 
     public void setSelectListDefaultItemACL(long id) {
-        selectList.setNewItemACL(CacheAdmin.getEnvironment().getACL(id));
+        currentData.selectList.setNewItemACL(CacheAdmin.getEnvironment().getACL(id));
     }
 
     public long getNewCreateItemACL() {
@@ -322,19 +368,19 @@ public class SelectListBean implements Serializable {
     }
 
     public String getSelectListBreadcrumbSeparator() {
-        return selectListBreadcrumbSeparator;
+        return currentData.selectListBreadcrumbSeparator;
     }
 
     public void setSelectListBreadcrumbSeparator(String selectListBreadcrumbSeparator) {
-        this.selectListBreadcrumbSeparator = selectListBreadcrumbSeparator;
+        this.currentData.selectListBreadcrumbSeparator = selectListBreadcrumbSeparator;
     }
 
     public boolean isSelectListOnlySameLevelSelect() {
-        return selectListOnlySameLevelSelect;
+        return currentData.selectListOnlySameLevelSelect;
     }
 
     public void setSelectListOnlySameLevelSelect(boolean selectListOnlySameLevelSelect) {
-        this.selectListOnlySameLevelSelect = selectListOnlySameLevelSelect;
+        this.currentData.selectListOnlySameLevelSelect = selectListOnlySameLevelSelect;
     }
 
 
@@ -347,11 +393,11 @@ public class SelectListBean implements Serializable {
     }
 
     public FxSelectListEdit getSelectList() {
-        return selectList;
+        return currentData.selectList;
     }
 
     public void setSelectList(FxSelectListEdit selectList) {
-        this.selectList = selectList;
+        this.currentData.selectList = selectList;
     }
 
     public void setEditListItemId(long editListItemId) {
@@ -363,7 +409,7 @@ public class SelectListBean implements Serializable {
     }
 
     public void editListItem() {
-        editListItem = selectList.getItem(editListItemId).asEditable();
+        editListItem = currentData.selectList.getItem(editListItemId).asEditable();
         originalParents = new HashMap<Long, Long>(editListItem.getChildCount());
         editNew = false;
         for (FxSelectListItem child : editListItem.getChildren())
@@ -371,6 +417,7 @@ public class SelectListBean implements Serializable {
     }
 
     public void createListItem() {
+        FxSelectList selectList = currentData.selectList;
         editListItem = FxSelectListItemEdit.createNew(null, selectList.getNewItemACL(), selectList, new FxString(true, ""), null, FxFormatUtils.DEFAULT_COLOR);
         editListItemId = editListItem.getId();
         editNew = true;
@@ -384,6 +431,7 @@ public class SelectListBean implements Serializable {
     }
 
     public void cancelItemEditing() throws FxInvalidParameterException {
+        FxSelectListEdit selectList = currentData.selectList;
         if (editNew) {
             selectList.removeItem(editListItemId);
             editNew = false;
@@ -408,11 +456,11 @@ public class SelectListBean implements Serializable {
     }
 
     public void moveItemUp() throws FxInvalidParameterException {
-        selectList.moveItemUp(moveListItemId);
+        currentData.selectList.moveItemUp(moveListItemId);
     }
 
     public void moveItemDown() throws FxInvalidParameterException {
-        selectList.moveItemDown(moveListItemId);
+        currentData.selectList.moveItemDown(moveListItemId);
     }
 
     public FxSelectListItemEdit getEditListItem() {
@@ -433,6 +481,7 @@ public class SelectListBean implements Serializable {
     }
 
     public void setEditListItemChildren(Long[] children) throws FxInvalidParameterException {
+        FxSelectList selectList = currentData.selectList;
         for (FxSelectListItem child : selectList.getChildItems(editListItem.getId()))
             child.asEditable().setParentItem(null);
         for (Long id : children) {
@@ -459,7 +508,8 @@ public class SelectListBean implements Serializable {
      */
     public List<FxSelectListItemEdit> getItems() {
         List<FxSelectListItemEdit> items = new ArrayList<FxSelectListItemEdit>();
-            for (FxSelectListItemEdit i : selectList.getEditableItems())
+        FxSelectListEdit selectList = currentData.selectList;
+        for (FxSelectListItemEdit i : selectList.getEditableItems())
                 if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
                         FxJsfUtils.getRequest().getUserTicket().mayReadACL(i.getAcl().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId()))
                     items.add(i);
@@ -485,6 +535,7 @@ public class SelectListBean implements Serializable {
     }
 
     public boolean getMayDeleteItems() {
+        FxSelectList selectList = currentData.selectList;
         return FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor)
                 || FxJsfUtils.getRequest().getUserTicket().mayDeleteACL(
                 selectList.getCreateItemACL().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId());
@@ -536,7 +587,7 @@ public class SelectListBean implements Serializable {
 
     public String showSelectListOverview() {
         reset();
-        return "selectListOverview";
+        return SELECT_LIST_OVERVIEW;
     }
 
     /**
@@ -563,17 +614,17 @@ public class SelectListBean implements Serializable {
     }
 
     private void reset() {
-        selectListName = null;
-        selectListLabel = new FxString("");
-        selectListDescription = new FxString("");
-        selectListAllowDynamicCreation = true;
-        selectListBreadcrumbSeparator = " > ";
-        selectListOnlySameLevelSelect = false;
-        itemLabel = new FxString("");
-        itemName = null;
-        itemACL = CacheAdmin.getEnvironment().getACL(ACLCategory.SELECTLISTITEM.getDefaultId());
-        itemData = null;
-        itemColor = FxFormatUtils.DEFAULT_COLOR;
+        currentData.selectListName = null;
+        currentData.selectListLabel = new FxString("");
+        currentData.selectListDescription = new FxString("");
+        currentData.selectListAllowDynamicCreation = true;
+        currentData.selectListBreadcrumbSeparator = " > ";
+        currentData.selectListOnlySameLevelSelect = false;
+        currentData.itemLabel = new FxString("");
+        currentData.itemName = null;
+        currentData.itemACL = CacheAdmin.getEnvironment().getACL(ACLCategory.SELECTLISTITEM.getDefaultId());
+        currentData.itemData = null;
+        currentData.itemColor = FxFormatUtils.DEFAULT_COLOR;
         editListItemId = UNSELECTED_ID;
         editListItem = null;
     }
@@ -581,13 +632,13 @@ public class SelectListBean implements Serializable {
     public String createSelectList() {
         try {
             FxPermissionUtils.checkRole(FxJsfUtils.getRequest().getUserTicket(), Role.SelectListEditor);
-            FxSelectListEdit list = FxSelectListEdit.createNew(selectListName.trim(), selectListLabel,
-                    selectListDescription, selectListAllowDynamicCreation,
+            FxSelectListEdit list = FxSelectListEdit.createNew(currentData.selectListName.trim(), currentData.selectListLabel,
+                    currentData.selectListDescription, currentData.selectListAllowDynamicCreation,
                     CacheAdmin.getEnvironment().getACL(newCreateItemACL),
                     CacheAdmin.getEnvironment().getACL(newDefaultItemACL));
-            list.setBreadcrumbSeparator(selectListBreadcrumbSeparator);
-            list.setOnlySameLevelSelect(selectListOnlySameLevelSelect);
-            selectListId = EJBLookup.getSelectListEngine().save(list);
+            list.setBreadcrumbSeparator(currentData.selectListBreadcrumbSeparator);
+            list.setOnlySameLevelSelect(currentData.selectListOnlySameLevelSelect);
+            currentData.selectListId = EJBLookup.getSelectListEngine().save(list);
             reset();
             new FxFacesMsgInfo("SelectList.nfo.created").addToContext();
             return initEditing(true);
@@ -603,22 +654,24 @@ public class SelectListBean implements Serializable {
     }
 
     public String initEditing(boolean reloadSelectlist) {
+        FxSelectList selectList = currentData.selectList;
         if (reloadSelectlist) {
-            selectList = CacheAdmin.getEnvironment().getSelectList(selectListId).asEditable();
+            currentData.selectList = CacheAdmin.getEnvironment().getSelectList(currentData.selectListId).asEditable();
+            selectList = currentData.selectList;
+            setSelectListAllowDynamicCreation(selectList.isAllowDynamicItemCreation());
+            setSelectListDescription(selectList.getDescription() == null ? new FxString("") : selectList.getDescription());
+            setSelectListLabel(selectList.getLabel() == null ? new FxString("") : selectList.getLabel());
+            setSelectListName(selectList.getName());
+            setSelectListBreadcrumbSeparator(selectList.getBreadcrumbSeparator());
+            setSelectListOnlySameLevelSelect(selectList.isOnlySameLevelSelect());
+            setItemACL(selectList.getNewItemACL());
         }
-        setSelectListAllowDynamicCreation(selectList.isAllowDynamicItemCreation());
-        setSelectListDescription(selectList.getDescription() == null ? new FxString("") : selectList.getDescription());
-        setSelectListLabel(selectList.getLabel() == null ? new FxString("") : selectList.getLabel());
-        setSelectListName(selectList.getName());
-        setSelectListBreadcrumbSeparator(selectList.getBreadcrumbSeparator());
-        setSelectListOnlySameLevelSelect(selectList.isOnlySameLevelSelect());
-        setItemACL(selectList.getNewItemACL());
 
-        itemName = null;
-        itemLabel = new FxString("");
-        itemACL = selectList.getNewItemACL();
-        itemData = null;
-        itemColor = FxFormatUtils.DEFAULT_COLOR;
+        currentData.itemName = null;
+        currentData.itemLabel = new FxString("");
+        currentData.itemACL = selectList.getNewItemACL();
+        currentData.itemData = null;
+        currentData.itemColor = FxFormatUtils.DEFAULT_COLOR;
 
         editListItemId = UNSELECTED_ID;
         editListItem = null;
@@ -629,7 +682,7 @@ public class SelectListBean implements Serializable {
     public void deleteSelectList() {
         try {
             FxPermissionUtils.checkRole(FxJsfUtils.getRequest().getUserTicket(), Role.SelectListEditor);
-            EJBLookup.getSelectListEngine().remove(CacheAdmin.getEnvironment().getSelectList(selectListId));
+            EJBLookup.getSelectListEngine().remove(CacheAdmin.getEnvironment().getSelectList(currentData.selectListId));
             new FxFacesMsgInfo("SelectList.nfo.deleted").addToContext();
         }
         catch (Throwable t) {
@@ -640,8 +693,10 @@ public class SelectListBean implements Serializable {
     public void deleteListItem() {
         try {
             //check if the user has permission
+            FxSelectListEdit selectList = currentData.selectList;
             if (getMayDeleteItems()) {
                 //check if the item is used in content instances (only check if the item was saved before (id >= 0) )
+                long listItemId = currentData.listItemId;
                 if (listItemId >= 0 && EJBLookup.getSelectListEngine().getSelectListItemInstanceCount(listItemId) != 0)
                     throw new FxEntryInUseException("ex.selectlist.item.itemInUse", selectList.getItem(listItemId).getLabel());
                 if (!selectList.getHasChildItems(listItemId)){
@@ -663,24 +718,26 @@ public class SelectListBean implements Serializable {
             //check if the user has permission
             if (getMayCreateItems().get(getSelectListId())) {
                 //check for empty label
+                FxString itemLabel = currentData.itemLabel;
                 if (itemLabel.getIsEmpty())
                     throw new FxInvalidParameterException("Label", "ex.selectlist.item.label.empty");
 
                 //convert color string to uppercase
-                if (itemColor != null)
-                    itemColor = itemColor.toUpperCase();
+                if (currentData.itemColor != null)
+                    currentData.itemColor = currentData.itemColor.toUpperCase();
 
-                new FxSelectListItemEdit(itemName, itemACL, selectList, itemLabel, itemData, FxFormatUtils.processColorString("Color", itemColor));
-                itemName = null;
-                itemLabel = new FxString(true, "");
-                itemACL = selectList.getNewItemACL();
-                itemData = null;
-                itemColor = FxFormatUtils.DEFAULT_COLOR;
+                new FxSelectListItemEdit(currentData.itemName, currentData.itemACL, currentData.selectList,
+                        itemLabel, currentData.itemData, FxFormatUtils.processColorString("Color", currentData.itemColor));
+                currentData.itemName = null;
+                currentData.itemLabel = new FxString(true, "");
+                currentData.itemACL = currentData.selectList.getNewItemACL();
+                currentData.itemData = null;
+                currentData.itemColor = FxFormatUtils.DEFAULT_COLOR;
                 FxJsf1Utils.resetFaceletsComponent("frm");
             }
             //else provoke exception
             else
-                throw new FxNoAccessException("ex.selectlist.item.create.noPerm", selectList.getLabel(), selectList.getCreateItemACL().getLabel());
+                throw new FxNoAccessException("ex.selectlist.item.create.noPerm", currentData.selectList.getLabel(), currentData.selectList.getCreateItemACL().getLabel());
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -706,17 +763,18 @@ public class SelectListBean implements Serializable {
         try {
             //set and check default colors if the user has permission,
             // if not just store them to DB as set
+            FxSelectListEdit selectList = currentData.selectList;
             for (FxSelectListItemEdit i : selectList.getEditableItems()) {
                 if (getMayEditItem().get(i))
                     i.setColor(FxFormatUtils.processColorString("Color", i.getColor()));
             }
             if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor)) {
-                selectList.setName(selectListName);
-                selectList.setLabel(selectListLabel);
-                selectList.setDescription(selectListDescription);
-                selectList.setAllowDynamicItemCreation(selectListAllowDynamicCreation);
-                selectList.setBreadcrumbSeparator(selectListBreadcrumbSeparator);
-                selectList.setOnlySameLevelSelect(selectListOnlySameLevelSelect);
+                selectList.setName(currentData.selectListName);
+                selectList.setLabel(currentData.selectListLabel);
+                selectList.setDescription(currentData.selectListDescription);
+                selectList.setAllowDynamicItemCreation(currentData.selectListAllowDynamicCreation);
+                selectList.setBreadcrumbSeparator(currentData.selectListBreadcrumbSeparator);
+                selectList.setOnlySameLevelSelect(currentData.selectListOnlySameLevelSelect);
             }
             EJBLookup.getSelectListEngine().save(selectList);
             reset();

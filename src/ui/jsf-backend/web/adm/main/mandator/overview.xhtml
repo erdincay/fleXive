@@ -16,6 +16,11 @@
         <h:form id="listForm">
 
             <adm:tab label="#{fxMessageBean['Mandator.tabtitle.overview']}" active="true" id="tab1"/>
+            <c:if test="#{mandatorBean.openTab}">
+                <t:saveState id="ssMand" value="#{mandatorBean.mandator}"/>
+                <adm:tab label="#{fxMessageBean['Mandator.tabtitle.edit,#{mandatorBean.mandator.name}']}" active="false" id="tab2"
+                         action="openEditTab"  bean="#{mandatorBean}" onclick="storeDataTablePosition('listForm');"/>
+            </c:if>
 
             <!-- Mandator select is only shown for global supervisors -->
             <!--      <c:if test="${fxSystemBean.userTicket.globalSupervisor}"> -->
