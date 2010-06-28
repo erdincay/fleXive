@@ -308,6 +308,12 @@
         </navigation-case>
 
         <navigation-case>
+            <from-outcome>homeRedirect</from-outcome>
+            <to-view-id>/adm/main.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+
+        <navigation-case>
             <from-outcome>loginSuccess</from-outcome>
             <to-view-id>/adm/loginSuccess.xhtml</to-view-id>
         </navigation-case>
