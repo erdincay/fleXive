@@ -86,6 +86,7 @@ public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<F
      */
     public void shutdown() throws FxCacheException {
         cache.getCache().stop();
+        cache.getCache().destroy();
     }
 
     /**

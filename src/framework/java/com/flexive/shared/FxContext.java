@@ -753,6 +753,16 @@ public class FxContext implements Serializable {
      * Performs a cleanup of the stored informations.
      */
     public static void cleanup() {
+        // clean up cache invocation context (JBoss cache workaround)
+        try {
+            CacheAdmin.getInstance().cleanupAfterRequest();
+        } catch (Exception ex) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed to clean up cache context: " + ex.getMessage(), ex);
+            }
+        }
+
+        // remove FxContext threadlocal
         if (info.get() != null) {
             info.get().clearCachedAttributes();
             info.remove();

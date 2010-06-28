@@ -443,6 +443,20 @@ public class FxCacheProxy implements FxCacheMBean {
         }
     }
 
+    public void cleanupAfterRequest() throws FxCacheException {
+        try {
+            server.invoke(name, "cleanupAfterRequest", new Object[0], new String[0]);
+        } catch (InstanceNotFoundException e) {
+            throw new FxCacheException("No FxCache instance found!");
+        } catch (MBeanException e) {
+            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
+                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+        } catch (ReflectionException e) {
+            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+        }
+    }
+
+
     /**
      * Marshal a value before writing it to the cache, if necessary.
      *

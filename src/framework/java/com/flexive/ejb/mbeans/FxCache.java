@@ -171,6 +171,7 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
         stopLocalStreamServers();
         try {
             if (cacheProvider != null) {
+                cleanupAfterRequest();
                 cacheProvider.shutdown();
                 cacheProvider = null;
             }
@@ -420,6 +421,13 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
     /**
      * {@inheritDoc}
      */
+    public void cleanupAfterRequest() throws FxCacheException {
+        getBackingCache().getCache().setInvocationContext(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Object invoke(String actionName, Object params[], String signature[]) throws MBeanException, ReflectionException {
         try {
             if ("get".equals(actionName)) {
@@ -461,13 +469,15 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
                 setEvictionStrategy((Integer) params[0], (String) params[1],
                         (Integer) params[2], (Integer) params[3], (Integer) params[4],
                         (Boolean) params[5]);
+            } else if ("cleanupAfterRequest".equals(actionName)) {
+                cleanupAfterRequest();
             } else {
                 LOG.warn("Tried to call [" + actionName + "] which is not implemented!");
             }
         } catch (Exception e) {
             LOG.error("Failed to invoke MBean op: " + e.getMessage());
             throw new MBeanException(e);
-        }
+        } 
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

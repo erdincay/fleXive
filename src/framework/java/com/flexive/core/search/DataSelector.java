@@ -111,6 +111,8 @@ public abstract class DataSelector {
 
     public abstract Map<String, FieldSelector> getSelectors();
 
+    public abstract FieldSelector getSelectListItemSelectorInstance();
+
     /**
      * Returns the index of the given column in a encoded binary result value.
      *

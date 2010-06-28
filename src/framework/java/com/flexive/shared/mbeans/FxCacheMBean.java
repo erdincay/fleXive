@@ -188,4 +188,12 @@ public interface FxCacheMBean extends FxBackingCache {
      * @since 3.0.2
      */
     void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive, Boolean overwrite) throws FxCacheException;
+
+    /**
+     * Perform (optional) cleanup after the request has finished (called e.g. by {@link com.flexive.shared.FxContext#cleanup()}).
+     *
+     * @throws FxCacheException on cache errors
+     * @since 3.1.4
+     */
+    void cleanupAfterRequest() throws FxCacheException;
 }

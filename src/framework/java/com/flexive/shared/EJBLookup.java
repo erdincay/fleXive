@@ -679,4 +679,13 @@ public class EJBLookup {
         getWorkflowStepDefinitionEngine();
         getWorkflowStepEngine();
     }
+
+    /**
+     * Clear the static interface cache on shutdown.
+     *
+     * @since 3.1.4
+     */
+    public static synchronized void clearCache() {
+        ejbCache.clear();
+    }
 }

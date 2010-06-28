@@ -151,7 +151,7 @@ public class SubSelectValues {
         }
         final FieldSelector selector;
         if (entry.getProperty().getDataType() == FxDataType.SelectOne) {
-            selector = GenericSQLDataSelector.SELECTLIST_ITEM_SELECTOR;
+            selector = ds.getSelectListItemSelectorInstance();
         } else {
             selector = ds.getSelectors().get(prop.getPropertyName().toUpperCase());
         }

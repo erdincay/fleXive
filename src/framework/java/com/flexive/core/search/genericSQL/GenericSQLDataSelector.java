@@ -70,16 +70,9 @@ public class GenericSQLDataSelector extends DataSelector {
      */
     protected static final Map<String, FieldSelector> SELECTORS = new HashMap<String, FieldSelector>();
 
-    static {
-        SELECTORS.put("MANDATOR", new GenericSQLForeignTableSelector("mandator", DatabaseConst.TBL_MANDATORS, "id", false, null));
-        SELECTORS.put("CREATED_BY", new GenericSQLForeignTableSelector("created_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
-        SELECTORS.put("MODIFIED_BY", new GenericSQLForeignTableSelector("modified_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
-        SELECTORS.put("ACL", new GenericSQLForeignTableSelector("acl", DatabaseConst.TBL_ACLS, "id", true, "label"));
-        SELECTORS.put("STEP", new GenericSQLStepSelector());
-        SELECTORS.put("TYPEDEF", new GenericSQLForeignTableSelector("tdef", DatabaseConst.TBL_STRUCT_TYPES, "id", true, "description"));
-    }
-    public static final FieldSelector SELECTLIST_ITEM_SELECTOR =
-            new GenericSQLForeignTableSelector(null, DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM, "ID", false, null);
+    protected static FieldSelector SELECTLIST_ITEM_SELECTOR;
+
+    private static final Object UPDATE_LOCK = new Object();
 
     protected static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION"};
     protected static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER"};
@@ -103,6 +96,16 @@ public class GenericSQLDataSelector extends DataSelector {
      */
     @Override
     public Map<String, FieldSelector> getSelectors() {
+        synchronized(UPDATE_LOCK) {
+            if (SELECTORS.isEmpty()) {
+                SELECTORS.put("MANDATOR", new GenericSQLForeignTableSelector("mandator", DatabaseConst.TBL_MANDATORS, "id", false, null));
+                SELECTORS.put("CREATED_BY", new GenericSQLForeignTableSelector("created_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
+                SELECTORS.put("MODIFIED_BY", new GenericSQLForeignTableSelector("modified_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
+                SELECTORS.put("ACL", new GenericSQLForeignTableSelector("acl", DatabaseConst.TBL_ACLS, "id", true, "label"));
+                SELECTORS.put("STEP", new GenericSQLStepSelector());
+                SELECTORS.put("TYPEDEF", new GenericSQLForeignTableSelector("tdef", DatabaseConst.TBL_STRUCT_TYPES, "id", true, "description"));
+            }
+        }
         return SELECTORS;
     }
 
@@ -125,6 +128,17 @@ public class GenericSQLDataSelector extends DataSelector {
     @Override
     public void cleanup(Connection con) throws FxSqlSearchException {
         // nothing to do
+    }
+
+    public FieldSelector getSelectListItemSelectorInstance() {
+        synchronized(UPDATE_LOCK) {
+            if (SELECTLIST_ITEM_SELECTOR == null) {
+                SELECTLIST_ITEM_SELECTOR = new GenericSQLForeignTableSelector(
+                        null, DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM, "ID", false, null
+                );
+            }
+        }
+        return SELECTLIST_ITEM_SELECTOR;
     }
 
     /**

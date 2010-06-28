@@ -37,9 +37,11 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.mbeans.MBeanHelper;
+import com.flexive.shared.media.impl.FxMimeType;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,22 +99,18 @@ public class FxFilter implements Filter {
             // shutdown timer service if it is installed - cannot use EJB call here since we're shutting down
             FxQuartz.shutdown();
 
-            // check if cache is still there
-            try {
-                CacheAdmin.getInstance().getDeploymentId();
-            } catch (Exception e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Cache already uninstalled");
-                }
-                return;
-            }
+            // cleanup MIME detectors
+            FxMimeType.shutdownDetectors();
 
             if (MBeanHelper.DEPLOYMENT_ID.equals(CacheAdmin.getInstance().getDeploymentId())) {
                 // Destroy local cache instance.
                 // This also stops local streaming servers, since they cannot use EJB calls from a shutdown context.
 
                 CacheAdmin.uninstallLocalInstance();
-            } 
+            }
+
+            EJBLookup.clearCache();
+            
         } catch (SchedulerException ex) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Failed to shutdown Quartz scheduler: " + ex.getMessage(), ex);

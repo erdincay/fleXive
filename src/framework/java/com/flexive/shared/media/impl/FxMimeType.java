@@ -43,8 +43,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,16 +61,20 @@ public class FxMimeType implements Serializable {
      * Replacement table with overrides for common extensions with mime-utils.
      */
     private static final Map<String, String> EXT_REPLACEMENTS;
+    private static final List<String> MIME_DETECTORS = Collections.unmodifiableList(Arrays.asList(
+            MagicMimeMimeDetector.class.getCanonicalName(),
+            // For Linux/OpenDesktop machines
+            OpendesktopMimeDetector.class.getCanonicalName(),
+            // For Windows machines
+            WindowsRegistryMimeDetector.class.getCanonicalName(),
+            // Last resort - use file extension
+            ExtensionMimeDetector.class.getCanonicalName()
+    ));
 
     static {
-        // MIME-type detection setup
-        MimeUtil.registerMimeDetector(MagicMimeMimeDetector.class.getCanonicalName());
-        // For Linux/OpenDesktop machines
-        MimeUtil.registerMimeDetector(OpendesktopMimeDetector.class.getCanonicalName());
-        // For Windows machines
-        MimeUtil.registerMimeDetector(WindowsRegistryMimeDetector.class.getCanonicalName());
-        // Last resort - use file extension
-        MimeUtil.registerMimeDetector(ExtensionMimeDetector.class.getCanonicalName());
+        for (String detector : MIME_DETECTORS) {
+            MimeUtil.registerMimeDetector(detector);
+        }
 
         // populate EXT_REPLACEMENTS
         final Map <String, String> replacements = Maps.newHashMap();
@@ -234,5 +240,23 @@ public class FxMimeType implements Serializable {
         // the first mime-type from mime-util's mapping table is usually fine
         mt = detected.iterator().next();
         return new FxMimeType(mt.getMediaType(), mt.getSubType());
+    }
+
+    /**
+     * Shutdown the MIME detectors. Needed since some (OpendesktopMimeDetector!) open resources or spawn
+     * threads that must be explicitly terminated by the application.
+     *
+     * @since 3.1.4
+     */
+    public static void shutdownDetectors() {
+        for (String detector : MIME_DETECTORS) {
+            try {
+                MimeUtil.unregisterMimeDetector(detector);
+            } catch (Exception e) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Failed to shutdown detector " + detector + ": " + e.getMessage(), e);
+                }
+            }
+        }
     }
 }
