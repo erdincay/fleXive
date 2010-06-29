@@ -348,23 +348,22 @@ public abstract class FxData implements Serializable {
         if (!mayCreateMore())
             throw new FxCreateException("ex.content.data.create.maxMultiplicity", this.getXPath(), this.getAssignmentMultiplicity().getMax());
         FxType type = CacheAdmin.getEnvironment().getAssignment(assignmentId).getAssignedType();
+        boolean isTop = false;
         if (insertPosition == POSITION_BOTTOM) {
             if (parent.getChildren().size() == 0)
-                insertPosition = 0; //should not be possible to happen but play safe ...
+                insertPosition = 0; //should not be possible to happen but play safe...
             else
                 insertPosition = parent.getChildren().get(parent.getChildren().size() - 1).getPos() + 1;
-        } else if (insertPosition < 0 || insertPosition == POSITION_TOP)
+        } else if (insertPosition < 0 || insertPosition == POSITION_TOP) {
+            isTop = true;
             insertPosition = 0;
-        compact();
+        }
         int newIndex = 1;
-        boolean movePos = false;
         for (FxData curr : parent.getChildren()) {
-            if (curr.getAssignmentId() == this.assignmentId)
+            if (curr.getAssignmentId() == this.assignmentId && curr.getIndex() + 1 > newIndex)
                 newIndex = curr.getIndex() + 1;
-            if (curr.getPos() == insertPosition)
-                movePos = true;
-            if (movePos)
-                curr.setPos(curr.getPos() + 1);
+            if (curr.getPos() >= insertPosition && !curr.systemInternal)
+                curr.pos++;
         }
         FxAssignment fxa = type.getAssignment(this.getXPath());
         // we need to check min and max multiplicity
@@ -372,6 +371,8 @@ public abstract class FxData implements Serializable {
         newData.setPos(insertPosition);
         newData.applyIndices();
         parent.addChild(newData); //adding honors the position!
+        if (!isTop)
+            compact();
         return newData;
     }
 
