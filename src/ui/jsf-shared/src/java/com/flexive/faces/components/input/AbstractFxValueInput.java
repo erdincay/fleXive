@@ -102,7 +102,7 @@ public abstract class AbstractFxValueInput extends UIInput {
     protected AbstractFxValueInput() {
         setRendererType("flexive.FxValueInput");
         applyComponentId();
-
+        addValidator(new FxValueInputValidator());
     }
 
     /**
@@ -138,17 +138,6 @@ public abstract class AbstractFxValueInput extends UIInput {
 
     @Override
     public void validate(FacesContext context) {
-        // automatically register a FxValueInputValidator, unless it is already present
-        boolean validatorFound = false;
-        for (Validator validator: getValidators()) {
-            if (validator instanceof FxValueInputValidator) {
-                validatorFound = true;
-                break;
-            }
-        }
-        if (!validatorFound) {
-            addValidator(new FxValueInputValidator());
-        }
         AbstractFxValueInputRenderer.buildComponent(context, this);
         super.validate(context);
     }
@@ -614,6 +603,15 @@ public abstract class AbstractFxValueInput extends UIInput {
      */
     @Override
     public Object saveState(FacesContext context) {
+        // remove our dynamically attached validator before saving, it will be added
+        // in the constructor on the next invocation anyway
+        for (Validator validator : getValidators()) {
+            if (validator instanceof FxValueInputValidator) {
+                removeValidator(validator);
+            }
+        }
+        
+        // save state
         Object[] values = new Object[12];
         int index = 0;
         values[index++] = super.saveState(context);
