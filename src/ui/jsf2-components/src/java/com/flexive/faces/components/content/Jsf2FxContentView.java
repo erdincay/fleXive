@@ -33,6 +33,8 @@ package com.flexive.faces.components.content;
 
 import com.flexive.faces.FxJsf2Utils;
 import javax.faces.component.UIComponent;
+import javax.faces.component.visit.VisitCallback;
+import javax.faces.component.visit.VisitContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.FacesEvent;
@@ -48,6 +50,17 @@ public class Jsf2FxContentView extends FxContentView {
     @Override
     protected void performBroadcast(FacesContext ctx, FacesEvent event) {
         FxJsf2Utils.broadcast(ctx, event);
+    }
+
+    @Override
+    public boolean visitTree(VisitContext context, VisitCallback callback) {
+        final FacesContext ctx = FacesContext.getCurrentInstance();
+        provideContent(ctx);
+        try {
+            return super.visitTree(context, callback);
+        } finally {
+            removeContent(ctx);
+        }
     }
 
 

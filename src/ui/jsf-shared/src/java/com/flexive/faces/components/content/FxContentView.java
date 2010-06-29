@@ -50,6 +50,8 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
+import javax.faces.FacesException;
+import javax.faces.component.ContextCallback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -201,8 +203,11 @@ public class FxContentView extends UIOutput {
     @Override
     public void processDecodes(FacesContext context) {
         provideContent(context);
-        super.processDecodes(context);
-        removeContent(context);
+        try {
+            super.processDecodes(context);
+        } finally {
+            removeContent(context);
+        }
     }
 
     /**
@@ -211,8 +216,11 @@ public class FxContentView extends UIOutput {
     @Override
     public void processValidators(FacesContext context) {
         provideContent(context);
-        super.processValidators(context);
-        removeContent(context);
+        try {
+            super.processValidators(context);
+        } finally {
+            removeContent(context);
+        }
     }
 
     /**
@@ -221,8 +229,11 @@ public class FxContentView extends UIOutput {
     @Override
     public void processUpdates(FacesContext context) {
         provideContent(context);
-        super.processUpdates(context);
-        removeContent(context);
+        try {
+            super.processUpdates(context);
+        } finally {
+            removeContent(context);
+        }
     }
 
     /**
@@ -253,6 +264,16 @@ public class FxContentView extends UIOutput {
     @Override
     public void queueEvent(FacesEvent event) {
         super.queueEvent(new WrappedEvent(this, event));
+    }
+
+    @Override
+    public boolean invokeOnComponent(FacesContext context, String clientId, ContextCallback callback) throws FacesException {
+        provideContent(context);
+        try {
+            return super.invokeOnComponent(context, clientId, callback);
+        } finally {
+            removeContent(context);
+        }
     }
 
     public Object getPk() {
