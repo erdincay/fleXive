@@ -78,6 +78,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     protected boolean useHTMLEditor = false;
     protected int rows = -1;
     protected boolean selectManyCheckboxes;
+    protected boolean needEmptyElementsInSelectList;
 
     protected FxEnvironment environment;
 
@@ -99,6 +100,9 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
                     useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
                 } else if (value instanceof FxSelectMany) {
                     selectManyCheckboxes = pa.getOption(FxStructureOption.OPTION_SELECTMANY_CHECKBOXES).isValueTrue();
+                    needEmptyElementsInSelectList = pa.getMultiplicity().isOptional();
+                } else if (value instanceof FxSelectOne) {
+                    needEmptyElementsInSelectList = pa.getMultiplicity().isOptional();
                 }
             }
             else if (CacheAdmin.getEnvironment().propertyExists(value.getXPath())) {
@@ -113,6 +117,9 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
                     useHTMLEditor = p.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
                 } else if (value instanceof FxSelectMany) {
                     selectManyCheckboxes = p.getOption(FxStructureOption.OPTION_SELECTMANY_CHECKBOXES).isValueTrue();
+                    needEmptyElementsInSelectList = p.getMultiplicity().isOptional();
+                } else if (value instanceof FxSelectOne) {
+                    needEmptyElementsInSelectList = p.getMultiplicity().isOptional();
                 }
             }
         }
@@ -304,7 +311,9 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         if (selectValue.getTranslation(language) != null) {
             listbox.setValue(selectValue.getTranslation(language).getId());
         }
-        storeSelectItems(listbox, selectValue.getSelectList(), true);
+        storeSelectItems(listbox, selectValue.getSelectList(), needEmptyElementsInSelectList);
+
+        //TODO : HERE
     }
 
     protected void renderSelectMany(UIComponent parent, String inputId, FxLanguage language) {
@@ -360,6 +369,21 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             // include only if no empty element (with ID -1) exists
             if (!FxSharedUtils.getSelectableObjectIdList(selectList.getItems()).contains(-1L)) {
                 items.add(0, new SelectItem(-1L, ""));
+            } else {
+                // if an empty element exist, we need to find it, and remove it so that we could add one at the begining
+                int emptyIndex = -1;
+                int index = 0;
+                for (SelectItem si : items) {
+                    if (si.getValue().equals(-1L)) {
+                        emptyIndex = index;
+                        break;
+                    }
+                    index++;
+                }
+                if (emptyIndex > 0) {
+                    items.remove(emptyIndex);
+                    items.add(0, new SelectItem(-1L, ""));
+                }
             }
         }
         selectItems.setValue(items);
