@@ -8,7 +8,10 @@
     <artifactId>flexive-ejb-interfaces-local</artifactId>
     <version>@FLEXIVE_VERSION@</version>
     <name>Flexive EJB Interfaces (only local)</name>
-    <description>Local EJB interfaces for flexive-ejb for deployment in EJB Lite containers.</description>
+    <description>
+        Local EJB interfaces for flexive-ejb for deployment in EJB Lite containers.
+        Also includes dependencies needed for deployment without external library setup (i.e. jboss-common-core).
+    </description>
 
     <licenses>
         <license>
@@ -30,4 +33,35 @@
         <connection>scm:svn:http://svn.flexive.org/repository/flexive/@FLEXIVE_BRANCH@</connection>
         <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/java/com/flexive/shared/interfaces</url>
     </scm>
+
+    <!--
+        Include jboss-common-core for JBoss cache. We currently don't know how this plays with
+        JBoss web profile containers, since they have yet to release one.
+    -->
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-common-core</artifactId>
+            <version>2.2.1.GA</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>apache-xerces</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>apache-httpclient</groupId>
+                    <artifactId>commons-httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jboss</groupId>
+                    <artifactId>jboss-common-logging-spi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>apache-slide</groupId>
+                    <artifactId>webdavlib</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
 </project>
