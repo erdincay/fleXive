@@ -203,8 +203,20 @@ public class FxPropertyData extends FxData {
         final List<XPathElement> elements = XPathElement.split(this.getXPathFull());
         if (elements.get(elements.size() - 1).getIndex() != this.getIndex()) {
             elements.get(elements.size() - 1).setIndex(this.getIndex());
-            this.XPathFull = XPathElement.toXPath(elements);
-            this.indices = XPathElement.getIndices(this.XPathFull);
+            setXPathFull(XPathElement.toXPath(elements));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setXPathFull(String xpathFull) {
+        this.XPathFull = xpathFull;
+        this.indices = XPathElement.getIndices(this.XPathFull);
+        if (this.value != null) {
+            // apply updated XPath to FxValue (FX-920)
+            this.value.setXPath(this.xpPrefix + this.XPathFull);
         }
     }
 

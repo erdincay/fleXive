@@ -185,6 +185,14 @@ public abstract class FxData implements Serializable {
     protected abstract void applyIndices();
 
     /**
+     * Update the XPath with indices.
+     * 
+     * @param xpathFull the complete XPath including indices.
+     * @since 3.1.4
+     */
+    protected abstract void setXPathFull(String xpathFull);
+
+    /**
      * Get the prefix to use for the XPath (Name of the type and primary key)
      *
      * @return prefix to use for the XPath

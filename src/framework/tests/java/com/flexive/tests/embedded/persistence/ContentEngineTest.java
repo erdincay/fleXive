@@ -1237,6 +1237,27 @@ public class ContentEngineTest {
         }
     }
 
+    @Test(groups = {"ejb", "content"})
+    public void compactIndicesTest_FX920() throws FxApplicationException {
+        // test with root property
+        final FxContent person = EJBLookup.getContentEngine().initialize("CMIS_PERSON");
+        person.setValue("/email[1]", "first");
+        person.setValue("/email[2]", "second");
+        person.setValue("/email[3]", "third");
+        person.remove("/email[1]");
+        assertEquals(person.getValue("/email[1]").getXPath().toUpperCase(), "CMIS_PERSON[@PK=NEW]/EMAIL[1]");
+        assertEquals(person.getValue("/email[2]").getXPath().toUpperCase(), "CMIS_PERSON[@PK=NEW]/EMAIL[2]");
+
+        // test with property attached to a group
+        final FxContent article = EJBLookup.getContentEngine().initialize("ARTICLE");
+        article.setValue("/box[1]/box_title", "first");
+        article.setValue("/box[2]/box_title", "second");
+        article.setValue("/box[3]/box_title", "third");
+        article.remove("/box[1]");
+        assertEquals(article.getValue("/box[1]/box_title").getXPath().toUpperCase(), "ARTICLE[@PK=NEW]/BOX[1]/BOX_TITLE[1]");
+        assertEquals(article.getValue("/box[2]/box_title").getXPath().toUpperCase(), "ARTICLE[@PK=NEW]/BOX[2]/BOX_TITLE[1]");
+    }
+
     /**
      * Test the conversion of a content type to another
      *

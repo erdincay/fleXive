@@ -331,14 +331,23 @@ public class FxGroupData extends FxData {
                 return;
             int pos = elements.size() - 1;
             elements.get(pos).setIndex(this.getIndex());
-            this.XPathFull = XPathElement.toXPath(elements);
-            this.indices = XPathElement.getIndices(this.XPathFull);
+            setXPathFull(XPathElement.toXPath(elements));
             if (this.getChildren() != null)
                 _changeIndex(this.getChildren(), pos, this.getIndex());
         } catch (FxInvalidParameterException e) {
             throw e.asRuntimeException();
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setXPathFull(String xpathFull) {
+        this.XPathFull = xpathFull;
+        this.indices = XPathElement.getIndices(this.XPathFull);
+    }
+
 
     /**
      * 'Fix' the indices of children after they have been added to reflect the parent groups index in
@@ -370,8 +379,7 @@ public class FxGroupData extends FxData {
             // we need to get the XPathFull to have the indices
             elements = XPathElement.split(curr.getXPathFull());
             elements.get(pos).setIndex(index);
-            curr.XPathFull = XPathElement.toXPath(elements);
-            curr.indices = XPathElement.getIndices(curr.XPathFull);
+            curr.setXPathFull(XPathElement.toXPath(elements));
             if (curr instanceof FxGroupData)
                 _changeIndex(((FxGroupData) curr).getChildren(), pos, index);
         }
