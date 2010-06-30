@@ -681,6 +681,20 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean isLanguageActive(long id) {
+        return environment.isLanguageActive(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isLanguageActive(String isoCode) {
+        return environment.isLanguageActive(isoCode);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxType getMimeTypeMatch(String mimeType) {
         return environment.getMimeTypeMatch(mimeType);
     }

@@ -32,10 +32,9 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.*;
-
 import com.flexive.core.storage.StorageManager;
-import com.flexive.core.structure.StructureLoader;
+import com.flexive.core.structure.FxEnvironmentImpl;
+import com.flexive.core.structure.FxEnvironmentUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
@@ -47,6 +46,7 @@ import com.flexive.shared.interfaces.LanguageEngineLocal;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.value.FxString;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,6 +57,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.flexive.core.DatabaseConst.*;
+
 /**
  * [fleXive] language engine interface.
  * This engine should not be used to load languages as they are available from the environment!
@@ -66,7 +68,7 @@ import java.util.Map;
  * @version $Rev$
  */
 
-@Stateless(name = "LanguageEngine", mappedName="LanguageEngine")
+@Stateless(name = "LanguageEngine", mappedName = "LanguageEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
@@ -94,17 +96,19 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     };
 
     /**
-     * {@inheritDoc} *
+     * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxLanguage load(long languageId) throws FxApplicationException {
         try {
             FxLanguage lang = (FxLanguage) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ID, languageId);
             if (lang == null) {
-                loadAll(true, true);
-                lang = (FxLanguage) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ID, languageId);
-                if (lang == null)
-                    throw new FxInvalidLanguageException("ex.language.invalid", languageId);
+                //check unavailable
+                for (FxLanguage l : loadAll(false, false)) {
+                    if (l.getId() == languageId)
+                        return l;
+                }
+                throw new FxInvalidLanguageException("ex.language.invalid", languageId);
             }
             return lang;
         } catch (FxCacheException e) {
@@ -113,17 +117,22 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     }
 
     /**
-     * {@inheritDoc} *
+     * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxLanguage load(String languageIsoCode) throws FxApplicationException {
         try {
+            if (StringUtils.isBlank(languageIsoCode) || languageIsoCode.length() != 2)
+                throw new FxInvalidLanguageException("ex.language.invalid", languageIsoCode);
             FxLanguage lang = (FxLanguage) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ISO, languageIsoCode);
             if (lang == null) {
-                loadAll(true, true);
-                lang = (FxLanguage) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ISO, languageIsoCode);
-                if (lang == null)
-                    throw new FxInvalidLanguageException("ex.language.invalid", languageIsoCode);
+                //check unavailable
+                String check = languageIsoCode.toLowerCase();
+                for (FxLanguage l : loadAll(false, false)) {
+                    if (l.getIso2digit().equals(languageIsoCode))
+                        return l;
+                }
+                throw new FxInvalidLanguageException("ex.language.invalid", languageIsoCode);
             }
             return lang;
         } catch (FxCacheException e) {
@@ -152,7 +161,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     }
 
     /**
-     * {@inheritDoc} *
+     * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxLanguage> loadDisabled() throws FxApplicationException {
@@ -160,7 +169,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     }
 
     /**
-     * {@inheritDoc} *
+     * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxLanguage> loadAvailable(boolean excludeSystemLanguage) throws FxApplicationException {
@@ -175,11 +184,11 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
 
 
     /**
-     * {@inheritDoc} *
+     * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public boolean isValid(long languageId) {
-        // Does the language exist at all? Check via constru
+        // Does the language exist at all? Check via constructor
         try {
             load(languageId);
         } catch (FxApplicationException exc) {
@@ -231,14 +240,16 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
             if (lang_code != -1 && lang_code != FxLanguage.SYSTEM_ID) {
                 //add
                 FxLanguage lang = new FxLanguage(lang_code, iso_code, new FxString(FxLanguage.DEFAULT_ID, hmMl), true);
-                if (add2cache) {
+                if (add2cache && used) {
                     cache.put(CacheAdmin.LANGUAGES_ID, lang.getId(), lang);
                     cache.put(CacheAdmin.LANGUAGES_ISO, lang.getIso2digit(), lang);
                 }
                 alLang.add(lang);
             }
-            if (add2cache)
+            if (add2cache && used) {
                 cache.put(CacheAdmin.LANGUAGES_ALL, "id", alLang);
+                FxEnvironmentUtils.replaceEnvironmentLanguages(alLang);
+            }
         } catch (SQLException e) {
             LOG.error(e, e);
         } catch (FxCacheException e) {
@@ -247,6 +258,20 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
             Database.closeObjects(LanguageBean.class, con, stmt);
         }
         return alLang;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void activateLanguage(FxLanguage language) throws FxApplicationException {
+        List<FxLanguage> available = loadAvailable();
+        if (available.contains(language)) {
+            LOG.info("Language " + language + " is already active.");
+            return;
+        }
+        available.add(language);
+        setAvailable(available, false);
     }
 
     /**
@@ -290,15 +315,9 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                 ps.addBatch();
             }
             ps.executeBatch();
-            FxCacheMBean cache = CacheAdmin.getInstance();
-            cache.remove(CacheAdmin.LANGUAGES_ID);
-            cache.remove(CacheAdmin.LANGUAGES_ISO);
-            cache.remove(CacheAdmin.LANGUAGES_ALL);
-            StructureLoader.reload(con);
+            loadAll(true, true);
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
-        } catch (FxCacheException e) {
-            throw new FxApplicationException(LOG, e);
         } finally {
             Database.closeObjects(LanguageBean.class, con, ps);
         }

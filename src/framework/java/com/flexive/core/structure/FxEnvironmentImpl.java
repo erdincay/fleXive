@@ -1437,6 +1437,34 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean isLanguageActive(long id) {
+        if (id == FxLanguage.SYSTEM_ID) {
+            return true;
+        }
+        for (FxLanguage language : languages) {
+            if (language.getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isLanguageActive(String isoCode) {
+        isoCode = isoCode.toLowerCase();
+        for (FxLanguage language : languages) {
+            if (language.getIso2digit().equals(isoCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxLanguage> getLanguages() {
         return languages;   // already unmodifiable
     }

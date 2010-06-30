@@ -39,11 +39,10 @@ import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.stream.ServerLocation;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Descriptor for binaries (immutable).
@@ -304,9 +303,9 @@ public class BinaryDescriptor implements Serializable {
     /**
      * Constructor (for new Binaries with unknown size)
      *
-     * @param name         name of the binary
-     * @param mimeType     the MIME type to be used, regardless of the stream content
-     * @param stream       an open input stream for the binary to upload
+     * @param name     name of the binary
+     * @param mimeType the MIME type to be used, regardless of the stream content
+     * @param stream   an open input stream for the binary to upload
      * @throws FxStreamException on upload errors
      * @since 3.1
      */
@@ -318,9 +317,9 @@ public class BinaryDescriptor implements Serializable {
     /**
      * Internal Constructor (for new Binaries with unknown size)
      *
-     * @param payload      payload from the streaming server to read the actual size
-     * @param name         name of the binary
-     * @param mimeType     the MIME type to be used, regardless of the stream content
+     * @param payload  payload from the streaming server to read the actual size
+     * @param name     name of the binary
+     * @param mimeType the MIME type to be used, regardless of the stream content
      * @since 3.1
      */
     protected BinaryDescriptor(BinaryUploadPayload payload, String name, String mimeType) {
@@ -460,6 +459,29 @@ public class BinaryDescriptor implements Serializable {
      */
     public void download(OutputStream stream, PreviewSizes size) throws FxStreamException {
         FxStreamUtils.downloadBinary(server, stream, this, size);
+    }
+
+    /**
+     * Get the binary as InputStream for a requested preview size
+     *
+     * @param size requested preview size
+     * @return InputStream
+     * @throws FxStreamException on errors
+     * @since 3.1.4
+     */
+    public InputStream getInputStream(PreviewSizes size) throws FxStreamException {
+        return FxStreamUtils.getBinaryStream(this, size);
+    }
+
+    /**
+     * Get the (original) binary as InputStream
+     *
+     * @return InputStream
+     * @throws FxStreamException on errors
+     * @since 3.1.4
+     */
+    public InputStream getInputStream() throws FxStreamException {
+        return FxStreamUtils.getBinaryStream(this, PreviewSizes.ORIGINAL);
     }
 
     /**
@@ -630,14 +652,14 @@ public class BinaryDescriptor implements Serializable {
 //                !(b.getMetadata() != null && !b.getMetadata().equals(this.getMetadata())) &&
 //                !(this.getMetadata() != null && !this.getMetadata().equals(b.getMetadata())) &&
                 !(this.metadata == null && b.metadata != null) &&
-                !(b.metadata == null && this.metadata != null) &&
-                !(b.getMimeType() != null && !b.getMimeType().equals(this.getMimeType())) &&
-                !(this.getMimeType() != null && !this.getMimeType().equals(b.getMimeType())) &&
-                !(this.getMimeType() == null && b.getMimeType() != null) &&
-                !(b.getMimeType() == null && this.getMimeType() != null) &&
-                !(this.handle != null && !this.handle.equals(b.handle)) &&
-                !(this.id != -1 && this.id != b.id) &&
-                !(this.md5sum != null && !this.md5sum.equals(b.md5sum));
+                        !(b.metadata == null && this.metadata != null) &&
+                        !(b.getMimeType() != null && !b.getMimeType().equals(this.getMimeType())) &&
+                        !(this.getMimeType() != null && !this.getMimeType().equals(b.getMimeType())) &&
+                        !(this.getMimeType() == null && b.getMimeType() != null) &&
+                        !(b.getMimeType() == null && this.getMimeType() != null) &&
+                        !(this.handle != null && !this.handle.equals(b.handle)) &&
+                        !(this.id != -1 && this.id != b.id) &&
+                        !(this.md5sum != null && !this.md5sum.equals(b.md5sum));
     }
 
     /**

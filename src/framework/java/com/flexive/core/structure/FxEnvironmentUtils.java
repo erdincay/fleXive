@@ -34,12 +34,14 @@ package com.flexive.core.structure;
 import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Environment helper functions (core)
@@ -130,7 +132,7 @@ final public class FxEnvironmentUtils {
      * @since 3.1.4
      */
     public static void setCacheEnvironmentRequestOnly(boolean requestOnly) {
-        if( requestOnly )
+        if (requestOnly)
             FxContext.get().setAttribute(ATTR_ENV_REQUEST_ONLY, Boolean.TRUE);
         else {
             boolean isSet = isCacheEnvironmentRequestOnly();
@@ -156,6 +158,22 @@ final public class FxEnvironmentUtils {
     public static boolean isCacheEnvironmentRequestOnly() {
         Object o = FxContext.get().getAttribute(ATTR_ENV_REQUEST_ONLY);
         return o != null && (o instanceof Boolean) && ((Boolean) o);
+    }
+
+    /**
+     * Replace the environments languages
+     *
+     * @param languages new active languages
+     * @throws FxCacheException on errors
+     * @since 3.1.4
+     */
+    public static void replaceEnvironmentLanguages(List<FxLanguage> languages) throws FxCacheException {
+        if (CacheAdmin.isNewInstallation())
+            return;
+        int divisionId = FxContext.get().getDivisionId();
+        FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+        structure.setLanguages(languages);
+        FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
     }
 
     /**

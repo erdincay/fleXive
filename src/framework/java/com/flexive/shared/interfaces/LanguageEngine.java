@@ -102,9 +102,18 @@ public interface LanguageEngine {
     boolean isValid(long languageId);
 
     /**
+     * Activate a language (convenience method)
+     *
+     * @param language the language to activate
+     * @throws FxApplicationException on errors
+     * @since 3.1.4
+     */
+    void activateLanguage(FxLanguage language) throws FxApplicationException;
+
+    /**
      * Set all available languages
      *
-     * @param available list containing all available languages
+     * @param available   list containing all available languages
      * @param ignoreUsage ignore if a language that is no longer available after calling this method is in use
      * @throws FxApplicationException on errors
      */

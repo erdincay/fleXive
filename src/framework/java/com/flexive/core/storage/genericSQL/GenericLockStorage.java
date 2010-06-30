@@ -241,6 +241,8 @@ public class GenericLockStorage implements LockStorage {
      * @throws FxLockException thrown when the content can not be loaded/checked or no access
      */
     private void checkEditPermission(Connection con, FxPK pk, UserTicket ticket) throws FxLockException {
+        if( ticket.isGuest() )
+            throw new FxLockException("ex.lock.content.guest");
         FxContent content;
         FxContentSecurityInfo si;
         FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
@@ -351,6 +353,8 @@ public class GenericLockStorage implements LockStorage {
         if (!currentLock.isLocked())
             return; //nothing locked, so unlock is successful
         final UserTicket ticket = FxContext.getUserTicket();
+        if( ticket.isGuest() )
+            throw new FxLockException("ex.lock.content.guest");    
         final boolean allowUnlock = currentLock.getLockType() == FxLockType.Loose ||
                 currentLock.isExpired() ||
                 (currentLock.getLockType() == FxLockType.Permanent &&

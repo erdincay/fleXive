@@ -366,7 +366,7 @@ public interface FxEnvironment extends Serializable {
     /**
      * Return the property assignment for the given ID.
      *
-     * @param id    the requested ID
+     * @param id the requested ID
      * @return the property assignment that matches the given XPath
      * @since 3.1
      */
@@ -624,7 +624,7 @@ public interface FxEnvironment extends Serializable {
      */
     List<FxScriptSchedule> getScriptSchedules();
 
-     /**
+    /**
      * Get a script schedule by its id
      *
      * @param scriptScheduleId requested script schedule id
@@ -692,9 +692,8 @@ public interface FxEnvironment extends Serializable {
     /**
      * Return all activated languages.
      *
-     * @return                          a list with all available language objects
-     *
-     * @since   3.1
+     * @return a list with all available language objects
+     * @since 3.1
      */
     List<FxLanguage> getLanguages();
 
@@ -702,10 +701,9 @@ public interface FxEnvironment extends Serializable {
      * Return the language for the given ID. If the language is not found or disabled, a FxRuntimeException
      * is thrown.
      *
-     * @param id    the language ID
-     * @return      the language
-     *
-     * @since   3.1
+     * @param id the language ID
+     * @return the language
+     * @since 3.1
      */
     FxLanguage getLanguage(long id);
 
@@ -714,18 +712,34 @@ public interface FxEnvironment extends Serializable {
      * is thrown.
      *
      * @param isoCode the language ISO code
-     * @return      the language
-     *
-     * @since   3.1
+     * @return the language
+     * @since 3.1
      */
     FxLanguage getLanguage(String isoCode);
+
+    /**
+     * Return if the requested language id is active
+     *
+     * @param id language id
+     * @return active
+     * @since 3.1.4
+     */
+    boolean isLanguageActive(long id);
+
+    /**
+     * Return if the requested language iso 2-digit code is active
+     *
+     * @param isoCode the language ISO code
+     * @return active
+     * @since 3.1.4
+     */
+    boolean isLanguageActive(String isoCode);
 
     /**
      * Return the closest matching FxType (any derived type of DocumentFile) for a given mime type
      *
      * @param mimeType e.g. application/pdf as a String
      * @return the relevant FxType or the resp. root type f. a given main mime type (i.e. DocumentFile f. unknown/unknown, Image f. image/unknown, Document f. application/unknown
-     *
      * @since 3.1
      */
     FxType getMimeTypeMatch(String mimeType);
