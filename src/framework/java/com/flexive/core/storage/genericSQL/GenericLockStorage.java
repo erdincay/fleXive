@@ -46,6 +46,7 @@ import com.flexive.shared.FxLockType;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.ACLPermission;
+import com.flexive.shared.security.Account;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -241,7 +242,7 @@ public class GenericLockStorage implements LockStorage {
      * @throws FxLockException thrown when the content can not be loaded/checked or no access
      */
     private void checkEditPermission(Connection con, FxPK pk, UserTicket ticket) throws FxLockException {
-        if( ticket.isGuest() )
+        if( ticket.isGuest() || ticket.getUserId() == Account.USER_GUEST )
             throw new FxLockException("ex.lock.content.guest");
         FxContent content;
         FxContentSecurityInfo si;
@@ -353,7 +354,7 @@ public class GenericLockStorage implements LockStorage {
         if (!currentLock.isLocked())
             return; //nothing locked, so unlock is successful
         final UserTicket ticket = FxContext.getUserTicket();
-        if( ticket.isGuest() )
+        if( ticket.isGuest() || ticket.getUserId() == Account.USER_GUEST )
             throw new FxLockException("ex.lock.content.guest");    
         final boolean allowUnlock = currentLock.getLockType() == FxLockType.Loose ||
                 currentLock.isExpired() ||

@@ -168,7 +168,7 @@ final public class FxEnvironmentUtils {
      * @since 3.1.4
      */
     public static void replaceEnvironmentLanguages(List<FxLanguage> languages) throws FxCacheException {
-        if (CacheAdmin.isNewInstallation())
+        if (CacheAdmin.isNewInstallation() || !CacheAdmin.isEnvironmentLoaded())
             return;
         int divisionId = FxContext.get().getDivisionId();
         FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();

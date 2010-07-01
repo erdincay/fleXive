@@ -33,7 +33,6 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.FxEnvironmentUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
@@ -129,7 +128,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                 //check unavailable
                 String check = languageIsoCode.toLowerCase();
                 for (FxLanguage l : loadAll(false, false)) {
-                    if (l.getIso2digit().equals(languageIsoCode))
+                    if (l.getIso2digit().equals(check))
                         return l;
                 }
                 throw new FxInvalidLanguageException("ex.language.invalid", languageIsoCode);
@@ -248,7 +247,6 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
             }
             if (add2cache && used) {
                 cache.put(CacheAdmin.LANGUAGES_ALL, "id", alLang);
-                FxEnvironmentUtils.replaceEnvironmentLanguages(alLang);
             }
         } catch (SQLException e) {
             LOG.error(e, e);
@@ -315,7 +313,9 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                 ps.addBatch();
             }
             ps.executeBatch();
-            loadAll(true, true);
+            FxEnvironmentUtils.replaceEnvironmentLanguages(loadAll(true, true));
+        } catch (FxCacheException e) {
+            LOG.error(e, e);
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
