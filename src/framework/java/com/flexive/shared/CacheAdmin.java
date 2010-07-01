@@ -322,16 +322,11 @@ public class CacheAdmin {
     public static void cacheContent(FxCachedContent content) {
         try {
             final String cachePath = getContentCachePath(content.getContent().getId());
-            FxCachedContentContainer container =
-                    (FxCachedContentContainer) getInstance().get(
-                            cachePath,
-                            CONTENTCACHE_KEY_STORE
-                    );
-            if (container == null) {
-                container = new FxCachedContentContainer(content);
-            } else {
-                container.add(content);
+            FxCachedContentContainer container = (FxCachedContentContainer) getInstance().get(cachePath, CONTENTCACHE_KEY_STORE);
+            if (container != null) {
+                getInstance().remove(cachePath, CONTENTCACHE_KEY_STORE);
             }
+            container = new FxCachedContentContainer(content);
             getInstance().put(cachePath, CONTENTCACHE_KEY_STORE, container);
         } catch (FxCacheException e) {
             LOG.warn(e.getMessage(), e);
