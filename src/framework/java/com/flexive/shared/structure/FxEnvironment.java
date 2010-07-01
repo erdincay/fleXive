@@ -38,6 +38,7 @@ import com.flexive.shared.scripting.FxScriptSchedule;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -743,4 +744,30 @@ public interface FxEnvironment extends Serializable {
      * @since 3.1
      */
     FxType getMimeTypeMatch(String mimeType);
+
+    /**
+     * Return all defined user groups
+     *
+     * @return list of all user groups
+     * @since 3.1.4
+     */
+    List<UserGroup> getUserGroups();
+
+    /**
+     * Get a user group by id
+     *
+     * @param id id of the user group
+     * @return UserGroup or <code>null</code> if not found
+     * @since 3.1.4
+     */
+    UserGroup getUserGroup(long id);
+
+    /**
+     * Get a user group by id
+     *
+     * @param name name of the user group
+     * @return UserGroup or <code>null</code> if not found
+     * @since 3.1.4
+     */
+    UserGroup getUserGroup(String name);
 }

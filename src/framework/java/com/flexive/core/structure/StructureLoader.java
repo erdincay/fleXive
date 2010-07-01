@@ -38,6 +38,7 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -45,12 +46,14 @@ import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.structure.FxType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Load structure information into the cache
@@ -125,6 +128,7 @@ public final class StructureLoader {
             environment.setScriptMappings(loader.loadScriptMapping(con, environment));
             environment.setScriptSchedules(loader.loadScriptSchedules(con, environment));
             environment.setLanguages(EJBLookup.getLanguageEngine().loadAvailable(true));
+            environment.setUserGroups(EJBLookup.getUserGroupEngine().loadAll(-1));
             environment.resolveDependencies();
             environment.updateTimeStamp();
             CacheAdmin.environmentChanged();
@@ -255,6 +259,7 @@ public final class StructureLoader {
      * Reload all assignment-related informations including types and properties for the given division.
      *
      * @param divisionId    the division to reload
+     * @throws FxApplicationException on errors
      * @since 3.1.4
      */
     public static void reloadAssignments(int divisionId) throws FxApplicationException {
@@ -396,6 +401,41 @@ public final class StructureLoader {
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
         } catch (FxCacheException e) {
             LOG.error(e, e);
+        }
+    }
+
+    /**
+     * Replace the environments languages
+     *
+     * @param divisionId division
+     * @param languages new active languages
+     * @throws FxCacheException on errors
+     * @since 3.1.4
+     */
+    public static void updateLanguages(int divisionId, List<FxLanguage> languages) throws FxCacheException {
+        if (CacheAdmin.isNewInstallation() || !CacheAdmin.isEnvironmentLoaded())
+            return;
+        FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+        structure.setLanguages(languages);
+        FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
+    }
+
+    /**
+     * Replace the environments languages
+     *
+     * @param divisionId division
+     * @param userGroups new user groups
+     * @since 3.1.4
+     */
+    public static void updateUserGroups(int divisionId, List<UserGroup> userGroups) {
+        if (CacheAdmin.isNewInstallation() || !CacheAdmin.isEnvironmentLoaded())
+            return;
+        try {
+            FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+            structure.setUserGroups(userGroups);
+            FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
+        } catch (FxCacheException e) {
+            LOG.error(e);
         }
     }
 }

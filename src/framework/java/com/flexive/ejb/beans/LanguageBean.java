@@ -33,7 +33,7 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.core.structure.FxEnvironmentUtils;
+import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
@@ -313,7 +313,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                 ps.addBatch();
             }
             ps.executeBatch();
-            FxEnvironmentUtils.replaceEnvironmentLanguages(loadAll(true, true));
+            StructureLoader.updateLanguages(FxContext.get().getDivisionId(), loadAll(true, true));
         } catch (FxCacheException e) {
             LOG.error(e, e);
         } catch (SQLException e) {

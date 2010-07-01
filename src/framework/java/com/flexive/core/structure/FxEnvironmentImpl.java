@@ -31,11 +31,7 @@
  ***************************************************************/
 package com.flexive.core.structure;
 
-import com.flexive.shared.FxArrayUtils;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -45,10 +41,7 @@ import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.scripting.FxScriptSchedule;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.security.Mandator;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.*;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
@@ -91,6 +84,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private List<FxScriptMapping> scriptMappings;
     private List<FxScriptSchedule> scriptSchedules;
     private List<FxLanguage> languages;
+    private List<UserGroup> userGroups;
     private FxLanguage systemInternalLanguage;
     private long timeStamp = 0;
     //storage-type-level-mapping
@@ -132,6 +126,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         this.selectLists = new ArrayList<FxSelectList>(e.selectLists);
         this.languages = new ArrayList<FxLanguage>(e.languages);
         this.timeStamp = e.timeStamp;
+        this.userGroups = new ArrayList<UserGroup>(e.userGroups);
         this.resolveFlatMappings();
     }
 
@@ -1088,6 +1083,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
 
     /**
      * {@inheritDoc}
+     *
      * @since 3.1.2
      */
     public List<FxScriptSchedule> getScriptSchedules() {
@@ -1096,6 +1092,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
 
     /**
      * {@inheritDoc}
+     *
      * @since 3.1.2
      */
     public FxScriptSchedule getScriptSchedule(long scriptScheduleId) {
@@ -1105,8 +1102,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         throw new FxNotFoundException("ex.scripting.schedule.notFound.id", scriptScheduleId).asRuntimeException();
     }
 
-   /**
+    /**
      * {@inheritDoc}
+     *
      * @since 3.1.2
      */
     public List<FxScriptSchedule> getScriptSchedulesForScript(long scriptId) {
@@ -1114,7 +1112,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         for (FxScriptSchedule ss : this.scriptSchedules)
             if (ss.getScriptId() == scriptId)
                 result.add(ss);
-         return Collections.unmodifiableList(result);
+        return Collections.unmodifiableList(result);
     }
 
     /**
@@ -1161,7 +1159,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     }
 
     /**
-     *  resolve flat storage mappings and prepare them by storage and level
+     * resolve flat storage mappings and prepare them by storage and level
      */
     private void resolveFlatMappings() {
         //storage-type-level-mapping
@@ -1269,8 +1267,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * Update scripts after changes
      *
-     * @param scripts       all scripts
-     * @param scriptMapping all mappings
+     * @param scripts         all scripts
+     * @param scriptMapping   all mappings
      * @param scriptSchedules scriptSchedules
      * @throws FxNotFoundException if dependencies can not be resolved
      */
@@ -1475,7 +1473,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     public FxType getMimeTypeMatch(String mimeType) {
         FxMimeType fxMimeType = FxMimeType.getMimeType(mimeType);
         // no proper match for given mimetype - return DocumentFile
-        if(FxMimeType.UNKNOWN.equals(fxMimeType.getType()))
+        if (FxMimeType.UNKNOWN.equals(fxMimeType.getType()))
             return getType(FxType.DOCUMENTFILE);
 
         List<FxType> allMimeFxTypes = getType(FxType.DOCUMENTFILE).getDerivedTypes();
@@ -1491,29 +1489,66 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      *
      * @param typeList the List&lt;FxType&gt;
      * @param mimeType the instance of FxMimeType
-     * @param root the root node
+     * @param root     the root node
      * @return the FxType or null/the input root node if nothing found
      */
     private FxType containsMimeType(List<FxType> typeList, FxMimeType mimeType, FxType root) {
         FxType derivedMatch = null;
-        for(FxType t : typeList) {
+        for (FxType t : typeList) {
             FxMimeTypeWrapper wrapper = t.getMimeType();
-            if(wrapper.contains(mimeType, true)) {
+            if (wrapper.contains(mimeType, true)) {
                 // assign root FxType for given (main) mime type
-                if(root == null)
+                if (root == null)
                     root = t;
                 // have we got an exact match?
-                if(wrapper.contains(mimeType)) {
+                if (wrapper.contains(mimeType)) {
                     return t;
                 }
                 // do we have further derived types for the current one?
                 List<FxType> currentDerivedList = t.getDerivedTypes();
 
-                if(currentDerivedList != null && currentDerivedList.size() > 0) {
+                if (currentDerivedList != null && currentDerivedList.size() > 0) {
                     derivedMatch = containsMimeType(currentDerivedList, mimeType, root);
                 }
             }
         }
         return derivedMatch != null ? derivedMatch : root;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<UserGroup> getUserGroups() {
+        return userGroups;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public UserGroup getUserGroup(long id) {
+        for (UserGroup grp : userGroups)
+            if (grp.getId() == id)
+                return grp;
+        return null; //not found
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public UserGroup getUserGroup(String name) {
+        for (UserGroup grp : userGroups)
+            if (grp.getName().equalsIgnoreCase(name))
+                return grp;
+        return null; //not found
+    }
+
+    /**
+     * Set user groups
+     *
+     * @param userGroups user groups
+     * @since 3.1.4
+     */
+    protected void setUserGroups(List<UserGroup> userGroups) {
+        this.userGroups = userGroups;
     }
 }

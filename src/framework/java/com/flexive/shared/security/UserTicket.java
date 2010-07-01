@@ -111,10 +111,19 @@ public interface UserTicket extends Serializable {
     /**
      * Returns true if the user is a member of the given group.
      *
-     * @param group the group to check for
+     * @param group the group id to check for
      * @return true if the user is a member of the given group
      */
     boolean isInGroup(long group);
+
+    /**
+     * Returns true if the user is a member of the given group.
+     *
+     * @param group the group name to check for
+     * @return true if the user is a member of the given group
+     * @since 3.1.4
+     */
+    boolean isInGroup(String group);
 
     /**
      * Returns true if the user is assigned to the given role.
@@ -340,7 +349,7 @@ public interface UserTicket extends Serializable {
     /**
      * Creates an independent copy of this ticket.
      *
-     * @return  an independent copy of this ticket.
+     * @return an independent copy of this ticket.
      * @since 3.1
      */
     public UserTicket copy();

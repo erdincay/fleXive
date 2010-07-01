@@ -38,16 +38,16 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptSchedule;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.security.Mandator;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.*;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * <p>
@@ -551,14 +551,16 @@ public final class FxFilteredEnvironment implements FxEnvironment {
 
     /**
      * {@inheritDoc}
+     *
      * @since 3.1.2
      */
     public List<FxScriptSchedule> getScriptSchedules() {
         return environment.getScriptSchedules();
     }
-    
+
     /**
      * {@inheritDoc}
+     *
      * @since 3.1.2
      */
     public FxScriptSchedule getScriptSchedule(long scriptScheduleId) {
@@ -567,6 +569,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
 
     /**
      * {@inheritDoc}
+     *
      * @since 3.1.2
      */
     public List<FxScriptSchedule> getScriptSchedulesForScript(long scriptId) {
@@ -697,5 +700,26 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public FxType getMimeTypeMatch(String mimeType) {
         return environment.getMimeTypeMatch(mimeType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<UserGroup> getUserGroups() {
+        return environment.getUserGroups();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public UserGroup getUserGroup(long id) {
+        return environment.getUserGroup(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public UserGroup getUserGroup(String name) {
+        return environment.getUserGroup(name);
     }
 }

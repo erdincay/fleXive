@@ -32,25 +32,29 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import com.flexive.core.storage.StorageManager;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
+import com.flexive.core.storage.StorageManager;
+import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
-import static com.flexive.shared.FxSharedUtils.indexOfSelectableObject;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.*;
+import com.flexive.shared.interfaces.SequencerEngineLocal;
+import com.flexive.shared.interfaces.UserGroupEngine;
+import com.flexive.shared.interfaces.UserGroupEngineLocal;
 import com.flexive.shared.security.*;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.ArrayUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+
+import static com.flexive.core.DatabaseConst.*;
+import static com.flexive.shared.FxSharedUtils.indexOfSelectableObject;
 
 
 /**
@@ -58,13 +62,12 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "UserGroupEngine", mappedName="UserGroupEngine")
+@Stateless(name = "UserGroupEngine", mappedName = "UserGroupEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLocal {
     private static final Log LOG = LogFactory.getLog(UserGroupEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
-    //@EJB AccountEngine account;
     @EJB
     SequencerEngineLocal seq;
 
@@ -129,7 +132,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             ResultSet rs = stmt.executeQuery(sql);
 
             // Does the group exist at all?
-            if (rs == null || !rs.next()) 
+            if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.account.group.notFound.id", mandatorId);
             long autoMandator = rs.getLong(5);
             if (rs.wasNull())
@@ -254,6 +257,8 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             ps.setLong(10, NOW);
             ps.executeUpdate();
 
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), loadAll(-1));
+
             // Return the new id
             return groupId;
         } catch (SQLException exc) {
@@ -326,6 +331,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             pstmt.executeUpdate();
             pstmt.close();
 
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), loadAll(-1));
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             EJBUtils.rollback(ctx);
@@ -405,9 +411,10 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             // Update all active user tickets that are affected
             UserTicketStore.flagDirtyHavingGroupId(groupId);
 
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), loadAll(-1));
+
             // Log
             if (LOG.isDebugEnabled()) LOG.debug("Group [" + theGroup + "] was successfully deleted.");
-
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
             FxRemoveException ce = new FxRemoveException(exc, "ex.usergroup.deleteSqlException", theGroup.getName());
@@ -425,7 +432,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * Checks if the group name is valid.
      * Throws a FxInvalidParameterException if the name is invalid.
      *
-     * @param sName  the name to check
+     * @param sName the name to check
      * @throws FxInvalidParameterException if the name is not valid
      */
     private void checkName(final String sName) throws FxInvalidParameterException {

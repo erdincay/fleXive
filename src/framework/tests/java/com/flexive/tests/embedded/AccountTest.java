@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
@@ -56,7 +57,7 @@ import java.util.List;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb"})
+@Test(groups = {"ejb", "security"})
 public class AccountTest {
 
     private static final String USERNAME = "CACTUS_TEST_USER";
@@ -66,11 +67,13 @@ public class AccountTest {
 
     private AccountEngine accountEngine = null;
     private ContentEngine contentEngine = null;
+    private UserGroupEngine userGroupEngine = null;
 
     @BeforeClass
     public void beforeClass() throws Exception {
         accountEngine = EJBLookup.getAccountEngine();
         contentEngine = EJBLookup.getContentEngine();
+        userGroupEngine = EJBLookup.getUserGroupEngine();
         long userCount = accountEngine.getActiveUserTickets().size();
         if (userCount > 0) {
             for (UserTicket t : accountEngine.getActiveUserTickets())
@@ -399,5 +402,25 @@ public class AccountTest {
         assertEquals(acc1.isActive(), acc2.isActive());
         assertEquals(acc1.isAllowMultiLogin(), acc2.isAllowMultiLogin());
         assertEquals(acc1.getMandatorId(), acc2.getMandatorId());
+    }
+
+    /**
+     * Test user groups
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void userGroupTest() throws FxApplicationException {
+        final UserTicket ticket = FxContext.getUserTicket();
+        List<UserGroup> ugEng = userGroupEngine.loadAll(-1);
+        List<UserGroup> ugEnv = CacheAdmin.getEnvironment().getUserGroups();
+        Assert.assertEquals(ugEng, ugEnv);
+        long grpId = userGroupEngine.create("test-grp42", "red", ticket.getMandatorId());
+        UserGroup newGrp = userGroupEngine.load(grpId);
+        Assert.assertTrue(userGroupEngine.loadAll(-1).contains(newGrp));
+        Assert.assertTrue(CacheAdmin.getEnvironment().getUserGroups().contains(newGrp));
+        userGroupEngine.remove(grpId);
+        Assert.assertFalse(userGroupEngine.loadAll(-1).contains(newGrp));
+        Assert.assertFalse(CacheAdmin.getEnvironment().getUserGroups().contains(newGrp));
     }
 }

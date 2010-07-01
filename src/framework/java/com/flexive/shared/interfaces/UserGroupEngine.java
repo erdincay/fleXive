@@ -47,19 +47,16 @@ import java.util.List;
 public interface UserGroupEngine {
 
     /**
-     * Loads a group defined by its unique id.
+     * Loads a user group defined by its unique id.
      * <p/>
      * No permission checks are performed<br>
      *
      * @param groupId the unique id of the group to load
      * @return the requested user group
-     * @throws FxApplicationException TODO
-     * @throws com.flexive.shared.exceptions.FxNoAccessException
-     *                                if the user may not access the group
-     * @throws com.flexive.shared.exceptions.FxNotFoundException
-     *                                if the group does not exist
-     * @throws com.flexive.shared.exceptions.FxLoadException
-     *                                if the load failed
+     * @throws FxApplicationException on errors
+     * @throws FxNoAccessException    if the user may not access the group
+     * @throws FxNotFoundException    if the group does not exist
+     * @throws FxLoadException        if the load failed
      */
     UserGroup load(long groupId) throws FxApplicationException;
 
@@ -78,8 +75,8 @@ public interface UserGroupEngine {
      * Specify -1 t load all groups within the system (all mandators).
      *
      * @param mandatorId the mandator id to load the groups for, or -1 to load all groups
-     * @return all groups belonging to the mandator
-     * @throws FxApplicationException TODO
+     * @return all groups (belonging to the mandator if mandatorId is set)
+     * @throws FxApplicationException on errors
      * @throws FxNoAccessException    If the calling user may not access the groups of the given mandator
      * @throws FxLoadException        if the load failed
      */
@@ -97,14 +94,11 @@ public interface UserGroupEngine {
      *                   or the name of a CSS class
      * @param mandatorId the mandator the group belongs to
      * @return the created group's ID
-     * @throws FxApplicationException TODO
-     * @throws FxNoAccessException    if the calling user lacks the permissions to create the group
-     * @throws com.flexive.shared.exceptions.FxEntryExistsException
-     *                                if a group with the given name exists
-     * @throws com.flexive.shared.exceptions.FxInvalidParameterException
-     *                                if a parameter was invalid (name,color,mandator)
-     * @throws com.flexive.shared.exceptions.FxCreateException
-     *                                if the create failed
+     * @throws FxApplicationException      on errors
+     * @throws FxNoAccessException         if the calling user lacks the permissions to create the group
+     * @throws FxEntryExistsException      if a group with the given name exists
+     * @throws FxInvalidParameterException if a parameter was invalid (name,color,mandator)
+     * @throws FxCreateException           if the create failed
      */
     long create(String name, String color, long mandatorId) throws FxApplicationException;
 
@@ -118,7 +112,7 @@ public interface UserGroupEngine {
      * @param groupId The group that should be updated
      * @param color   the color of the group as 6 digit RGB value (eg 'FF0000' for pure red), or null to keep the old value
      * @param name    the new name of the group, or null to keep the old value
-     * @throws FxApplicationException      TODO
+     * @throws FxApplicationException      on errors
      * @throws FxNotFoundException         if the group to update does not exist
      * @throws FxNoAccessException         if the user lacks the permissions to update the group
      * @throws FxUpdateException           if the update failed
@@ -136,7 +130,7 @@ public interface UserGroupEngine {
      * The groups GROUP_EVERYONE and GROUP_OWNER may not be removed in any case.
      *
      * @param groupId the unqiue id of the group to remove
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      * @throws FxNoAccessException    if the user lacks the permissions to remove the group
      * @throws FxNotFoundException    if the group does not exist
      * @throws FxRemoveException      if the remove failed
@@ -153,7 +147,7 @@ public interface UserGroupEngine {
      *
      * @param groupId the group to set the roles for
      * @param roles   the roles to set
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      * @throws FxNoAccessException    if the calling user lacks the permissions to set the roles for the given group
      * @throws FxNotFoundException    if the group does not exist
      * @throws FxUpdateException      if setting the roles failed
@@ -169,7 +163,7 @@ public interface UserGroupEngine {
      *
      * @param groupId the group to set the roles for
      * @param roles   the roles to set
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      * @throws FxNoAccessException    if the calling user lacks the permissions to set the roles for the given group
      * @throws FxNotFoundException    if the group does not exist
      * @throws FxUpdateException      if setting the roles failed
@@ -184,7 +178,7 @@ public interface UserGroupEngine {
      *
      * @param groupId the group to get the assigned roles for
      * @return a list of the roles that ate assigned to the group
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      * @throws FxNoAccessException    if the caller lacks the permissions to get the roles
      * @throws FxNotFoundException    if the group does not exist
      * @throws FxLoadException        if the function failed to load the data

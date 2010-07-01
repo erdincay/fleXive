@@ -158,6 +158,16 @@ public class UserTicketImpl implements UserTicket, Serializable {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public boolean isInGroup(String group) {
+        for(UserGroup check: CacheAdmin.getEnvironment().getUserGroups())
+            if( check.getName().equalsIgnoreCase(group))
+                return true;
+        return false;
+    }
+
+    /**
      * If true the ticket is dirty and needs to be synced with the database.
      *
      * @return true the ticket is dirty and needs to be synced with the database
