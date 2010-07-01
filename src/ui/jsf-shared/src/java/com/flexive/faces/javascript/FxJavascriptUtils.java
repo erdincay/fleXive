@@ -36,6 +36,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.faces.context.ResponseWriter;
 import java.io.IOException;
 import java.io.Writer;
+import javax.faces.context.FacesContext;
 
 /**
  * Utility functions for handling/creating javascript code.
@@ -56,9 +57,27 @@ public class FxJavascriptUtils {
      *
      * @param out the output writer
      * @throws IOException if the code could not be written
+     * @deprecated  use {@link #beginJavascript(javax.faces.context.ResponseWriter)} to correctly encode CDATA script blocks
      */
     public static void beginJavascript(Writer out) throws IOException {
         out.write("<script type=\"text/javascript\" language=\"javascript\">\n//<![CDATA[\n<!--\n");
+    }
+
+    /**
+     * Start a javascript block.
+     *
+     * @param out the response writer
+     * @throws IOException if the code could not be written
+     * @since 3.1.4
+     */
+    public static void beginJavascript(ResponseWriter out) throws IOException {
+
+        // Rely on JSF to determine if an enclosing CDATA block needs to be rendered.
+        // This may lead to validation errors if JSF is not rendering in XHTML mode,
+        // but improves compatibility in JSF2 for AJAX updates, where nested CDATA sections cause problems.
+
+        out.startElement("script", null);
+        out.writeAttribute("type", "text/javascript", null);
     }
 
     /**
@@ -66,9 +85,21 @@ public class FxJavascriptUtils {
      *
      * @param out the output writer
      * @throws IOException if the code could not be written
+     * @deprecated  use {@link #endJavascript(javax.faces.context.ResponseWriter)} to correctly encode CDATA script blocks
      */
     public static void endJavascript(Writer out) throws IOException {
         out.write("\n//-->\n//]]>\n</script>");
+    }
+
+    /**
+     * End a javascript block.
+     *
+     * @param out the response writer
+     * @throws IOException if the code could not be written
+     * @since 3.1.4
+     */
+    public static void endJavascript(ResponseWriter out) throws IOException {
+        out.endElement("script");
     }
 
     /**
