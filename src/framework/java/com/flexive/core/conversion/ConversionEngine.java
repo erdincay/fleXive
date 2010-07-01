@@ -111,7 +111,7 @@ public class ConversionEngine {
     /**
      * Get language code
      *
-     * @param le   reference to the LanguageEngine
+     * @param environment FxEnvironment
      * @param code 2-digit ISO language code
      * @return language code as long
      * @throws FxApplicationException on errors

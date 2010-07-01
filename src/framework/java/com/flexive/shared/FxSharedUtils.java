@@ -1185,8 +1185,12 @@ public final class FxSharedUtils {
         }
         String resource = lookupResource(resourceBundle, key, localeIso);
         if (resource == null) {
-            LOG.warn("Called with unlocalized Message [" + key + "]. See StackTrace for origin!", new Throwable());
-            return key;
+            //try to fallback to PluginMessages ...
+            resource = lookupResource("PluginMessages", key, localeIso);
+            if (resource == null) {
+                LOG.warn("Called with unlocalized Message [" + key + "]. See StackTrace for origin!", new Throwable());
+                return key;
+            }
         }
 
         //lookup possible resource keys in values (they may not have placeholders like {n} though)
