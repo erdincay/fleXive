@@ -163,7 +163,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     public boolean isInGroup(String group) {
         for(UserGroup check: CacheAdmin.getEnvironment().getUserGroups())
             if( check.getName().equalsIgnoreCase(group))
-                return true;
+                return isInGroup(check.getId());
         return false;
     }
 
