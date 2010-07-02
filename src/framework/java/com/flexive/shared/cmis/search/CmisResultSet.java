@@ -121,6 +121,14 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
     }
 
     /**
+     * @return the column definitions.
+     * @since  3.1.4
+     */
+    public List<CmisResultColumnDefinition> getColumns() {
+        return columns;
+    }
+
+    /**
      * Return the column value at the given row and column.
      *
      * @param rowIndex    the row index (0-based)
