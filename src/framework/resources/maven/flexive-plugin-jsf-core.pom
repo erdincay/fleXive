@@ -68,6 +68,10 @@
                     <groupId>javax.servlet</groupId>
                     <artifactId>jstl</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
