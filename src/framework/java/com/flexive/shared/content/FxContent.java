@@ -1007,6 +1007,9 @@ public class FxContent implements Serializable {
         //  xpath, assignment
         Map<String, FxAssignment> currAssignment = new HashMap<String, FxAssignment>();
 
+        // xpath, true if empty false if not
+        Map<String, Boolean> emptyGroups = new HashMap<String, Boolean>();
+
         // First create a list containing all groups in the root
 
         List<FxGroupAssignment> allTypeGroup = new LinkedList<FxGroupAssignment>();
@@ -1020,18 +1023,25 @@ public class FxContent implements Serializable {
                 currAssignment.put(xPath, prop);
             }
         }
+        for (FxGroupAssignment prop : currentType.getAssignedGroups()){
+            String xPath = prop.getXPath().substring(len);
+            currAssignment.put(xPath, prop);
+        }
 
         // instead a recursion have a (linked)list where we put groups at the end and add properties of the first group as long
         // as there are groups
         while (allTypeGroup.size() > 0) {
             FxGroupAssignment currData = allTypeGroup.remove(0);
             String xPath = currData.getXPath().substring(len);
-            currAssignment.put(xPath, currData);
             currAssignment = new HashMap<String, FxAssignment>();
             allAssignemnts.put(xPath, currAssignment);
             for (FxPropertyAssignment ass : currData.getAssignedProperties()) {
                 xPath = ass.getXPath().substring(len);
                 currAssignment.put(xPath, ass);
+            }
+            for (FxGroupAssignment prop : currData.getAssignedGroups()){
+                xPath = prop.getXPath().substring(len);
+                currAssignment.put(xPath, prop);
             }
             allTypeGroup.addAll(currData.getAssignedGroups());
         }
@@ -1064,6 +1074,10 @@ public class FxContent implements Serializable {
                         if (curr.getAssignmentMultiplicity().isOptional()) {
                             curMults.put(xPath, tmp);
                         }
+                        Boolean empty = emptyGroups.get(xPath);
+                        if (empty == null) {
+                            emptyGroups.put(xPath, true);
+                        }
                     } else {
                         curMults.put(xPath, tmp);
                     }
@@ -1071,6 +1085,7 @@ public class FxContent implements Serializable {
                     // if we got a group we add it to the list so that it is checked later (only if it is not empty)
                     if (curr instanceof FxGroupData) {
                         allData.add((FxGroupData) curr);
+                        emptyGroups.put(xPath, false);
                     } else {
                         ((FxPropertyData) curr).checkMaxLength();
                     }
@@ -1091,7 +1106,13 @@ public class FxContent implements Serializable {
                         throw new FxInvalidParameterException(/*curAss.getAlias()*/key, "ex.content.required.missing.none",
                                 /*curAss.getDisplayName(true)*/ key, curAss.getMultiplicity().toString());
                 }
-
+            }
+            currAssignment.clear();
+            for (String key : emptyGroups.keySet()) {
+                Boolean empty = emptyGroups.get(key);
+                if (empty) {
+                    allAssignemnts.remove(key);
+                }
             }
         }
         allAssignemnts.remove(currentXPath);
@@ -1101,10 +1122,11 @@ public class FxContent implements Serializable {
         groups : for (Map<String, FxAssignment> tmp : allAssignemnts.values()) {
             for (FxAssignment currAss : tmp.values()) {
                 // optional groups could be missing but we have to add them so if they are present, they need to have the right fields
-                final FxGroupAssignment parentGroupAssignment = currAss.getParentGroupAssignment();
-                if (parentGroupAssignment != null) {
-                    if (currAss.getParentGroupAssignment().getMultiplicity().isOptional())
+                FxGroupAssignment parentGroupAssignment = currAss.getParentGroupAssignment();
+                while (parentGroupAssignment != null) {
+                    if (parentGroupAssignment.getMultiplicity().isOptional())
                         continue groups;
+                    parentGroupAssignment = parentGroupAssignment.getParentGroupAssignment();
                 }
                 if (!currAss.getMultiplicity().isOptional())
                 throw new FxInvalidParameterException(/*currAss.getAlias()*/ currAss.getXPath(), "ex.content.required.missing.none",
