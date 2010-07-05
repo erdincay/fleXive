@@ -222,7 +222,7 @@ public abstract class CmisResultValue<T> implements Serializable {
      *
      * @return  the primary key of a content selected with the ObjectId property.
      */
-    public FxPK getPK() {
+    public FxPK getPk() {
         return (FxPK) value;
     }
     
