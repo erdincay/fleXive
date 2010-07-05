@@ -47,6 +47,7 @@ import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLockException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.security.LifeCycleInfo;
@@ -140,6 +141,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     private ArrayList<FxPK> sortedPKArray = new ArrayList<FxPK>();
     private transient HttpSession session = null;
     private final static String SORTED_PK_KEY = "BeContentEditorBean/sortedPK";
+    private static final String LOOSE_LOCKED_PKS = "LooseLockedPKs";
 
     /**
      * {@inheritDoc}
@@ -164,6 +166,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 }
                 beBeanInUse = true;
                 editMode = true;
+                unlockLast();
             } else if ("editInstance".equals(action)) {
                 FxPK newPk;
                 if (FxJsfUtils.getParameter("pk") != null) {
@@ -181,6 +184,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 pk = newPk;
                 beBeanInUse = true;
                 editMode = FxJsfUtils.getBooleanParameter("editMode", false);
+                unlockLast();
             }
         } catch (Throwable t) {
             // TODO possibly pass some error message to the HTML page
@@ -758,7 +762,31 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.fromResultSet = true;
         this.pk = new FxPK(contentIdToInit, version);
         beBeanInUse = true;
+        unlockLast();
         return getEditorPage();
+    }
+
+    /**
+     * checks if there is an open loose lock for the current session, and if so release it
+     *
+     * save the current pk as an open loose lock for the next time
+     * @since 3.1.4
+     */
+    private void unlockLast() {
+        FxPK currPK = (FxPK) FxJsfUtils.getSession().getAttribute(LOOSE_LOCKED_PKS);
+        if (currPK != null) {
+            final ContentEngine ce = EJBLookup.getContentEngine();
+            final UserTicket ticket = FxContext.getUserTicket();
+                FxLock currLock = ce.getLock(currPK);
+                if (currLock.getUserId() == ticket.getUserId() && currLock.getLockType() == FxLockType.Loose) {
+                    try {
+                        ce.unlock(currPK);
+                    } catch (FxLockException e) {
+                        new FxFacesMsgErr("ContentEditor.err.lock", e.getMessage()).addToContext();
+                    }
+                }
+        }
+        FxJsfUtils.getSession().setAttribute(LOOSE_LOCKED_PKS, this.pk);
     }
 
     /**

@@ -56,10 +56,8 @@ Parameters (valid for all binarypreviewprocess scripts):
 if (processed)
   return
 
-println "Entered [BinaryProcessor_Video]"
 boolean isVideoFile = mimeType.startsWith("video/")
 if (!isVideoFile) {
-  println "returning [BinaryProcessor_Video]"
   return
 }
 

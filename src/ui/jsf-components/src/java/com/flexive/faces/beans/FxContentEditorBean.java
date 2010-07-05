@@ -51,6 +51,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.faces.event.ActionEvent;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -100,6 +101,8 @@ public class FxContentEditorBean implements Serializable {
     private String expiresTime;
     private boolean changed;
 
+    private boolean needToCancel = false;
+
     public String getMessagesId() {
         return MESSAGES_ID;
     }
@@ -118,6 +121,9 @@ public class FxContentEditorBean implements Serializable {
 
     public void setEditorId(String editorId) {
         this.editorId = editorId;
+        if (needToCancel) {
+            cancel();
+        }
     }
 
     public String getStorageKey() {
@@ -293,7 +299,7 @@ public class FxContentEditorBean implements Serializable {
             final boolean editMode = wc.getGuiSettings().isEditMode();
             // if in edit mode, only remove permanent locks
             try {
-                if ((editMode && lock.getLockType() == FxLockType.Permanent) || (!editMode && lock.getLockType() == FxLockType.Permanent)) {
+                if (lock.getLockType() == FxLockType.Permanent) {
                     // check user priviledges
                     if (lock.getUserId() == ticket.getUserId() || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
                         ce.unlock(wc.getContent().getPk());
@@ -1104,6 +1110,18 @@ public class FxContentEditorBean implements Serializable {
         this.affectedXPath = null;
     }
 
+    /**
+     * cancle the editing without asking
+     *
+     * @since 3.1.4
+     * @param evt not used, needed to be an action
+     */
+    public void callBack(ActionEvent evt) {
+        if (editorId == null)
+            needToCancel = true;
+        else
+            cancel();
+    }
 
     public void callBack() {
         cancel();

@@ -36,6 +36,26 @@
                 <h:messages id="#{_ceContent.editorId}_#{__ceBean.messagesId}"/>
         </c:if>
 
+        <c:if test="false">
+            <!--a code to cancel the last edit on leaving the page (by navigate away or closing tab / browser)-->
+        <script type="text/javascript">
+
+            window.onbeforeunload = function (e) {
+                try {
+                    cancelEdit("#{_ceContent.editorId}");
+                } catch (e) {
+                    alert (e);
+                }
+            };
+
+        </script>
+
+        <a4j:jsFunction name="cancelEdit" actionListener="#{__ceBean.callBack}">
+            <a4j:actionparam name="editorID"  assignTo="#{__ceBean.editorId}"/>
+        </a4j:jsFunction>
+
+         </c:if>
+
         <c:set var="__ce_reRenderSuffix" value=""/>
 
         <c:if test="false">
