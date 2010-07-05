@@ -66,6 +66,7 @@ public class MapBean implements Serializable {
     private Map<Long, FxProperty> propertiesMap = null;
     private Map<String, FxProperty> propertiesByNameMap = null;
     private Map<Long, FxAssignment> assignmentsMap = null;
+    private Map<String, FxAssignment> assignmentsByXPathMap = null;
     private Map<Long, Account> accountMap = null;
     private Map<Long, String> dateTimeMap = null;
     private Map<Long, FxLanguage> languagesMap = null;
@@ -220,6 +221,23 @@ public class MapBean implements Serializable {
             }, true);
         }
         return assignmentsMap;
+    }
+
+    /**
+     * Return an assignment by its XPath (containing the type).
+     *
+     * @return  a map between assignment XPaths and assignments
+     * @since   3.1.4
+     */
+    public Map<String, FxAssignment> getAssignmentsByXPath() {
+        if (assignmentsByXPathMap == null) {
+            assignmentsByXPathMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, FxAssignment>() {
+                public FxAssignment get(Object key) {
+                    return key != null ? environment.getAssignment((String) key) : null;
+                }
+            });
+        }
+        return assignmentsByXPathMap;
     }
 
     /**
