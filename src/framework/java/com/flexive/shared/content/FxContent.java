@@ -631,15 +631,130 @@ public class FxContent implements Serializable {
     }
 
     /**
-     * Set a properties value, needed groups will be created
+     * Get the maximum index of the last element of an XPath.
+     * The multiplicity of the last element is checked.
+     * Lets say group and property (/group/property) each have a max. multiplicity > 1:
+     * "/group/property" -> returns the maximum multiplicity of property in group[1]
+     * "/group[2]/property" -> returns the maximum multiplicity of property in group[2]
+     * "/group" -> returns the maximum multipliciy of group
      *
-     * @param XPath FQ XPath
-     * @param value value to apply
-     * @return this FxContent instance to allow chained calls
+     * @param XPath xpath to get the maximum multiplicity for
+     * @return maximum multiplicity of the xpath or <code>0</code> if it does not exist (yet)
+     * @since 3.1.4
      */
-    public FxContent setValue(String XPath, FxValue value) {
-        getPropertyDataCreate(XPath).setValue(value);
+    public int getMaxIndex(String XPath) {
+        XPath = XPathElement.stripType(XPath);
+        String xp = XPathElement.toXPathMult(XPath).toUpperCase(); //make sure all multiplicities are set
+        XPathElement last = XPathElement.lastElement(xp);
+        xp = XPathElement.stripLastElement(xp);
+        if (!containsXPath(xp))
+            return 0;
+        int max = 0;
+        for (FxData data : getData(xp)) {
+            if (data.getXPathElement().getAlias().equals(last.getAlias())) {
+                if (max < data.getXPathElement().getIndex())
+                    max = data.getXPathElement().getIndex();
+            }
+        }
+        return max;
+    }
+
+    /**
+     * Convenience method to compact (=remove all empty groups and properties that are not required).
+     * This method is equivalent to calling <code>getRootGroup().compact()</code>.
+     *
+     * @return this
+     * @since 3.1.4
+     */
+    public FxContent compact() {
+        getRootGroup().compact();
         return this;
+    }
+
+    /**
+     * Add a value for a XPath.
+     * This method helps when setting values for properties with a multiplicity > 1 by adding new entries.
+     * If e.g. /property[2] is the current property with the highest multiplicity, a /property[3] entry will be created.
+     *
+     * @param XPath XPath to add a value for
+     * @param value FxValue to add
+     * @return XPath of the added element
+     * @since 3.1.4
+     */
+    public String addValue(String XPath, FxValue value) {
+        XPath = XPathElement.stripType(XPath);
+        if (containsXPath(XPath)) {
+            if (getValue(XPath).isEmpty()) {
+                //set empty value first
+                setValue(XPath, value);
+                return XPathElement.toXPathMult(XPath);
+            }
+        }
+        FxPropertyData pd = getPropertyDataCreate(XPathElement.buildXPath(true,
+                XPathElement.stripLastElement(XPath),
+                XPathElement.lastElement(XPath).getAlias() + "[" + (getMaxIndex(XPath) + 1) + "]"));
+        pd.setValue(value);
+        return pd.getXPathFull();
+    }
+
+    /**
+     * Depending on the underlying FxValue's multilanguage setting set either the default
+     * translation or the single language value.
+     * This method helps when setting values for properties with a multiplicity > 1 by adding new entries.
+     * If e.g. /property[2] is the current property with the highest multiplicity, a /property[3] entry will be created.
+     *
+     * @param XPath XPath to add a value for
+     * @param value the value (has to match the FxValue's data type)
+     * @return XPath of the added element
+     * @since 3.1.4
+     */
+    @SuppressWarnings({"unchecked"})
+    public String addValue(String XPath, Object value) {
+        if (value instanceof FxValue)
+            return this.addValue(XPath, (FxValue) value);
+        XPath = XPathElement.stripType(XPath);
+        String createdXPath;
+        if (!containsValue(XPath)) {
+            createXPath(XPath);
+            createdXPath=XPathElement.toXPathMult(XPath);
+        } else {
+            FxPropertyData pd = getPropertyDataCreate(XPathElement.stripLastElement(XPath) + "/" + XPathElement.lastElement(XPath).getAlias() +
+                "[" + (getMaxIndex(XPath) + 1) + "]");
+            createdXPath = pd.getXPathFull();
+        }
+        FxValue val = getPropertyData(createdXPath).getValue();
+        if (val.isMultiLanguage())
+            val.setDefaultTranslation(value);
+        else
+            val.setValue(value);
+        return createdXPath;
+    }
+
+    /**
+     * Add (or create) another group. The group to create is the last element in the requested XPath. 
+     *
+     * @param XPath XPath with the group alias as last element
+     * @return XPath of the added group
+     * @since 3.1.4
+     */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    public String addGroup(String XPath) {
+        XPath = XPathElement.stripType(XPath);
+        if (!isXPathValid(XPath, false))
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath).asRuntimeException();
+        int index = 1;
+        if (containsXPath(XPath))
+            index = getMaxIndex(XPath) + 1;
+        String xpGroup = XPathElement.toXPathMult(XPath);
+        xpGroup = XPathElement.buildXPath(true, XPathElement.stripLastElement(xpGroup), XPathElement.lastElement(XPath).getAlias() + "[" + index + "]");
+
+        FxGroupAssignment ga = CacheAdmin.getEnvironment().getType(this.getTypeId()).getGroupAssignment(xpGroup);
+        try {
+            getRootGroup().addGroup(xpGroup, ga, FxData.POSITION_BOTTOM);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
+        return xpGroup;
     }
 
     /**
@@ -659,6 +774,18 @@ public class FxContent implements Serializable {
         if (!(prop.get(0) instanceof FxPropertyData))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
         return ((FxPropertyData) prop.get(0));
+    }
+
+    /**
+     * Set a properties value, needed groups will be created
+     *
+     * @param XPath FQ XPath
+     * @param value value to apply
+     * @return this FxContent instance to allow chained calls
+     */
+    public FxContent setValue(String XPath, FxValue value) {
+        getPropertyDataCreate(XPath).setValue(value);
+        return this;
     }
 
     /**
@@ -730,7 +857,7 @@ public class FxContent implements Serializable {
     }
 
     /**
-     * Create (if possible and not already exists) the given XPath
+     * Create (if possible and not already exists) the given XPath which has to point to a property
      *
      * @param XPath the XPath to create
      */

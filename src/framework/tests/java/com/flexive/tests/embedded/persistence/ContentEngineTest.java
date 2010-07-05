@@ -2089,4 +2089,51 @@ public class ContentEngineTest {
 //    public void testDocumentFileMimeConversion() {
 //
 //    }
+
+    /**
+     * Test checking and adding properties and groups multiplicities
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "content"})
+    public void testMultiplictyMethods() throws FxApplicationException {
+        FxContent test = ce.initialize(TEST_TYPE).compact();
+        FxString testValue = new FxString("Hello world");
+
+        //property
+        Assert.assertEquals(test.getMaxIndex("/TestProperty4"), 1); //1 as it is 1..N
+        test.setValue("/TestProperty4", testValue);
+        Assert.assertEquals(test.getMaxIndex("/TestProperty4"), 1);
+        test.setValue("/TestProperty4[2]", testValue);
+        Assert.assertEquals(test.getMaxIndex("/TestProperty4"), 2);
+        test.setValue("/TestProperty4[" + (test.getMaxIndex("/TestProperty4") + 1) + "]", testValue);
+        Assert.assertEquals(test.getMaxIndex("/TestProperty4"), 3);
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestProperty1_3"), 1);
+        test.setValue("/TestGroup1/TestProperty1_3", testValue);
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1"), 1);
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestProperty1_3"), 1);
+        Assert.assertEquals(test.addValue("/TestGroup1/TestProperty1_3", testValue), "/TESTGROUP1[1]/TESTPROPERTY1_3[2]");
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestProperty1_3"), 2);
+        test.addValue("/TestGroup1/TestProperty1_3", testValue);
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestProperty1_3"), 3);
+        test.addValue("/TestGroup1/TestProperty1_3", "Test");
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestProperty1_3"), 4);
+
+        //group
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1"), 1); //1 because it contains required properties/groups
+        Assert.assertEquals(test.addGroup("/TestGroup1"), "/TESTGROUP1[2]");
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1"), 2);
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestGroup1_2"), 1); //1 as the group contains a required property
+        Assert.assertEquals(test.addGroup("/TestGroup1/TestGroup1_2"), "/TESTGROUP1[1]/TESTGROUP1_2[2]");
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestGroup1_2"), 2);
+        Assert.assertEquals(test.addGroup("/TestGroup1/TestGroup1_2"), "/TESTGROUP1[1]/TESTGROUP1_2[3]");
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestGroup1_2"), 3);
+        Assert.assertEquals(test.addGroup("/TestGroup1/TestGroup1_2"), "/TESTGROUP1[1]/TESTGROUP1_2[4]");
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestGroup1_2"), 4);
+        test.remove("/TESTGROUP1[1]/TESTGROUP1_2[2]");
+        //gaps are closed
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestGroup1_2"), 3);
+        Assert.assertEquals(test.addGroup("/TestGroup1/TestGroup1_2"), "/TESTGROUP1[1]/TESTGROUP1_2[4]");
+        Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestGroup1_2"), 4);
+    }
 }
