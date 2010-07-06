@@ -33,11 +33,9 @@ package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsf2Const;
 import com.flexive.faces.FxJsf2Utils;
-import com.flexive.shared.value.FxValue;
 import javax.faces.application.ResourceDependencies;
 import javax.faces.application.ResourceDependency;
 import javax.faces.component.html.HtmlGraphicImage;
-import javax.faces.context.FacesContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,13 +52,6 @@ import org.apache.commons.logging.LogFactory;
 })
 public class Jsf2FxValueInput extends AbstractFxValueInput {
     private static final Log LOG = LogFactory.getLog(Jsf2FxValueInput.class);
-
-    @Override
-    public RenderHelper getRenderHelper(FacesContext context, FxValue value, boolean editMode) {
-        return editMode
-                ? new Jsf2EditModeHelper(this, getClientId(context), value)
-                : new Jsf2ReadOnlyModeHelper(this, getClientId(context), value);
-    }
 
     @Override
     protected void setPackagedImageUrl(HtmlGraphicImage imageComponent, String imagePath) {

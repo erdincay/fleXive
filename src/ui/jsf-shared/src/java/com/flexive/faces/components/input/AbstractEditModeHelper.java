@@ -143,6 +143,34 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
      */
     protected abstract void renderUploadComponent(UIComponent parent, String inputId);
 
+    protected ContainerWriter newContainerWriter() {
+        return new ContainerWriter();
+    }
+
+    protected DefaultLanguageRadioWriter newDefaultLanguageRadioWriter() {
+        return new DefaultLanguageRadioWriter();
+    }
+
+    protected LanguageContainerWriter newLanguageContainerWriter() {
+        return new LanguageContainerWriter();
+    }
+
+    protected LanguageSelectWriter newLanguageSelectWriter() {
+        return new LanguageSelectWriter();
+    }
+
+    protected TextAreaWriter newTextAreaWriter() {
+        return new TextAreaWriter();
+    }
+
+    protected YuiDateInputWriter newYuiDateInputWriter() {
+        return new YuiDateInputWriter();
+    }
+
+    protected YuiAutocompleteWriter newYuiAutocompleteWriter() {
+        return new YuiAutocompleteWriter();
+    }
+
 
     /**
      * {@inheritDoc}
@@ -152,7 +180,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         //ensureDefaultLanguageExists(value, languages);
         final String radioName = clientId + AbstractFxValueInputRenderer.DEFAULT_LANGUAGE;
 
-        final ContainerWriter container = new ContainerWriter();
+        final ContainerWriter container = newContainerWriter();
         container.setId(stripForm(clientId) + "_container");
         container.setInputClientId(clientId);
         component.getChildren().add(container);
@@ -166,7 +194,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             final String inputId = clientId + AbstractFxValueInputRenderer.INPUT + language.getId();
             rowInfos.put(language.getId(), new LanguageSelectWriter.InputRowInfo(containerId, inputId));
 
-            final LanguageContainerWriter languageContainer = new LanguageContainerWriter();
+            final LanguageContainerWriter languageContainer = newLanguageContainerWriter();
             languageContainer.setId(stripForm(inputId) + "_langContainer");
             languageContainer.setContainerId(containerId);
             languageContainer.setLanguageId(language.getId());
@@ -178,7 +206,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             first = false;
         }
 
-        final LanguageSelectWriter languageSelect = new LanguageSelectWriter();
+        final LanguageSelectWriter languageSelect = newLanguageSelectWriter();
         languageSelect.setId(stripForm(clientId) + "_langSelect");
         languageSelect.setInputClientId(clientId);
         languageSelect.setRowInfos(rowInfos);
@@ -196,8 +224,8 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
      * @param radioName name of the radio input control
      * @param language  the language for which this input should be rendered @throws IOException if a io error occured
      */
-    private void encodeDefaultLanguageRadio(LanguageContainerWriter parent, String clientId, final String radioName, final FxLanguage language) {
-        final DefaultLanguageRadioWriter radio = new DefaultLanguageRadioWriter();
+    protected void encodeDefaultLanguageRadio(LanguageContainerWriter parent, String clientId, final String radioName, final FxLanguage language) {
+        final DefaultLanguageRadioWriter radio = newDefaultLanguageRadioWriter();
         radio.setId(stripForm(clientId) + "_defaultLanguageRadio_" + language.getId());
         radio.setRadioName(radioName);
         radio.setLanguageId(language.getId());
@@ -220,7 +248,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
      */
     public void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
         if (language == null) {
-            final ContainerWriter container = new ContainerWriter();
+            final ContainerWriter container = newContainerWriter();
             container.setId(stripForm(clientId) + "_" + "container");
             container.setInputClientId(clientId);
             parent.getChildren().add(container);
@@ -260,7 +288,13 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         }
     }
 
-    protected static void renderTextInput(AbstractFxValueInput inputComponent, UIComponent parent, FxValue value, final String inputId, long languageId) throws IOException {
+    protected void renderTextInput(AbstractFxValueInput inputComponent, UIComponent parent, FxValue value, final String inputId, long languageId) throws IOException {
+        renderBasicTextInput(inputComponent, parent, newYuiAutocompleteWriter(), value, inputId, languageId);
+    }
+    
+    protected static void renderBasicTextInput(AbstractFxValueInput inputComponent, UIComponent parent,
+            YuiAutocompleteWriter autocompleteWriter, FxValue value, final String inputId, long languageId) throws IOException {
+
         final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlInputText.COMPONENT_TYPE);
         addHtmlAttributes(inputComponent, input);
         if (value.getMaxInputLength() > 0) {
@@ -271,16 +305,15 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
 
         // add autocomplete YUI component
         if (StringUtils.isNotBlank(inputComponent.getAutocompleteHandler())) {
-            final YuiAutocompleteWriter yuiWriter = new YuiAutocompleteWriter();
-            yuiWriter.setId(stripForm(inputId) + "_autocomplete");
-            yuiWriter.setInputClientId(inputId);
-            yuiWriter.setAutocompleteHandler(inputComponent.getAutocompleteHandler());
-            parent.getChildren().add(parent.getChildren().size() - 1, yuiWriter);
+            autocompleteWriter.setId(stripForm(inputId) + "_autocomplete");
+            autocompleteWriter.setInputClientId(inputId);
+            autocompleteWriter.setAutocompleteHandler(inputComponent.getAutocompleteHandler());
+            parent.getChildren().add(parent.getChildren().size() - 1, autocompleteWriter);
         }
     }
 
     protected void renderTextArea(UIComponent parent, final String inputId, final FxLanguage language, final int rows, final boolean useHTMLEditor) throws IOException {
-        final TextAreaWriter textArea = new TextAreaWriter();
+        final TextAreaWriter textArea = newTextAreaWriter();
         textArea.setInputClientId(inputId);
         textArea.setLanguageId(language != null ? language.getId() : -1);
         textArea.setRows(rows);
@@ -409,7 +442,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         component.setPackagedImageUrl(img, "/images/calendar.gif");
         img.setStyleClass("button");
 
-        final YuiDateInputWriter diw = new YuiDateInputWriter();
+        final YuiDateInputWriter diw = newYuiDateInputWriter();
         diw.setId(stripForm(inputId) + "_yuidate");
         diw.setInputClientId(inputId);
         diw.setButtonId(img.getClientId(FacesContext.getCurrentInstance()));
@@ -900,7 +933,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             final ResponseWriter writer = facesContext.getResponseWriter();
             final FxValue value = getInputValue();
             if (getInputComponent().isForceLineInput()) {
-                renderTextInput(getInputComponent(), this, value, inputClientId, languageId);
+                renderBasicTextInput(getInputComponent(), this, newYuiAutocompleteWriter(), value, inputClientId, languageId);
                 return;
             }
             // make textareas resizable? - IE <= 7.0 not supported, because it cannot scale textareas to 100% height
@@ -957,6 +990,10 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             final Object[] state = (Object[]) stateValue;
             super.restoreState(context, state[0]);
             languageId = (Long) state[1];
+        }
+
+        protected YuiAutocompleteWriter newYuiAutocompleteWriter() {
+            return new YuiAutocompleteWriter();
         }
     }
 

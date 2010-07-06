@@ -75,6 +75,7 @@ public abstract class AbstractFxValueInput extends UIInput {
      * The JSF component type for a FxValue component.
      */
     public static final String COMPONENT_TYPE = "flexive.FxValueInput";
+    public static final String COMPONENT_FAMILY = UIInput.COMPONENT_FAMILY;
     
     private static final String REQ_ID_COUNTER = "REQ_FXVALUEINPUT_ID";
     /** Request context key for caching the list of allowed reference values */
@@ -100,20 +101,10 @@ public abstract class AbstractFxValueInput extends UIInput {
      * Default constructor
      */
     protected AbstractFxValueInput() {
-        setRendererType("flexive.FxValueInput");
+        setRendererType(COMPONENT_TYPE);
         applyComponentId();
         addValidator(new FxValueInputValidator());
     }
-
-    /**
-     * Return the {@link RenderHelper} for rendering this component.
-     *
-     * @param context   the Faces context
-     * @param value     the value to be rendered
-     * @param editMode  if the component should be rendered in edit mode
-     * @return          a RenderHelper instance
-     */
-    public abstract RenderHelper getRenderHelper(FacesContext context, FxValue value, boolean editMode);
 
     /**
      * Use a packaged image for the given image component.
@@ -138,7 +129,7 @@ public abstract class AbstractFxValueInput extends UIInput {
 
     @Override
     public void validate(FacesContext context) {
-        AbstractFxValueInputRenderer.buildComponent(context, this);
+        ((AbstractFxValueInputRenderer) getRenderer(context)).buildComponent(context, this);
         super.validate(context);
     }
 

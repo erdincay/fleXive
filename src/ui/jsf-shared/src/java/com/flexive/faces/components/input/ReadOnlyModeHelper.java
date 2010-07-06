@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.components.input.RenderHelperUtils.ContainerWriter;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -155,10 +156,15 @@ public class ReadOnlyModeHelper implements RenderHelper {
         }
     }
 
+    protected ContainerWriter newContainerWriter() {
+        return new RenderHelperUtils.ContainerWriter();
+    }
+
+
     protected void addOutputComponent(String value, FxLanguage language, String inputId) {
         UIComponent parent = component;
         if (component.isReadOnlyShowTranslations() && component.getUIValue().isMultiLanguage()) {
-            final RenderHelperUtils.ContainerWriter container = new RenderHelperUtils.ContainerWriter();
+            final RenderHelperUtils.ContainerWriter container = newContainerWriter();
             container.setId(RenderHelperUtils.stripForm(inputId) + "_container");
             container.setDisplayLanguage(true);
             container.setLanguage(language);

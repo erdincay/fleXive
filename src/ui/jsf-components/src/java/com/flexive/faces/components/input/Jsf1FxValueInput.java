@@ -49,17 +49,6 @@ public class Jsf1FxValueInput extends AbstractFxValueInput {
      * {@inheritDoc}
      */
     @Override
-    public RenderHelper getRenderHelper(FacesContext context, FxValue value, boolean editMode) {
-        return editMode
-                ? new Jsf1EditModeHelper(this, getClientId(context), value)
-                : new Jsf1ReadOnlyModeHelper(this, getClientId(context), value);
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected void setPackagedImageUrl(HtmlGraphicImage imageComponent, String imagePath) {
         imageComponent.setUrl(FxJsfUtils.stripContextPath(
                 FxJsf1Utils.getWebletUrl("com.flexive.faces.weblets", imagePath)));

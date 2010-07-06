@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxValue;
 import javax.faces.context.FacesContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,9 +43,17 @@ import org.apache.commons.logging.LogFactory;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class Jsf2FxValueInputRenderer extends AbstractFxValueInputRenderer {
+public class Jsf2FxValueInputRenderer extends AbstractFxValueInputRenderer<Jsf2FxValueInput> {
     private static final Log LOG = LogFactory.getLog(Jsf2FxValueInputRenderer.class);
-    
+
+    @Override
+    public RenderHelper getRenderHelper(FacesContext context, Jsf2FxValueInput component, FxValue value, boolean editMode) {
+        return editMode
+                ? new Jsf2EditModeHelper(component, component.getClientId(context), value)
+                : new Jsf2ReadOnlyModeHelper(component, component.getClientId(context), value);
+    }
+
+
     @Override
     protected void processBinary(FacesContext context, AbstractFxValueInput input, String inputId, FxBinary value, long languageId) {
         if (LOG.isWarnEnabled()) {

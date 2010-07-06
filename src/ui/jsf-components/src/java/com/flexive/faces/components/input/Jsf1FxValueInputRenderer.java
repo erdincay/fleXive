@@ -34,6 +34,7 @@ package com.flexive.faces.components.input;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxValue;
 import javax.faces.context.FacesContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -47,8 +48,18 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class Jsf1FxValueInputRenderer extends AbstractFxValueInputRenderer {
+public class Jsf1FxValueInputRenderer extends AbstractFxValueInputRenderer<Jsf1FxValueInput> {
     private static final Log LOG = LogFactory.getLog(Jsf1FxValueInputRenderer.class);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RenderHelper getRenderHelper(FacesContext context, Jsf1FxValueInput component, FxValue value, boolean editMode) {
+        return editMode
+                ? new Jsf1EditModeHelper(component, component.getClientId(context), value)
+                : new Jsf1ReadOnlyModeHelper(component, component.getClientId(context), value);
+    }
 
     /**
      * {@inheritDoc}

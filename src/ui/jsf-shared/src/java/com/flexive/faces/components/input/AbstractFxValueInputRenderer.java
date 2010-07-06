@@ -61,8 +61,9 @@ import java.util.Map;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @param <T>   concrete (base) type supported for rendering
  */
-public abstract class AbstractFxValueInputRenderer extends Renderer {
+public abstract class AbstractFxValueInputRenderer<T extends AbstractFxValueInput> extends Renderer {
     private static final Log LOG = LogFactory.getLog(AbstractFxValueInputRenderer.class);
 
     protected static final String LANG_CONTAINER = "_language_";
@@ -92,14 +93,23 @@ public abstract class AbstractFxValueInputRenderer extends Renderer {
      */
     @Override
     public void encodeBegin(FacesContext context, UIComponent input) throws IOException {
-        AbstractFxValueInput component = (AbstractFxValueInput) input;
-
 //        if (component.calcConfigurationMask() != component.getConfigurationMask()) {
-        buildComponent(context, component);
+        buildComponent(context, (T) input);
 //        }
     }
 
-    public static void buildComponent(FacesContext context, AbstractFxValueInput component) {
+    /**
+     * Return the {@link RenderHelper} for rendering this component.
+     *
+     * @param context   the Faces context
+     * @param component the component to be rendered
+     * @param value     the value to be rendered
+     * @param editMode  if the component should be rendered in edit mode
+     * @return          a RenderHelper instance
+     */
+    public abstract RenderHelper getRenderHelper(FacesContext context, T component, FxValue value, boolean editMode);
+
+    public void buildComponent(FacesContext context, T component) {
 
         final String clientId = component.getClientId(context);
         //noinspection unchecked
@@ -107,7 +117,7 @@ public abstract class AbstractFxValueInputRenderer extends Renderer {
                 ? getFxValue(context, component)
                 : component.getInputMapper().encode(getFxValue(context, component));
 
-        RenderHelper helper = component.getRenderHelper(context, value, !(component.isReadOnly() || value.isReadOnly()));
+        RenderHelper helper = getRenderHelper(context, component, value, !(component.isReadOnly() || value.isReadOnly()));
 
         /*if (!component.getChildren().isEmpty()) {
             LOG.warn(DBG + "Component " + clientId + " already has " + component.getChildren().size()
@@ -133,7 +143,7 @@ public abstract class AbstractFxValueInputRenderer extends Renderer {
      */
     @Override
     public void decode(FacesContext context, UIComponent component) {
-        AbstractFxValueInput input = (AbstractFxValueInput) component;
+        T input = (T) component;
         buildComponent(context, input);
         if (!(input.getValue() instanceof FxVoid) && !input.isReadOnly()
                 && !(input.getValue() != null && ((FxValue) input.getValue()).isReadOnly())) {
