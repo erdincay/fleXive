@@ -1095,10 +1095,23 @@ public class FxContent implements Serializable {
      * @throws FxNotFoundException         XPath does not exist for this content
      */
     public void move(String XPath, int delta) throws FxInvalidParameterException, FxNotFoundException {
-        if (delta == 0 || StringUtils.isEmpty(XPath) || "/".equals(XPath))
+        if (delta == 0 || StringUtils.isEmpty(XPath))
             return; //nothing to do
-        List<FxData> mdata = getData(XPath);
-        FxGroupData parent = mdata.get(0).getParent();
+        XPath = XPathElement.stripType(XPath);
+        if ("/".equals(XPath))
+            return; //nothing to do
+
+        FxGroupData parent;
+        if (isXPathValid(XPath, false)) {
+            //group
+            parent = getGroupData(XPath);
+            if (!parent.isRootGroup())
+                parent = parent.getParent();
+        } else {
+            //property
+            List<FxData> mdata = getData(XPath);
+            parent = mdata.get(0).getParent();
+        }
         XPathElement last = XPathElement.lastElement(XPath);
         parent.moveChild(last, delta);
     }
