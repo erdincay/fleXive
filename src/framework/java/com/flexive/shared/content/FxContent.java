@@ -927,6 +927,27 @@ public class FxContent implements Serializable {
     }
 
     /**
+     * Get the value of a given class (eg FxString) and (property) XPath.
+     * This is actually a convenience method that internally calls <code>getPropertyData(XPath).getValue()</code> and
+     * casts the value to the requested class.
+     * If the XPath is valid but no value is set or the value is not of the requested class,
+     * <code>null</code> will be returned
+     *
+     * @param clazz return only instances of this class (eg FxString.class)
+     * @param XPath requested XPath
+     * @return FxValue or <code>null</code> if no value is set or not of the requested class
+     * @see #getValue(String)
+     * @since 3.1.4
+     */
+    public <T extends FxValue> T getValue(Class<T> clazz, String XPath) {
+        FxValue value = getValue(XPath);
+        if (value != null && clazz.isInstance(value))
+            return clazz.cast(value);
+        else
+            return null;
+    }
+
+    /**
      * Get all values of a given XPath, ordered by multiplicty.
      * If the assignment has a max. multiplicity of 1 return a list with a single entry
      *
@@ -955,6 +976,36 @@ public class FxContent implements Serializable {
         for (String xp : p)
             values.add(getValue(xp));
         return values;
+    }
+
+    /**
+     * Get all values of a given class (eg FxString) and XPath, ordered by multiplicty.
+     * If the assignment has a max. multiplicity of 1 return a list with a single entry
+     *
+     * @param clazz collect only instances of this class (eg FxString.class)
+     * @param XPath requested XPath
+     * @return all values of a given XPath, ordered by multiplicty
+     * @since 3.1.4
+     */
+    public <T extends FxValue> List<T> getValues(Class<T> clazz, String XPath) {
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
+        FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
+        List<String> paths = new ArrayList<String>(10);
+        for (FxData data : group.getChildren()) {
+            if (data.isGroup())
+                continue;
+            if (data.getAssignmentId() == assignmentId) {
+                if( clazz.isInstance(((FxPropertyData) data).getValue()))
+                    paths.add(data.getXPathFull());
+            }
+        }
+        String[] p = paths.toArray(new String[paths.size()]);
+        Arrays.sort(p);
+        List<T> result = new ArrayList<T>(p.length);
+        for (String xp : p)
+            result.add(clazz.cast(getValue(xp)));
+        return result;
     }
 
     /**

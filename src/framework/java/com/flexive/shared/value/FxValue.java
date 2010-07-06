@@ -217,7 +217,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * Constructor
      *
      * @param multiLanguage   multilanguage value?
-     * @param defaultLanguage the default language
+     * @param defaultLanguage the default language and the language for the value
      * @param value           single initializing value
      */
     protected FxValue(boolean multiLanguage, long defaultLanguage, T value) {
