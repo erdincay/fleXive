@@ -71,9 +71,18 @@ public class FxMimeType implements Serializable {
             ExtensionMimeDetector.class.getCanonicalName()
     ));
 
+    private static Log LOG = LogFactory.getLog(FxMimeType.class);
+
     static {
         for (String detector : MIME_DETECTORS) {
-            MimeUtil.registerMimeDetector(detector);
+            try {
+                MimeUtil.registerMimeDetector(detector);
+            } catch (Exception e) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Failed to initialize MIME detector " + detector + " (ignored): "
+                            + e.getMessage(), e);
+                }
+            }
         }
 
         // populate EXT_REPLACEMENTS
@@ -100,7 +109,6 @@ public class FxMimeType implements Serializable {
     private String type;
     private String subType;
     private static final long serialVersionUID = -5416305800516366421L;
-    private static Log LOG = LogFactory.getLog(FxMimeType.class);
 
     /**
      * Default constructor, sets a default of "application/octet-stream"

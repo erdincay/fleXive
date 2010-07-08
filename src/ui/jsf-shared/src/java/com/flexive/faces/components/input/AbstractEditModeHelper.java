@@ -341,12 +341,10 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         listbox.setSize(1);
         listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + AbstractFxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
         // update posted value
-        if (selectValue.getTranslation(language) != null) {
+        if (!selectValue.isEmpty() && selectValue.getTranslation(language) != null) {
             listbox.setValue(selectValue.getTranslation(language).getId());
         }
         storeSelectItems(listbox, selectValue.getSelectList(), needEmptyElementsInSelectList);
-
-        //TODO : HERE
     }
 
     protected void renderSelectMany(UIComponent parent, String inputId, FxLanguage language) {

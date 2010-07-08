@@ -69,6 +69,11 @@ public class ContainerBootstrap {
             FxContext.initializeSystem(DivisionData.DIVISION_TEST, "flexiveTests");
             TestUsers.initializeUsers();
         } catch (Exception ex) {
+            if (ex.getMessage().indexOf("Parameter /globalconfig/datasources{GLOBAL}/-2 not found.") >= 0) {
+                System.err.println("*******************************************************************");
+                System.err.println("** you should run \"ant db.update.config\" to resolve this problem **");
+                System.err.println("*******************************************************************");
+            }
             throw new RuntimeException(ex);
         }
     }
