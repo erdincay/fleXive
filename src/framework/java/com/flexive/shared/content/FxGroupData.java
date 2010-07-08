@@ -615,6 +615,46 @@ public class FxGroupData extends FxData {
     }
 
     /**
+     * Get the FxGroupData entry for the given group assignment.
+     *
+     * @param assignmentId  the group assignment ID
+     * @return FxGroupData  entry for the given assignment
+     * @throws FxRuntimeException   if the assignment was not found
+     * @since 3.1.4
+     */
+    public FxGroupData getGroup(long assignmentId) {
+        if (getAssignmentId() == assignmentId) {
+            return this;
+        }
+        final FxGroupData result = findGroup(assignmentId);
+        if (result != null) {
+            return result;
+        } else {
+            throw new FxNotFoundException(
+                    "ex.content.assignment.notFound",
+                    CacheAdmin.getEnvironment().getAssignment(assignmentId).getXPath()
+            ).asRuntimeException();
+        }
+    }
+
+    private FxGroupData findGroup(long assignmentId) {
+        for (FxData child : data) {
+            if (child.isGroup()) {
+                if (child.getAssignmentId() == assignmentId) {
+                    return (FxGroupData) child;
+                } else {
+                    // recurse
+                    final FxGroupData result = ((FxGroupData) child).findGroup(assignmentId);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Return true if the content has at least one group.
      *
      * @return true if the content has at least one group.

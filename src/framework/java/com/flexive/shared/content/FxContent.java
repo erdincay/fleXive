@@ -601,7 +601,7 @@ public class FxContent implements Serializable {
         List<FxData> currChildren = data.getChildren();
         FxGroupData group = null;
         boolean found;
-        for (XPathElement xpe : XPathElement.split(XPath.toUpperCase())) {
+        for (XPathElement xpe : XPathElement.split(XPath)) {
             found = false;
             for (FxData curr : currChildren) {
                 if (curr.getXPathElement().equals(xpe)) {
@@ -620,6 +620,18 @@ public class FxContent implements Serializable {
         }
         return group;
     }
+
+    /**
+     * Get the FxGroupData entry for the given group assignment.
+     *
+     * @param assignmentId  the group assignment ID
+     * @return FxGroupData  entry for the given assignment
+     * @since 3.1.4
+     */
+    public FxGroupData getGroupData(long assignmentId) {
+        return data.getGroup(assignmentId);
+    }
+
 
     /**
      * Get the (virtual) root group of this content

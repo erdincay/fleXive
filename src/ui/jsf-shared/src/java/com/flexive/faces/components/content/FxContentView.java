@@ -45,6 +45,8 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxReference;
@@ -512,14 +514,17 @@ public class FxContentView extends UIOutput {
         private List<?> getList(String path, boolean includeEmpty) {
             path = StringUtils.replace(StringUtils.replace(path, "$listAll", ""), "$list", "");
             try {
-                final FxAssignment assignment = CacheAdmin.getEnvironment().getType(content.getTypeId()).getAssignment(path);
+                final FxEnvironment env = CacheAdmin.getEnvironment();
+                // use faster direct assignment lookup in the environment
+                final String typeName = env.getType(content.getTypeId()).getName();
+                final FxAssignment assignment = env.getAssignment(typeName + path);
                 if (assignment instanceof FxPropertyAssignment) {
                     // iterate over property values
                     return content.getPropertyData(path).getValues(false);
                 } else {
                     // create a content map for each child
                     List<ContentMap> rowMaps = new ArrayList<ContentMap>();
-                    for (FxData row : content.getGroupData(path).getElements()) {
+                    for (FxData row : content.getGroupData(assignment.getId()).getElements()) {
                         if (includeEmpty || !row.isEmpty()) {
                             rowMaps.add(new ContentMap(content, path + "[" + row.getIndex() + "]"));
                         }

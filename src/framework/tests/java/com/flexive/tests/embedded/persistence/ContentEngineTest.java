@@ -343,6 +343,13 @@ public class ContentEngineTest {
     }
 
     @Test(groups = {"ejb", "content"})
+    public void getGroupData() throws FxApplicationException {
+        FxContent test = ce.initialize(TEST_TYPE);
+        final FxGroupData group = test.getGroupData("/TestGroup1");
+        assertEquals(test.getGroupData(group.getAssignment().getId()), group);
+    }
+
+    @Test(groups = {"ejb", "content"})
     public void removeAddData() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assertTrue(testType != null);

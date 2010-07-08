@@ -218,7 +218,7 @@ public class XPathElement implements Serializable {
     public static String toXPath(List<XPathElement> xpe) {
         if (xpe == null || xpe.size() == 0)
             return "/";
-        StringBuffer XPath = new StringBuffer(100);
+        StringBuilder XPath = new StringBuilder(100);
         for (XPathElement xp : xpe) {
             XPath.append('/').append(xp.getAlias()).append('[').append(xp.getIndex()).append(']');
         }
@@ -234,7 +234,7 @@ public class XPathElement implements Serializable {
     public static String toXPathNoMult(List<XPathElement> xpe) {
         if (xpe == null || xpe.size() == 0)
             return "/";
-        StringBuffer XPath = new StringBuffer(100);
+        StringBuilder XPath = new StringBuilder(100);
         for (XPathElement xp : xpe) {
             XPath.append('/').append(xp.getAlias());
         }
@@ -262,7 +262,7 @@ public class XPathElement implements Serializable {
         if (!isValidXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
-        StringBuffer xpc = new StringBuffer(XPath.length() + 10);
+        StringBuilder xpc = new StringBuilder(XPath.length() + 10);
         for (String xpcurr : xp) {
             xpc.append('/');
             if (xpcurr.indexOf('[') > 0)
@@ -304,7 +304,7 @@ public class XPathElement implements Serializable {
             XPath = XPath.substring(firstSep);
         }
         final String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
-        final StringBuffer xpc = new StringBuffer(XPath.length() + 10);
+        final StringBuilder xpc = new StringBuilder(XPath.length() + 10);
         for (String xpcurr : xp) {
             xpc.append('/');
             final int multSep = xpcurr.indexOf('[');
@@ -342,7 +342,7 @@ public class XPathElement implements Serializable {
      * @return XPath
      */
     public static String buildXPath(boolean leadingSlash, String... elements) {
-        StringBuffer XPath = new StringBuffer(100);
+        StringBuilder XPath = new StringBuilder(100);
         for (String element : elements) {
             if (element == null)
                 continue;
