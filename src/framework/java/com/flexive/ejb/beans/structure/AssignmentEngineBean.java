@@ -2668,6 +2668,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ResultSet rs = ps.executeQuery();
             rs.next();
             mult = rs.getLong(1);
+            if (rs.wasNull()) {
+                //no data returned -> check flat storage
+                //if data exists multiplicity is 1, else 0 independent if min or max is requested since max=1
+                return FxFlatStorageManager.getInstance().getPropertyInstanceCount(con, propertyId) > 0 ? 1 : 0;
+            }
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
