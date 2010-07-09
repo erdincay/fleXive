@@ -37,6 +37,8 @@ import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -260,12 +262,35 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
     public void setSelectList(FxSelectList list) {
         if (isMultiLanguage()) {
             this.list = translations.isEmpty() ? list : null;
+            List<FxSelectListItem> removed = null;
             for (FxSelectListItem item : translations.values()) {
+                if( !list.containsItem(item.getId())) {
+                    if( removed == null )
+                        removed = new ArrayList<FxSelectListItem>(5);
+                    removed.add(item);
+                }
                 item.setList(list);
             }
+            if( removed != null ) {
+                List<Long> rmLang = new ArrayList<Long>(5);
+                for(FxSelectListItem rm: removed) {
+                    for(Map.Entry<Long, FxSelectListItem> trans: translations.entrySet()) {
+                        if( trans.getValue().getId() == rm.getId()) {
+                            rmLang.add(trans.getKey());
+                        }
+                    }
+                }
+                for(Long lang: rmLang) {
+                    translations.remove(lang);
+                    setEmpty(lang);
+                }
+            }
         } else if (singleValue != null) {
-            this.list = null;
-            singleValue.setList(list);
+            this.list = list;
+            if( !list.containsItem(singleValue.getId()))
+                setEmpty();
+            else
+                singleValue.setList(list);
         } else {
             this.list = list; 
         }
