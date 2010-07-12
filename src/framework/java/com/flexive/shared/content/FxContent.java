@@ -752,7 +752,7 @@ public class FxContent implements Serializable {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public String addGroup(String XPath) {
         XPath = XPathElement.stripType(XPath);
-        if (!isXPathValid(XPath, false))
+        if (!isGroupXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath).asRuntimeException();
         int index = 1;
         if (containsXPath(XPath))
@@ -932,7 +932,7 @@ public class FxContent implements Serializable {
         try {
             return getPropertyData(XPath).getValue();
         } catch (FxRuntimeException e) {
-            if (isXPathValid(XPath, true))
+            if (isPropertyXPath(XPath))
                 return null; //just not set, see FX-473
             throw e;
         }
@@ -1063,9 +1063,36 @@ public class FxContent implements Serializable {
      * @param checkProperty should the XPath point to a property?
      * @return if the XPath is valid or not
      * @see FxType#isXPathValid(String,boolean)
+     * @deprecated use #isGroupXPath(String or #isPropertyXPath(String) instead
      */
     public boolean isXPathValid(String XPath, boolean checkProperty) {
         return CacheAdmin.getEnvironment().getType(this.getTypeId()).isXPathValid(XPath, checkProperty);
+    }
+
+    /**
+     * Check if the given XPath is a valid group XPath for this content.
+     * This is a shortcut to the corresponding type's method!
+     *
+     * @param XPath         the XPath to check
+     * @return if the XPath is valid or not
+     * @see FxType#isXPathValid(String,boolean)
+     * @since 3.1.4
+     */
+    public boolean isGroupXPath(String XPath) {
+        return CacheAdmin.getEnvironment().getType(this.getTypeId()).isXPathValid(XPath, false);
+    }
+
+    /**
+     * Check if the given XPath is a valid property XPath for this content.
+     * This is a shortcut to the corresponding type's method!
+     *
+     * @param XPath         the XPath to check
+     * @return if the XPath is valid or not
+     * @see FxType#isXPathValid(String,boolean)
+     * @since 3.1.4
+     */
+    public boolean isPropertyXPath(String XPath) {
+        return CacheAdmin.getEnvironment().getType(this.getTypeId()).isXPathValid(XPath, true);
     }
 
     /**
@@ -1114,7 +1141,7 @@ public class FxContent implements Serializable {
             return; //nothing to do
 
         FxGroupData parent;
-        if (isXPathValid(XPath, false)) {
+        if (isGroupXPath(XPath)) {
             //group
             parent = getGroupData(XPath);
             if (!parent.isRootGroup())

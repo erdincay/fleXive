@@ -632,7 +632,7 @@ public class FxContentView extends UIOutput {
 
         private boolean getXPathValid(String path) {
             path = StringUtils.replace(path, "$valid", "");
-            return content.isXPathValid(path, true);
+            return content.isPropertyXPath(path);
         }
 
         public Map<String, Integer> getNewIndices() {
