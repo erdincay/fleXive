@@ -1237,8 +1237,8 @@ public class FxContent implements Serializable {
         //  xpath, assignment
         Map<String, FxAssignment> currAssignment = new HashMap<String, FxAssignment>();
 
-        // xpath, true if empty false if not
-//        Map<String, Boolean> emptyGroups = new HashMap<String, Boolean>();
+        Set<String> processedXpaths = new HashSet<String>();
+
 
         // First create a list containing all groups in the root
 
@@ -1283,9 +1283,9 @@ public class FxContent implements Serializable {
 
         while (allData.size() > 0) {
             FxGroupData currData = allData.remove(0);
-            if (!currentXPath.equals(currData.getXPath())) {
-                allAssignments.remove(currentXPath);
-            }
+//            if (!currentXPath.equals(currData.getXPath())) {
+//                allAssignments.remove(currentXPath);
+//            }
             currentXPath = currData.getXPath();
             // we just need keep track of the current group
             curMults.clear();
@@ -1344,8 +1344,12 @@ public class FxContent implements Serializable {
 //                    allAssignments.remove(key);
 //                }
 //            }
+            // mark the xpath to be removed
+            processedXpaths.add(currentXPath);
         }
-        allAssignments.remove(currentXPath);
+        // remove all processed xpaths from the "needed" assignments
+        for (String tmpXpath : processedXpaths)
+            allAssignments.remove(tmpXpath);
 
         // after we checked all groups, and removed the not needed corrects the only entries are invalid so if there are any, throw an exception.
         if (allAssignments.size() == 0) return;
