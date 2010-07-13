@@ -1232,13 +1232,13 @@ public class FxContent implements Serializable {
         //  xpath, multiplicity        
         Map<String, Integer> curMults = new HashMap<String, Integer>();
         //  Group-xpath, xpath, assignment
-        Map<String, Map<String, FxAssignment>> allAssignemnts = new HashMap<String, Map<String, FxAssignment>>();
+        Map<String, Map<String, FxAssignment>> allAssignments = new HashMap<String, Map<String, FxAssignment>>();
 
         //  xpath, assignment
         Map<String, FxAssignment> currAssignment = new HashMap<String, FxAssignment>();
 
         // xpath, true if empty false if not
-        Map<String, Boolean> emptyGroups = new HashMap<String, Boolean>();
+//        Map<String, Boolean> emptyGroups = new HashMap<String, Boolean>();
 
         // First create a list containing all groups in the root
 
@@ -1246,7 +1246,7 @@ public class FxContent implements Serializable {
         allTypeGroup.addAll(currentType.getAssignedGroups());
 
         // and add all properties of the root to the list
-        allAssignemnts.put("/", currAssignment);
+        allAssignments.put("/", currAssignment);
         for (FxPropertyAssignment prop : currentType.getAssignedProperties()){
             if (!prop.isSystemInternal()) {
                 String xPath = prop.getXPath().substring(len);
@@ -1264,7 +1264,7 @@ public class FxContent implements Serializable {
             FxGroupAssignment currData = allTypeGroup.remove(0);
             String xPath = currData.getXPath().substring(len);
             currAssignment = new HashMap<String, FxAssignment>();
-            allAssignemnts.put(xPath, currAssignment);
+            allAssignments.put(xPath, currAssignment);
             for (FxPropertyAssignment ass : currData.getAssignedProperties()) {
                 xPath = ass.getXPath().substring(len);
                 currAssignment.put(xPath, ass);
@@ -1284,7 +1284,7 @@ public class FxContent implements Serializable {
         while (allData.size() > 0) {
             FxGroupData currData = allData.remove(0);
             if (!currentXPath.equals(currData.getXPath())) {
-                allAssignemnts.remove(currentXPath);
+                allAssignments.remove(currentXPath);
             }
             currentXPath = currData.getXPath();
             // we just need keep track of the current group
@@ -1304,25 +1304,25 @@ public class FxContent implements Serializable {
                         if (curr.getAssignmentMultiplicity().isOptional()) {
                             curMults.put(xPath, tmp);
                         }
-                        Boolean empty = emptyGroups.get(xPath);
-                        if (empty == null) {
-                            emptyGroups.put(xPath, true);
-                        }
-                    } else {
-                        curMults.put(xPath, tmp);
+//                        Boolean empty = emptyGroups.get(xPath);
+//                        if (empty == null) {
+//                            emptyGroups.put(xPath, true);
+//                        }
+//                    } else {
+//                        curMults.put(xPath, tmp);
                     }
                 } else {
                     // if we got a group we add it to the list so that it is checked later (only if it is not empty)
                     if (curr instanceof FxGroupData) {
                         allData.add((FxGroupData) curr);
-                        emptyGroups.put(xPath, false);
+//                        emptyGroups.put(xPath, false);
                     } else {
                         ((FxPropertyData) curr).checkMaxLength();
                     }
                 }
             }
             // after we build a list with the properties of the current group, we check if all found properties has a valid length
-            currAssignment = allAssignemnts.get(currentXPath);
+            currAssignment = allAssignments.get(currentXPath);
             for (String key : currAssignment.keySet()) {
                 Integer curMult = curMults.get(key);
                 FxAssignment curAss = currAssignment.get(key);
@@ -1337,19 +1337,19 @@ public class FxContent implements Serializable {
                                 /*curAss.getDisplayName(true)*/ key, curAss.getMultiplicity().toString());
                 }
             }
-            currAssignment.clear();
-            for (String key : emptyGroups.keySet()) {
-                Boolean empty = emptyGroups.get(key);
-                if (empty) {
-                    allAssignemnts.remove(key);
-                }
-            }
+//            currAssignment.clear();
+//            for (String key : emptyGroups.keySet()) {
+//                Boolean empty = emptyGroups.get(key);
+//                if (empty) {
+//                    allAssignments.remove(key);
+//                }
+//            }
         }
-        allAssignemnts.remove(currentXPath);
+        allAssignments.remove(currentXPath);
 
         // after we checked all groups, and removed the not needed corrects the only entries are invalid so if there are any, throw an exception.
-        if (allAssignemnts.size() == 0) return;
-        groups : for (Map<String, FxAssignment> tmp : allAssignemnts.values()) {
+        if (allAssignments.size() == 0) return;
+        groups : for (Map<String, FxAssignment> tmp : allAssignments.values()) {
             for (FxAssignment currAss : tmp.values()) {
                 // optional groups could be missing but we have to add them so if they are present, they need to have the right fields
                 FxGroupAssignment parentGroupAssignment = currAss.getParentGroupAssignment();
