@@ -1308,8 +1308,8 @@ public class FxContent implements Serializable {
 //                        if (empty == null) {
 //                            emptyGroups.put(xPath, true);
 //                        }
-//                    } else {
-//                        curMults.put(xPath, tmp);
+                    } else {
+                        curMults.put(xPath, tmp);
                     }
                 } else {
                     // if we got a group we add it to the list so that it is checked later (only if it is not empty)
