@@ -102,6 +102,10 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
         try {
             FxLanguage lang = (FxLanguage) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ID, languageId);
             if (lang == null) {
+                loadAll(true, true);
+                lang = (FxLanguage) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ID, languageId);
+            }
+            if (lang == null) {
                 //check unavailable
                 for (FxLanguage l : loadAll(false, false)) {
                     if (l.getId() == languageId)
