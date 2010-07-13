@@ -165,7 +165,7 @@ public abstract class AbstractFxValueInputRenderer<T extends AbstractFxValueInpu
             throw new FxInvalidParameterException("VALUE", "ex.jsf.valueInput.null", input.getClientId(context)).asRuntimeException();
         } else if (!(o instanceof FxValue)) {
             throw new FxInvalidParameterException("VALUE", "ex.jsf.valueInput.invalidType",
-                    o.getClass().getCanonicalName()).asRuntimeException();
+                    o.getClass().getCanonicalName(), input.getClientId(context)).asRuntimeException();
         }
         return (FxValue) o;
     }

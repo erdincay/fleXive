@@ -258,14 +258,18 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
             // Content type HAS to be set before the print writer is used
             forceContentType(contentType);
             // obtain and store the printwriter
-            fxWriter = new FxWriter(catchContent ? null : resp.getWriter(), catchContent);
-            pw = new PrintWriter(fxWriter);
+            if (catchContent) {
+                fxWriter = new FxWriter(catchContent ? null : resp.getWriter(), catchContent);
+                pw = new PrintWriter(fxWriter);
+            } else {
+                pw = resp.getWriter();
+            }
         }
         return pw;
     }
 
     /**
-     * Forces the contentype directly at the wrapped catalina response, since the
+     * Forces the content type directly at the wrapped catalina response, since the
      * wrapper is not always allowing the type to change.
      *
      * @param type the content type
@@ -284,7 +288,11 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
         if (fos == null) {
-            fos = new FxOutputStream(catchContent ? null : resp.getOutputStream(), catchContent, !catchContent);
+            if (catchContent) {
+                fos = new FxOutputStream(null, catchContent, !catchContent);
+            } else {
+                return resp.getOutputStream();
+            }
         }
         return fos;
     }
