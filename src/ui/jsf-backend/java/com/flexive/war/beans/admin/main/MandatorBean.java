@@ -74,7 +74,7 @@ public class MandatorBean implements Serializable {
      * @since 3.1.4
      */
     public boolean isOpenTab() {
-        return mandator != null && mandator.getName().length() >= 0;
+        return mandator != null && mandator.getName() != null && mandator.getName().length() >= 0;
     }
 
     /**
