@@ -53,7 +53,7 @@ public class Jsf1EditModeHelper extends AbstractEditModeHelper {
      */
     protected void renderUploadComponent(UIComponent parent, String inputId) {
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(
-                parent, RenderHelperUtils.stripForm(inputId), HtmlInputFileUpload.COMPONENT_TYPE
+                parent, RenderHelperUtils.stripForm(inputId), HtmlInputFileUpload.COMPONENT_TYPE, true
         );
         addHtmlAttributes(component, upload);
         upload.setStyleClass("fxValueFileInput " + AbstractFxValueInputRenderer.CSS_VALUE_INPUT_FIELD);

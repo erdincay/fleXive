@@ -437,7 +437,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         input.setStyleClass(CSS_VALUE_INPUT_FIELD);
 
         final HtmlGraphicImage img = (HtmlGraphicImage) FxJsfUtils.addChildComponent(
-                parent, "calendarButton_" + stripForm(inputId), HtmlGraphicImage.COMPONENT_TYPE
+                parent, "calendarButton_" + stripForm(inputId), HtmlGraphicImage.COMPONENT_TYPE, true
         );
         component.setPackagedImageUrl(img, "/images/calendar.gif");
         img.setStyleClass("button");
@@ -499,15 +499,15 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
 
     protected void renderReferenceSelect(UIComponent parent, String inputId, FxLanguage language) throws IOException {
         // render hidden input that contains the actual reference
-        final HtmlInputHidden inputPk = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlInputHidden.COMPONENT_TYPE);
+        final HtmlInputHidden inputPk = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlInputHidden.COMPONENT_TYPE, true);
         // render hidden input where the caption is stored
-        final HtmlInputHidden inputCaption = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_caption", HtmlInputHidden.COMPONENT_TYPE);
+        final HtmlInputHidden inputCaption = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_caption", HtmlInputHidden.COMPONENT_TYPE, true);
 
         // render popup button
         renderReferencePopupButton(parent, inputId);
 
         // render image container (we need this since the image id attribute does not get rendered)
-        final HtmlOutputText captionContainer = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_preview", HtmlOutputText.COMPONENT_TYPE);
+        final HtmlOutputText captionContainer = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_preview", HtmlOutputText.COMPONENT_TYPE, true);
 
         // render caption
         if (!value.isEmpty() && ((language != null && !value.isTranslationEmpty(language)) || language == null)) {
