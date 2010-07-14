@@ -392,7 +392,9 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             throw new FxInvalidParameterException("selectList", "ex.jsf.valueInput.select.emptyList",
                     component.getClientId(FacesContext.getCurrentInstance())).asRuntimeException();
         }
-        FxSelectList _selectList = CacheAdmin.getEnvironment().getSelectList(selectList.getId()); //load the list to ensure it is up-to-date
+        FxSelectList _selectList = selectList;      // fallback if the id is -1 keep the items
+        if (selectList.getId() > 0) // references have id -1 and are not in cache
+            _selectList = CacheAdmin.getEnvironment().getSelectList(selectList.getId()); //load the list to ensure it is up-to-date
         // store available items in select component
         final UISelectItems selectItems = (UISelectItems) FxJsfUtils.createComponent(UISelectItems.COMPONENT_TYPE);
         selectItems.setId(stripForm(listbox.getId()) + "_items");
