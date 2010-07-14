@@ -428,6 +428,53 @@ public class ContentEngineTest {
         }
     }
 
+    //  test for groups (with groups + props) with mult 2+
+
+    @Test(groups = {"ejb", "content"})
+    public void groupValidityTest() throws Exception {
+        FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
+
+        FxContent test = ce.initialize(testType.getId());
+        //fill all required properties
+        FxString testValue = new FxString(FxLanguage.ENGLISH, TEST_EN);
+        testValue.setTranslation(FxLanguage.GERMAN, TEST_DE);
+        testValue.setTranslation(FxLanguage.FRENCH, TEST_FR);
+        testValue.setTranslation(FxLanguage.ITALIAN, TEST_IT);
+        test.setValue("/TestProperty2", testValue);
+        test.setValue("/TestProperty4", testValue);
+
+        test.checkValidity();
+        test.setValue("/TESTGROUP1/TESTPROPERTY1_3", testValue);
+        test.setValue("/TESTGROUP1/TESTPROPERTY1_2", testValue);
+        test.setValue("/TESTGROUP1[1]/TESTGROUP1_2[1]/TESTPROPERTY1_2_1[1]", testValue);    // not optional
+        test.setValue("/TESTGROUP1[1]/TESTGROUP1_2[1]/TESTPROPERTY1_2_2[1]", testValue);    // optional
+
+        try {
+            test.checkValidity();
+        } catch (FxInvalidParameterException ip) {
+            fail("should be valid [" + ip + "]");
+        }
+        test.setValue("/TESTGROUP1[1]/TESTGROUP1_3[1]/TestProperty1_3_1", testValue);
+
+        test.getRootGroup().removeEmptyEntries();
+        for (int i = 2; i < 8; i++) {
+            test.setValue("/TESTGROUP1[1]/TESTGROUP1_2["+ i +"]/TESTPROPERTY1_2_2[1]", testValue);
+            try {
+                test.checkValidity();
+                fail ("should fail");
+            } catch (FxInvalidParameterException ip) {
+                // OK
+            }
+            test.setValue("/TESTGROUP1[1]/TESTGROUP1_2["+ i + "]/TESTPROPERTY1_2_1[1]", testValue);
+
+            try {
+                test.checkValidity();
+            } catch (FxInvalidParameterException ip) {
+                fail("should be valid");
+            }
+        }
+    }
+
     @Test(groups = {"ejb", "content"})
     public void contentComplex() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
