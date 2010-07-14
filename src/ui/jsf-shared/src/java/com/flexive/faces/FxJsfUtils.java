@@ -722,6 +722,23 @@ public class FxJsfUtils {
      * @since               3.1.3
      */
     public static UIComponent addChildComponent(UIComponent parent, String id, String componentType) {
+        return addChildComponent(parent, id, componentType, false);
+    }
+
+    /**
+     * Add a child component of the given type to the parent component. The child component
+     * is returned to the caller.
+     *
+     * @param parent    the parent component
+     * @param id        the component ID. If null, no ID will be set - in this case,
+     * don't set an ID on the component afterwards, otherwise the wrong ID has already been published
+     * in JSF2 events.
+     * @param componentType child component type, e.g. <code>javax.faces.SelectOne</code>
+     * @param isTransient   if the component should be marked as transient
+     * @return the created child component
+     * @since               3.1.4
+     */
+    public static UIComponent addChildComponent(UIComponent parent, String id, String componentType, boolean isTransient) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Adding a component of type " + componentType + " to " + parent.getClientId(FacesContext.getCurrentInstance()));
         }
@@ -729,6 +746,7 @@ public class FxJsfUtils {
         if (StringUtils.isNotBlank(id)) {
             child.setId(id);
         }
+        child.setTransient(isTransient);
         parent.getChildren().add(child);
         return child;
     }

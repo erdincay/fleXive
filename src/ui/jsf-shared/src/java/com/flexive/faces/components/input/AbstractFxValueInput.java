@@ -127,9 +127,13 @@ public abstract class AbstractFxValueInput extends UIInput {
         ctx.setAttribute(REQ_ID_COUNTER, idCounter + 1);
     }
 
+    protected void buildComponent(FacesContext context) {
+        ((AbstractFxValueInputRenderer) getRenderer(context)).buildComponent(context, this);
+    }
+
     @Override
     public void validate(FacesContext context) {
-        ((AbstractFxValueInputRenderer) getRenderer(context)).buildComponent(context, this);
+        buildComponent(context);
         super.validate(context);
     }
 

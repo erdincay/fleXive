@@ -295,7 +295,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     protected static void renderBasicTextInput(AbstractFxValueInput inputComponent, UIComponent parent,
             YuiAutocompleteWriter autocompleteWriter, FxValue value, final String inputId, long languageId) throws IOException {
 
-        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlInputText.COMPONENT_TYPE);
+        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlInputText.COMPONENT_TYPE, true);
         addHtmlAttributes(inputComponent, input);
         if (value.getMaxInputLength() > 0) {
             input.setMaxlength(value.getMaxInputLength());
@@ -382,7 +382,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     }
 
     protected UIInput createUISelect(UIComponent parent, String inputId, String componentType) {
-        final UIInput listbox = (UIInput) FxJsfUtils.addChildComponent(parent, stripForm(inputId), componentType);
+        final UIInput listbox = (UIInput) FxJsfUtils.addChildComponent(parent, stripForm(inputId), componentType, true);
         addHtmlAttributes(component, listbox);
         return listbox;
     }
@@ -396,6 +396,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         // store available items in select component
         final UISelectItems selectItems = (UISelectItems) FxJsfUtils.createComponent(UISelectItems.COMPONENT_TYPE);
         selectItems.setId(stripForm(listbox.getId()) + "_items");
+        selectItems.setTransient(true);
         final List<SelectItem> items = FxJsfUtils.asSelectList(_selectList);
         if (includeEmptyElement) {
             // include only if no empty element (with ID -1) exists
@@ -429,7 +430,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     }
 
     protected void createDateInput(UIComponent parent, String inputId, Date date) {
-        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlInputText.COMPONENT_TYPE);
+        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlInputText.COMPONENT_TYPE, true);
         input.setSize(10);
         input.setMaxlength(10);
         input.setValue(date == null ? "" : FxFormatUtils.toString(date));
@@ -480,7 +481,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     }
 
     protected void renderTimeInput(UIComponent parent, String inputId, String suffix, int value) {
-        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + suffix, HtmlInputText.COMPONENT_TYPE);
+        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + suffix, HtmlInputText.COMPONENT_TYPE, true);
         input.setSize(2);
         input.setMaxlength(2);
         input.setStyleClass(CSS_VALUE_INPUT_FIELD);
@@ -530,10 +531,10 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     }
 
     protected void renderReferencePopupButton(UIComponent parent, String inputId) {
-        final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_refButtonLink", HtmlOutputLink.COMPONENT_TYPE);
+        final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_refButtonLink", HtmlOutputLink.COMPONENT_TYPE, true);
         link.setValue("javascript:flexive.input.openReferenceQueryPopup('" + StringUtils.defaultString(value.getXPath()) + "', '"
                 + inputId + "', '" + getForm(inputId) + "')");
-        final HtmlGraphicImage button = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, stripForm(inputId) + "_refButton", HtmlGraphicImage.COMPONENT_TYPE);
+        final HtmlGraphicImage button = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, stripForm(inputId) + "_refButton", HtmlGraphicImage.COMPONENT_TYPE, true);
         component.setPackagedImageUrl(button, "/images/findReferences.png");
         button.setStyle("border:0");
         button.setStyleClass(AbstractFxValueInputRenderer.CSS_FIND_REFERENCES);
@@ -543,7 +544,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         if (!value.isEmpty() && (language == null || value.translationExists((int) language.getId()))) {
             final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
             if (!descriptor.isNewBinary()) {
-                final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, stripForm(clientId) + "_thumb", HtmlGraphicImage.COMPONENT_TYPE);
+                final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, stripForm(clientId) + "_thumb", HtmlGraphicImage.COMPONENT_TYPE, true);
                 image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
                         BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));
                 if (component.isReadOnlyShowTranslations()) {
@@ -563,7 +564,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             mb.getMessage("FxValueInput.selectBox.value.false"),
             mb.getMessage("FxValueInput.selectBox.value.empty")};
 
-        final HtmlSelectBooleanCheckbox checkbox = (HtmlSelectBooleanCheckbox) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlSelectBooleanCheckbox.COMPONENT_TYPE);
+        final HtmlSelectBooleanCheckbox checkbox = (HtmlSelectBooleanCheckbox) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlSelectBooleanCheckbox.COMPONENT_TYPE, true);
         Boolean b = (Boolean) value.getTranslation(language);
         checkbox.setValue(b);
         checkbox.setTitle(value.isTranslationEmpty(language) ? toolTips[2] : b ? toolTips[0] : toolTips[1]);
@@ -575,12 +576,12 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
 
         checkbox.setOnclick("flexive.input.onTristateCheckboxChanged('" + inputId + "', new Array('"+StringUtils.join(toolTips,"' ,'") +"')" +")");
         // render hidden input to represent "empty"
-        final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_empty", HtmlInputHidden.COMPONENT_TYPE);
+        final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_empty", HtmlInputHidden.COMPONENT_TYPE, true);
         hidden.setValue(value.isTranslationEmpty(language));
     }
 
     protected HtmlOutputText renderLiteral(UIComponent parent, String value, String inputId) {
-        HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlOutputText.COMPONENT_TYPE);
+        HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, stripForm(inputId), HtmlOutputText.COMPONENT_TYPE, true);
         output.setValue(value);
         return output;
     }
