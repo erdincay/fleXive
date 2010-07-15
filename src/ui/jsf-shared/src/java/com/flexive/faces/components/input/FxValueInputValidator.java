@@ -61,10 +61,14 @@ public class FxValueInputValidator implements Validator {
         if (!fxValue.isValid()) {
             FxFacesMsgErr message = new FxFacesMsgErr("FxValueInput.err.invalid", prepareXPath(fxValue), fxValue.getErrorValue());
             String clientId = input.getExternalId() == -1 ? input.getClientId(context) : String.valueOf(input.getExternalId());
-            if (!StringUtils.isEmpty(clientId) && clientId.indexOf(':') > 0) {
-                String[] cid = clientId.split(":");
-                message.setForm(cid[0]);
-                message.setId(cid[1]);
+            if (!StringUtils.isEmpty(clientId)) {
+                if (clientId.indexOf(':') > 0) {
+                    String[] cid = clientId.split(":");
+                    message.setForm(cid[0]);
+                    message.setId(cid[1]);
+                } else {
+                    message.setId(clientId);
+                }
             }
             message.setLocalizedDetail("FxValueInput.err.invalid.detail", fxValue.getErrorValue());
             throw new ValidatorException(message);
