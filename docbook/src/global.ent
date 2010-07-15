@@ -37,7 +37,7 @@
 <!ENTITY productsArticle "<link xlink:href='http://www.onjava.com/pub/a/onjava/2008/04/30/introducing-flexive-a-complementary-approach-to-java-ee-5-web-development.html'>an ONJava.com article</link>">
 
 <!-- Website references -->
-<!ENTITY downloadsUrl "http://www.flexive.org/download">
+<!ENTITY downloadsUrl "http://www.flexive.org/download.html">
 <!ENTITY downloadsPage "<link xlink:href='&downloadsUrl;'>download page</link>">
 <!ENTITY forums "<link xlink:href='http://forum.flexive.org'>forums</link>">
 
