@@ -981,7 +981,7 @@
         <echo file="${flexive.dist.apps.disabled.dir}/README.txt">Use this directory for flexive applications that should not be included in flexive.ear.</echo>
     </target>
 
-    <target name="dist" depends="jar.all,jar.interfaces.onlylocal,dist.prepare,tests.package.dist,dist.srcOnly,dist.assemble,examples,dist.package" description="Build a distribution of all jars, wars and ears">
+    <target name="dist" depends="jar.all,jar.interfaces.onlylocal,jar.jsf2.components,dist.prepare,tests.package.dist,dist.srcOnly,dist.assemble,examples,dist.package" description="Build a distribution of all jars, wars and ears">
     </target>
 
     <target name="dist.assemble">
@@ -1017,10 +1017,10 @@
         <copy file="${build.ui.jar.dir}/flexive-backend.jar" todir="${flexive.dist.apps.dir}/flexive-backend"/>
         <!-- Include standard plugin setup -->
         <copy todir="${flexive.dist.apps.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf2-core.jar"/>
         </copy>
         <copy todir="${flexive.dist.apps.disabled.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-testrunner.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf2-core.jar"/>
         </copy>
 
         <!-- Copy build environment to root dist folder -->
