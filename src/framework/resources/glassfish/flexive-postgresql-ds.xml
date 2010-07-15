@@ -15,7 +15,8 @@
     <jdbc-connection-pool
         name="flexiveConfiguration"
         datasource-classname="org.postgresql.xa.PGXADataSource"
-        res-type="javax.sql.XADataSource">
+        res-type="javax.sql.XADataSource"
+		non-transactional-connections="false">
         
         <property name="ServerName" value="localhost"/>
         <property name="PortNumber" value="5432"/>
@@ -33,7 +34,8 @@
     <jdbc-connection-pool
         name="flexiveDivision1"
         datasource-classname="org.postgresql.xa.PGXADataSource"
-        res-type="javax.sql.XADataSource">
+        res-type="javax.sql.XADataSource"
+		non-transactional-connections="false">
         <property name="ServerName" value="localhost"/>
         <property name="PortNumber" value="5432"/>
 
@@ -49,7 +51,8 @@
     <jdbc-connection-pool
         name="flexiveDivision1NoTX"
         datasource-classname="org.postgresql.ds.PGPoolingDataSource"
-        res-type="javax.sql.DataSource">
+        res-type="javax.sql.DataSource"
+		non-transactional-connections="true">
         <property name="serverName" value="localhost"/>
         <property name="portNumber" value="5432"/>
 

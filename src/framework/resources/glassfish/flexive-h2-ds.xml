@@ -15,7 +15,8 @@
     <jdbc-connection-pool
         name="flexiveConfiguration"
         datasource-classname="org.h2.jdbcx.JdbcDataSource"
-        res-type="javax.sql.XADataSource">
+        res-type="javax.sql.XADataSource"
+		non-transactional-connections="false">
         <property name="user" value="sa"/>
         <property name="password" value="()"/>
         <property name="url" value="jdbc:h2:tcp://localhost:9092/~/flexiveConfiguration;MVCC=TRUE"/>
@@ -29,7 +30,8 @@
     <jdbc-connection-pool
         name="flexiveDivision1"
         datasource-classname="org.h2.jdbcx.JdbcDataSource"
-        res-type="javax.sql.XADataSource">
+        res-type="javax.sql.XADataSource"
+		non-transactional-connections="false">
         <property name="user" value="sa"/>
         <property name="password" value="()"/>
         <property name="url" value="jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;MVCC=TRUE;LOCK_TIMEOUT=10000"/>
@@ -41,7 +43,8 @@
     <jdbc-connection-pool
         name="flexiveDivision1NoTX"
         datasource-classname="org.h2.jdbcx.JdbcDataSource"
-        res-type="javax.sql.DataSource">
+        res-type="javax.sql.DataSource"
+		non-transactional-connections="true">
         <property name="user" value="sa"/>
         <property name="password" value="()"/>
         <property name="url" value="jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;MVCC=TRUE;LOCK_TIMEOUT=10000"/>
