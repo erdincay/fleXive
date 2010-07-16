@@ -453,4 +453,14 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                 return true;
         return false;
     }
+
+    @Override
+    public void resolveParentDependencies(List<FxAssignment> assignments) {
+        for (FxAssignment a : assignments) {
+            if (a.hasParentGroupAssignment() && a.getParentGroupAssignment().getId() == this.getId()) {
+                addAssignment(a);
+            }
+        }
+    }
+
 }

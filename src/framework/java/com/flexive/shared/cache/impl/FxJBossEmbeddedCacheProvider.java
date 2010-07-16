@@ -87,6 +87,17 @@ public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<F
     public void shutdown() throws FxCacheException {
         cache.getCache().stop();
         cache.getCache().destroy();
+        final ThreadGroup group = org.jgroups.util.Util.getGlobalThreadGroup();
+        if (group.getClass().getClassLoader() == FxJBossEmbeddedCacheProvider.class.getClassLoader()) {
+            // it seems that our JBoss cache instance created the group
+            try {
+                group.destroy();
+            } catch (Exception e) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Failed to shutdown JGroups thread group: " + e.getMessage(), e);
+                }
+            }
+        }
     }
 
     /**

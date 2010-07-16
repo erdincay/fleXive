@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core;
 
+import java.util.Enumeration;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.ejb.beans.configuration.GlobalConfigurationEngineBean;
@@ -84,6 +85,7 @@ public final class Database {
     private static final DataSource[] dataSourcesNoTX = new DataSource[MAX_DIVISIONS];
     // cached data source by (resource) name
     private static final Map<String, DataSource> dataSourcesByName = new HashMap<String, DataSource>();
+    private static boolean defaultDataSourceInitialized;
 
     /**
      * Empty default constructor.
@@ -231,6 +233,7 @@ public final class Database {
                             }
                             // remember data source for #getDataSource(String)
                             dataSourcesByName.put(finalDsName, ds);
+                            defaultDataSourceInitialized = true;    // remember to unload driver in cleanup
                             // set division data source, return
                             return (dataSourceCache[divisionId] = ds);
                         } else {
@@ -840,6 +843,41 @@ public final class Database {
             if (ps != null)
                 ps.close();
         }
+    }
+
+    /**
+     * Cleanup cached data sources.
+     * 
+     * @since 3.1.4
+     */
+    public static synchronized void cleanup() {
+        if (defaultDataSourceInitialized) {
+            // try to deregister bundled H2 driver
+            try {
+                final Enumeration<Driver> drivers = DriverManager.getDrivers();
+                while (drivers.hasMoreElements()) {
+                    final Driver driver = drivers.nextElement();
+                    if ("org.h2.Driver".equals(driver.getClass().getCanonicalName())) {
+                        // deregister our bundled H2 driver
+                        LOG.info("Uninstalling bundled H2 driver");
+                        DriverManager.deregisterDriver(driver);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.warn("Failed to deregister H2 driver", e);
+            }
+        }
+        
+        dataSourcesByName.clear();
+        for (int i = 0; i < dataSources.length; i++) {
+            dataSources[i] = null;
+        }
+        for (int i = 0; i < dataSourcesNoTX.length; i++) {
+            dataSourcesNoTX[i] = null;
+        }
+        globalDataSource = null;
+        testDataSource = null;
+        testDataSourceNoTX = null;
     }
 
     /**

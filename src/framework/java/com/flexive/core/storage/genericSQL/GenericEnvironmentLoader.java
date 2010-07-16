@@ -58,6 +58,7 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
+import com.google.common.collect.Maps;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -509,6 +510,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             final Map<Long, List<FxStructureOption>> propertyAssignmentOptions = loadAllPropertyAssignmentOptions(con);
             final Map<Long, List<FxStructureOption>> groupAssignmentOptions = loadAllGroupAssignmentOptions(con);
             final Map<Long, FxFlatStorageMapping> flatStorageEntries = FxFlatStorageManager.getInstance().loadAllFlatStorageMappings(con);
+            final Map<Long, FxGroupAssignment> groupAssignments = Maps.newHashMap();        // group assignment lookup map by ID
 
             //               1   2      3        4        5        6        7    8      9
             curSql = "SELECT ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, POS, XPATH, XALIAS, " +
@@ -536,6 +538,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         if (rs.getBoolean(16))
                             ga._setSystemInternal();
                         result.add(ga);
+                        groupAssignments.put(ga.getId(), ga);
                         break;
                     case FxAssignment.TYPE_PROPERTY:
                         FxValue defaultValue = null;
@@ -571,9 +574,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 }
             }
             for (FxAssignment as : result)
-                as.resolvePreloadDependencies(result);
-            for (FxAssignment as : result)
-                as.resolveParentDependencies(result);
+                as.resolveDependencies(groupAssignments);
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, "Failed to load all FxAssignments: " + exc.getMessage(), exc);
         } catch (FxNotFoundException e) {

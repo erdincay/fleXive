@@ -225,6 +225,17 @@ public class FxExceptionMessage implements Serializable {
     }
 
     /**
+     * Cleanup cached resources.
+     * @since 3.1.4
+     */
+    public static synchronized void cleanup() {
+        cachedBundles.clear();
+        resourceBundles.clear();
+        cachedMessages.clear();
+        initialized = false;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

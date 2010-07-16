@@ -31,15 +31,16 @@
  ***************************************************************/
 package com.flexive.war.filter;
 
+import com.flexive.core.Database;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.timer.FxQuartz;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxExceptionMessage;
 import com.flexive.shared.mbeans.MBeanHelper;
 import com.flexive.shared.media.impl.FxMimeType;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
@@ -110,7 +111,13 @@ public class FxFilter implements Filter {
             }
 
             EJBLookup.clearCache();
-            
+
+            FxExceptionMessage.cleanup();
+
+            Database.cleanup();
+
+            DIVISION_SERVICES.clear();
+
         } catch (SchedulerException ex) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Failed to shutdown Quartz scheduler: " + ex.getMessage(), ex);

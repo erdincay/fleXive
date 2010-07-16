@@ -34,10 +34,6 @@ package com.flexive.shared.media.impl;
 import com.google.common.collect.Maps;
 import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil;
-import eu.medsea.mimeutil.detector.ExtensionMimeDetector;
-import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
-import eu.medsea.mimeutil.detector.OpendesktopMimeDetector;
-import eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,29 +58,21 @@ public class FxMimeType implements Serializable {
      */
     private static final Map<String, String> EXT_REPLACEMENTS;
     private static final List<String> MIME_DETECTORS = Collections.unmodifiableList(Arrays.asList(
-            MagicMimeMimeDetector.class.getCanonicalName(),
+            "eu.medsea.mimeutil.detector.MagicMimeMimeDetector",
             // For Linux/OpenDesktop machines
-            OpendesktopMimeDetector.class.getCanonicalName(),
+            "eu.medsea.mimeutil.detector.OpendesktopMimeDetector",
             // For Windows machines
-            WindowsRegistryMimeDetector.class.getCanonicalName(),
+            "eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector",
             // Last resort - use file extension
-            ExtensionMimeDetector.class.getCanonicalName()
+            "eu.medsea.mimeutil.detector.ExtensionMimeDetector"
     ));
+
+    private static volatile boolean DETECTORS_INITIALIZED = false;
+    private static final Object INIT_LOCK = new Object();
 
     private static Log LOG = LogFactory.getLog(FxMimeType.class);
 
     static {
-        for (String detector : MIME_DETECTORS) {
-            try {
-                MimeUtil.registerMimeDetector(detector);
-            } catch (Exception e) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Failed to initialize MIME detector " + detector + " (ignored): "
-                            + e.getMessage(), e);
-                }
-            }
-        }
-
         // populate EXT_REPLACEMENTS
         final Map <String, String> replacements = Maps.newHashMap();
         replacements.put("wmv", "video/x-ms/wmv");
@@ -218,7 +206,9 @@ public class FxMimeType implements Serializable {
     @SuppressWarnings({"unchecked"})
     public static FxMimeType detectMimeType(byte[] header, String fileName) {
         MimeType mt;
-        
+
+        initialize();
+
         // try and find the mimetype from the given file header
         Collection<MimeType> detected = MimeUtil.getMimeTypes(header);
         if (!detected.isEmpty()) {
@@ -250,6 +240,29 @@ public class FxMimeType implements Serializable {
         return new FxMimeType(mt.getMediaType(), mt.getSubType());
     }
 
+    private static void initialize() {
+        if (DETECTORS_INITIALIZED) {
+            return;
+        }
+        synchronized (INIT_LOCK) {
+            if (DETECTORS_INITIALIZED) {
+                // someone else beat us to it
+                return;
+            }
+            for (String detector : MIME_DETECTORS) {
+                try {
+                    MimeUtil.registerMimeDetector(detector);
+                } catch (Exception e) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Failed to initialize MIME detector " + detector + " (ignored): "
+                                + e.getMessage(), e);
+                    }
+                }
+            }
+            DETECTORS_INITIALIZED = true;
+        }
+    }
+
     /**
      * Shutdown the MIME detectors. Needed since some (OpendesktopMimeDetector!) open resources or spawn
      * threads that must be explicitly terminated by the application.
@@ -257,6 +270,9 @@ public class FxMimeType implements Serializable {
      * @since 3.1.4
      */
     public static void shutdownDetectors() {
+        if (!DETECTORS_INITIALIZED) {
+            return;     // nothing to do
+        }
         for (String detector : MIME_DETECTORS) {
             try {
                 MimeUtil.unregisterMimeDetector(detector);

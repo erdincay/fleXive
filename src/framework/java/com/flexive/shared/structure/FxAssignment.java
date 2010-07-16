@@ -40,6 +40,7 @@ import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.*;
@@ -308,7 +309,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
         if (XPath != null)
             return XPath;
         //build XPath
-        StringBuffer sbXPath = new StringBuffer(200);
+        StringBuilder sbXPath = new StringBuilder(200);
         sbXPath.append(this.getAlias());
         FxAssignment parent = this.getParentGroupAssignment();
         while (parent != null) {
@@ -521,9 +522,10 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     public abstract FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity);
 
     /**
-     * Resolve preload dependecies after initial loading
+     * Resolve preload dependencies after initial loading
      *
      * @param assignments all known assignment
+     * @deprecated  Use {@link #resolveDependencies(java.util.Map)}
      */
     public void resolvePreloadDependencies(List<FxAssignment> assignments) {
         if (parentGroupAssignment != null && parentGroupAssignment.getAlias() == null) {
@@ -540,6 +542,26 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
         }
     }
 
+    /**
+     * Resolve preload dependencies after initial loading (improved version for large environments).
+     *
+     * @param groupAssignments all known group assignments
+     * @since 3.1.4
+     */
+    public void resolveDependencies(Map<Long, FxGroupAssignment> groupAssignments) {
+        if (parentGroupAssignment != null && parentGroupAssignment.getAlias() == null) {
+            if (parentGroupAssignment.getId() == FxAssignment.NO_PARENT) {
+                parentGroupAssignment = null;
+            } else {
+                parentGroupAssignment = groupAssignments.get(parentGroupAssignment.getId());
+                if (parentGroupAssignment != null) {
+                    parentGroupAssignment.addAssignment(this);
+                }
+            }
+        } else if (parentGroupAssignment != null) {
+            parentGroupAssignment.addAssignment(this);
+        }
+    }
 
     /**
      * Resolve references after initial loading
@@ -586,13 +608,10 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * Resolve parent dependecies after initial loading
      *
      * @param assignments all known assignments
+     * @deprecated  Use {@link #resolveDependencies(java.util.Map)}
      */
     public void resolveParentDependencies(List<FxAssignment> assignments) {
-        if (!(this instanceof FxGroupAssignment))
-            return;
-        for (FxAssignment a : assignments)
-            if (a.hasParentGroupAssignment() && a.getParentGroupAssignment().getId() == this.getId())
-                ((FxGroupAssignment) this).addAssignment(a);
+        // do nothing, only interesting for group assignments
     }
 
     /**
