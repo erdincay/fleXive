@@ -160,6 +160,7 @@
     <!-- ========================== targets ============================= -->
 
     <target name="init" unless="init.done">
+        <echo>Java version: ${ant.java.version}</echo>
         <groovy src="buildTasks.groovy"/>
         <groovy>
             void setParam(String name) {
