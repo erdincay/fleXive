@@ -581,7 +581,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NEVER)
     public void importDivision(String localFileName) throws FxApplicationException {
         if (!FxContext.getUserTicket().isGlobalSupervisor())
             throw new FxNoAccessException("ex.import.noAccess");
