@@ -6,14 +6,21 @@ package ${package};
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.FxType;
 import java.util.Map;
-import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
+import javax.inject.Inject;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * JSF bean accessing an EJB.
  */
+@Named
+@RequestScoped
 public class ExampleBean {
-    @EJB EJBExampleBean exampleEJB;
+
+    @Inject EJBExampleBean exampleEJB;
     private Map<FxType, Integer> instanceCounts;
+    private String value;
 
     public Map<FxType, Integer> getInstanceCounts() throws FxApplicationException {
         if (instanceCounts == null) {
@@ -21,4 +28,19 @@ public class ExampleBean {
         }
         return instanceCounts;
     }
+
+    public void reverse() {
+        if (value != null) {
+            value = StringUtils.reverse(value);
+        }
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
 }

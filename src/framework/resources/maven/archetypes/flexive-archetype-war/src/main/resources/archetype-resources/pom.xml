@@ -11,58 +11,9 @@
     <!-- Define common versions of dependencies -->
     <properties>
         <flexive.version>3.1-SNAPSHOT</flexive.version>
+        <jsf.version>2.0.2</jsf.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-ejb</artifactId>
-            <type>ejb</type>
-            <version>${flexive.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.flexive</groupId>
-                    <artifactId>flexive-ejb-interfaces-all</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-ejb-interfaces-local</artifactId>
-            <version>${flexive.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-plugin-jsf-core</artifactId>
-            <version>${flexive.version}</version>
-        </dependency>
-
-        <!-- Add EL-Impl for Glassfish v3 Preview -->
-        <!--dependency>
-            <groupId>com.sun.el</groupId>
-            <artifactId>el-ri</artifactId>
-            <version>1.0</version>
-        </dependency-->
-
-        <!-- Add Glassfish for EJB 3.1 APIs -->
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.javaee</artifactId>
-            <version>3.0-Prelude-b28b</version>
-            <scope>provided</scope>
-        </dependency>
-
-    </dependencies>
-
 
     <build>
         <finalName>${artifactId}</finalName>
@@ -71,18 +22,99 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>1.6</source>
+                    <target>1.6</target>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb</artifactId>
+            <type>ejb</type>
+            <version>${flexive.version}</version>
+            <exclusions>
+                <!-- Exclude remote interfaces to enable web profile deployment -->
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-ejb-interfaces-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Add only local EJB interfaces for flexive -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb-interfaces-local</artifactId>
+            <version>${flexive.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf2-core</artifactId>
+            <version>${flexive.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>6.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Add JSF Mojarra APIs and implementation for easier debugging -->
+        <dependency>
+            <groupId>com.sun.faces</groupId>
+            <artifactId>jsf-api</artifactId>
+            <version>${jsf.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.faces</groupId>
+            <artifactId>jsf-impl</artifactId>
+            <version>${jsf.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <!-- Enable this dependency for JSF1 -->
+        <!--dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf-core</artifactId>
+                <version>${flexive.version}</version>
+        </dependency-->
+
+        <!-- Enable this dependency if you want to process binary documents (Word, PDF, Excel, ...) -->
+        <!--dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-documents</artifactId>
+            <version>${flexive.version}</version>
+        </dependency-->
+
+        <!-- Enable this dependency if you don't need to process audio documents (MP3, OGG, Flac, ...) -->
+        <!--dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-audio</artifactId>
+            <version>${flexive.version}</version>
+        </dependency-->
+
+        <!-- Enable this dependency if you don't need to process video documents (AVI, MKV, ...) -->
+        <!--dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-video</artifactId>
+            <version>${flexive.version}</version>
+        </dependency-->
+
+    </dependencies>
+
 
     <repositories>
         <repository>
             <id>maven.flexive.org</id>
-            <name>Flexive repo</name>
+            <name>Flexive Maven repository</name>
             <url>http://repo.flexive.org/maven2</url>
             <layout>default</layout>
         </repository>

@@ -3,23 +3,29 @@
 #set( $symbol_escape = '\' )
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
-      xmlns:t="http://myfaces.apache.org/tomahawk"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf2/core">
 
-    <head>
-        <fx:includes yui="true"/>
-    </head>
+    <h:body styleClass="yui-skin-sam">
+        <h:outputScript name="jsf.js" library="javax.faces" target="body"></h:outputScript>
 
-    <body class="yui-skin-sam">
-        <h1>Hello JSF world!</h1>
+        <h1>Hello JSF2 world!</h1>
 
         <p>
             ${symbol_pound}{fxSystemBean.buildInfoVerbose}
         </p>
+
+        <!-- AJAX test -->
+        <h:form>
+            <h:panelGrid columns="2">
+                <h:inputText id="valueInput" value="#{exampleBean.value}"/>
+                <h:commandButton action="#{exampleBean.reverse}" value="Reverse">
+                    <f:ajax execute="@form" render="valueInput"/>
+                </h:commandButton>
+            </h:panelGrid>
+        </h:form>
 
         <!-- Render instance counts as returned by the EJBExample engine using the JSF ManagedExampleBean -->
         <table>
@@ -31,7 +37,5 @@
                 </tr>
             </c:forEach>
         </table>
-
-        <fx:yuiSetup/>
-    </body>
+    </h:body>
 </html>
