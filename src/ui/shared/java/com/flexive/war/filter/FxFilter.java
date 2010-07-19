@@ -96,6 +96,15 @@ public class FxFilter implements Filter {
     }
 
     public void destroy() {
+        final String deploymentId;
+        try {
+            deploymentId = CacheAdmin.getInstance().getDeploymentId();
+        } catch (Exception e) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Skipping cleanup since cache is already uninstalled.");
+            }
+            return;
+        }
         try {
             // shutdown timer service if it is installed - cannot use EJB call here since we're shutting down
             FxQuartz.shutdown();
@@ -103,7 +112,7 @@ public class FxFilter implements Filter {
             // cleanup MIME detectors
             FxMimeType.shutdownDetectors();
 
-            if (MBeanHelper.DEPLOYMENT_ID.equals(CacheAdmin.getInstance().getDeploymentId())) {
+            if (MBeanHelper.DEPLOYMENT_ID.equals(deploymentId)) {
                 // Destroy local cache instance.
                 // This also stops local streaming servers, since they cannot use EJB calls from a shutdown context.
 

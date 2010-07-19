@@ -175,6 +175,13 @@ public class DivisionImportExportBean implements Serializable {
         }
     }
 
+    /**
+     * Reset bean
+     */
+    public void back() {
+        setStatus("init");
+    }
+
     private void examineExportedDivision() {
         examineExport();
         setStatus("exportSuccess");

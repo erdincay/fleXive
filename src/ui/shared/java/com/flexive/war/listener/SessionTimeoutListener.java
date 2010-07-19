@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.war.listener;
 
+import com.flexive.shared.CacheAdmin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -66,30 +67,36 @@ public class SessionTimeoutListener implements HttpSessionListener {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Session destroyed: " + session.getId());
         }
+        // set parameters needed for logout
+        final FxContext ctx = FxContext.get();
+        ctx.setSessionID(session.getId());
+
+        // retrieve context path
+        final ServletContext servletContext = session.getServletContext();
+        if (servletContext != null) {
+            ctx.setContextPath(servletContext.getContextPath());
+        }
+
+        // get division ID from session
+        final String divisionIdKey = FxSessionWrapper.encodeAttributeName(FxContext.SESSION_DIVISIONID);
+        if (session.getAttribute(divisionIdKey) != null) {
+            ctx.setDivisionId((Integer) session.getAttribute(divisionIdKey));
+        }
+        
+        if (ctx.getDivisionId() == -1 || !CacheAdmin.isEnvironmentLoaded()) {
+            // probably during undeploy
+            return;
+        }
+        
         try {
-            // set parameters needed for logout
-            final FxContext ctx = FxContext.get();
-            ctx.setSessionID(session.getId());
-            // retrieve context path
-            final ServletContext servletContext = session.getServletContext();
-            if (servletContext != null) {
-                ctx.setContextPath(servletContext.getContextPath());
-            }
-            // get division ID from session
-            final String divisionIdKey = FxSessionWrapper.encodeAttributeName(FxContext.SESSION_DIVISIONID);
-            if (session.getAttribute(divisionIdKey) != null) {
-                ctx.setDivisionId((Integer) session.getAttribute(divisionIdKey));
-            }
-            if (ctx.getDivisionId() != -1) {
-                ctx.setTicket(FxContext.getTicketFromEJB(session));
-                if (!ctx.getTicket().isGuest()) {
-                    // perform logout only when the user is logged in
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Performing logout for user of destroyed session (possible session timeout): "
-                                + session.getId());
-                    }
-                    ctx.logout();
+            ctx.setTicket(FxContext.getTicketFromEJB(session));
+            if (!ctx.getTicket().isGuest()) {
+                // perform logout only when the user is logged in
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Performing logout for user of destroyed session (possible session timeout): "
+                            + session.getId());
                 }
+                ctx.logout();
             }
         } catch (FxLogoutFailedException e) {
             LOG.error("Failed to logout user after session timeout: " + e.getMessage(), e);

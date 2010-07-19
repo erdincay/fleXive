@@ -117,12 +117,14 @@
                                            rendered="#{divisionImportExportBean.status == 'init'}"
                                            icon="export" action="exportDivision" id="exportButton" reRender="impex"/>
 
-                    <div onclick="loadContentPage('adm/main/importexport/divisionImportExport.jsf');">
-                        <adm:ajaxCommandButton labelKey="DivisionImportExport.button.back" location="both"
-                                           bean="#{divisionImportExportBean}" lockscreen="true"
-                                           rendered="#{divisionImportExportBean.status == 'exportSuccess'}"
-                                           icon="previous" id="backButton"/>
-                    </div>
+                    <adm:commandButton
+                                       bean="#{divisionImportExportBean}" action="back"
+                                       labelKey="DivisionImportExport.button.back" location="both"
+                                       lockscreen="true"
+                                       rendered="#{divisionImportExportBean.status == 'exportSuccess'}"
+                                       icon="previous" id="backButton"/>
+                    
+                    <fx:yuiSetup/>
                 </a4j:outputPanel>
 
                 <adm:toolbarPluginButtons/>
