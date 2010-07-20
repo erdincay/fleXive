@@ -29,7 +29,7 @@
                 <h:inputHidden value="#{stepDefinitionBean.stepDefinition.id}"/>
 
                 <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id == -1}">
-                    <adm:tab labelKey="#StepDefinition.tabtitle.create" active="true" id="tab1"/>
+                    <adm:tab labelKey="StepDefinition.tabtitle.create" active="true" id="tab1"/>
                 </ui:fragment>
                 <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id != -1}">
                     <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}']}" active="true" id="tab3">
