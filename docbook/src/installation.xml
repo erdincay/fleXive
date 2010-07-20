@@ -106,7 +106,7 @@
                     </listitem>
                     <listitem>
                         <para>
-                            Open the &flexive; backend using the shortcut from the desktop or the program group or
+                            Open the &flexive; &backendGui; using the shortcut from the desktop or the program group or
                             point your browser to
                             <link xlink:href="http://localhost:8080/flexive/adm/">
                                 http://localhost:8080/flexive/adm/</link> and login with the default credentials
@@ -194,7 +194,7 @@
                     <filename>flexive-dist</filename>
                     directory, execute
                     <command>ant ear</command>
-                    to build an EAR containing flexive's backend application.
+                    to build an EAR containing flexive's &backendGui;.
                 </para>
                 <para>
                     To deploy the EAR to your application server, please follow the guide for your
@@ -241,7 +241,7 @@
                 <itemizedlist>
                     <listitem>
                         <para>
-                            continue browsing the backend at
+                            continue browsing the &backendGui; at
                             <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>,
                         </para>
                     </listitem>
@@ -250,7 +250,7 @@
                             <link xlink:href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html">
                                 screencasts
                             </link>
-                            on our homepage giving you an introduction to the backend application and to the
+                            on our homepage giving you an introduction to the &backendGui; and to the
                             process of writing applications with &flexive;,
                         </para>
                     </listitem>
@@ -484,7 +484,7 @@ database.vendor=MySQL]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
-                    <para>To access the backend point your browser to
+                    <para>To access the &backendGui; point your browser to
                         <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
                     </para>
                     <para>Alternatively you can specify your server's IP address, which is supported by default,
@@ -493,7 +493,7 @@ database.vendor=MySQL]]></programlisting>
                 </listitem>
                 <listitem>
                     <para>
-                        The default superuser's username and password for the Backend Administration are:
+                        The default superuser's username and password for the &backendGui; are:
                     </para>
                     <para>username: supervisor, password: supervisor</para>
                 </listitem>
@@ -768,10 +768,10 @@ database.vendor=MySQL]]></programlisting>
                         </para>
                     </listitem>
                 </orderedlist>
-                To access the backend point your browser to
+                To access the &backendGui; point your browser to
                 <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
                 Alternatively you can specify your server's IP address, which is supported by default, too.
-                The default superuser's username and password for the Backend Administration are
+                The default superuser's username and password for the &backendGui; are
                 username: supervisor, password: supervisor.
             </para>
         </section>

@@ -1231,7 +1231,7 @@ BUILD SUCCESSFUL]]></screen>
                         <term>flexive-backend</term>
                         <listitem>
                             <para>
-                                The &flexive; backend application, including all required libraries and the
+                                The &flexive; &backendGui;, including all required libraries and the
                                 actual WAR package.
                             </para>
                             <programlisting language="xml"><![CDATA[<dependency>

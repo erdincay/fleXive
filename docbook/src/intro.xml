@@ -24,7 +24,7 @@
     </para>
 
     <para>
-        The &Flexive; backend application is an optional application built on top of the framework and is licensed under the
+        The &Flexive; &backendGui; is an optional application built on top of the framework and is licensed under the
         GNU General Public License (GPL). It helps you to visually manage most aspects of &flexive; - like defining data structures,
         building queries, manage users and security, etc. 
     </para>

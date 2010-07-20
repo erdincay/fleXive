@@ -934,7 +934,7 @@
                             <methodname>&list_no;</methodname>
                         </td>
                         <td>
-                            May items be created dynamically (in UI's other than backends). Can only be set
+                            May items be created dynamically (in UIs other than the &backendGui;). Can only be set
                             when the select list is created. This flag is merely used as information
                             for UI's where users may create select list items themselves. Independent of this
                             flag the users can only create items if they have the permission (see <xref linkend="cssliperm_table">select list item permissions</xref>

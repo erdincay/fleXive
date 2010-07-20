@@ -390,10 +390,10 @@ BUILD SUCCESSFUL
             </para>
         </section>
         <section xml:id="be_adm">
-            <title>Preview of the Backend Administration</title>
+            <title>Preview of the &backendGui;</title>
             <para>
-                You can find the datastructures of the hello-world application in the backend
-                administration's structure editor. Log on to the backend administration and expand the tab named
+                You can find the datastructures of the hello-world application in the &backendGui;'s
+                structure editor. Log on to the &backendGui; and expand the tab named
                 "Structure".  flexive/adm/
                 You should be able to see the type Blog Entry in the tree. Expand it and click on one of the properties.
 

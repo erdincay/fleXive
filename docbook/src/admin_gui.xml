@@ -10,18 +10,18 @@
     <xi:include href="includes/author_azrzavy.xml"/>
     <xi:include href="includes/author_hbacher.xml"/>
 
-    <title>The &flexive; backend GUI</title>
+    <title>The &flexive; &backendGui;</title>
 
     <section xml:id="adm_gui_basics">
-        <title>&Flexive; backend basics</title>
+        <title>&Flexive; &backendGui; basics</title>
         <section xml:id="adm_gui_run">
-        <title>Running the backend administration GUI</title>
+        <title>Running the &backendGui;</title>
             <para>Provided that you have a working
                 <link linkend="installation">&flexive; installation</link>, you
-                start the &flexive; backend by starting your chosen application server.
-                You can access the administration GUI by opening your web browser
+                start the &flexive; &backendGui; by starting your chosen application server.
+                You can access the &backendGui; by opening your web browser
                 and entering the address
-                of the backend GUI startpage. By default the address is
+                of the &backendGui; startpage. By default the address is
                 <code>http://localhost:8080/flexive/adm/main.jsf</code>
                 where
                 <code>localhost</code>
@@ -58,7 +58,7 @@
                     via <link linkend="adm_user_preferences">user preferences</link>.
                 </caution>
                 <note>
-                    When the backend administration GUI is started for the first time
+                    When the &backendGui; is started for the first time
                     and a user successfully logs in, the execution of
                     <link linkend="core_scripting_runonce">run-once scripts</link>
                     is automatically triggered which may take a few seconds.
@@ -69,13 +69,13 @@
             </para>
         </section>
         <section xml:id="adm_gui_areas">
-            <title>&Flexive; backend display areas</title>
+            <title>&Flexive; &backendGui; display areas</title>
             <para>
-                The backend consists of four areas:
+                The &backendGui; consists of four areas:
                 <itemizedlist>
                     <listitem>
                         <para>
-                            (1) The currently selected backend GUI section: The currently
+                            (1) The currently selected &backendGui; section: The currently
                             active GUI section is displayed on top, in this case the
                             <link linkend="adm_content_tree">Content Tree</link>.
                         </para>
@@ -133,7 +133,7 @@
                     <listitem>
                         <para>
                             (4) The content frame: The content frame is the main display
-                            area for the currently opened backend GUI.
+                            area for the currently opened &backendGui;.
                         </para>
                     </listitem>
                 </itemizedlist>
@@ -146,9 +146,9 @@
             </para>
         </section>
         <section xml:id="adm_gui_overview">
-            <title>Backend GUI overview</title>
+            <title>&backendGui; overview</title>
                 <para>
-                    The &flexive; backend provides four main GUIs:
+                    The &flexive; &backendGui; provides four main GUIs:
                 <itemizedlist>
                     <listitem>
                         <para>
@@ -196,7 +196,7 @@
                 </imageobject>
             </inlinemediaobject> icon.
             The user preferences GUI provides two tabs. The first tab called "User preferences" allows
-            changing the backend language and the default input language, the e-mail address
+            changing the &backendGui; language and the default input language, the e-mail address
             and the password.
             <mediaobject>
                 <imageobject>
@@ -289,7 +289,7 @@
 
             <para>The structure editor GUI is reachable by clicking the
                 <guimenuitem>Structure</guimenuitem>
-                tab (1) in the administration backend. The GUI is separated into two parts: the
+                tab (1) in the &backendGui;. The GUI is separated into two parts: the
                 structure tree (2) on the left half of the screen and the edit view (3) on the right half.
             </para>
             <section xml:id="adm_structure_tree">
@@ -441,7 +441,7 @@
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Switch to another section of the backend application.
+                                                <para>Switch to another section of the &backendGui;.
                                                 </para>
                                             </listitem>
                                         </itemizedlist>
@@ -1703,7 +1703,7 @@
             can be used to organize and mange your contents.
             I.e. the page tree of a website can be
             modeled using the content tree and administered via the
-            &Flexive; backend administration.
+            &Flexive; &backendGui;.
             Mind that when we speak of the content tree, in fact we speak of
             two separate trees. The <link linkend="adm_content_tree_modes">
             live and the edit tree</link>.
@@ -1931,7 +1931,7 @@
             <title>Creating queries with the visual query editor</title>
             <para>The query editor can be accessed via the
                 "Search"
-                tab of the &Flexive; backend administration.
+                tab of the &Flexive; &backendGui;.
                 It is also accessible in the instance editor via the "Query" tab
                 and the "Create Query" context menu item in the
                 <link linkend="adm_ui_structure_editor">structure editor</link>.
@@ -3115,7 +3115,7 @@
                         <listitem>
                             <para>
                                 Default query: Allows the definition of a system-wide default query for &flexive;
-                                backend users using the <link linkend="adm_query_editor">query editor</link>.
+                                &backendGui; users using the <link linkend="adm_query_editor">query editor</link>.
                             </para>
                         </listitem>
                          <listitem>
@@ -3147,7 +3147,7 @@
                                 <itemizedlist>
                                     <listitem>
                                         <para>
-                                            Content results: Search location used by the &flexive; backend when searching for
+                                            Content results: Search location used by the &flexive; &backendGui; when searching for
                                             contents.
                                         </para>
                                     </listitem>
@@ -3194,7 +3194,7 @@
                             Enable live tree: if this option is disabled, the user cannot switch to the
                             <link linkend="adm_content_tree">live tree</link> in the
                             <link linkend="adm_instance_editor">content instance editor</link>
-                            anymore. Note that the backend needs to be reloaded via the browser
+                            anymore. Note that the &backendGui; needs to be reloaded via the browser
                             in order for changes to take effect!.
                         </para>
                     </listitem>
@@ -3249,7 +3249,7 @@
                     &flexive; system parameters grouped by scope.
                     Some parameters
                     can intentionally not be edited
-                    as either specialized GUIs for editing exist in the backend administration
+                    as either specialized GUIs for editing exist in the &backendGui;
                     or they merely serve information purposes and don't impact system behavior.
                     <mediaobject>
                         <imageobject>

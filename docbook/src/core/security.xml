@@ -220,7 +220,7 @@
                 </listitem>
                 <listitem>
                     <para>
-                        <constant>BackendAccess</constant>: may login to the backend (does not imply any rights)
+                        <constant>BackendAccess</constant>: may login to the &backendGui; (does not imply any rights)
                     </para>
                 </listitem>
             </itemizedlist>

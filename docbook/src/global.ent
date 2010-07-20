@@ -1,6 +1,7 @@
 <!ENTITY flexive "[fleXive]">
 <!ENTITY Flexive "[fleXive]">
-<!ENTITY backendGui "backend administration application">
+<!ENTITY backendGui "administration GUI">
+<!ENTITY BackendGui "Administration GUI">
 <!ENTITY xpath "XPath">
 <!ENTITY messagekey "message key">
 <!ENTITY flexiveJavadocBase "http://www.flexive.org/docs/3.1/javadoc/">

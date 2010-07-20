@@ -118,9 +118,9 @@
     </section>
 
     <section xml:id="plugins_backend_feedback">
-        <title>Backend Feedback Plugin</title>
+        <title>&BackendGui; Feedback Plugin</title>
         <para>
-            Integrates feedback buttons on the pages of the backend application.
+            Integrates feedback buttons on the pages of the &backendGui;.
         </para>
 
         <itemizedlist>
