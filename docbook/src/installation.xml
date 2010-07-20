@@ -46,34 +46,40 @@
         </section>
 
         <section xml:id="i_quickstart_run">
-            <title>Running &flexive;</title>
+            <title>Using &flexive;</title>
 
             <para>
-                There are three ways to run &flexive;:
+                The easiest way to get started is to
+                <link linkend="i_quickstart_installer">download the Java-based installer</link>.
+                It provides a preconfigured &flexive; instance that can be accessed with the
+                &backendGui;. WebDAV and CMIS connectors are also included.
             </para>
+
+            <para>
+                The common options for custom development and deployment are:
+            </para>
+
             <itemizedlist>
                 <listitem>
                     <para>
-                        Install and start the server through our
-                        <link xlink:href='&downloadsUrl;'>Java-based installer</link>.
-                        This is the easiest option to get started.
+                        Create a new EAR or WAR project with a
+                        <link linkend="i_quickstart_maven">Maven archetype</link>.
+                        EAR projects default to &jee5;,
+                        while standalone WAR deployments (not part of an EAR) require a &jee6; container.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        Create a new &flexive; project using &maven; and start the project
-                        using Maven's embedded Jetty container. This is preferable if you want to develop
-                        your application using Maven, but it may take a while to download all dependencies.
+                        To use &flexive; in an existing project, include the
+                        <link linkend="writing_applications_maven_packages">flexive-ejb artifact</link>.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        Download the
-                        <link xlink:href='&downloadsUrl;'>&flexive; distribution</link>,
-                        create the EAR (or start your own project), and deploy it to a supported
-                        application server. This is preferable if you want to develop
-                        applications using Ant. However, using the installer also provides you with
-                        a copy of the &flexive; distribution.
+                        To use the &backendGui; in a &jee6; application server (web or full profile), download
+                        and deploy
+                        <filename>flexive-backend.war</filename>
+                        from the &downloadsPage;.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -100,8 +106,11 @@
                     </listitem>
                     <listitem>
                         <para>
-                            Start the &flexive; server using the shortcut on the desktop, or if you didn't choose to
-                            create shortcuts, using the entry from the newly created flexive program group.
+                            Start the &flexive; server using the created shortcut, or manually using the
+                            <filename>start.sh</filename>
+                            (for Unix, Mac) or
+                            <filename>start.bat</filename>
+                            (Windows) scripts in the installation directory.
                         </para>
                     </listitem>
                     <listitem>
@@ -117,118 +126,151 @@
             </section>
 
             <section xml:id="i_quickstart_maven">
-                <title>Maven and Jetty</title>
+                <title>Maven support</title>
 
-                <itemizedlist>
-                    <listitem>
-                        <para>
-                            Create a new &flexive; project and install it:
-                        </para>
-                        <blockquote>
-                            <para>
-                                <userinput>
-                                    mvn -B archetype:generate -DarchetypeGroupId=com.flexive
-                                    -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=&mavenEarArchetypeVersion;
-                                    -DarchetypeRepository=http://repo.flexive.org/maven2/
-                                    -DartifactId=hello-flexive
-                                    -DgroupId=test
-                                    -Dversion=1.0-SNAPSHOT
-                                </userinput>
-                            </para>
-                            <para>
-                                <userinput>
-                                    cd hello-flexive
-                                </userinput>
-                            </para>
-                            <para>
-                                <userinput>
-                                    mvn install
-                                </userinput>
-                            </para>
-                        </blockquote>
-                    </listitem>
-
-                    <listitem>
-                        <para>Invoke the Jetty container for the WAR artifact:</para>
-                        <blockquote>
-                            <para>
-                                <userinput>
-                                    cd war
-                                </userinput>
-                            </para>
-                            <para>
-                                <userinput>
-                                    mvn jetty:run
-                                </userinput>
-                            </para>
-                        </blockquote>
-                        <para>
-                            Point your browser to
-                            <link xlink:href="http://localhost:8080/flexive-backend-war/adm/">
-                                http://localhost:8080/flexive-backend-war/adm/
-                            </link>
-                            and login with the default credentials
-                            (<userinput>supervisor/supervisor</userinput>).
-                        </para>
-                    </listitem>
-                </itemizedlist>
-
-                <para>
-                    For further information on &flexive; Maven support please continue with
-                    <xref linkend="writing_applications_maven"/>.
-                </para>
-            </section>
-
-            <section xml:id="i_quickstart_applicationserver">
-                <title>Deploying the EAR to an application server</title>
-
-                <para>
-                    To use a &flexive; application in a production environment, you should deploy the application
-                    as an EAR to one of our supported application servers. You need to configure
-                    the datasources required by &flexive; and possibly deploy additional libraries into
-                    the application server classpath.
-                </para>
-                <para>
-                    To create the EAR, download and install either the binary distribution or the
-                    installer from the &downloadsPage;. In the
-                    <filename>flexive-dist</filename>
-                    directory, execute
-                    <command>ant ear</command>
-                    to build an EAR containing flexive's &backendGui;.
-                </para>
-                <para>
-                    To deploy the EAR to your application server, please follow the guide for your
-                    vendor:
+                <section xml:id="i_quickstart_maven_ear">
+                    <title>EAR projects</title>
 
                     <itemizedlist>
                         <listitem>
                             <para>
-                                <link linkend="jboss_installation">JBoss 4.2</link>
-                                (also applies to 5.0)
+                                Create a new &flexive; project and install it:
                             </para>
+                            <blockquote>
+                                <para>
+                                    <userinput>
+                                        mvn -B archetype:generate -DarchetypeGroupId=com.flexive
+                                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=&mavenEarArchetypeVersion;
+                                        -DarchetypeRepository=http://repo.flexive.org/maven2/
+                                        -DartifactId=hello-flexive
+                                        -DgroupId=test
+                                        -Dversion=1.0-SNAPSHOT
+                                    </userinput>
+                                </para>
+                                <para>
+                                    <userinput>
+                                        cd hello-flexive
+                                    </userinput>
+                                </para>
+                                <para>
+                                    <userinput>
+                                        mvn install
+                                    </userinput>
+                                </para>
+                            </blockquote>
                         </listitem>
+
                         <listitem>
+                            <para>Invoke the Jetty container for the WAR artifact:</para>
+                            <blockquote>
+                                <para>
+                                    <userinput>
+                                        cd war
+                                    </userinput>
+                                </para>
+                                <para>
+                                    <userinput>
+                                        mvn jetty:run
+                                    </userinput>
+                                </para>
+                            </blockquote>
                             <para>
-                                <link linkend="glassfish_installation">Glassfish 2.1</link>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+Geronimo+2.1">
-                                    Geronimo 2.1
+                                Point your browser to
+                                <link xlink:href="http://localhost:8080/flexive/">
+                                    http://localhost:8080/flexive/
                                 </link>
-                                (Wiki)
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+WebLogic+10.3">
-                                    WebLogic 10.3
-                                </link>
-                                (Wiki)
+                                and login with the default credentials
+                                (<userinput>supervisor/supervisor</userinput>).
                             </para>
                         </listitem>
                     </itemizedlist>
+
+                    <para>
+                        To deploy the EAR to your application server, you need to
+                        configure a datasource and possibly install a few libraries. Please follow the guide for your
+                        vendor:
+
+                        <itemizedlist>
+                            <listitem>
+                                <para>
+                                    <link linkend="jboss_installation">JBoss 4.2</link>
+                                    (also applies to 5.0+)
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    <link linkend="glassfish_installation">Glassfish 2.1</link>
+                                    (also applies to 3.0+)
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+Geronimo+2.1">
+                                        Geronimo 2.1
+                                    </link>
+                                    (Wiki)
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+WebLogic+10.3">
+                                        WebLogic 10.3
+                                    </link>
+                                    (Wiki)
+                                </para>
+                            </listitem>
+                        </itemizedlist>
+                    </para>
+                </section>
+
+                <section xml:id="i_quickstart_maven_war">
+                    <title>WAR projects (&jee6;)</title>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Create a new &flexive;-based WAR and install it:
+                            </para>
+                            <blockquote>
+                                <para>
+                                    <userinput>
+                                        mvn -B archetype:generate -DarchetypeGroupId=com.flexive
+                                        -DarchetypeArtifactId=flexive-archetype-war -DarchetypeVersion=&mavenWarArchetypeVersion;
+                                        -DarchetypeRepository=http://repo.flexive.org/maven2/
+                                        -DartifactId=hello-flexive
+                                        -DgroupId=test
+                                        -Dversion=1.0-SNAPSHOT
+                                    </userinput>
+                                </para>
+                                <para>
+                                    <userinput>
+                                        cd hello-flexive
+                                    </userinput>
+                                </para>
+                                <para>
+                                    <userinput>
+                                        mvn package
+                                    </userinput>
+                                </para>
+                            </blockquote>
+                        </listitem>
+
+                        <listitem>
+                            <para>
+                                Deploy the WAR artifact from the
+                                <filename>target</filename>
+                                directory to your application server. If you want to use the &backendGui;
+                                for managing the repository, download and deploy
+                                <filename>flexive-backend.war</filename>
+                                from the &downloadsPage;.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </section>
+
+                <para>
+                    For further information on &flexive; Maven support please continue with
+                    <xref linkend="writing_applications_maven"/>.
                 </para>
             </section>
 
@@ -239,12 +281,6 @@
                     Now that you got &flexive; up and running, you might...
                 </para>
                 <itemizedlist>
-                    <listitem>
-                        <para>
-                            continue browsing the &backendGui; at
-                            <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>,
-                        </para>
-                    </listitem>
                     <listitem>
                         <para>watch the
                             <link xlink:href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html">
@@ -550,8 +586,22 @@ database.vendor=MySQL]]></programlisting>
     </section>
 
     <section xml:id="glassfish_installation">
-        <title>&Flexive; installation guide for Glassfish V2
+        <title>&Flexive; installation guide for Glassfish 2 and 3
         </title>
+        <para>
+            <emphasis>Notes for Glassfish 3+:</emphasis>
+            The glassfish base directory is actually the
+            <filename>glassfish</filename>
+            subdirectory in the installation directory.
+
+            For example, instead of
+            <filename>${glassfish.home}/domains/domain1</filename>
+            you would need to go to
+            <filename>${glassfish.home}/glassfish/domains/domain1</filename>.
+            
+            You can also skip the following section about required libraries if you intend to do only
+            WAR deployments.
+        </para>
         <section xml:id="glassfish_installation_required_libs">
             <title>Required libraries</title>
             <para>Flexive needs several libraries to be deployed to the application server's internal
@@ -563,7 +613,7 @@ database.vendor=MySQL]]></programlisting>
                 <para>We provide an
                     <command>ant</command>
                     task for you which copies all libraries needed
-                    to deploy &Flexive; on Glassfish V2 to the specified directory.
+                    to deploy &Flexive; on Glassfish to the specified directory.
                 </para>
                 <itemizedlist>
                     <listitem>
@@ -578,15 +628,6 @@ database.vendor=MySQL]]></programlisting>
                             The
                             <command>ant</command>
                             task will copy all required libraries to this directory.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>Copy the
-                            <filename>jbosscache-core.jar</filename>
-                            from the
-                            <filename>extlib</filename>
-                            directory of your &Flexive; binary distribution to
-                            <filename>${glassfish.home}/lib</filename>
                         </para>
                     </listitem>
                 </itemizedlist>

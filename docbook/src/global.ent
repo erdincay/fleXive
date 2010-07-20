@@ -17,6 +17,8 @@
 <!ENTITY xstream "<link xlink:href='http://xstream.codehaus.org/'>XStream</link>">
 <!ENTITY ajax4jsf "Ajax4jsf">
 <!ENTITY jee5 "JavaEE 5">
+<!ENTITY jee6 "JavaEE 6">
+<!ENTITY webprofile "<link xlink:href='http://java.sun.com/developer/technicalArticles/JavaEE/JavaEE6Overview_Part3.html#webprof'>web profile</link>">
 <!ENTITY fxsql "FxSQL">
 <!ENTITY contentTree "content tree">
 <!ENTITY list_yes "X">
@@ -29,9 +31,9 @@
 <!ENTITY groovy "<link xlink:href='http://groovy.codehaus.org/'>Groovy</link>">
 <!ENTITY mavenRepoUrl "http://repo.flexive.org/maven2/">
 <!ENTITY mavenRepo "<link xlink:href='&mavenRepoUrl;'>&mavenRepoUrl;</link>">
-<!ENTITY mavenVersion "3.1.0">
-<!ENTITY mavenEarArchetypeVersion "0.7.1">
-<!ENTITY mavenWarArchetypeVersion "1.0-SNAPSHOT">
+<!ENTITY mavenVersion "3.1.4">
+<!ENTITY mavenEarArchetypeVersion "0.8">
+<!ENTITY mavenWarArchetypeVersion "0.8">
 <!ENTITY hudson "<link xlink:href='https://hudson.dev.java.net/'>Hudson</link>">
 <!ENTITY eclipse "<link xlink:href='http://www.eclipse.org/'>Eclipse</link>">
 <!ENTITY idea "<link xlink:href='http://www.jetbrains.com/idea/'>IntelliJ IDEA</link>">
