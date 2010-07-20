@@ -407,7 +407,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * Transfer a binary from the transit to the 'real' binary table
      *
-     * @param con     open and valid connection
+     * @param _con     open and valid connection
      * @param binary  the binary descriptor
      * @param id      desired id
      * @param version desired version
@@ -697,7 +697,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * Identifies a binary in the transit table and generates previews etc.
      *
-     * @param con    an open and valid Connection
+     * @param _con    an open and valid Connection
      * @param binary the binary to identify
      * @return BinaryDescriptor
      * @throws FxApplicationException on errors
