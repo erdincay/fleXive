@@ -362,6 +362,14 @@ public class SystemBean implements Serializable {
     }
 
     /**
+     * @return  the [fleXive] version number, e.g. 3.1.3
+     * @since   3.1.4
+     */
+    public String getBuildVersion() {
+        return FxSharedUtils.getFlexiveVersion();
+    }
+
+    /**
      * Get a list of all installed and deployed drop names.
      *
      * @return list of all installed and deployed drop names.
