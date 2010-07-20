@@ -279,6 +279,12 @@
 
     <repositories>
         <repository>
+            <id>maven.flexive.org</id>
+            <name>Flexive repo</name>
+            <url>http://repo.flexive.org/maven2</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
             <id>milton</id>
             <url>http://www.ettrema.com/maven2/</url>
             <snapshots>
