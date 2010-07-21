@@ -22,7 +22,6 @@
             <groupId>com.flexive</groupId>
             <artifactId>flexive-ejb</artifactId>
             <type>ejb</type>
-            <version>${flexive.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.flexive</groupId>
@@ -34,19 +33,31 @@
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-backend</artifactId>
-            <version>${flexive.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-ejb-interfaces-local</artifactId>
-            <version>${flexive.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-plugin-jsf-core</artifactId>
-            <version>${flexive.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-documents</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-audio</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-video</artifactId>
         </dependency>
 
     </dependencies>

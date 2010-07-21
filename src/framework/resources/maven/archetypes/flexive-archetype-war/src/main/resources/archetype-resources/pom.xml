@@ -94,14 +94,14 @@
             <version>${flexive.version}</version>
         </dependency-->
 
-        <!-- Enable this dependency if you don't need to process audio documents (MP3, OGG, Flac, ...) -->
+        <!-- Enable this dependency if you want to process audio documents (MP3, OGG, Flac, ...) -->
         <!--dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-extractor-audio</artifactId>
             <version>${flexive.version}</version>
         </dependency-->
 
-        <!-- Enable this dependency if you don't need to process video documents (AVI, MKV, ...) -->
+        <!-- Enable this dependency if you want to process video documents (AVI, MKV, ...) -->
         <!--dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-extractor-video</artifactId>

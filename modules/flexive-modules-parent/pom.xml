@@ -23,6 +23,7 @@
                 <groupId>com.flexive</groupId>
                 <artifactId>flexive-ejb</artifactId>
                 <version>${flexive.version}</version>
+                <type>ejb</type>
             </dependency>
 
             <dependency>
@@ -36,6 +37,68 @@
                 <artifactId>flexive-shared</artifactId>
                 <version>${flexive.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-backend</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-backend-war</artifactId>
+                <type>war</type>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-ejb-interfaces-local</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-ejb-interfaces-allo</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf-core</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-extractor-documents</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-extractor-audio</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-extractor-video</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf2-core</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf-core</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>junit</groupId>
