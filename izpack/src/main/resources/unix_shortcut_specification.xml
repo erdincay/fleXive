@@ -19,8 +19,8 @@
             Categories="Development;Java;Database"
     />
     <shortcut
-            name="Open fleXive Backend"
-            description="Open the fleXive backend application in your web browser"
+            name="Open fleXive administration GUI"
+            description="Open the fleXive administration GUI in your web browser"
             iconFile="$INSTALL_PATH/icon_backend.png"
             encoding="UTF-8"
             desktop="yes"

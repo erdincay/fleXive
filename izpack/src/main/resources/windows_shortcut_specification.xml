@@ -18,8 +18,8 @@
             Categories="Development;Java;Database"
     />
     <shortcut
-            name="Open fleXive Backend"
-            description="Open the fleXive backend application in your web browser (http://localhost:8080/flexive/adm/)"
+            name="Open fleXive administration GUI"
+            description="Open the fleXive administration GUI in your web browser (http://localhost:8080/flexive/adm/)"
             iconFile="$INSTALL_PATH/icon_backend.ico"
             encoding="UTF-8"
             desktop="yes"

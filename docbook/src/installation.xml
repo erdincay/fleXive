@@ -78,7 +78,7 @@
                     <para>
                         To use the &backendGui; in a &jee6; application server (web or full profile), download
                         and deploy
-                        <filename>flexive-backend.war</filename>
+                        <filename>flexive-admin.war</filename>
                         from the &downloadsPage;.
                     </para>
                 </listitem>
@@ -261,7 +261,7 @@
                                 <filename>target</filename>
                                 directory to your application server. If you want to use the &backendGui;
                                 for managing the repository, download and deploy
-                                <filename>flexive-backend.war</filename>
+                                <filename>flexive-admin.war</filename>
                                 from the &downloadsPage;.
                             </para>
                         </listitem>
