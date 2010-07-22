@@ -189,7 +189,7 @@
                                         <adm:ajaxCommandIcon titleKey="SelectList.button.delete"
                                                          icon="delete" bean="#{selectListBean}" action="deleteListItem"
                                                          id="deleteButton"
-                                                         rendered="#{selectListBean.mayDeleteItems}" reRender="itemTable">
+                                                         rendered="#{selectListBean.mayDeleteItems}" reRender="itemTable,itemCount">
                                             <f:setPropertyActionListener target="#{selectListBean.listItemId}"
                                                                          value="#{item.id}"/>
                                             <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerDTPage"
