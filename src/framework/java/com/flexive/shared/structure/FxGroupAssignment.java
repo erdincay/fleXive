@@ -244,6 +244,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      * {@inheritDoc}
      * @since 3.1.4
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     @Override
     public FxData createEmptyData(FxGroupData parent, int index, int position) {
         List<FxData> children = new CopyOnWriteArrayList<FxData>();
@@ -254,8 +255,9 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             // if we need to check minMulti then it has to be valid otherwise it has only valid maxMulti
             if (!fxMultiplicity.isValidMax(index))
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
-            thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
-                    XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
+            final String xPathFull = XPathElement.stripType(parent.getXPathFull() + (parent.isRootGroup() ? "" : "/") + this.getAlias() + "[" + index + "]");
+            thisGroup = new FxGroupData(parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
+                    xPathFull, XPathElement.getIndices(xPathFull),
                     this.getId(), this.getMultiplicity(), position, parent, children, this.isSystemInternal());
             if (this.getMode() == GroupMode.OneOf) {
                 //if One-Of more find the first non-optional child and create it (should not happen if correctly setup

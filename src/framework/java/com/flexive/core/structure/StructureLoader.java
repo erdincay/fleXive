@@ -421,7 +421,7 @@ public final class StructureLoader {
     }
 
     /**
-     * Replace the environments languages
+     * Replace the environments user groups
      *
      * @param divisionId division
      * @param userGroups new user groups
