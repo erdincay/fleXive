@@ -1859,6 +1859,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 if (!isGroup)
                     currValue.setDefaultLanguage(defLang);
                 addValue(root, currXPath, currAssignment, currPos, currValue);
+            } else {
+                if (flatContainer == null && isGroup && currAssignment != null) //make sure to add the last assignment if it is a group and no flat storage is enabled
+                    addValue(root, currXPath, currAssignment, currPos, currValue);
             }
             if (flatContainer != null) {
                 if (isGroup && currAssignment != null) //if the last value was a group, add it (can only happen when using a flat storage)
