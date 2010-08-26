@@ -87,14 +87,23 @@ public class FxExceptionMessage implements Serializable {
     }
 
     /**
-     * Returns the resource bundle, which is cached within the request.
+     * Returns the resource bundle in the default locale.
      *
      * @param key resource key
-     * @return the resource bundle
+     * @return the resource bundle value
      */
     public String getResource(String key) {
-        final UserTicket ticket = FxContext.getUserTicket();
-        final Locale locale = ticket != null ? ticket.getLanguage().getLocale() : Locale.getDefault();
+        return getResource(key, Locale.getDefault());
+    }
+
+    /**
+     * Returns the resource bundle, which is cached within the request.
+     *
+     * @param key       resource key
+     * @param locale    the requested locale
+     * @return the resource bundle value
+     */
+    public String getResource(String key, Locale locale) {
         if (!initialized) {
             initialize();
         }
@@ -168,26 +177,26 @@ public class FxExceptionMessage implements Serializable {
     /**
      * Get the localized message for a given language code
      *
-     * @param localeId locale id of the desired output
+     * @param language  the language
      * @return localized message
      */
-    public String getLocalizedMessage(long localeId) {
+    public String getLocalizedMessage(FxLanguage language) {
         String result;
         try {
-            result = getResource(key);
+            result = getResource(key, language.getLocale());
             if (values != null && values.length > 0) {
                 for (int i = 0, valuesLength = values.length; i < valuesLength; i++) {
                     Object val = values[i];
                     if (val != null && val instanceof String && ((String) val).startsWith("ex.")) {
                         //replace potential resource key with message
                         try {
-                            values[i] = getResource((String)val);
+                            values[i] = getResource((String)val, language.getLocale());
                         } catch (Exception e) {
                             LOG.warn(e);
                         }
                     }
                 }
-                result = FxFormatUtils.formatResource(result, localeId, values);
+                result = FxFormatUtils.formatResource(result, language.getId(), values);
             }
             return result;
         } catch (MissingResourceException e) {
@@ -197,31 +206,25 @@ public class FxExceptionMessage implements Serializable {
     }
 
     /**
+     * Get the localized message for a given language code
+     *
+     * @param localeId locale id of the desired output
+     * @return localized message
+     * @deprecated use {@link #getLocalizedMessage(com.flexive.shared.FxLanguage) } if possible
+     */
+    public String getLocalizedMessage(long localeId) {
+         return getLocalizedMessage(CacheAdmin.getEnvironment().getLanguage(localeId));
+    }
+
+    /**
      * Get the localized message for given ISO code
      *
      * @param localeIso requested ISO code for desired output
      * @return localized message
+     * @deprecated use {@link #getLocalizedMessage(com.flexive.shared.FxLanguage) } if possible
      */
     public String getLocalizedMessage(String localeIso) {
-        FxLanguage locale;
-        try {
-            locale = CacheAdmin.getEnvironment().getLanguage(localeIso);
-        } catch (FxRuntimeException e) {
-            String msg = "[Invalid locale code (" + localeIso + ") requested for " + key + "!]";
-            LOG.warn(msg);
-            return msg;
-        }
-        return getLocalizedMessage(locale.getId());
-    }
-
-    /**
-     * Get the localized message for a given language
-     *
-     * @param locale locale of the desired output
-     * @return localized message
-     */
-    public String getLocalizedMessage(FxLanguage locale) {
-        return getLocalizedMessage(locale.getId());
+        return getLocalizedMessage(CacheAdmin.getEnvironment().getLanguage(localeIso));
     }
 
     /**

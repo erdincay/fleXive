@@ -273,7 +273,7 @@ public final class FxFormatUtils {
      * @return generated hex string
      */
     public static String encodeHex(byte[] bytes) {
-        StringBuffer buf = new StringBuffer(bytes.length * 2);
+        StringBuilder buf = new StringBuilder(bytes.length * 2);
         int i;
         for (i = 0; i < bytes.length; i++) {
             if (((int) bytes[i] & 0xff) < 0x10) {
@@ -306,7 +306,7 @@ public final class FxFormatUtils {
      */
     public static String encodeBase64(byte[] data, int len) {
         int c;
-        StringBuffer ret = new StringBuffer(((len / 3) + 1) * 4);
+        StringBuilder ret = new StringBuilder(((len / 3) + 1) * 4);
         for (int i = 0; i < len; ++i) {
             c = (data[i] >> 2) & 0x3f;
             ret.append(cvt.charAt(c));
@@ -345,11 +345,11 @@ public final class FxFormatUtils {
     public static String formatResource(String resource, long languageId, Object... values) {
         if (resource == null)
             return "";
-        StringBuffer msg = new StringBuffer((int) (resource.length() * 1.5));
+        StringBuilder msg = new StringBuilder((int) (resource.length() * 1.5));
         int pos = 0;
         boolean inRep = false;
         int index;
-        StringBuffer sbIdx = new StringBuffer(5);
+        StringBuilder sbIdx = new StringBuilder(5);
         while (pos < resource.length()) {
             if (resource.charAt(pos) == '{') {
                 inRep = true;
