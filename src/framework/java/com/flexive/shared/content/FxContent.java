@@ -1290,12 +1290,16 @@ public class FxContent implements Serializable {
                 if (curMult == null)
                     curMult = 0;
                 if (!curAss.getMultiplicity().isValid(curMult)) {
+                    final FxInvalidParameterException error;
                     if (curMult > 0)
-                        throw new FxInvalidParameterException(/*curAss.getAlias()*/key, "ex.content.required.missing",
+                        error = new FxInvalidParameterException(/*curAss.getAlias()*/key, "ex.content.required.missing",
                                 curAss.getDisplayName(true), curMult, curAss.getMultiplicity().toString());
                     else
-                        throw new FxInvalidParameterException(/*curAss.getAlias()*/key, "ex.content.required.missing.none",
+                        error = new FxInvalidParameterException(/*curAss.getAlias()*/key, "ex.content.required.missing.none",
                                 /*curAss.getDisplayName(true)*/ key, curAss.getMultiplicity().toString());
+                    // notify caller or invalid XPath
+                    error.setAffectedXPath(curAss.getXPath(), FxContentExceptionCause.RequiredViolated);
+                    throw error;
                 }
             }
             // mark the xpath to be removed
@@ -1321,10 +1325,12 @@ public class FxContent implements Serializable {
                             break groups ;
                         parentGroupAssignment = parentGroupAssignment.getParentGroupAssignment();
                     }
-                    if (!currAss.getMultiplicity().isOptional())
-                    throw new FxInvalidParameterException(/*currAss.getAlias()*/ currAss.getXPath(), "ex.content.required.missing.none",
-                            currAss.getDisplayName(true), currAss.getMultiplicity().toString());
-
+                    if (!currAss.getMultiplicity().isOptional()) {
+                        final FxInvalidParameterException error = new FxInvalidParameterException(currAss.getXPath(), "ex.content.required.missing.none",
+                                currAss.getDisplayName(true), currAss.getMultiplicity().toString());
+                        error.setAffectedXPath(xPath, FxContentExceptionCause.RequiredViolated);
+                        throw error;
+                    }
                 }
 
             }
