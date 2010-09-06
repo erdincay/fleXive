@@ -129,7 +129,7 @@ public class ReadOnlyModeHelper implements RenderHelper {
         } else if (value instanceof FxReference && !value.isTranslationEmpty(language)) {
             // render reference preview
             final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(
-                    parent, RenderHelperUtils.stripForm(langInputId) + "_image", HtmlGraphicImage.COMPONENT_TYPE
+                    parent, RenderHelperUtils.stripForm(langInputId) + "_image", HtmlGraphicImage.COMPONENT_TYPE, true
             );
             image.setUrl(ThumbnailServlet.getLink(
                     new FxMediaSelector(((FxReference) value).getDefaultTranslation()).
@@ -142,7 +142,7 @@ public class ReadOnlyModeHelper implements RenderHelper {
         } else if (value instanceof FxBoolean && !value.isTranslationEmpty(language)) {
             // render disabled checkbox
             final HtmlSelectBooleanCheckbox checkbox = (HtmlSelectBooleanCheckbox) FxJsfUtils.addChildComponent(
-                    parent, RenderHelperUtils.stripForm(langInputId) + "_cb", HtmlSelectBooleanCheckbox.COMPONENT_TYPE
+                    parent, RenderHelperUtils.stripForm(langInputId) + "_cb", HtmlSelectBooleanCheckbox.COMPONENT_TYPE, true
             );
             checkbox.setDisabled(true);
             checkbox.setReadonly(true);
@@ -173,7 +173,7 @@ public class ReadOnlyModeHelper implements RenderHelper {
             // use container as parent for all subsequent operations
             parent = container;
         }
-        final HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, RenderHelperUtils.stripForm(inputId), HtmlOutputText.COMPONENT_TYPE);
+        final HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, RenderHelperUtils.stripForm(inputId), HtmlOutputText.COMPONENT_TYPE, true);
         if (this.value instanceof FxSelectOne)
             output.setStyle("color:" + ((FxSelectOne) this.value).getDefaultTranslation().getColor());
         output.setEscape(false);
@@ -190,7 +190,7 @@ public class ReadOnlyModeHelper implements RenderHelper {
             return;
         }
         final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(
-                component, RenderHelperUtils.stripForm(inputId) + "_imglink", HtmlOutputLink.COMPONENT_TYPE
+                component, RenderHelperUtils.stripForm(inputId) + "_imglink", HtmlOutputLink.COMPONENT_TYPE, true
         );
         FxPK pk;
         try {
@@ -220,7 +220,7 @@ public class ReadOnlyModeHelper implements RenderHelper {
     }
 
     protected void addImageComponent(UIComponent parent, BinaryDescriptor descriptor, FxLanguage language, String inputId) {
-        final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, RenderHelperUtils.stripForm(inputId), HtmlGraphicImage.COMPONENT_TYPE);
+        final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, RenderHelperUtils.stripForm(inputId), HtmlGraphicImage.COMPONENT_TYPE, true);
         FxPK pk;
         try {
             pk = XPathElement.getPK(value.getXPath());
