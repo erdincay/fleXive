@@ -58,7 +58,6 @@ import javax.faces.component.UIInput;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
-import javax.faces.validator.Validator;
 import java.io.IOException;
 import javax.faces.component.html.HtmlGraphicImage;
 
@@ -599,14 +598,6 @@ public abstract class AbstractFxValueInput extends UIInput {
      */
     @Override
     public Object saveState(FacesContext context) {
-        // remove our dynamically attached validator before saving, it will be added
-        // in the constructor on the next invocation anyway
-        for (Validator validator : getValidators()) {
-            if (validator instanceof FxValueInputValidator) {
-                removeValidator(validator);
-            }
-        }
-        
         // save state
         Object[] values = new Object[12];
         int index = 0;
