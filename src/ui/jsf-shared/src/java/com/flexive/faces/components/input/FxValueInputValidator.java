@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgValidationErr;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.StringUtils;
@@ -59,7 +60,7 @@ public class FxValueInputValidator implements Validator {
         }
         FxValue fxValue = (FxValue) value;
         if (!fxValue.isValid()) {
-            FxFacesMsgErr message = new FxFacesMsgErr("FxValueInput.err.invalid", prepareXPath(fxValue), fxValue.getErrorValue());
+            FxFacesMsgErr message = new FxFacesMsgValidationErr(fxValue, "FxValueInput.err.invalid", prepareXPath(fxValue), fxValue.getErrorValue());
             String clientId = input.getExternalId() == -1 ? input.getClientId(context) : String.valueOf(input.getExternalId());
             if (!StringUtils.isEmpty(clientId)) {
                 if (clientId.indexOf(':') > 0) {
