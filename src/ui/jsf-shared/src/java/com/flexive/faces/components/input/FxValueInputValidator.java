@@ -63,7 +63,9 @@ public class FxValueInputValidator implements Validator {
             String clientId = input.getExternalId() == -1 ? input.getClientId(context) : String.valueOf(input.getExternalId());
             if (!StringUtils.isEmpty(clientId)) {
                 if (clientId.indexOf(':') > 0) {
-                    String[] cid = clientId.split(":");
+                    String[] cid = StringUtils.split(clientId, ":", 2);
+                    // TODO: this doesn't really work in most JSF2 applications, where every composite component
+                    // is a naming container
                     message.setForm(cid[0]);
                     message.setId(cid[1]);
                 } else {
