@@ -89,6 +89,7 @@ public class SelectListBean implements Serializable {
         private boolean selectListAllowDynamicCreation = true;
         private String selectListBreadcrumbSeparator = " > ";
         private boolean selectListOnlySameLevelSelect = false;
+        private boolean selectListSortEntries = false;
 
         private long listItemId = UNSELECTED_ID;
         private String itemName = null;
@@ -383,6 +384,13 @@ public class SelectListBean implements Serializable {
         this.currentData.selectListOnlySameLevelSelect = selectListOnlySameLevelSelect;
     }
 
+    public boolean isSelectListSortEntries() {
+        return currentData.selectListSortEntries;
+    }
+
+    public void setSelectListSortEntries(boolean selectListSortEntries) {
+        this.currentData.selectListSortEntries = selectListSortEntries;
+    }
 
     public long getMoveListItemId() {
         return moveListItemId;
@@ -620,6 +628,7 @@ public class SelectListBean implements Serializable {
         currentData.selectListAllowDynamicCreation = true;
         currentData.selectListBreadcrumbSeparator = " > ";
         currentData.selectListOnlySameLevelSelect = false;
+        currentData.selectListSortEntries = false;
         currentData.itemLabel = new FxString("");
         currentData.itemName = null;
         currentData.itemACL = CacheAdmin.getEnvironment().getACL(ACLCategory.SELECTLISTITEM.getDefaultId());
@@ -638,6 +647,7 @@ public class SelectListBean implements Serializable {
                     CacheAdmin.getEnvironment().getACL(newDefaultItemACL));
             list.setBreadcrumbSeparator(currentData.selectListBreadcrumbSeparator);
             list.setOnlySameLevelSelect(currentData.selectListOnlySameLevelSelect);
+            list.setSortEntries(currentData.selectListSortEntries);
             currentData.selectListId = EJBLookup.getSelectListEngine().save(list);
             reset();
             new FxFacesMsgInfo("SelectList.nfo.created").addToContext();
@@ -664,6 +674,7 @@ public class SelectListBean implements Serializable {
             setSelectListName(selectList.getName());
             setSelectListBreadcrumbSeparator(selectList.getBreadcrumbSeparator());
             setSelectListOnlySameLevelSelect(selectList.isOnlySameLevelSelect());
+            setSelectListSortEntries(selectList.isSortEntries());
             setItemACL(selectList.getNewItemACL());
         }
 
@@ -775,6 +786,7 @@ public class SelectListBean implements Serializable {
                 selectList.setAllowDynamicItemCreation(currentData.selectListAllowDynamicCreation);
                 selectList.setBreadcrumbSeparator(currentData.selectListBreadcrumbSeparator);
                 selectList.setOnlySameLevelSelect(currentData.selectListOnlySameLevelSelect);
+                selectList.setSortEntries(currentData.selectListSortEntries);
             }
             EJBLookup.getSelectListEngine().save(selectList);
             reset();

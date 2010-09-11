@@ -1668,6 +1668,30 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Item sorter by label
+     */
+    public static class ItemLabelSorter implements Comparator<FxSelectListItem>, Serializable {
+        private static final long serialVersionUID = 2366364003069358945L;
+        private long language;
+
+        /**
+         * Ctor
+         *
+         * @param language the language used for sorting
+         */
+        public ItemLabelSorter(long language) {
+            this.language = language;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public int compare(FxSelectListItem i1, FxSelectListItem i2) {
+            return i1.getLabel().getBestTranslation(language).compareToIgnoreCase(i2.getLabel().getBestTranslation(language));
+        }
+    }
+
+    /**
      * An SQL executor, similar to ant's sql task
      * An important addition are raw blocks:
      * lines starting with '-- @START@' indicate the start of a raw block and lines starting with '-- @END@'

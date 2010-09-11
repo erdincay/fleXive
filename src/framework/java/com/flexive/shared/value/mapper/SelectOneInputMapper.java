@@ -92,7 +92,7 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
         try {
             return selectList.getItem(languageId != -1 ? value.getTranslation(languageId) : value.getDefaultTranslation());
         } catch (FxRuntimeException e) {
-            return selectList.getItems().get(0);    // select first item as default
+            return (selectList.isSortEntries() ? selectList.getItemsSortedByLabel() : selectList.getItems()).get(0);    // select first item as default
         }
     }
 

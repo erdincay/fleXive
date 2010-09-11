@@ -370,8 +370,8 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             con = Database.getDbConnection();
             //                                                            1  2        3    4
             ps = con.prepareStatement("INSERT INTO " + TBL_STRUCT_SELECTLIST + "(ID,PARENTID,NAME,ALLOW_ITEM_CREATE," +
-                    //5              6            7            8     9
-                    "ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT)VALUES(?,?,?,?,?,?,?,?,?)");
+                    //5              6            7            8     9             10
+                    "ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT,SORTENTRIES)VALUES(?,?,?,?,?,?,?,?,?,?)");
             ps.setLong(1, newId);
             if (list.hasParentList())
                 ps.setLong(2, list.getParentList().getId());
@@ -384,6 +384,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setNull(7, java.sql.Types.INTEGER);
             ps.setString(8, list.getBreadcrumbSeparator());
             ps.setBoolean(9, list.isOnlySameLevelSelect());
+            ps.setBoolean(10, list.isSortEntries());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
                     con, TBL_STRUCT_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", newId);
@@ -467,8 +468,8 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             con = Database.getDbConnection();
             //                                                                    1      2                   3
             ps = con.prepareStatement("UPDATE " + TBL_STRUCT_SELECTLIST + " SET PARENTID=?,NAME=?,ALLOW_ITEM_CREATE=?," +
-                    //               4              5       6               7          8
-                    "ACL_CREATE_ITEM=?,ACL_ITEM_NEW=?,BCSEP=?,SAMELVLSELECT=? WHERE ID=?");
+                    //               4              5       6               7             8          9
+                    "ACL_CREATE_ITEM=?,ACL_ITEM_NEW=?,BCSEP=?,SAMELVLSELECT=?,SORTENTRIES=? WHERE ID=?");
             if (list.hasParentList())
                 ps.setLong(1, list.getParentList().getId());
             else
@@ -479,7 +480,8 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setLong(5, list.getNewItemACL().getId());
             ps.setString(6, list.getBreadcrumbSeparator());
             ps.setBoolean(7, list.isOnlySameLevelSelect());
-            ps.setLong(8, list.getId());
+            ps.setBoolean(8, list.isSortEntries());
+            ps.setLong(9, list.getId());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
                     con, TBL_STRUCT_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", list.getId());

@@ -864,8 +864,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_STRUCT_SELECTLIST, "LABEL", "DESCRIPTION");
             final Map<Long, FxString[]> itemTranslations = Database.loadFxStrings(con, TBL_STRUCT_SELECTLIST_ITEM, "LABEL");
 
-            //            1  2        3    4                 5               6            7            8     9
-            sql = "SELECT ID,PARENTID,NAME,ALLOW_ITEM_CREATE,ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT FROM " +
+            //            1  2        3    4                 5               6            7            8     9             10
+            sql = "SELECT ID,PARENTID,NAME,ALLOW_ITEM_CREATE,ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT,SORTENTRIES FROM " +
                     TBL_STRUCT_SELECTLIST + " ORDER BY NAME";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -880,11 +880,14 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 boolean sameLvl = rs.getBoolean(9);
                 if (rs.wasNull())
                     sameLvl = false;
+                boolean sort = rs.getBoolean(10);
+                if (rs.wasNull())
+                    sort = false;
                 lists.add(new FxSelectList(id, parent, rs.getString(3),
                         getTranslation(translations, id, 0),
                         getTranslation(translations, id, 1),
                         rs.getBoolean(4), environment.getACL(rs.getLong(5)), environment.getACL(rs.getLong(6)),
-                        rs.getLong(7), bcSep, sameLvl));
+                        rs.getLong(7), bcSep, sameLvl, sort));
             }
             ps.close();
             //            1  2    3   4        5    6     7          8          9           10          11      12       13

@@ -32,6 +32,7 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxArrayUtils;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -60,7 +61,7 @@ public class SelectMany implements Serializable {
      */
     public SelectMany(FxSelectList list) {
         this.list = list;
-        this.available = new ArrayList<FxSelectListItem>(list.getItems());
+        this.available = new ArrayList<FxSelectListItem>(list.isSortEntries() ? list.getItemsSortedByLabel() : list.getItems());
         this.selected = new ArrayList<FxSelectListItem>(available.size());
     }
 
@@ -217,7 +218,7 @@ public class SelectMany implements Serializable {
     public void deselectAll() {
         selected.clear();
         available.clear();
-        available.addAll(list.getItems());
+        available.addAll(list.isSortEntries() ? list.getItemsSortedByLabel() : list.getItems());
     }
 
     /**
@@ -250,7 +251,7 @@ public class SelectMany implements Serializable {
     }
 
     private void sortSelected() {
-        Collections.sort(selected, new FxSharedUtils.ItemPositionSorter());
+        Collections.sort(selected, list.isSortEntries() ? new FxSharedUtils.ItemLabelSorter(FxContext.getUserTicket().getLanguage().getId()) : new FxSharedUtils.ItemPositionSorter());
     }
 
     @Override

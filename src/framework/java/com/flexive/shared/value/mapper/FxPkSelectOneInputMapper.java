@@ -132,7 +132,7 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
     private FxSelectListItem defaultSelectItem() {
         return selectList.getItems().isEmpty()
                     ? new FxSelectListItem(-1, "", selectList, -1, new FxString(""))
-                : selectList.getItems().get(0);
+                : (selectList.isSortEntries() ? selectList.getItemsSortedByLabel() : selectList.getItems()).get(0);
     }
 
 

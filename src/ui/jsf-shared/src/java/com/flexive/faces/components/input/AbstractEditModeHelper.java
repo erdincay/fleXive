@@ -367,7 +367,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             // automatically limit select list rows for very long lists. "Real" single-line input is not possible with a
             // standard listbox widget if multiple selection should still be possible,
             // so we're only restraining the height a bit stronger
-            listbox.setSize(Math.min(selectValue.getSelectList().getItems().size(), component.isForceLineInput() ? 3 : 7));
+            listbox.setSize(Math.min(selectValue.getSelectList().getItemCount(), component.isForceLineInput() ? 3 : 7));
             input = listbox;
         }
         storeSelectItems(input, selectValue.getSelectList(), false);

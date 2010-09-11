@@ -75,6 +75,9 @@
             <fx:formRow labelKey="SelectList.label.selectList.onlySameLevelSelect" id="onlySameLevelSelect">
                 <h:selectBooleanCheckbox id="onlySameLevelSelect" value="#{selectListBean.selectListOnlySameLevelSelect}" disabled="#{readonlyList}"/>
             </fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.sortEntries" id="sortEntries">
+                <h:selectBooleanCheckbox id="sortEntries" value="#{selectListBean.selectListSortEntries}" disabled="#{readonlyList}"/>
+            </fx:formRow>
             <a4j:outputPanel id="itemCount">
             <fx:formRow labelKey="SelectList.label.count" id="elementCount">
                 <h:outputText value="#{selectListBean.selectList.itemCount}"/>

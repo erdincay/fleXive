@@ -97,6 +97,7 @@ public class GroovySelectListBuilder extends BuilderSupport implements Serializa
                     (ACL) getMapValue(map, "newItemACL", false, CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLISTITEM)),
                     null);
             list.setOnlySameLevelSelect(Boolean.valueOf(String.valueOf(getMapValue(map, "selectOnlySameLevel", false, false))));
+            list.setSortEntries(Boolean.valueOf(String.valueOf(getMapValue(map, "sortEntries", false, false))));
             list.setBreadcrumbSeparator((String) getMapValue(map, "breadcrumbSeparator", false, " > "));
             return list;
         } else {

@@ -858,8 +858,8 @@ public class FxJsfUtils {
      * @return a JSF select list corresponding to the given list options
      */
     public static List<SelectItem> asSelectList(FxSelectList list) {
-        final List<SelectItem> result = new ArrayList<SelectItem>(list.getItems().size());
-        for (FxSelectListItem item : list.getItems())
+        final List<SelectItem> result = new ArrayList<SelectItem>(list.getItemCount());
+        for (FxSelectListItem item : (list.isSortEntries() ? list.getItemsSortedByLabel() : list.getItems()))
             result.add(new FxJSFSelectItem(item));
         return result;
     }

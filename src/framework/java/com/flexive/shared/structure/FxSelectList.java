@@ -31,10 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.ObjectWithLabel;
-import com.flexive.shared.SelectableObjectWithLabel;
-import com.flexive.shared.SelectableObjectWithName;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
@@ -70,6 +67,7 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
     protected long defaultItemId;
     protected String breadcrumbSeparator;
     protected boolean onlySameLevelSelect;
+    protected boolean sortEntries;
 
     /**
      * Internal(!) Constructor to be used while loading from storage
@@ -85,10 +83,11 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      * @param defaultItemId            the id of the default selected item, optional, can be <code>null</code>
      * @param breadcrumbSeparator      separator for breadcrumbs
      * @param onlySameLevelSelect      only selections within the same level are allowed (applies only to multi select lists)
+     * @param sortEntries              sort entries by label or in the defined sort order?
      */
     public FxSelectList(long id, long parentListId, String name, FxString label, FxString description,
                         boolean allowDynamicItemCreation, ACL createItemACL, ACL newItemACL,
-                        long defaultItemId, String breadcrumbSeparator, boolean onlySameLevelSelect) {
+                        long defaultItemId, String breadcrumbSeparator, boolean onlySameLevelSelect, boolean sortEntries) {
         this.id = id;
         this.parentListId = parentListId;
         this.parentList = null;
@@ -102,6 +101,7 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
         this.defaultItem = null;
         this.breadcrumbSeparator = breadcrumbSeparator;
         this.onlySameLevelSelect = onlySameLevelSelect;
+        this.sortEntries = sortEntries;
         this.items = new HashMap<Long, FxSelectListItem>(10);
     }
 
@@ -112,7 +112,7 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      * @param name the select list name
      */
     public FxSelectList(String name) {
-        this(-1, -1, name, new FxString(name), new FxString(name), true, null, null, 0, " > ", false);
+        this(-1, -1, name, new FxString(name), new FxString(name), true, null, null, 0, " > ", false, false);
     }
 
     /**
@@ -288,6 +288,12 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
         return sorted;
     }
 
+    public final List<FxSelectListItem> getItemsSortedByLabel() {
+        List<FxSelectListItem> sorted = new ArrayList<FxSelectListItem>(items.values());
+        Collections.sort(sorted, new FxSharedUtils.ItemLabelSorter(FxContext.getUserTicket().getLanguage().getId()));
+        return sorted;
+    }
+
     /**
      * Get the number of items in this SelectList
      *
@@ -431,6 +437,16 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      */
     public boolean isOnlySameLevelSelect() {
         return onlySameLevelSelect;
+    }
+
+    /**
+     * Should entries be sorted by the label in the current users language or by the defined order?
+     *
+     * @return if entries should be sorted by the label in the current users language or by the defined order
+     * @since 3.1.5
+     */
+    public boolean isSortEntries() {
+        return sortEntries;
     }
 }
 

@@ -65,7 +65,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
         super(list.id, list.parentListId, "" + list.name, list.label.copy(), list.description.copy(),
                 list.allowDynamicItemCreation, list.createItemACL, list.newItemACL,
                 list.hasDefaultItem() ? list.getDefaultItem().getId() : 0, list.getBreadcrumbSeparator(),
-                list.isOnlySameLevelSelect());
+                list.isOnlySameLevelSelect(), list.isSortEntries());
         this.isNew = false;
         this.original = list;
         this.parentList = list.parentList;
@@ -91,7 +91,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
                             FxSelectListItem defaultItem) {
         super(-1, parent != null ? parent.getId() : -1, name, label, description,
                 allowDynamicItemCreation, createItemACL, newItemACL,
-                defaultItem != null ? defaultItem.getId() : 0, " > ", false);
+                defaultItem != null ? defaultItem.getId() : 0, " > ", false, false);
         if (parent != null || defaultItem != null)
             super._synchronize(CacheAdmin.getEnvironment());
         this.isNew = true;
@@ -119,7 +119,8 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
                 original.allowDynamicItemCreation != this.allowDynamicItemCreation ||
                 !original.description.equals(this.description) ||
                 !original.getBreadcrumbSeparator().equals(this.breadcrumbSeparator) ||
-                original.onlySameLevelSelect != this.onlySameLevelSelect;
+                original.onlySameLevelSelect != this.onlySameLevelSelect ||
+                original.sortEntries != this.sortEntries;
     }
 
     /**
@@ -212,6 +213,15 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     }
 
     /**
+     * Set if entries should be sorted in the defined order or by the label in the current users language
+     *
+     * @param sortEntries if entries should be sorted in the defined order or by the label in the current users language
+     */
+    public void setSortEntries(boolean sortEntries) {
+        this.sortEntries = sortEntries;
+    }
+
+    /**
      * returns all list items as editable list items.
      *
      * @return a list of editable list items.
@@ -270,7 +280,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
      */
     private void recalcPositions() {
         int pos = 0;
-        for(FxSelectListItem item: getItems())
+        for (FxSelectListItem item : getItems())
             item.setPosition(pos++);
     }
 
@@ -354,7 +364,6 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
                 return;
             }
         }
-        System.out.println("not found!");
     }
 
     public void moveItemDown(long itemId) {
@@ -366,6 +375,5 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
                 return;
             }
         }
-        System.out.println("not found!");
     }
 }
