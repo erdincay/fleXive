@@ -1174,13 +1174,14 @@ public class FxContent implements Serializable {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPath);
         FxData data = null;
-        if (!XPathElement.lastElement(XPath).isIndexDefined()) {
+        final XPathElement lastElement = XPathElement.lastElement(XPath);
+        if (!lastElement.isIndexDefined()) {
             //remove all
             String parentGroup = XPathElement.stripLastElement(XPath);
             data = getGroupData(parentGroup);
             List<FxData> remove = new ArrayList<FxData>(10);
             for (FxData child : ((FxGroupData) data).getChildren())
-                if (child.getXPath().equals(XPath))
+                if (child.getAlias().equals(lastElement.getAlias()))
                     remove.add(child);
             ((FxGroupData) data).removeChildren(remove);
             return;
