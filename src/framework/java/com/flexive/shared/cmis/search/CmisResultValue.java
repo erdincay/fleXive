@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.cmis.search;
 
+import com.flexive.shared.SelectableObject;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.BinaryDescriptor;
@@ -99,7 +100,7 @@ public abstract class CmisResultValue<T> implements Serializable {
      * @return  "true" if this value is considered to be empty
      */
     public boolean isEmpty() {
-        return value != null;
+        return value == null;
     }
 
     @Override
@@ -147,7 +148,11 @@ public abstract class CmisResultValue<T> implements Serializable {
      * @return  the value as a {@link Long}.
      */
     public long getLong() {
-        return getNumberValue().longValue();
+        if (value instanceof SelectableObject) {
+            return ((SelectableObject) value).getId();
+        } else {
+            return getNumberValue().longValue();
+        }
     }
 
     /**
