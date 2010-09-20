@@ -975,19 +975,23 @@ public class FxContent implements Serializable {
         final FxEnvironment env = CacheAdmin.getEnvironment();
         long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
         FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
-        List<String> paths = new ArrayList<String>(10);
+        List<FxPropertyData> values = new ArrayList<FxPropertyData>(10);
         for (FxData data : group.getChildren()) {
             if (data.isGroup())
                 continue;
             if (data.getAssignmentId() == assignmentId)
-                paths.add(data.getXPathFull());
+                values.add((FxPropertyData)data);
         }
-        String[] p = paths.toArray(new String[paths.size()]);
-        Arrays.sort(p);
-        List<FxValue> values = new ArrayList<FxValue>(p.length);
-        for (String xp : p)
-            values.add(getValue(xp));
-        return values;
+        Collections.sort(values, new Comparator<FxPropertyData>() {
+            @Override
+            public int compare(FxPropertyData o1, FxPropertyData o2) {
+                return ((Integer)o1.getIndex()).compareTo(o2.getIndex());
+            }
+        });
+        List<FxValue> result = new ArrayList<FxValue>(values.size());
+        for (FxPropertyData data : values)
+            result.add(data.getValue());
+        return result;
     }
 
     /**
@@ -1003,20 +1007,24 @@ public class FxContent implements Serializable {
         final FxEnvironment env = CacheAdmin.getEnvironment();
         long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
         FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
-        List<String> paths = new ArrayList<String>(10);
+        List<FxPropertyData> values = new ArrayList<FxPropertyData>(10);
         for (FxData data : group.getChildren()) {
             if (data.isGroup())
                 continue;
             if (data.getAssignmentId() == assignmentId) {
                 if( clazz.isInstance(((FxPropertyData) data).getValue()))
-                    paths.add(data.getXPathFull());
+                    values.add((FxPropertyData)data);
             }
         }
-        String[] p = paths.toArray(new String[paths.size()]);
-        Arrays.sort(p);
-        List<T> result = new ArrayList<T>(p.length);
-        for (String xp : p)
-            result.add(clazz.cast(getValue(xp)));
+        Collections.sort(values, new Comparator<FxPropertyData>() {
+            @Override
+            public int compare(FxPropertyData o1, FxPropertyData o2) {
+                return ((Integer)o1.getIndex()).compareTo(o2.getIndex());
+            }
+        });
+        List<T> result = new ArrayList<T>(values.size());
+        for (FxPropertyData data : values)
+            result.add(clazz.cast(data.getValue()));
         return result;
     }
 
