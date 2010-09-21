@@ -983,7 +983,6 @@ public class FxContent implements Serializable {
                 values.add((FxPropertyData)data);
         }
         Collections.sort(values, new Comparator<FxPropertyData>() {
-            @Override
             public int compare(FxPropertyData o1, FxPropertyData o2) {
                 return ((Integer)o1.getIndex()).compareTo(o2.getIndex());
             }
@@ -1017,7 +1016,6 @@ public class FxContent implements Serializable {
             }
         }
         Collections.sort(values, new Comparator<FxPropertyData>() {
-            @Override
             public int compare(FxPropertyData o1, FxPropertyData o2) {
                 return ((Integer)o1.getIndex()).compareTo(o2.getIndex());
             }
