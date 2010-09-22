@@ -186,7 +186,7 @@ public abstract class FxData implements Serializable {
 
     /**
      * Update the XPath with indices.
-     * 
+     *
      * @param xpathFull the complete XPath including indices.
      * @since 3.1.4
      */
@@ -438,6 +438,56 @@ public abstract class FxData implements Serializable {
      */
     public boolean isRemoveable() {
         return this.getRemoveableElements() > 0;
+    }
+
+    /**
+     * Move this element by delta positions within its parent group
+     * If delta is Integer.MAX_VALUE the data will always be placed at the bottom,
+     * Integer.MIN_VALUE will always place it at the top.
+     *
+     * @param delta delta positions to move
+     * @since 3.1.5
+     */
+    public void move(int delta) {
+        if (getParent() == null)
+            return; //root group can not be moved!
+        getParent().moveChild(new XPathElement(this.getAlias(), this.getIndex(), true), delta);
+    }
+
+    /**
+     * Move this elements index delta positions within the same group.
+     * Warning: this will cause a repositioning within the parent group as well!
+     * If for example this element has ALIAS[5] and the delta is 2, this element will be assigned a new index of 7 and
+     * become ALIAS[7], moving the current element at ALIAS[7] to ALIAS[6] (assuming there are at least 7 elements of
+     * assignment, else it will be moved to the bottom or respectively top)
+     *
+     * @param delta delta positions to move the index
+     * @since 3.1.5
+     */
+    public void moveIndex(int delta) {
+        if (this.getParent() == null || this.getAssignmentMultiplicity().getMax() == 1)
+            return;
+        this.compact(); //make sure there are no gaps and indices are ordered
+        int total = this.getOccurances();
+        int curr = this.getIndex();
+        int newIndex = curr + delta;
+        //ensure bounds
+        if (newIndex < 1) newIndex = 1;
+        if (newIndex > total) newIndex = total;
+        FxData swap = null;
+        for (FxData data : parent.getChildren()) {
+            if (data.getAssignmentId() == assignmentId) {
+                if (data.getIndex() == newIndex) {
+                    swap = data;
+                    break;
+                }
+            }
+        }
+        if (swap != null) {
+            getParent().getChildren().remove(this);
+            getParent().getChildren().add(swap.getPos(), this);
+            this.compact();
+        }
     }
 
     /**
