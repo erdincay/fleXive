@@ -190,12 +190,20 @@ public class FxContentView extends UIOutput {
      */
     @Override
     public void encodeEnd(FacesContext context) throws IOException {
-        removeContent(context);
+        removeContent(context, true);
     }
 
     protected void removeContent(FacesContext context) {
+        removeContent(context, false);
+    }
+
+    protected void removeContent(FacesContext context, boolean cleanup) {
         //context.getELContext().getVariableMapper().setVariable(getVar(), null);
         context.getExternalContext().getRequestMap().remove(getVar());
+        if (cleanup) {
+            setContent(null);
+            contentMap.clear();
+        }
 //        context.getExternalContext().getRequestMap().remove(getVar() + "_content");
     }
 
@@ -249,7 +257,7 @@ public class FxContentView extends UIOutput {
                 provideContent(ctx);
                 performBroadcast(ctx, ((WrappedEvent) event).event);
             } finally {
-                removeContent(ctx);
+                removeContent(ctx, true);
             }
         } else {
             super.broadcast(event);

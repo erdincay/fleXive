@@ -59,7 +59,7 @@ public class Jsf2FxContentView extends FxContentView {
         try {
             return super.visitTree(context, callback);
         } finally {
-            removeContent(ctx);
+            removeContent(ctx, true);
         }
     }
 
