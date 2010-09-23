@@ -138,7 +138,7 @@ public class FxContentView extends UIOutput {
                         setContent(contentMap.get(contentKey));
                     } else {
                         setContent(contentInterface.load(pk));
-                        if (explode) {
+                        if (isExplode()) {
                             content.getRootGroup().explode(true);
                         }
                     }
@@ -353,8 +353,10 @@ public class FxContentView extends UIOutput {
                 // we need to make sure the content instance still exists at
                 // the next request, so we store it in the component
                 preserveContent = true;
-                // initialize empty fields
-                content.getRootGroup().explode(true);
+                if (isExplode()) {
+                    // initialize empty fields
+                    content.getRootGroup().explode(true);
+                }
             }
         }
         return content;

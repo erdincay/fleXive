@@ -2190,4 +2190,16 @@ public class ContentEngineTest {
         Assert.assertEquals(test.addGroup("/TestGroup1/TestGroup1_2"), "/TESTGROUP1[1]/TESTGROUP1_2[4]");
         Assert.assertEquals(test.getMaxIndex("/TestGroup1/TestGroup1_2"), 4);
     }
+
+    @Test(groups = {"ejb", "content"})
+    public void explodeTest() throws FxApplicationException {
+        final FxContent content = ce.initialize(TEST_TYPE).compact();
+
+        for (int i = 0; i < 10; i++) {
+            content.getRootGroup().explode(true);
+        }
+
+        assertEquals(content.getMaxIndex("/TestProperty4"), 1, "TestProperty4: Unexpected cardinality after exploding 10 times");
+        assertEquals(content.getMaxIndex("/TestGroup1"), 1, "TestGroup1: Unexpected cardinality after exploding 10 times");
+    }
 }
