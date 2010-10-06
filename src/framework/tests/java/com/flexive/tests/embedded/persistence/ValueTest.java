@@ -374,9 +374,10 @@ public class ValueTest {
                 if (test.dataType == FxDataType.Reference) {
                     //additional tests
                     content = co.initialize(testType.getId());
+                    content.setValue("/VTM" + test.dataType.name() + "[1]", new FxReference(true, new ReferencedContent(RPK1)));
                     try {
                         //set to a new pk
-                        content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(new FxPK())));
+                        content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(false, new ReferencedContent(new FxPK())));
                         co.save(content); //expected to fail
                         Assert.fail("Invalid PK (new) for a reference should fail!");
                     } catch (Exception e) {
@@ -384,7 +385,7 @@ public class ValueTest {
                     }
                     try {
                         //set to a non existing pk
-                        content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(new FxPK(123456))));
+                        content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(false, new ReferencedContent(new FxPK(123456))));
                         co.save(content); //expected to fail
                         Assert.fail("Invalid PK (non existant) for a reference should fail!");
                     } catch (Exception e) {
@@ -392,10 +393,19 @@ public class ValueTest {
                     }
                     try {
                         //set to an existing pk, but wrong type
-                        content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(RPK2)));
+                        content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(false, new ReferencedContent(RPK2)));
                         co.save(content); //expected to fail
                         Assert.fail("Invalid PK (wrong type) for a reference should fail!");
                     } catch (Exception e) {
+                        //expected
+                    }
+                    try {
+                        //set to an existing pk, but wrong type
+                        content.setValue("/VTS" + test.dataType.name() + "[1]", RPK1);
+                        co.save(content); //expected to work
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Assert.fail("Correct PK for a reference should not fail!");
                         //expected
                     }
                 }

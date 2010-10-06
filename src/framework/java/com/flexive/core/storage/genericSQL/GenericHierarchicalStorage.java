@@ -1382,7 +1382,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (type != expectedType.getId())
                 throw new FxDbException("ex.content.value.invalid.reftype", expectedType, CacheAdmin.getEnvironment().getType(type));
         } catch (SQLException e) {
-            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } finally {
             if (ps != null)
                 try {
@@ -1399,11 +1399,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param dataClass expected class
      * @param value     value to check
      * @param XPath     xpath with full indices for error message
-     * @throws FxUpdateException if the class does not match
+     * @throws FxDbException if the class does not match
      */
-    private static void checkDataType(Class dataClass, FxValue value, String XPath) throws FxUpdateException {
+    private static void checkDataType(Class dataClass, FxValue value, String XPath) throws FxDbException {
         if (!(value.getClass().getSimpleName().equals(dataClass.getSimpleName()))) {
-            throw new FxUpdateException("ex.content.value.invalid.class", value.getClass().getSimpleName(), XPath, dataClass.getSimpleName());
+            throw new FxDbException("ex.content.value.invalid.class", value.getClass().getSimpleName(), XPath, dataClass.getSimpleName());
         }
     }
 
@@ -3133,12 +3133,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         // key: handle, value: [mimeType,metaData]
         Map<String, String[]> mimeMetaMap = new HashMap<String, String[]>(5);
         try {
-            for (FxData data : content.getRootGroup().getChildren())
+            for (FxData data : content.getRootGroup().getChildren()) {
                 try {
-                    _prepareSave(mimeMetaMap, con, data);
+                    _prepareBinaries(mimeMetaMap, con, data);
                 } catch (FxApplicationException e) {
                     LOG.error(e); //not supposed to be thrown if called with a mimeMetaMap
                 }
+                _checkReferences(con, data);
+            }
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
         }
@@ -3149,26 +3151,53 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      *
      * @param mimeMetaMap optional meta map to avoid duplicates, can be <code>null</code>
      * @param con         an open and valid connection
-     * @param data        current FxDate object to inspect
+     * @param data        current FxData object to inspect
      * @throws SQLException           on errors
      * @throws FxApplicationException on errors
      */
-    private void _prepareSave(Map<String, String[]> mimeMetaMap, Connection con, FxData data) throws SQLException, FxApplicationException {
+    private void _prepareBinaries(Map<String, String[]> mimeMetaMap, Connection con, FxData data) throws SQLException, FxApplicationException {
         if (data instanceof FxGroupData)
             for (FxData sub : ((FxGroupData) data).getChildren())
-                _prepareSave(mimeMetaMap, con, sub);
+                _prepareBinaries(mimeMetaMap, con, sub);
         else if (data instanceof FxPropertyData) {
             FxPropertyData pdata = (FxPropertyData) data;
             if (pdata.isContainsDefaultValue() && !pdata.isEmpty())
                 ((FxPropertyData) data).setContainsDefaultValue(false);
             if (!pdata.isEmpty() && pdata.getValue() instanceof FxBinary) {
-                FxBinary bin = (FxBinary) pdata.getValue();
-                binaryStorage.prepareBinary(con, mimeMetaMap, bin);
+                    FxBinary bin = (FxBinary) pdata.getValue();
+                    binaryStorage.prepareBinary(con, mimeMetaMap, bin);
             }
         }
     }
 
     //Binary handling
+
+
+    /**
+     * Internal prepare save that walks through all groups to discover references that are not legal
+     *
+     * @param con         an open and valid connection
+     * @param data        current FxData object to inspect
+     * @throws FxDbException on errors
+     */
+    private void _checkReferences(Connection con, FxData data) throws FxDbException {
+        if (data instanceof FxGroupData)
+            for (FxData sub : ((FxGroupData) data).getChildren())
+                _checkReferences(con, sub);
+        else if (data instanceof FxPropertyData) {
+            FxPropertyData pdata = (FxPropertyData) data;
+            if (!pdata.isEmpty() && pdata.getValue() instanceof FxReference) {
+                final FxPropertyAssignment pa = pdata.getPropertyAssignment();
+                if (!pa.isSystemInternal()) {
+                    checkDataType(FxReference.class, pdata.getValue(), pdata.getXPathFull());
+                    final FxType referencedType = pa.getProperty().getReferencedType();
+
+                    for (long lang : pdata.getValue().getTranslatedLanguages())
+                        checkReference(con, referencedType, ((FxPK) pdata.getValue().getTranslation(lang)), pdata.getXPathFull());
+                }
+            }
+        }
+    }
 
     /**
      * {@inheritDoc}
