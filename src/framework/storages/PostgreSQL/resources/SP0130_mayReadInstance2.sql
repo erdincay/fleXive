@@ -73,8 +73,13 @@ BEGIN
   -- ------------------------------------------------------------------------------------------
   done=false;
   OPEN cur;
+
+  <<PermLoop>>
   WHILE NOT done LOOP
     FETCH cur INTO _createdBy,_userGroup,_read,_type,_instanceMandator,_securityMode;
+    IF (_userGroup = GRP_OWNER AND _userId != _createdBy) THEN
+      CONTINUE PermLoop;
+    END IF;
     IF NOT FOUND THEN
       done = TRUE;
     END IF;
@@ -89,9 +94,7 @@ BEGIN
       END IF;
 
       IF (_type = 1) /*Content*/ THEN
-        IF (_userGroup!=GRP_OWNER OR (_userGroup=GRP_OWNER AND _createdBy=_userId)) THEN
-          IF (_read)   THEN IPREAD=true;   END IF;
-        END IF;
+        IF (_read)   THEN IPREAD=true;   END IF;
       ELSIF (_type = 2) /*Type*/ THEN
         IF (_read)   THEN TPREAD=true;   END IF;
       ELSIF (_type = 3) /*Workflow Step*/ THEN
@@ -104,7 +107,7 @@ BEGIN
         CLOSE cur;
         RETURN TRUE;    /* break out early */
       END IF;
-  END LOOP;
+  END LOOP PermLoop;
   CLOSE cur;
 
   -- ------------------------------------------------------------------------------------------

@@ -77,8 +77,11 @@ BEGIN
   -- ------------------------------------------------------------------------------------------
   set done=false;
   OPEN cur;
-  WHILE NOT done DO
+  PermLoop: WHILE NOT done DO
     FETCH cur INTO _createdBy,_userGroup,_read,_type,_instanceMandator,_securityMode;
+    IF (_userGroup=GRP_OWNER AND _createdBy!=_userId) THEN
+      ITERATE PermLoop;    /* owner group but not owner */
+    END IF;
       IF (_securityMode & 0x01 = 0) THEN
         SET IPREAD=true;    /* content permissions are disabled */
       END IF;
@@ -90,9 +93,7 @@ BEGIN
       END IF;
       CASE _type
           WHEN 1 /*Content*/ THEN
-            IF (_userGroup!=GRP_OWNER OR (_userGroup=GRP_OWNER AND _createdBy=_userId)) THEN
               IF (_read)   THEN set IPREAD=true;   END IF;
-            END IF;
           WHEN 2 /*Type*/ THEN
               IF (_read)   THEN set TPREAD=true;   END IF;
           WHEN 3 /*Workflow Step*/ THEN

@@ -39,8 +39,15 @@ import static com.flexive.shared.FxLanguage.ENGLISH;
 import static com.flexive.shared.FxLanguage.GERMAN;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.interfaces.ACLEngine;
+import com.flexive.shared.interfaces.CmisSearchEngine;
+import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import static com.flexive.shared.search.query.PropertyValueComparator.EQ;
@@ -1641,6 +1648,76 @@ public class SearchEngineTest {
         assertEquals(result.getTotalRowCount(), 1, "Wrong totalRowCount for truncated result");
     }
 
+    @Test
+    public void testOwnerPermission() throws FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException, FxApplicationException {
+        // FX-946: owner permission applied to all users
+        logout();
+        final String aclName = "ownerPermissionACL_FX946";
+        final String typeName = "testOwnerPermission_FX946";
+        FxType type = null;
+        try {
+            FxPK contentPK;
+            FxContext.startRunningAsSystem();
+            try {
+                // ACL (and type) do not exist, create
+                final ACLEngine ae = EJBLookup.getAclEngine();
+                final long aclId = ae.create(
+                        aclName, new FxString(true, aclName), TestUsers.getTestMandator(), "black", "", ACLCategory.STRUCTURE
+                );
+                ae.assign(aclId, UserGroup.GROUP_OWNER, ACLPermission.READ);
+
+                final FxTypeEdit newType = FxTypeEdit.createNew(typeName);
+                newType.setUseInstancePermissions(false);
+                newType.setUsePropertyPermissions(false);
+                newType.setUseStepPermissions(false);
+                newType.setUseTypePermissions(true);
+                newType.setACL(CacheAdmin.getEnvironment().getACL(aclId));
+                type = newType.save();
+
+                // create a test instance for user regular2
+                login(TestUsers.REGULAR2);
+                final ContentEngine ce = EJBLookup.getContentEngine();
+                contentPK = ce.save(ce.initialize(typeName));
+                logout();
+            } finally {
+                FxContext.stopRunningAsSystem();
+            }
+
+            final SearchEngine se = EJBLookup.getSearchEngine();
+            final CmisSearchEngine cmis = EJBLookup.getCmisSearchEngine();  // also test CMIS search engine for convenience
+
+            // search as REGULAR2
+            login(TestUsers.REGULAR2);
+            EJBLookup.getContentEngine().load(contentPK);
+            assertEquals(se.search("SELECT @pk WHERE typedef=" + type.getId()).getRowCount(), 1, "Creator should be able to read own content");
+            assertEquals(cmis.search("SELECT cmis:ObjectId FROM " + typeName).getRowCount(), 1, "CMIS: Creator should be able to read own content");
+            logout();
+
+            // try as REGULAR
+            login(TestUsers.REGULAR);
+            try {
+                EJBLookup.getContentEngine().load(contentPK);
+                fail("Foreign user should not be able to load content");
+            } catch (FxNoAccessException e) {
+                // pass
+            }
+            assertEquals(se.search("SELECT @pk WHERE typedef=" + type.getId()).getRowCount(), 0, "Foreign user allowed to read content");
+            assertEquals(cmis.search("SELECT cmis:ObjectId FROM " + typeName).getRowCount(), 0, "CMIS: Foreign user allowed to read content");
+            logout();
+        } finally {
+            if (type != null) {
+                FxContext.startRunningAsSystem();
+                try {
+                    EJBLookup.getContentEngine().removeForType(type.getId());
+                    EJBLookup.getTypeEngine().remove(type.getId());
+                    EJBLookup.getAclEngine().remove(type.getACL().getId());
+                } finally {
+                    FxContext.stopRunningAsSystem();
+                }
+            }
+            login(TestUsers.REGULAR);
+        }
+    }
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());

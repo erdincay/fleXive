@@ -284,6 +284,9 @@ public class StoredProcedures {
 
         long instanceMandator = -1;
         while (rs != null && rs.next()) {
+            if (rs.getLong(2) == GRP_OWNER && rs.getLong(1) != userId) {
+                continue;
+            }
             if (instanceMandator == -1)
                 instanceMandator = rs.getLong(10);
             final int typeSecurityMode = rs.getInt(11);
@@ -301,14 +304,12 @@ public class StoredProcedures {
             }
             switch (rs.getInt(9)) { //cat_type
                 case 1: //content
-                    if (rs.getLong(2) != GRP_OWNER || (rs.getLong(2) == GRP_OWNER && rs.getLong(1) == userId)) {
-                        if (rs.getBoolean(3)) IPEDIT = true;
-                        if (rs.getBoolean(4)) IPREMOVE = true;
-                        if (rs.getBoolean(5)) IPEXPORT = true;
-                        if (rs.getBoolean(6)) IPREL = true;
-                        if (rs.getBoolean(7)) IPREAD = true;
-                        if (rs.getBoolean(8)) IPCREATE = true;
-                    }
+                    if (rs.getBoolean(3)) IPEDIT = true;
+                    if (rs.getBoolean(4)) IPREMOVE = true;
+                    if (rs.getBoolean(5)) IPEXPORT = true;
+                    if (rs.getBoolean(6)) IPREL = true;
+                    if (rs.getBoolean(7)) IPREAD = true;
+                    if (rs.getBoolean(8)) IPCREATE = true;
                     break;
                 case 2: //type
                     if (rs.getBoolean(3)) TPEDIT = true;
