@@ -194,6 +194,28 @@ public class ACLEngineTest {
         }
     }
 
+    @Test(groups = {"ejb", "security"})
+    public void testOnlyCreate_FX943() throws FxApplicationException {
+        FxContext.startRunningAsSystem();
+        long id = -1;
+        try {
+            id = getAclEngine().create("acl-fx943", new FxString(true, ""), TestUsers.getTestMandator(), "black", "", ACLCategory.INSTANCE);
+            getAclEngine().assign(id, FxContext.getUserTicket().getGroups()[0], ACLPermission.CREATE);
+            final List<ACLAssignment> assignments = getAclEngine().loadAssignments(id);
+            assertEquals(assignments.size(), 1, "Expected one ACL assignment");
+            assertEquals(assignments.get(0).getPermissions(), Arrays.asList(ACLPermission.CREATE));
+        } finally {
+            if (id != -1) {
+                try {
+                    getAclEngine().remove(id);
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
+            }
+            FxContext.stopRunningAsSystem();
+        }
+    }
+
     private void tryCreateInstanceAsGuest(long typeId, boolean hasPerms) throws FxApplicationException {
         try {
             // force user ticket update (as in a new request)

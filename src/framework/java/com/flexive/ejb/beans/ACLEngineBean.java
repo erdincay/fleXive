@@ -495,19 +495,19 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assign(long aclId, long groupId, boolean mayRead, boolean mayEdit,
-                       boolean mayRelate, boolean mayDelete, boolean mayExport, boolean mayCreate)
+                       boolean mayRelate, boolean mayRemove, boolean mayExport, boolean mayCreate)
             throws FxApplicationException {
         UserTicket ticket = FxContext.getUserTicket();
         // Delete rather than create?
-        if (!mayRead && !mayRelate && !mayExport && !mayEdit && !mayDelete) {
+        if (!mayRead && !mayRelate && !mayExport && !mayEdit && !mayRemove && !mayCreate) {
             try {
                 unassign(aclId, groupId);
-                return;
             } catch (FxNotFoundException e) {
-                //can happen if an ACL only has create set! -> ignore it then
+                // ignore missing assignments
             } catch (FxRemoveException exc) {
                 throw new FxCreateException(exc.getMessage(), exc);
             }
+            return;
         }
 
         // Permission & exists check
@@ -540,7 +540,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             stmt.setLong(2, aclId);
             stmt.setBoolean(3, mayRead);
             stmt.setBoolean(4, mayEdit);
-            stmt.setBoolean(5, mayDelete);
+            stmt.setBoolean(5, mayRemove);
             stmt.setBoolean(6, mayCreate);
             stmt.setBoolean(7, mayExport);
             stmt.setBoolean(8, mayRelate);
@@ -638,7 +638,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             curSql = "DELETE FROM " + TBL_ACLS_ASSIGNMENT + " WHERE USERGROUP=" + groupId + " AND ACL=" + aclId;
             stmt = con.createStatement();
             if (stmt.executeUpdate(curSql) == 0)
-                throw new FxNotFoundException(LOG, "ex.aclAssignment.notFound", aclId, groupId);
+                throw new FxNotFoundException("ex.aclAssignment.notFound", aclId, groupId);
 
             // Update active UserTickets
             UserTicketStore.flagDirtyHavingGroupId(groupId);
