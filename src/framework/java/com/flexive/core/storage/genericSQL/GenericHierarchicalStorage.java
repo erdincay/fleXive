@@ -1325,9 +1325,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             ps.setLong(pos[0], 0); //write the virtual item as a marker to have a valid row
                         break;
                     case Reference:
-                        checkDataType(FxReference.class, value, data.getXPathFull());
-                        checkReference(con, prop.getReferencedType(), ((ReferencedContent) translatedValue), data.getXPathFull());
-                        ps.setLong(pos[0], ((ReferencedContent) translatedValue).getId());
+                        //reference integrity check is done prior to saving
+                        ps.setLong(pos[0], ((FxPK) translatedValue).getId());
                         break;
                     case InlineReference:
                     default:
@@ -3191,7 +3190,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 if (!pa.isSystemInternal()) {
                     checkDataType(FxReference.class, pdata.getValue(), pdata.getXPathFull());
                     final FxType referencedType = pa.getProperty().getReferencedType();
-
                     for (long lang : pdata.getValue().getTranslatedLanguages())
                         checkReference(con, referencedType, ((FxPK) pdata.getValue().getTranslation(lang)), pdata.getXPathFull());
                 }
