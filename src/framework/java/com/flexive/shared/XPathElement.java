@@ -37,8 +37,8 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +59,7 @@ public class XPathElement implements Serializable {
     private static final Pattern PKPattern = Pattern.compile(PK);
     private static final Pattern doubleSlashPattern = Pattern.compile("/{2,}");
     private static final List<XPathElement> EMPTY = Collections.unmodifiableList(new ArrayList<XPathElement>(0));
-    
+
     private String alias;
     private int index;
     private boolean indexDefined;
@@ -320,18 +320,65 @@ public class XPathElement implements Serializable {
 
 
     /**
-     * Get the FQ indices of an XPath as an int array
+     * Get the FQ indices of an XPath as an int array.
+     * This method is optimized for performance and does not check for validity!
      *
      * @param XPath the xpath to examine
      * @return FQ indices of an XPath as an int array
-     * @throws FxInvalidParameterException on errors
      */
     public static int[] getIndices(String XPath) {
-        List<XPathElement> xpe = split(XPath);
-        int[] mult = new int[xpe.size()];
-        for (int i = 0; i < mult.length; i++)
-            mult[i] = xpe.get(i).getIndex();
-        return mult;
+        int[] mult = new int[10];
+        byte curr = 0;
+        int lastOpen = -1;
+        char[] c = XPath.toCharArray();
+        for (int i = 0; i < c.length; i++) {
+            switch (c[i]) {
+                case '/':
+                    if( i == 0)
+                        break;
+                    if( c[i-1] == ']')
+                        break;
+                    mult[curr++] = 1;
+                    if (mult.length <= curr) {
+                        //resize mult
+                        int[] tmp = new int[mult.length + 5];
+                        System.arraycopy(mult, 0, tmp, 0, mult.length);
+                        mult = tmp;
+                    }
+                    break;
+                case '[':
+                    lastOpen = i;
+                    break;
+                case ']':
+                    int m = 1;
+                    for (int w = (i - 1); w > lastOpen; w--) {
+                        mult[curr] += (c[w] - (byte) '0') * m;
+                        m *= 10;
+                    }
+                    curr++;
+                    if (mult.length <= curr) {
+                        //resize mult
+                        int[] tmp = new int[mult.length + 5];
+                        System.arraycopy(mult, 0, tmp, 0, mult.length);
+                        mult = tmp;
+                    }
+            }
+        }
+        if( c[c.length-1] != ']' && c[c.length-1] != '/') {
+            if (mult.length < curr) {
+                //resize mult
+                int[] tmp = new int[mult.length + 5];
+                System.arraycopy(mult, 0, tmp, 0, mult.length);
+                mult = tmp;
+            }
+            mult[curr++] = 1;
+        }
+        if (curr == 0)
+            return new int[0];
+        int start = (c[0] == '/') ? 0 : 1;
+        int[] ret = new int[curr - start];
+        System.arraycopy(mult, start, ret, 0, curr - start);
+        return ret;
     }
 
     /**
@@ -380,7 +427,6 @@ public class XPathElement implements Serializable {
      *
      * @param XPath the XPath
      * @return XPath without the last element
-     * @throws FxInvalidParameterException for invalid XPath's
      */
     public static String stripLastElement(String XPath) {
         if (XPath != null && ("/".equals(XPath.trim()) || XPath.trim().lastIndexOf('/') == 0))
@@ -407,5 +453,34 @@ public class XPathElement implements Serializable {
             throw new FxInvalidParameterException("xpath", "ex.xpath.element.noPk", xPath).asRuntimeException();
         }
         return FxPK.fromString(matcher.group(2));
+    }
+
+    /**
+     * Change the index of an xpath
+     * This method is optimized for performance and does not check for validity!
+     *
+     * @param XPath the xpath
+     * @param pos   position of the element (0-based)
+     * @param index the new index to apply
+     * @return xpath with the new index at the requested position
+     * @since 3.1.5
+     */
+    public static String changeIndex(String XPath, int pos, int index) {
+        byte curr = 0;
+        int lastOpen = -1;
+        StringBuilder res = new StringBuilder(XPath);
+        for (int i = 0; i < res.length(); i++) {
+            switch (res.charAt(i)) {
+                case '[':
+                    lastOpen = i;
+                    break;
+                case ']':
+                    if (curr++ != pos)
+                        break;
+                    res.replace(lastOpen + 1, i, String.valueOf(index));
+                    return res.toString();
+            }
+        }
+        return XPath; //not found, return original
     }
 }

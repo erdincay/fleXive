@@ -377,9 +377,7 @@ public class FxGroupData extends FxData {
         List<XPathElement> elements;
         for (FxData curr : children) {
             // we need to get the XPathFull to have the indices
-            elements = XPathElement.split(curr.getXPathFull());
-            elements.get(pos).setIndex(index);
-            curr.setXPathFull(XPathElement.toXPath(elements));
+            curr.setXPathFull(XPathElement.changeIndex(curr.getXPathFull(), pos, index));
             if (curr instanceof FxGroupData)
                 _changeIndex(((FxGroupData) curr).getChildren(), pos, index);
         }

@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.FxCreateException;
@@ -39,8 +40,6 @@ import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.value.FxString;
-import com.flexive.shared.SelectableObjectWithLabel;
-import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.*;
@@ -157,6 +156,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
 
     private boolean systemInternal;
     List<FxStructureOption> options;
+    protected int defaultMultCalc = -1; //cache for performance
 
     /**
      * Constructor
@@ -268,9 +268,9 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     /**
      * Returns true if this assignment is a (direct or indirect) descendant of the given assignment.
      *
-     * @param environment   the current environment
-     * @param assignmentId  the parent assignment ID to be checked
-     * @return  true if this assignment is a (direct or indirect) descendant of the given assignment.
+     * @param environment  the current environment
+     * @param assignmentId the parent assignment ID to be checked
+     * @return true if this assignment is a (direct or indirect) descendant of the given assignment.
      * @since 3.1
      */
     public boolean isDerivedFrom(FxEnvironment environment, long assignmentId) {
@@ -341,14 +341,18 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @return default multiplicity
      */
     public int getDefaultMultiplicity() {
+        if (defaultMultCalc != -1)
+            return defaultMultCalc;
         FxMultiplicity m = this.getMultiplicity();
         if (m.isValid(defaultMultiplicity))
-            return defaultMultiplicity;
-        if (defaultMultiplicity < m.getMin())
-            return m.getMin();
-        if (defaultMultiplicity > m.getMax())
-            return m.getMax();
-        return m.getMin();
+            defaultMultCalc = defaultMultiplicity;
+        else if (defaultMultiplicity < m.getMin())
+            defaultMultCalc = m.getMin();
+        else if (defaultMultiplicity > m.getMax())
+            defaultMultCalc = m.getMax();
+        else
+            defaultMultCalc = m.getMin();
+        return defaultMultCalc;
     }
 
     /**
@@ -381,13 +385,13 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     /**
      * Return a human-readable string to present this assignment to the user.
      *
-     * @param includePath   if the path to the assignment (the parent groups) should be included
-     * @return  a human-readable string to present this assignment to the user.
+     * @param includePath if the path to the assignment (the parent groups) should be included
+     * @return a human-readable string to present this assignment to the user.
      * @since 3.1
      */
     public String getDisplayName(boolean includePath) {
         if (!includePath) {
-            return getDisplayLabel().getBestTranslation(); 
+            return getDisplayLabel().getBestTranslation();
         }
         // add parent group labels
         final StringBuilder out = new StringBuilder();
@@ -500,10 +504,10 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     /**
      * Create an empty FxData entry for this assignment
      *
-     * @param parent the parent group
-     * @param index  the index of the new entry
-     * @return FxData
+     * @param parent   the parent group
+     * @param index    the index of the new entry
      * @param position the position to use (to avoid puting multiple elemtns of the same type on the same position)
+     * @return FxData
      * @throws FxCreateException on errors
      */
     public abstract FxData createEmptyData(FxGroupData parent, int index, int position);
@@ -525,7 +529,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * Resolve preload dependencies after initial loading
      *
      * @param assignments all known assignment
-     * @deprecated  Use {@link #resolveDependencies(java.util.Map)}
+     * @deprecated Use {@link #resolveDependencies(java.util.Map)}
      */
     public void resolvePreloadDependencies(List<FxAssignment> assignments) {
         if (parentGroupAssignment != null && parentGroupAssignment.getAlias() == null) {
@@ -608,7 +612,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * Resolve parent dependecies after initial loading
      *
      * @param assignments all known assignments
-     * @deprecated  Use {@link #resolveDependencies(java.util.Map)}
+     * @deprecated Use {@link #resolveDependencies(java.util.Map)}
      */
     public void resolveParentDependencies(List<FxAssignment> assignments) {
         // do nothing, only interesting for group assignments

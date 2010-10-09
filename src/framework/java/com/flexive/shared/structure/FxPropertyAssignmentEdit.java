@@ -403,6 +403,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      *          if the defaultMultiplicity is not within the range of min and max
      */
     public FxPropertyAssignmentEdit setDefaultMultiplicity(int defaultMultiplicity) throws FxInvalidParameterException {
+        super.defaultMultCalc = -1; //reset cached value
         if (this.getMultiplicity().isValid(defaultMultiplicity)) {
             this.defaultMultiplicity = defaultMultiplicity;
             return this;

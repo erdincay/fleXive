@@ -140,6 +140,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      * @return this
      */
     public FxGroupAssignmentEdit setDefaultMultiplicity(int defaultMultiplicity) {
+        super.defaultMultCalc = -1; //reset cached value
         if (this.getMultiplicity().isValid(defaultMultiplicity)) {
             this.defaultMultiplicity = defaultMultiplicity;
             return this;
