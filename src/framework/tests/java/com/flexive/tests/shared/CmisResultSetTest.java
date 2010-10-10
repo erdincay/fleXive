@@ -47,7 +47,7 @@ import java.util.Arrays;
  * @since 3.1
  */
 public class CmisResultSetTest {
-    @Test(groups = {"shared", "search", "cmis"})
+    @Test(groups = {"search", "cmis"})
     public void resultSetConstruction() {
         final CmisResultSet result = new CmisResultSet(2);
         final CmisResultRow row = result.newRow();

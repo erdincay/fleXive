@@ -49,11 +49,8 @@ import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.interfaces.ContentEngine;
-import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxMultiplicity;
-import com.flexive.shared.structure.FxPropertyAssignmentEdit;
-import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
@@ -65,8 +62,6 @@ import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxNumber;
-import com.flexive.shared.value.FxSelectOne;
-import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.SelectMany;
 import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
@@ -122,7 +117,7 @@ public class CmisSearchEngineTest {
         FxTestUtils.logout();
     }
 
-    @Test(groups = {"shared", "search", "cmis"})
+    @Test(groups = {"search", "cmis"})
     public void resultFilter() {
         final CmisResultSet rs = new CmisResultSet(2);
         rs.addRow(rs.newRow().setValue(1, "Apple").setValue(2, new FxNumber(25)));

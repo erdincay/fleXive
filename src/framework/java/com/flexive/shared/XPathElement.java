@@ -55,7 +55,7 @@ public class XPathElement implements Serializable {
      * an XPath element must start with a letter or underscore followed by an optional letter/number/underscore combination
      * and may end with an optional multiplicity like [x] where x is a number
      */
-    private static final Pattern XPathPattern = Pattern.compile("([A-Z_][A-Z_0-9 _]*(\\[" + PK + "\\])?)?(/[A-Z][A-Z_0-9]*(\\[[0-9]+\\])?)+");
+//    private static final Pattern XPathPattern = Pattern.compile("([A-Z_][A-Z_0-9 _]*(\\[" + PK + "\\])?)?(/[A-Z][A-Z_0-9]*(\\[[0-9]+\\])?)+");
     private static final Pattern PKPattern = Pattern.compile(PK);
     private static final Pattern doubleSlashPattern = Pattern.compile("/{2,}");
     private static final List<XPathElement> EMPTY = Collections.unmodifiableList(new ArrayList<XPathElement>(0));
@@ -145,7 +145,6 @@ public class XPathElement implements Serializable {
      *
      * @param XPath the XPath
      * @return XPathElement array
-     * @throws FxInvalidParameterException for invalid elements
      */
     public static List<XPathElement> split(String XPath) {
         if (StringUtils.isEmpty(XPath))
@@ -169,7 +168,6 @@ public class XPathElement implements Serializable {
      *
      * @param XPath the XPath
      * @return last (rightmost) element of an XPath
-     * @throws FxInvalidParameterException on errors
      */
     public static XPathElement lastElement(String XPath) {
         if (StringUtils.isEmpty(XPath) || !isValidXPath(XPath))
@@ -183,7 +181,6 @@ public class XPathElement implements Serializable {
      * @param XPath full XPath, only used if exception is thrown
      * @param alias alias to convert to an XPathElement
      * @return XPathElement
-     * @throws FxInvalidParameterException on errors
      */
     public static XPathElement toElement(String XPath, String alias) {
         if (StringUtils.isEmpty(alias) || alias.indexOf('/') >= 0)
@@ -205,9 +202,131 @@ public class XPathElement implements Serializable {
      * @return valid or not
      */
     public static boolean isValidXPath(String XPath) {
-        return "/".equals(XPath) || !StringUtils.isEmpty(XPath) && XPathPattern.matcher(XPath).matches();
+        try {
+//            slow version using reqular expressions:
+//            return "/".equals(XPath) || !StringUtils.isEmpty(XPath) && XPathPattern.matcher(XPath).matches();
+            if (XPath == null)
+                return false;
+            char[] xp = XPath.toCharArray();
+            if (xp.length == 1 && xp[0] == '/')
+                return true;
+            int pos = -1;
+            if (xp[0] != '/') {
+                //check for correct type
+                boolean inBr = false; //in bracket
+                boolean hadBr = false; //already had a bracket
+                while (++pos < xp.length) {
+                    if (xp[pos] == '/')
+                        break;//end of type
+                    if (xp[pos] >= '0' && xp[pos] <= '9' && pos > 1 && !inBr) //first letter must not be a number
+                        continue;
+                    if (((xp[pos] >= 'A' && xp[pos] <= 'Z') || xp[pos] == '_' || xp[pos] == ' ') && !inBr) //only A-Z, underscore and space allowed in name
+                        continue;
+                    if (xp[pos] == '[') {
+                        if (inBr || hadBr || xp[pos + 1] != '@') //in type bracket has to be followed by "@"
+                            return false;
+                        inBr = true;
+                        hadBr = true;
+                        continue;
+                    }
+                    if (xp[pos] == '@') {
+                        switch (xp[++pos]) {
+                            case 'p':
+                            case 'P':
+                                break;
+                            default:
+                                return false;
+                        }
+                        switch (xp[++pos]) {
+                            case 'k':
+                            case 'K':
+                                break;
+                            default:
+                                return false;
+                        }
+                        if (xp[++pos] != '=')
+                            return false;
+                        //@pk=NEW
+                        if (xp[pos + 1] == 'N' && xp[pos + 2] == 'E' && xp[pos + 3] == 'W' && xp[pos + 4] == ']') {
+                            pos += 3;
+                            continue;
+                        }
+                        boolean hasNum = false;
+                        //@pk=<number>.
+                        while (xp[++pos] >= '0' && xp[pos] <= '9') {
+                            hasNum = true;
+                        }
+                        if (!hasNum)
+                            return false;
+                        if (xp[pos] != '.')
+                            return false;
+                        if (xp[pos + 1] >= '0' && xp[pos + 1] <= '9') {
+                            //@pk=<number>.<number>
+                            while (xp[++pos] >= '0' && xp[pos] <= '9') {
+                            }
+                            --pos; //one back as we reached ']
+                            continue;
+                        }
+                        if (xp[pos + 1] == 'L' && xp[pos + 2] == 'I' && xp[pos + 3] == 'V' && xp[pos + 4] == 'E') {
+                            pos += 4;
+                            continue;
+                        }
+                        if (xp[pos + 1] == 'M' && xp[pos + 2] == 'A' && xp[pos + 3] == 'X') {
+                            pos += 3;
+                            continue;
+                        }
+                        return false;
+                    }
+                    if (xp[pos] == ']') {
+                        if (!inBr)
+                            return false;
+                        inBr = false;
+                        continue;
+                    }
+                    return false;
+                }
+                if (inBr)
+                    return false;
+                pos--;
+            } else //end type check
+                pos = -1;
+            if ((pos + 1) == xp.length) //empty or name only is not valid
+                return false;
+            while (++pos < xp.length) {
+                if (xp[pos] == '/') { //element start
+                    if (pos == xp.length)
+                        return false; //may not end with '/'
+                    if (!(xp[pos + 1] >= 'A' && xp[pos + 1] <= 'Z'))
+                        return false; //element must start with A-Z
+                    pos++;
+                    while ((xp[pos] >= 'A' && xp[pos] <= 'Z') || (xp[pos] >= '0' && xp[pos] <= '9') || xp[pos] == '_') {
+                        if ((pos + 1) == xp.length)
+                            return true;
+                        pos++;
+                    }
+                    if (pos == xp.length)
+                        return true;
+                    if (xp[pos] == '[') { //index is optional and may only exist here
+                        boolean hasNum = false;
+                        //@pk=<number>.
+                        while (xp[++pos] >= '0' && xp[pos] <= '9') {
+                            hasNum = true;
+                        }
+                        if (!hasNum)
+                            return false;
+                        if (xp[pos] != ']')
+                            return false; //index has to end with '['
+                    } else
+                        pos--;
+                } else
+                    return false; //expected an element start
+            }
+            //element check, allowed is only [A-Z] as first letter followed by [A-Z0-9] and an optional index
+            return true;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
     }
-
 
     /**
      * Get the XPath of an array of XPathElements with multiplicities
@@ -247,7 +366,6 @@ public class XPathElement implements Serializable {
      *
      * @param XPath XPath
      * @return XPath with full multiplicity information
-     * @throws FxInvalidParameterException for invalid XPath
      */
     public static String toXPathMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
@@ -280,7 +398,6 @@ public class XPathElement implements Serializable {
      *
      * @param XPath XPath with indices
      * @return XPath with indices stripped, in upper case
-     * @throws FxInvalidParameterException for invalid XPath
      */
     public static String toXPathNoMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
@@ -334,9 +451,9 @@ public class XPathElement implements Serializable {
         for (int i = 0; i < c.length; i++) {
             switch (c[i]) {
                 case '/':
-                    if( i == 0)
+                    if (i == 0)
                         break;
-                    if( c[i-1] == ']')
+                    if (c[i - 1] == ']')
                         break;
                     mult[curr++] = 1;
                     if (mult.length <= curr) {
@@ -364,7 +481,7 @@ public class XPathElement implements Serializable {
                     }
             }
         }
-        if( c[c.length-1] != ']' && c[c.length-1] != '/') {
+        if (c[c.length - 1] != ']' && c[c.length - 1] != '/') {
             if (mult.length < curr) {
                 //resize mult
                 int[] tmp = new int[mult.length + 5];
@@ -429,11 +546,14 @@ public class XPathElement implements Serializable {
      * @return XPath without the last element
      */
     public static String stripLastElement(String XPath) {
-        if (XPath != null && ("/".equals(XPath.trim()) || XPath.trim().lastIndexOf('/') == 0))
-            return "/";
-        if (StringUtils.isEmpty(XPath) || !isValidXPath(XPath.toUpperCase()))
+        if (XPath == null)
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
-        return XPath.substring(0, XPath.lastIndexOf('/')).toUpperCase();
+        if (XPath.lastIndexOf('/') == 0)
+            return "/";
+        XPath = XPath.toUpperCase();
+        if (!isValidXPath(XPath))
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
+        return XPath.substring(0, XPath.lastIndexOf('/'));
     }
 
     /**
@@ -456,10 +576,10 @@ public class XPathElement implements Serializable {
     }
 
     /**
-     * Change the index of an xpath
+     * Change the index of an xpath (requires an xpath with all explicit indices set!)
      * This method is optimized for performance and does not check for validity!
      *
-     * @param XPath the xpath
+     * @param XPath the xpath with all indices set
      * @param pos   position of the element (0-based)
      * @param index the new index to apply
      * @return xpath with the new index at the requested position

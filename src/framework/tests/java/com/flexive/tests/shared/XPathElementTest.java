@@ -91,7 +91,6 @@ public class XPathElementTest {
             //expected
         }
         Assert.assertEquals("/", XPathElement.stripLastElement("/"));
-        Assert.assertEquals("/", XPathElement.stripLastElement(" / "));
         Assert.assertEquals("/", XPathElement.stripLastElement("/abc"));
         Assert.assertEquals("/ABC", XPathElement.stripLastElement("/abc/def"));
         Assert.assertEquals("/ABC/DEF", XPathElement.stripLastElement("/abc/def/ghi"));
@@ -100,21 +99,42 @@ public class XPathElementTest {
     @Test
     public void isValid() {
         String[] validPatterns = {
-                "/A",
-                "/A[1]",
                 "/A[1]/B[1]/C[1]",
-                "/AA[1]/B",
                 "A[@pk=123.46]/A/BC",
+                "A_B[@pk=123.46]/A/BC",
+                "/A[1]",
                 "A[@pk=NEW]/A",
                 "A[@pk=5.LIVE]/A",
                 "A[@pk=7.MAX]/A",
+                "A[@pK=7.MAX]/A",
+                "A[@PK=7.MAX]/A",
+                "A[@pK=7.MAX]/A",
+                "/A",
+                "/A_A[1]/B",
+                "/A___A_[1]/B_/C[42]",
+                "A/B/C",
         };
         String[] invalidPatterns = {
+                "FOO",
+                "",
+                "/A[",
+                "/AA[1]]/B",
+                "/AA[1]/B]",
+                "/AA[[1]/B",
+                "/AA[[1]]/B",
                 "/A/",
-                "/A[a]",
-                "/AA[1]/B/",
+                "/1",
+                "1/A",
+                "/1A",
+                "/a",
+                "A[@pK=7.MAXX]/A",
+                "A[@pK=7.Max]/A",
                 "A[@pk=NEW.42]/A",
                 "A[@pk=LIVE]/A",
+                "A[@pK=7.LIVEE]/A",
+                "A[@pK=.MAX]/A",
+                "/A[a]",
+                "/AA[1]/B/",
                 "A[@pk=]/A",
                 "A[@pk]/A",
                 "A[]/A",
@@ -176,5 +196,29 @@ public class XPathElementTest {
         Assert.assertEquals(XPathElement.getPK("TYPE[@pk=5.LIVE]/property"), new FxPK(5, FxPK.LIVE));
         Assert.assertEquals(XPathElement.getPK("TYPE[@pk=5.MAX]/property"), new FxPK(5, FxPK.MAX));
     }
+
+    @Test
+    public void changeIndex() {
+        Assert.assertEquals(XPathElement.changeIndex("/Test[1]/a[1]/b[3]", 0, 5), "/Test[5]/a[1]/b[3]");
+        Assert.assertEquals(XPathElement.changeIndex("/Test[1]/a[1]/b[3]", 1, 5), "/Test[1]/a[5]/b[3]");
+        Assert.assertEquals(XPathElement.changeIndex("type/Test[1]/a[1]/b[3]", 1, 5), "type/Test[1]/a[5]/b[3]");
+    }
+
+    @Test
+    public void getIndices() {
+        checkIntArray(XPathElement.getIndices("/TEST[1]/A[1]/B[3]"), new int[]{1, 1, 3});
+        checkIntArray(XPathElement.getIndices("/TEST[1]/A/B[3]"), new int[]{1, 1, 3});
+        checkIntArray(XPathElement.getIndices("/TEST/A/B[3]"), new int[]{1, 1, 3});
+        checkIntArray(XPathElement.getIndices("B/TEST[1]/A/B[3]"), new int[]{1, 1, 3});
+        checkIntArray(XPathElement.getIndices("/B/TEST[1]/A/B[3]"), new int[]{1, 1, 1, 3});
+    }
+
+    private void checkIntArray(int[] a, int[] b) {
+        if( a.length != b.length )
+            Assert.fail("Invalid length!");
+        for(int i=0; i<a.length; i++)
+            Assert.assertEquals(a[i], b[i]);
+    }
+
 
 }

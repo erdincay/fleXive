@@ -656,7 +656,7 @@ public class FxContent implements Serializable {
      */
     public int getMaxIndex(String XPath) {
         XPath = XPathElement.stripType(XPath);
-        String xp = XPathElement.toXPathMult(XPath).toUpperCase(); //make sure all multiplicities are set
+        String xp = XPathElement.toXPathMult(XPath); //make sure all multiplicities are set
         XPathElement last = XPathElement.lastElement(xp);
         xp = XPathElement.stripLastElement(xp);
         if (!containsXPath(xp))
