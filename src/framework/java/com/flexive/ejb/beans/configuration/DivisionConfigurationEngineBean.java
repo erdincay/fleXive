@@ -615,7 +615,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (StringUtils.isBlank(key))
             return;
         key = key.trim();
-        if (key.length() > 50)
+        if (key.length() > 250)
             throw new FxApplicationException("ex.configuration.resource.key.tooLong", key);
         if (!StringUtils.isAsciiPrintable(key))
             throw new FxApplicationException("ex.configuration.resource.key.nonAscii", key);
