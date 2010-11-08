@@ -66,7 +66,7 @@ public abstract class DataFilter {
      *
      * @return FxStatement
      */
-    protected FxStatement getStatement() {
+    protected final FxStatement getStatement() {
         return search.getFxStatement();
     }
 

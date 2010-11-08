@@ -112,25 +112,52 @@ public class GenericSQLDataFilter extends DataFilter {
     public GenericSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         super(con, search);
         this.con = con;
-        final long[] briefcaseIds = getStatement().getBriefcaseFilter();
-        if (briefcaseIds.length == 0) {
+        if (!hasBriefcaseFilter()) {
             tableMain = DatabaseConst.TBL_CONTENT;
             tableContentData = DatabaseConst.TBL_CONTENT_DATA;
             tableFulltext = DatabaseConst.TBL_CONTENT_DATA_FT;
         } else {
+            final String briefcaseIdSelect = getBriefcaseIdSelect();
             // TODO: Add briefcase security (may the user access the specified briefcases?)
             // TODO: Filter out undesired / desired languages
-            final String briefcaseIdFilter = "SELECT id from " + DatabaseConst.TBL_BRIEFCASE_DATA +
-                    " WHERE briefcase_id " +
-                    (getStatement().getBriefcaseFilter().length == 1 ? ("=" + briefcaseIds[0]) : "IN (" +
-                            StringUtils.join(ArrayUtils.toObject(briefcaseIds), ',') + ")");
             tableContentData = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA +
-                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) + ")";
+                    " WHERE id IN (" + briefcaseIdSelect + ") " + getVersionFilter(null) + ")";
             tableMain = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT +
-                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) +
+                    " WHERE id IN (" + briefcaseIdSelect + ") " + getVersionFilter(null) +
                     getDeactivatedTypesFilter(null) + getInactiveMandatorsFilter(null) + ")";
             tableFulltext = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA_FT +
-                    " WHERE id IN (" + briefcaseIdFilter + "))"; //versions are matched against content_data table
+                    " WHERE id IN (" + briefcaseIdSelect + "))"; //versions are matched against content_data table
+        }
+    }
+
+    protected final boolean hasBriefcaseFilter() {
+        return getStatement().getBriefcaseFilter().length > 0;
+    }
+
+    protected final String getBriefcaseIdSelect() {
+        final long[] briefcaseIds = getStatement().getBriefcaseFilter();
+        return "(SELECT id from " + DatabaseConst.TBL_BRIEFCASE_DATA
+                + " WHERE briefcase_id "
+                + (briefcaseIds.length == 1 ? ("=" + briefcaseIds[0]) : "IN ("
+                + StringUtils.join(ArrayUtils.toObject(briefcaseIds), ',') + ")")
+                + ")";
+    }
+
+    /**
+     * Return the filtered table for reading from the given flat storage table (adds briefcase filters).
+     * 
+     * @param table the flat storage table
+     * @return      the filtered table for reading from the given flat storage table (adds briefcase filters).
+     */
+    protected final String flatContentDataTable(String table) {
+        if (hasBriefcaseFilter()) {
+            return "(SELECT * FROM " + table + " WHERE id IN (" + getBriefcaseIdSelect() + ")"
+                    + getVersionFilter(null) 
+                    + getDeactivatedTypesFilter(null) 
+                    + getInactiveMandatorsFilter(null)
+                    + ")";
+        } else {
+            return table;
         }
     }
 
@@ -816,7 +843,8 @@ public class GenericSQLDataFilter extends DataFilter {
                 return isNullSelect(entry, prop, tableContentData, filter, "tprop");
             } else if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA_FLAT) {
                 final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
-                return isNullSelect(entry, prop, mapping.getStorage(),
+                return isNullSelect(entry, prop, 
+                        flatContentDataTable(mapping.getStorage()),
                         SearchUtils.getFlatStorageAssignmentFilter(search.getEnvironment(), "da", entry.getAssignment()),
                         mapping.getColumn()
                 );
@@ -870,7 +898,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     return "(" + condition + ")";
                 } else {
                     return " (SELECT DISTINCT cd.id, cd.ver, cd.lang " +
-                            "FROM " + mapping.getStorage() + " cd " +
+                            "FROM " + flatContentDataTable(mapping.getStorage()) + " cd " +
                             "WHERE "
                             + condition
                             + getSubQueryLimit()

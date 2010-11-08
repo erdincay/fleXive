@@ -293,6 +293,49 @@ public class SearchEngineTest {
 
 
     @Test
+    public void briefcaseFlatStorageConditionTest() throws FxApplicationException {
+        // filter from a briefcase with only flat storage conditions
+
+        final List<FxPK> pks = new SqlQueryBuilder().select("@pk").type(TEST_TYPE).maxRows(2).getResult().collectColumn(1);
+        assertEquals(pks.size(), 2);
+        assertFalse(pks.get(0).getId() == pks.get(1).getId(), "Two instances with the same ID returned");
+
+        final long id1 = getBriefcaseEngine().create("flatc1", "", null);
+        getBriefcaseEngine().addItems(id1, Arrays.asList(pks.get(0)));
+
+        final long id2 = getBriefcaseEngine().create("flatc2", "", null);
+        getBriefcaseEngine().addItems(id2, Arrays.asList(pks.get(1)));
+
+        try {
+            final String property = TEST_TYPE + "/stringSearchProp";
+            final FxPropertyAssignment prop = CacheAdmin.getEnvironment().getPropertyAssignment(property);
+            if (prop.getFlatStorageMapping() == null) {
+                // may happen if tested with a dummy flat storage, run the test anyway but print a warning
+                System.err.println("Warning: assignment " + prop.getXPath()
+                        + " is not in flat storage (briefcaseFlatStorageConditionTest)");
+            }
+
+            final List<FxPK> result1 = new SqlQueryBuilder().select("@pk").filterBriefcase(id1)
+                    .condition(property, PropertyValueComparator.NOT_EMPTY, null)
+                    .getResult().collectColumn(1);
+            
+            final List<FxPK> result2 = new SqlQueryBuilder().select("@pk").filterBriefcase(id2)
+                    .condition(property, PropertyValueComparator.NOT_EMPTY, null)
+                    .getResult().collectColumn(1);
+
+            assertEquals(result1.size(), 1, "Returned more than one row for briefcase " + id1);
+            assertEquals(result2.size(), 1, "Returned more than one row for briefcase " + id2);
+
+            assertEquals(result1.get(0), pks.get(0), "Unexpected row returned for briefcase " + id1);
+            assertEquals(result2.get(0), pks.get(1), "Unexpected row returned for briefcase " + id2);
+
+        } finally {
+            getBriefcaseEngine().remove(id1);
+            getBriefcaseEngine().remove(id2);
+        }
+    }
+
+    @Test
     public void queryBuilderBriefcaseTest() throws FxApplicationException {
         long briefcaseId = -1;
         try {
