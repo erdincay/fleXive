@@ -70,12 +70,12 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
     }
 
     /**
-     * Internal constructor to make an existing list item editable and add it to an editable select list.
+     * Constructor to make an existing list item editable and add it to an editable select list.
      *
      * @param item the item to make editable
      * @param list the new list to add the item to
      */
-    FxSelectListItemEdit(FxSelectListItem item, FxSelectListEdit list) {
+    public FxSelectListItemEdit(FxSelectListItem item, FxSelectListEdit list) {
         super(item.id, item.name, item.acl, list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
         this.isNew = false;
         this.original = item;
