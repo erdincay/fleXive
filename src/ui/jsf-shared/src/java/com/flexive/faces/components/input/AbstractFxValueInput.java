@@ -295,8 +295,11 @@ public abstract class AbstractFxValueInput extends UIInput {
      */
     public InputMapper getInputMapper() {
         if (inputMapper == null) {
-            inputMapper = (InputMapper) FxJsfComponentUtils.getValue(this, "inputMapper");
-            if (inputMapper == null) {
+            final InputMapper mapper = (InputMapper) FxJsfComponentUtils.getValue(this, "inputMapper");
+            if (mapper != null) {
+                return mapper;
+            } else if (mapper == null) {
+                // default input mapper handling
                 final FxValue fxValue = AbstractFxValueInputRenderer.getFxValue(FacesContext.getCurrentInstance(), this);
                 if (fxValue instanceof FxReference && StringUtils.isNotBlank(fxValue.getXPath())) {
                     // fetch property from assignment
@@ -308,8 +311,7 @@ public abstract class AbstractFxValueInput extends UIInput {
                             property = CacheAdmin.getEnvironment().getProperty(fxValue.getXPath());
                             referenceSelectOne = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
                         } else {
-                            inputMapper = new IdentityInputMapper();    // use dummy mapper
-                            return inputMapper;
+                            return new IdentityInputMapper();    // use dummy mapper
                         }
                     } else {
                         final FxPropertyAssignment assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath());
@@ -320,13 +322,13 @@ public abstract class AbstractFxValueInput extends UIInput {
 
                     if (referenceSelectOne && !isReadOnly()) {
                         // render a select list with *all* valid choices (i.e. all instances visible to the user)
-                        inputMapper = new FxPkSelectOneInputMapper(getValidReferenceList(property));
+                        return new FxPkSelectOneInputMapper(getValidReferenceList(property));
                     } else {
                         // render a text input with an auto suggest box
-                        inputMapper = new NumberQueryInputMapper.ReferenceQueryInputMapper(property);
+                        return new NumberQueryInputMapper.ReferenceQueryInputMapper(property);
                     }
                 } else {
-                    inputMapper = new IdentityInputMapper();    // use dummy mapper
+                    return new IdentityInputMapper();    // use dummy mapper
                 }
             }
         }
