@@ -1567,6 +1567,15 @@
                         </varlistentry>
 
                         <varlistentry>
+                            <term>accesskey</term>
+                            <listitem>
+                                <para>
+                                    An optional access key for the input element.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
                             <term>autocompleteHandler</term>
                             <listitem>
                                 <para>

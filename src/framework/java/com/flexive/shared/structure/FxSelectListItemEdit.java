@@ -63,7 +63,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param item the item to make editable
      */
     public FxSelectListItemEdit(FxSelectListItem item) {
-        super(item.id, item.name, item.acl, item.list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
+        super(item.id, item.name, item.acl, item.list, item.parentItemId, item.label.copy(), item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
         this.isNew = false;
         this.original = item;
         this.parentItem = item.parentItem;
@@ -76,7 +76,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param list the new list to add the item to
      */
     public FxSelectListItemEdit(FxSelectListItem item, FxSelectListEdit list) {
-        super(item.id, item.name, item.acl, list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
+        super(item.id, item.name, item.acl, list, item.parentItemId, item.label.copy(), item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
         this.isNew = false;
         this.original = item;
         this.parentItem = item.parentItem;
@@ -93,7 +93,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param color color for display
      */
     public FxSelectListItemEdit(String name, ACL acl, FxSelectList list, FxString label, String data, String color) {
-        super(calcId(list), name, acl, list, -1, label, data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null, 
+        super(calcId(list), name, acl, list, -1, label.copy(), data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null, 
                 list == null ? 0 : list.getItemCount()+1);
         this.isNew = true;
         this.original = null;

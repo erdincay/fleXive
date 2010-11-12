@@ -375,9 +375,13 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     }
 
     protected static void addHtmlAttributes(AbstractFxValueInput component, UIComponent target) {
-        if (component.getOnchange() != null) {
-            //noinspection unchecked
-            target.getAttributes().put("onchange", component.getOnchange());
+        addHtmlAttribute(target, "onchange", component.getOnchange());
+        addHtmlAttribute(target, "accesskey", component.getAccessKey());
+    }
+
+    protected static void addHtmlAttribute(UIComponent target, String name, String value) {
+        if (value != null) {
+            target.getAttributes().put(name, value);
         }
     }
 

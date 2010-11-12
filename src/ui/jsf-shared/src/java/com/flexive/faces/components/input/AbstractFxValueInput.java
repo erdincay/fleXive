@@ -89,7 +89,10 @@ public abstract class AbstractFxValueInput extends UIInput {
     private String containerDivClass; //if present a div is created to surround the FxValueInput using this CSS class
     private InputMapper inputMapper;
     private String autocompleteHandler;
+
     private String onchange;
+    private String accesskey;
+
     private FxValueFormatter valueFormatter;
     private Boolean disableLytebox;
     private String downloadServletPath;
@@ -429,13 +432,29 @@ public abstract class AbstractFxValueInput extends UIInput {
      */
     public String getOnchange() {
         if (onchange == null) {
-            onchange = FxJsfComponentUtils.getStringValue(this, "onchange");
+            return FxJsfComponentUtils.getStringValue(this, "onchange");
         }
         return onchange;
     }
 
     public void setOnchange(String onchange) {
         this.onchange = onchange;
+    }
+
+    /**
+     * Return the value of the 'accesskey' HTML attribute.
+     *
+     * @return  the value of the 'accesskey' HTML attribute.
+     */
+    public String getAccessKey() {
+        if (accesskey == null) {
+            return FxJsfComponentUtils.getStringValue(this, "accesskey");
+        }
+        return accesskey;
+    }
+
+    public void setAccesskey(String accesskey) {
+        this.accesskey = accesskey;
     }
 
     public String getAutocompleteHandler() {
@@ -591,8 +610,9 @@ public abstract class AbstractFxValueInput extends UIInput {
         this.filter = (Boolean) values[index++];
         this.configurationMask = (Integer) values[index++];
         this.autocompleteHandler = (String) values[index++];
-        //noinspection UnusedAssignment
         this.downloadServletPath = (String) values[index++];
+        //noinspection UnusedAssignment
+        this.accesskey = (String) values[index++];
     }
 
     /**
@@ -601,7 +621,7 @@ public abstract class AbstractFxValueInput extends UIInput {
     @Override
     public Object saveState(FacesContext context) {
         // save state
-        Object[] values = new Object[12];
+        Object[] values = new Object[13];
         int index = 0;
         values[index++] = super.saveState(context);
         values[index++] = disableMultiLanguage;
@@ -616,6 +636,7 @@ public abstract class AbstractFxValueInput extends UIInput {
         values[index++] = autocompleteHandler;
         //noinspection UnusedAssignment
         values[index++] = downloadServletPath;
+        values[index++] = accesskey;
         return values;
 	}
 	

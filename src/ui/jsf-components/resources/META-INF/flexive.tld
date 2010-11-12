@@ -634,6 +634,12 @@
             <description>An optional javascript expression to be called when an input element  changed its value.</description>
         </attribute>
         <attribute>
+            <name>accesskey</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional access key for the input element.</description>
+        </attribute>
+        <attribute>
             <name>autocompleteHandler</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
