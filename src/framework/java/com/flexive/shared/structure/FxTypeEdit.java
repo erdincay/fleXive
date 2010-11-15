@@ -89,6 +89,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param trackHistory               track history
      * @param historyAge                 max. age of the history to track
      * @param maxVersions                max. number of versions to keep, if &lt; 0 unlimited
+     * @param autoVersion                automatically create a new version when contents changed during a save operation
      * @param maxRelSource               max. number of instance related as source
      * @param maxRelDestination          max. number of instances related as destination
      * @param options                    List of FxStructureOptions
@@ -98,11 +99,11 @@ public class FxTypeEdit extends FxType implements Serializable {
                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                        LanguageMode language, TypeState state, byte permissions, boolean multipleContentACLs,
                        boolean includedInSupertypeQueries,
-                       boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
+                       boolean trackHistory, long historyAge, long maxVersions, boolean autoVersion, int maxRelSource,
                        int maxRelDestination, List<FxStructureOption> options) {
         super(-1, acl, defaultInstanceACL, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
                 multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge,
-                maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5), options);
+                maxVersions, autoVersion, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5), options);
         FxSharedUtils.checkParameterMultilang(label, "label");
         this.enableParentAssignments = enableParentAssignments;
         this.isNew = true;
@@ -121,8 +122,9 @@ public class FxTypeEdit extends FxType implements Serializable {
         super(type.getId(), type.getACL(), type.hasDefaultInstanceACL() ? type.getDefaultInstanceACL() : null, type.getWorkflow(),
                 type.getName(), type.getLabel(), type.getParent(), type.getStorageMode(), type.getCategory(),
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions, type.isMultipleContentACLs(),
-                type.isIncludedInSupertypeQueries(), type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
-                type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations(), FxStructureOption.cloneOptions(type.options));
+                type.isIncludedInSupertypeQueries(), type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(),
+                type.isAutoVersion(), type.getMaxRelSource(), type.getMaxRelDestination(), type.getLifeCycleInfo(),
+                type.getDerivedTypes(), type.getRelations(), FxStructureOption.cloneOptions(type.options));
         FxSharedUtils.checkParameterMultilang(label, "label");
         this.isNew = false;
         this.scriptMapping = type.scriptMapping;
@@ -221,7 +223,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                     CacheAdmin.getEnvironment().getWorkflows().get(0),
                     null, false, TypeStorageMode.Hierarchical,
                     TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
-                    getDefaultTypePermissions(), false, 0, -1, 0, 0, options);
+                    getDefaultTypePermissions(), false, 0, -1, false, 0, 0, options);
         } else {
             return createNew(name, label, acl, parent.hasDefaultInstanceACL() ? parent.getDefaultInstanceACL() : null,
                     parent.getWorkflow(),
@@ -229,7 +231,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                     TypeCategory.User, parent.getMode(),
                     parent.getLanguage(), TypeState.Available,
                     parent.getBitCodedPermissions(), parent.isTrackHistory(), parent.getHistoryAge(),
-                    parent.getMaxVersions(), parent.getMaxRelSource(), parent.getMaxRelDestination(),
+                    parent.getMaxVersions(), parent.isAutoVersion(), parent.getMaxRelSource(), parent.getMaxRelDestination(),
                     options);
         }
     }
@@ -278,6 +280,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param trackHistory            track history
      * @param historyAge              max. age of the history to track
      * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
+     * @param autoVersion             automatically create a new version when contents changed during a save operation
      * @param maxRelSource            max. number of instance related as source
      * @param maxRelDestination       max. number of instance related as destination
      * @return FxTypeEdit instance for creating a new FxType
@@ -287,12 +290,12 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        FxType parent, boolean enableParentAssignments,
                                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                                        LanguageMode language, TypeState state, byte permissions,
-                                       boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
-                                       int maxRelDestination) {
+                                       boolean trackHistory, long historyAge, long maxVersions,
+                                       boolean autoVersion, int maxRelSource, int maxRelDestination) {
         return new FxTypeEdit(name, label, acl, null, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
-                maxVersions, maxRelSource, maxRelDestination, null);
+                maxVersions, autoVersion, maxRelSource, maxRelDestination, null);
     }
 
     /**
@@ -314,6 +317,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param trackHistory            track history
      * @param historyAge              max. age of the history to track
      * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
+     * @param autoVersion             automatically create a new version when contents changed during a save operation
      * @param maxRelSource            max. number of instance related as source
      * @param maxRelDestination       max. number of instance related as destination
      * @return FxTypeEdit instance for creating a new FxType
@@ -323,12 +327,12 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        FxType parent, boolean enableParentAssignments,
                                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                                        LanguageMode language, TypeState state, byte permissions,
-                                       boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
-                                       int maxRelDestination) {
+                                       boolean trackHistory, long historyAge, long maxVersions, boolean autoVersion,
+                                       int maxRelSource, int maxRelDestination) {
         return new FxTypeEdit(name, label, acl, defaultInstanceACL, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
-                maxVersions, maxRelSource, maxRelDestination, null);
+                maxVersions, autoVersion, maxRelSource, maxRelDestination, null);
     }
 
     /**
@@ -364,7 +368,7 @@ public class FxTypeEdit extends FxType implements Serializable {
         return new FxTypeEdit(name, label, acl, null, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
-                maxVersions, maxRelSource, maxRelDestination, options);
+                maxVersions, false, maxRelSource, maxRelDestination, options);
     }
 
     /**
@@ -386,6 +390,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param trackHistory            track history
      * @param historyAge              max. age of the history to track
      * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
+     * @param autoVersion             automatically create a new version when contents changed during a save operation
      * @param maxRelSource            max. number of instance related as source
      * @param maxRelDestination       max. number of instance related as destination
      * @param options                 list of structure options
@@ -396,12 +401,13 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        FxType parent, boolean enableParentAssignments,
                                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                                        LanguageMode language, TypeState state, byte permissions,
-                                       boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
+                                       boolean trackHistory, long historyAge, long maxVersions,
+                                       boolean autoVersion, int maxRelSource,
                                        int maxRelDestination, List<FxStructureOption> options) {
         return new FxTypeEdit(name, label, acl, defaultInstanceACL, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
-                maxVersions, maxRelSource, maxRelDestination, options);
+                maxVersions, autoVersion, maxRelSource, maxRelDestination, options);
     }
 
     /**
@@ -709,6 +715,19 @@ public class FxTypeEdit extends FxType implements Serializable {
     }
 
     /**
+     * Set if new versions should be automatically created on content changes
+     *
+     * @param autoVersion automatically create a new version when contents changed during a save operation
+     * @return the type itself, useful for chained calls
+     * @since 3.1.5
+     */
+    public FxType setAutoVersion(boolean autoVersion) {
+        this.autoVersion = autoVersion;
+        this.changed = true;
+        return this;
+    }
+
+    /**
      * Set the max. number related source instances for this type, if negative unlimited
      *
      * @param maxRelSource max. number related source instances for this type, if negative or zero unlimited
@@ -926,9 +945,9 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Add a new select list assignment to this type.
      * The assignment is saved instantly and is returned to the caller.
      *
-     * @param name     the assignment name
+     * @param name           the assignment name
      * @param referencedList the referenced select list
-     * @param selectMany true to enable multiple selection
+     * @param selectMany     true to enable multiple selection
      * @return the created assignment
      * @throws FxApplicationException on errors
      * @since 3.1.2
@@ -941,14 +960,14 @@ public class FxTypeEdit extends FxType implements Serializable {
         );
         prop.setReferencedList(referencedList);
         return addProperty(name, prop);
-        
+
     }
 
     /**
      * Add a reference assignment to this type.
      * The assignment is saved instantly and is returned to the caller.
      *
-     * @param name     the assignment name
+     * @param name           the assignment name
      * @param referencedType the referenced type
      * @return the created assignment
      * @throws FxApplicationException on errors
@@ -970,7 +989,7 @@ public class FxTypeEdit extends FxType implements Serializable {
         return prop;
     }
 
-    private FxPropertyAssignmentEdit addProperty( String name, final FxPropertyEdit prop) throws FxApplicationException {
+    private FxPropertyAssignmentEdit addProperty(String name, final FxPropertyEdit prop) throws FxApplicationException {
         final long propId = EJBLookup.getAssignmentEngine().createProperty(getId(), prop, getAssignmentParent(name));
         return CacheAdmin.getEnvironment().getPropertyAssignment(propId).asEditable();
     }

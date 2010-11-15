@@ -355,6 +355,7 @@ CREATE TABLE FXS_TYPEDEF (
   TRACKHISTORY BOOLEAN NOT NULL COMMENT 'track changes on instance data? HISTORY_AGE tells for how long they are kept.',
   HISTORY_AGE INTEGER UNSIGNED COMMENT 'Days to keep histories for instance changes if TRACKHISTORY is true. 0=for ever',
   MAX_VERSIONS INTEGER NOT NULL COMMENT 'maximum number of versions to keep (if the storage mode supports versions)\n-1 = unlimited\n0 = no versioning\n> 0 = number of versions to keep',
+  AUTO_VERSION BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'When true and contents have changed, a new version will be created when saving.',
   REL_TOTAL_MAXSRC INTEGER UNSIGNED NOT NULL COMMENT 'If not 0 used to override the MAXSRC from FXS_TYPERELS for a total amount',
   REL_TOTAL_MAXDST INTEGER UNSIGNED NOT NULL COMMENT 'If not 0 used to override the MAXDST from FXS_TYPERELS for a total amount',
   ICON_REF BIGINT COMMENT 'Optional reference to a content instance for a preview icon',

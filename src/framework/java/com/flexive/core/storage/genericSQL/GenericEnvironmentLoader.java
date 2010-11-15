@@ -442,8 +442,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
                     //13               14                15          16          17           18           19   20        21
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF, " +
-                    // 22                   23                24
-                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL" +
+                    // 22                   23                24      25
+                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL, AUTO_VERSION" +
                     " FROM " + TBL_STRUCT_TYPES + " ORDER BY NAME";
 
             stmt = con.createStatement();
@@ -474,7 +474,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                             TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
                             rs.getBoolean(22), rs.getBoolean(23), rs.getBoolean(10), rs.getLong(11), rs.getLong(12),
-                            rs.getInt(13), rs.getInt(14), LifeCycleInfoImpl.load(rs, 15, 16, 17, 18),
+                            rs.getBoolean(25), rs.getInt(13), rs.getInt(14), LifeCycleInfoImpl.load(rs, 15, 16, 17, 18),
                             new ArrayList<FxType>(5), alRelations, FxSharedUtils.get(typeOptions, id, null));
                     long iconId = rs.getLong(21);
                     if (!rs.wasNull())

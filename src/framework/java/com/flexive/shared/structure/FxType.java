@@ -126,6 +126,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected boolean trackHistory;
     protected long historyAge;
     protected long maxVersions;
+    protected boolean autoVersion;
     protected int maxRelSource;
     protected int maxRelDestination;
     protected boolean multipleContentACLs;
@@ -164,6 +165,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param trackHistory               track history?
      * @param historyAge                 max. age of history to keep
      * @param maxVersions                max. number of versions to keep for instances of this type
+     * @param autoVersion                automatically create a new version when contents changed during a save operation
      * @param maxRelSource               max. number of relation sources
      * @param maxRelDestination          max. number of relation destination
      * @param lifeCycleInfo              life cycle info for the type
@@ -174,7 +176,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     public FxType(long id, ACL acl, ACL defaultInstanceACL, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
                   boolean multipleContentACLs, boolean includedInSupertypeQueries, boolean trackHistory,
-                  long historyAge, long maxVersions, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
+                  long historyAge, long maxVersions, boolean autoVersion, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
                   List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxStructureOption> options) {
         this.id = id;
         this.ACL = acl;
@@ -194,6 +196,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.trackHistory = trackHistory;
         this.historyAge = historyAge;
         this.maxVersions = maxVersions;
+        this.autoVersion = autoVersion;
         this.maxRelSource = maxRelSource < 0 ? 0 : maxRelSource;
         this.maxRelDestination = maxRelDestination < 0 ? 0 : maxRelDestination;
         this.lifeCycleInfo = lifeCycleInfo;
@@ -241,7 +244,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                   long historyAge, long maxVersions, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
                   List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxStructureOption> options) {
         this(id, acl, null, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
-                multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge, maxVersions, maxRelSource,
+                multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge, maxVersions, false, maxRelSource,
                 maxRelDestination, lifeCycleInfo, derivedTypes, relations, options);
     }
 
@@ -645,6 +648,15 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public long getMaxVersions() {
         return maxVersions;
+    }
+
+    /**
+     * Should new versions be automatically created when data changed?
+     *
+     * @return automatically create a new version if data changed
+     */
+    public boolean isAutoVersion() {
+        return autoVersion;
     }
 
     /**

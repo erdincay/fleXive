@@ -403,6 +403,14 @@ public class TypeEditorBean implements Serializable {
         this.unlimitedVersions = unlimitedVersions;
     }
 
+    public boolean isAutoVersion() {
+        return type.isAutoVersion();
+    }
+
+    public void setAutoVersion(boolean autoVersion) {
+        type.setAutoVersion(autoVersion);
+    }
+
     public List<WrappedRelation> getWrappedRelations() {
         return wrappedRelations;
     }

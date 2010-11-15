@@ -372,6 +372,19 @@
                             </td>
                         </tr>
                         <tr>
+                            <td xml:id="cs_type_autover">Automatic versioning</td>
+                            <td>
+                                <methodname>setAutoVersion(boolean autoVersion)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>If set to
+                                <code>true</code>
+                                a new version is automatically created if data (and not only positioning) has changed
+                                when saving a content.
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Mode</td>
                             <td>
                                 <methodname>setMode(TypeMode mode)</methodname>

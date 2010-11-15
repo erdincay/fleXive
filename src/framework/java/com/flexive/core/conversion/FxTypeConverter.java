@@ -64,10 +64,7 @@ import org.apache.commons.lang.ArrayUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * XStream converter for FxType
@@ -97,6 +94,8 @@ public class FxTypeConverter implements Converter {
             writer.addAttribute("category", type.getCategory().name());
             writer.addAttribute("languageMode", type.getLanguage().name());
             writer.addAttribute("maxVersions", String.valueOf(type.getMaxVersions()));
+            writer.addAttribute("autoVersion", String.valueOf(type.isAutoVersion()));
+            writer.addAttribute("includedInSuperTypeQueries", String.valueOf(type.isIncludedInSupertypeQueries()));
             writer.addAttribute("mode", type.getMode().name());
             writer.addAttribute("state", type.getState().name());
             writer.addAttribute("storageMode", type.getStorageMode().name());
@@ -206,6 +205,8 @@ public class FxTypeConverter implements Converter {
         long historyAge = 0;
         if (trackHistory)
             historyAge = Long.valueOf(reader.getAttribute("historyAge"));
+        boolean autoVersion = containsAttribute(reader, "autoVersion") ? Boolean.valueOf(reader.getAttribute("autoVersion")) : false;
+        boolean includedInSuperTypeQueries = containsAttribute(reader, "autoVersion") ? Boolean.valueOf(reader.getAttribute("includedInSuperTypeQueries")) : true;
         int maxRelSource = -1;
         int maxRelDest = -1;
         FxString label = null;
@@ -213,7 +214,8 @@ public class FxTypeConverter implements Converter {
         if (!existing) {
             typeEdit = FxTypeEdit.createNew(name, label, acl, defACL, workflow, parent, false,
                     storageMode, cat, mode, langMode, state, permissions, trackHistory, historyAge, maxVersions,
-                    maxRelSource, maxRelDest);
+                    autoVersion, maxRelSource, maxRelDest);
+            typeEdit.setIncludedInSupertypeQueries(includedInSuperTypeQueries);
             typeEdit.setLifeCycleInfo(LifeCycleInfoImpl.createNew(FxContext.getUserTicket()));
         }
         if (existing) {
@@ -355,6 +357,23 @@ public class FxTypeConverter implements Converter {
             reader.moveUp(); //move up the final assignments closing node
         }
         return typeEdit;
+    }
+
+    /**
+     * Check if the reader contains the requested attribute
+     * @param reader xml reader
+     * @param attr attribute to check for
+     * @return attribute exists
+     */
+    private boolean containsAttribute(HierarchicalStreamReader reader, String attr) {
+        String att;
+        Iterator it = reader.getAttributeNames();
+        while( it.hasNext() ) {
+            att = (String)it.next();
+            if( attr.equals(att))
+                return true;
+        }
+        return false;
     }
 
     /**

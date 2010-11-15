@@ -341,6 +341,11 @@
                         </fx:formRow>
                     </div>
                 </ui:fragment>
+
+                <fx:formRow labelKey="TypeEditor.label.autoVersion" id="autoVersion">
+                    <h:selectBooleanCheckbox id="autoVersion" value="#{typeEditorBean.autoVersion}"
+                                         disabled="#{not typeEditorBean.editMode}" onchange="submit();"/>
+                </fx:formRow>
             </fx:fieldSet>
 
             <fx:fieldSet legendKey="TypeEditor.label.permissions">

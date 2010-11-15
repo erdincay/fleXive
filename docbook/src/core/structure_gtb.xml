@@ -415,7 +415,7 @@ builder {
                     <tr>
                         <td>historyAge</td>
                         <td>
-                            Long
+                            <classname>Long</classname>
                         </td>
                         <td>
                             <code>testtype(trackHistory: true, historyAge: 10L)</code>
@@ -427,13 +427,25 @@ builder {
                     <tr>
                         <td>maxVersions</td>
                         <td>
-                            Long
+                            <classname>Long</classname>
                         </td>
                         <td>
                             <code>testtype(maxVersions: 5L)</code>
                         </td>
                         <td>
                             Sets the number of versions to keep.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>autoVersion</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>testtype(autoVersion: true)</code>
+                        </td>
+                        <td>
+                            Automatically create a new version when saving and data (not positions only!) has changed.
                         </td>
                     </tr>
                     <tr>

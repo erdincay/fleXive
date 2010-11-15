@@ -331,7 +331,15 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 if (LOG.isDebugEnabled())
                     LOG.debug("creating new content for type " + CacheAdmin.getEnvironment().getType(content.getTypeId()).getName());
             } else {
-                pk = storage.contentSave(con, env, null, content, EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_FQN_PROPERTY));
+                boolean newVersion = false;
+                if (type.isAutoVersion()) {
+                    FxDelta delta = FxDelta.processDelta(storage.contentLoad(con, content.getPk(), CacheAdmin.getEnvironment(), null), content);
+                    newVersion = delta.isDataChanged();
+                }
+                if (newVersion)
+                    pk = storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, content);
+                else
+                    pk = storage.contentSave(con, env, null, content, EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_FQN_PROPERTY));
             }
             //scripting after start
             //assignment scripting
@@ -400,6 +408,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     public FxPK createNewVersion(FxContent content) throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;
+        if (content.getPk().isNew())
+            return save(content);
         try {
             //security check start
             FxEnvironment env = CacheAdmin.getEnvironment();
@@ -418,7 +428,69 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclIds(), true);
             FxContent prepared = prepareSave(con, storage, content);
             //security check end
-            return storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, prepared);
+
+            FxScriptBinding binding = null;
+            long[] typeScripts;
+            //scripting before start
+            //type scripting
+            typeScripts = type.getScriptMapping(
+                    content.getPk().isNew()
+                            ? FxScriptEvent.BeforeContentCreate
+                            : FxScriptEvent.BeforeContentSave);
+            if (typeScripts != null)
+                for (long script : typeScripts) {
+                    if (binding == null)
+                        binding = new FxScriptBinding();
+                    binding.setVariable("content", content);
+                    Object result = scripting.runScript(script, binding).getResult();
+                    if (result != null && result instanceof FxContent) {
+                        content = (FxContent) result;
+                    }
+                }
+            //assignment scripting
+            if (type.hasScriptedAssignments()) {
+                binding = null;
+                for (FxAssignment as : type.getScriptedAssignments(FxScriptEvent.BeforeAssignmentDataSave)) {
+                    if (binding == null)
+                        binding = new FxScriptBinding();
+                    binding.setVariable("assignment", as);
+                    for (long script : as.getScriptMapping(FxScriptEvent.BeforeAssignmentDataSave)) {
+                        binding.setVariable("content", content);
+                        Object result = scripting.runScript(script, binding).getResult();
+                        if (result != null && result instanceof FxContent) {
+                            content = (FxContent) result;
+                        }
+                    }
+                }
+            }
+            //scripting before end
+
+            FxPK pk = storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, prepared);
+
+            //scripting after start
+            //assignment scripting
+            if (type.hasScriptedAssignments()) {
+                binding = new FxScriptBinding();
+                binding.setVariable("pk", pk);
+                for (FxAssignment as : type.getScriptedAssignments(FxScriptEvent.AfterAssignmentDataSave)) {
+                    binding.setVariable("assignment", as);
+                    for (long script : as.getScriptMapping(FxScriptEvent.AfterAssignmentDataSave)) {
+                        scripting.runScript(script, binding);
+                    }
+                }
+            }
+            //type scripting
+            typeScripts = env.getType(content.getTypeId()).getScriptMapping(FxScriptEvent.AfterContentSave);
+            if (typeScripts != null)
+                for (long script : typeScripts) {
+                    if (binding == null)
+                        binding = new FxScriptBinding();
+                    binding.setVariable("pk", pk);
+                    scripting.runScript(script, binding);
+                }
+            //scripting after end
+
+            return pk;
         } catch (SQLException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -1181,18 +1253,18 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
 
             // either destination ist derived from source or vice versa, or both types have to have the same supertype
-            if(sourceType.getParent() == null && destinationType.getParent() == null)
+            if (sourceType.getParent() == null && destinationType.getParent() == null)
                 throw new FxContentTypeConversionException("ex.content.typeconversion.derivedTypeError");
-            if(!sourceType.isDerivedFrom(destinationTypeId) && !destinationType.isDerivedFrom(sourceTypeId)) {
+            if (!sourceType.isDerivedFrom(destinationTypeId) && !destinationType.isDerivedFrom(sourceTypeId)) {
                 // check for an indirect parentage (same supertype)
                 FxType o1 = null;
                 FxType o2 = null;
-                for(FxType t = sourceType; t != null; t = t.getParent())
+                for (FxType t = sourceType; t != null; t = t.getParent())
                     o1 = t;
-                for(FxType t = destinationType; t != null; t = t.getParent())
+                for (FxType t = destinationType; t != null; t = t.getParent())
                     o2 = t;
 
-                if(o1.getId() != o2.getId())
+                if (o1.getId() != o2.getId())
                     throw new FxContentTypeConversionException("ex.content.typeconversion.derivedTypeError");
             }
 
@@ -1207,7 +1279,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                         if (!a.isSystemInternal()) {
                             if (propAssignsOnly && a instanceof FxPropertyAssignment)
                                 out.put(a.getId(), XPathElement.stripType(a.getXPath()));
-                            else if(!propAssignsOnly)
+                            else if (!propAssignsOnly)
                                 out.put(a.getId(), XPathElement.stripType(a.getXPath()));
                         }
                     }
@@ -1236,13 +1308,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                         throw new FxContentTypeConversionException("ex.content.typeconversion.xpathsDiffError");
                     } else if (d.getDeletedStart() == d.getDeletedEnd() && d.getAddedStart() != d.getAddedEnd()) {
                         // lossy conversion check
-                        if(!allowLossy) {
+                        if (!allowLossy) {
                             throw new FxContentTypeConversionException("ex.content.typeconversion.sourceLossError");
                         } else { // add to list of xPaths / assignments t.b. removed
                             // sourcePathsMap.
                             final String removePath = sourcePaths.get(d.getDeletedStart());
                             for (Map.Entry<Long, String> pathEntry : sourcePathsMap.entrySet()) {
-                                if(pathEntry.getValue().equals(removePath))
+                                if (pathEntry.getValue().equals(removePath))
                                     sourceRemoveMap.put(pathEntry.getKey(), removePath);
                             }
                         }
@@ -1258,31 +1330,31 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             final List<Long> nonFlatSourceAssignments = new ArrayList<Long>(5);
             final List<Long> nonFlatDestinationAssignments = new ArrayList<Long>(5);
 
-            for(FxAssignment a : sourceTypeAssignments) {
-                if(a.isSystemInternal() || a instanceof FxGroupAssignment)
+            for (FxAssignment a : sourceTypeAssignments) {
+                if (a.isSystemInternal() || a instanceof FxGroupAssignment)
                     continue;
 
                 final String sourceXPath = XPathElement.stripType(a.getXPath());
                 // get the corresponding assignment from the destination type
-                final String destinationXPath =  destinationType.getName() + sourceXPath;
-                if(destPaths.contains(sourceXPath) && CacheAdmin.getEnvironment().assignmentExists(destinationXPath)) {
+                final String destinationXPath = destinationType.getName() + sourceXPath;
+                if (destPaths.contains(sourceXPath) && CacheAdmin.getEnvironment().assignmentExists(destinationXPath)) {
                     // if the dest assignment exists, test that the datatype is the same as for the source
                     final FxAssignment destAssignment = CacheAdmin.getEnvironment().getAssignment(destinationXPath);
-                    if(a instanceof FxPropertyAssignment) {
-                        if(!(destAssignment instanceof FxPropertyAssignment))
+                    if (a instanceof FxPropertyAssignment) {
+                        if (!(destAssignment instanceof FxPropertyAssignment))
                             throw new FxContentTypeConversionException("ex.content.typeconversion.destneqprop", destAssignment.getId());
 
-                        final FxDataType sourceDT = ((FxPropertyAssignment)a).getProperty().getDataType();
-                        final FxDataType destDT = ((FxPropertyAssignment)destAssignment).getProperty().getDataType();
-                        if(sourceDT != destDT)
+                        final FxDataType sourceDT = ((FxPropertyAssignment) a).getProperty().getDataType();
+                        final FxDataType destDT = ((FxPropertyAssignment) destAssignment).getProperty().getDataType();
+                        if (sourceDT != destDT)
                             throw new FxContentTypeConversionException("ex.content.typeconversion.destDTneqsourceDT", destinationXPath);
                     }
-                    if(((FxPropertyAssignment)destAssignment).isFlatStorageEntry()) {
+                    if (((FxPropertyAssignment) destAssignment).isFlatStorageEntry()) {
                         flatStoreAssignments.add(destAssignment.getId());
                     } else {
                         nonFlatDestinationAssignments.add(destAssignment.getId());
                     }
-                    if(!((FxPropertyAssignment)a).isFlatStorageEntry()) {
+                    if (!((FxPropertyAssignment) a).isFlatStorageEntry()) {
                         nonFlatSourceAssignments.add(a.getId());
                     }
                     assignmentMap.put(a.getId(), destAssignment.getId());
@@ -1292,12 +1364,12 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
 
             // check if we have any mandatory assignments in our destination type and if we've got data for it
-            for(FxAssignment a : destinationTypeAssignments) {
-                if(a instanceof FxPropertyAssignment && !a.isSystemInternal()) {
+            for (FxAssignment a : destinationTypeAssignments) {
+                if (a instanceof FxPropertyAssignment && !a.isSystemInternal()) {
                     final int minMult = a.getMultiplicity().getMin();
-                    if(minMult > 0) {
+                    if (minMult > 0) {
                         final String destXPath = XPathElement.stripType(a.getXPath());
-                        if(content.getData(destXPath).size() < minMult)
+                        if (content.getData(destXPath).size() < minMult)
                             throw new FxContentTypeConversionException("ex.content.typeconversion.destMultiplicityError", destXPath, a.getId(), minMult);
                     }
                 }
@@ -1313,7 +1385,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw new FxContentTypeConversionException("ex.content.typeconversion.error", e.getMessage(), contentPK, sourceTypeId, destinationType.getId());
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             EJBUtils.rollback(ctx);
             LOG.error(e);
         } finally { // flush cache after update was completed

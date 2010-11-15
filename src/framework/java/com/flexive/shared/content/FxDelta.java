@@ -372,6 +372,23 @@ public class FxDelta implements Serializable {
     }
 
     /**
+     * Are there any data (and not only position) changed?
+     *
+     * @return data changes?
+     * @since 3.1.5
+     */
+    public boolean isDataChanged() {
+        if( !changes())
+            return false;
+        if( adds.size() > 0 || removes.size() > 0)
+            return true;
+        for(FxDelta.FxDeltaChange change: updates)
+            if( change.isDataChange())
+                return true;
+        return false;
+    }
+
+    /**
      * Create a dump of all changes for debugging purposes
      *
      * @return dump of all changes for debugging purposes

@@ -131,7 +131,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "ACL", "GENERALACL", "LABEL", "PARENTTYPENAME", "LANGUAGEMODE", "TYPEMODE", "TRACKHISTORY", "HISTORYAGE",
             "MAXVERSIONS", "USEINSTANCEPERMISSIONS", "USEPROPERTYPERMISSIONS", "USESTEPPERMISSIONS", "WORKFLOW",
             "USETYPEPERMISSIONS", "USEPERMISSIONS", "ICON", "MIMETYPE", "STORAGEMODE", "NAME", "HINT", "DESCRIPTION",
-            "STRUCTUREOPTIONS", "DEFAULTINSTANCEACL"
+            "STRUCTUREOPTIONS", "DEFAULTINSTANCEACL", "AUTOVERSION"
     };
 
     /**
@@ -921,7 +921,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         Boolean useInstancePermissions, useStepPermissions, useTypePermissions, usePropertyPermissions,
                 usePermissions, overrideMultilang, multilang, overrideACL, overrideMultiplicity, overrideInOverview,
                 overrideMaxLength, overrideMultiline, overrideSearchable, overrideHTMLEditor, searchable, flatten,
-                inOverview, useHTMLEditor, multiline, enabled, trackHistory, fullTextIndexed, autoUniquePropertyName;
+                inOverview, useHTMLEditor, multiline, enabled, trackHistory, fullTextIndexed, autoUniquePropertyName,
+                autoVersion;
         Integer maxLength;
         FxType referencedType;
         FxSelectList referencedList;
@@ -995,6 +996,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             trackHistory = (Boolean) FxSharedUtils.get(attributes, "trackHistory", false);
             historyAge = (Long) FxSharedUtils.get(attributes, "historyAge", 1L);
             maxVersions = (Long) FxSharedUtils.get(attributes, "maxVersions", -1L);
+            autoVersion = (Boolean) FxSharedUtils.get(attributes, "autoVersion", false);
             //noinspection unchecked
             structureOptions = (List<FxStructureOption>) FxSharedUtils.get(attributes, "structureOptions", null);
 
@@ -1032,6 +1034,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 type.setTrackHistory(trackHistory);
             if (attributes.containsKey("maxVersions"))
                 type.setMaxVersions(maxVersions);
+            if (attributes.containsKey("autoVersion"))
+                type.setAutoVersion(autoVersion);
             if (attributes.containsKey("useInstancePermissions"))
                 type.setUseInstancePermissions(useInstancePermissions);
             if (attributes.containsKey("usePropertyPermissions"))

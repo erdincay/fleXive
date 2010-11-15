@@ -305,6 +305,7 @@ class GroovyTypeBuilderTest {
             new GroovyTypeBuilder().builderTest(languageMode: LanguageMode.Single,
                     trackHistory: true,
                     typeMode: TypeMode.Content,
+                    autoVersion: true,
                     maxVersions: 10L) {
                 testprop1unique(label: new FxString(true, "TestProp1"),
                         description: new FxString(true, "TestProp1Description"), // should be overwritten if a label is given
@@ -356,6 +357,7 @@ class GroovyTypeBuilderTest {
             // asserts
             FxType t = CacheAdmin.getEnvironment().getType("BUILDERTEST")
             Assert.assertTrue(t.isTrackHistory())
+            Assert.assertTrue(t.isAutoVersion())
             Assert.assertEquals(t.getMaxVersions(), 10L)
             Assert.assertEquals(t.getMode(), TypeMode.Content)
 

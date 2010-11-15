@@ -104,10 +104,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     "LANG_MODE,  TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS, " +
                     //13               14                15          16          17           18           19   20        21
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF," +
-                    // 22                   23                24
-                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL)" +
+                    // 22                   23                24      25
+                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL, AUTO_VERSION)" +
                     " VALUES " +
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     /**
      * {@inheritDoc}
@@ -179,6 +179,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 ps.setLong(24, type.getDefaultInstanceACL().getId());
             else
                 ps.setNull(24, java.sql.Types.INTEGER);
+            ps.setBoolean(25, type.isAutoVersion());
             ps.executeUpdate();
             Database.storeFxString(type.getLabel(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
 
@@ -781,6 +782,19 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             //end max.ver changes
 
+            //start isAutoVersion setting changes
+            if (type.isAutoVersion() != orgType.isAutoVersion()) {
+                sql.setLength(0);
+                sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET AUTO_VERSION=? WHERE ID=?");
+                if (ps != null) ps.close();
+                ps = con.prepareStatement(sql.toString());
+                ps.setBoolean(1, type.isAutoVersion());
+                ps.setLong(2, type.getId());
+                ps.executeUpdate();
+                htracker.track(type, "history.type.update.isAutoVersion", orgType.isAutoVersion(), type.isAutoVersion());
+            }
+            //end isAutoVersion setting changes
+
             //start max source relations changes
             if (type.isRelation() && type.getMaxRelSource() != orgType.getMaxRelSource()) {
                 //TODO: check if the new condition is not violated by existing data
@@ -1095,8 +1109,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
                     //13               14                15          16          17           18           19   20
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, " +
-                    // 21                   22                23
-                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL" +
+                    // 21                   22                23      24
+                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL, AUTO_VERSION" +
                     " FROM " + TBL_STRUCT_TYPES + " WHERE ID=" + id;
 
             stmt = con.createStatement();
@@ -1124,7 +1138,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                             new FxPreloadType(rs.getLong(3)), TypeStorageMode.getById(rs.getInt(4)),
                             TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
-                            rs.getBoolean(21), rs.getBoolean(22), rs.getBoolean(10), rs.getLong(11), rs.getLong(12),
+                            rs.getBoolean(21), rs.getBoolean(22), rs.getBoolean(10), rs.getLong(11),
+                            rs.getLong(12), rs.getBoolean(24),
                             rs.getInt(13), rs.getInt(14), LifeCycleInfoImpl.load(rs, 15, 16, 17, 18),
                             new ArrayList<FxType>(5), alRelations, options);
 
