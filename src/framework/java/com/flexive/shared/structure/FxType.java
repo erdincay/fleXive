@@ -1288,9 +1288,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             return !checkProperty; //only valid for groups
         XPath = XPath.toUpperCase();
         if (!XPath.startsWith("/")) {
-            if (!XPath.startsWith(getName() + "/"))
+            if (XPath.startsWith(getName()))
+                XPath = XPathElement.stripType(XPath);
+            else
                 return false;
-            XPath = XPath.substring(XPath.indexOf('/'));
         }
         boolean valid = true;
         try {
