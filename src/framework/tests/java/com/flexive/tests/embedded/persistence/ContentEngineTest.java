@@ -834,21 +834,21 @@ public class ContentEngineTest {
     public void typeValidityTest() throws Exception {
         FxType t = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assertTrue(t.isXPathValid("/", false), "Root group should be valid for groups");
-        assertTrue(!t.isXPathValid("/", true), "Root group should be invalid for properties");
+        assertFalse(t.isXPathValid("/", true), "Root group should be invalid for properties");
         assertTrue(t.isXPathValid("/TestProperty1", true));
-        assertTrue(!t.isXPathValid("/TestProperty1", false));
+        assertFalse(t.isXPathValid("/TestProperty1", false));
         assertTrue(t.isXPathValid(TEST_TYPE + "/TestProperty1", true));
-        assertTrue(!t.isXPathValid(TEST_TYPE + "123/TestProperty1", true));
-        assertTrue(!t.isXPathValid("WrongType/TestProperty1", true));
-        assertTrue(!t.isXPathValid(TEST_TYPE + "/TestProperty1/Dummy", true));
+        assertTrue(t.isXPathValid(TEST_TYPE + "[@PK=123.456]/TestProperty1", true));
+        assertFalse(t.isXPathValid("WrongType/TestProperty1", true));
+        assertFalse(t.isXPathValid(TEST_TYPE + "/TestProperty1/Dummy", true));
         assertTrue(t.isXPathValid("/TestProperty1[1]", true));
-        assertTrue(!t.isXPathValid("/TestProperty1[2]", true));
+        assertFalse(t.isXPathValid("/TestProperty1[2]", true));
         assertTrue(t.isXPathValid("/TestGroup1[2]", false));
         assertTrue(t.isXPathValid("/TestGroup1[1]/TestProperty1_3[4711]", true));
-        assertTrue(!t.isXPathValid("/TestGroup1[1]/TestProperty1_3[4711]", false));
+        assertFalse(t.isXPathValid("/TestGroup1[1]/TestProperty1_3[4711]", false));
         assertTrue(t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[5]", true));
-        assertTrue(!t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[5]", false));
-        assertTrue(!t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[6]", true));
+        assertFalse(t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[5]", false));
+        assertFalse(t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[6]", true));
     }
 
     @Test(groups = {"ejb", "content"})
