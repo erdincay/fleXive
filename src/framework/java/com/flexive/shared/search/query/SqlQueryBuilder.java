@@ -32,25 +32,22 @@
 package com.flexive.shared.search.query;
 
 import com.flexive.shared.*;
-
-import static com.flexive.shared.FxSharedUtils.checkParameterNull;
-import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
+
+import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 
 /**
  * Query Builder for flexive SQL queries. Supports incremental adding
@@ -481,11 +478,18 @@ public class SqlQueryBuilder implements Serializable {
     public SqlQueryBuilder select(String... columns) {
         checkParameterNull(columns, "columns");
         selectColumns.clear();
-        selectColumns.addAll(Arrays.asList(columns));
+        addSelectColumns(columns);
         if (columns.length > 0) {
             includeBasicSelects = false;
         }
         return this;
+    }
+
+    protected void addSelectColumns(String... columns) {
+        // trim whitespace between keywords
+        for (String column : columns) {
+            selectColumns.add(StringUtils.join(StringUtils.split(column, ' '), ' '));
+        }
     }
 
     /**
@@ -602,7 +606,7 @@ public class SqlQueryBuilder implements Serializable {
         if (columnIndex == -1) {
             throw new FxInvalidParameterException("column", "ex.sqlQueryBuilder.column.invalid", column).asRuntimeException();
         }
-        orderBy.add(injectQuotes(getColumnNames().get(columnIndex - 1)) + direction.getSqlSuffix());
+        orderBy.add(columnIndex + direction.getSqlSuffix());
         return this;
     }
 
@@ -623,11 +627,11 @@ public class SqlQueryBuilder implements Serializable {
         checkParameterNull(direction, "direction");
         final List<String> names = getColumnNames();
         if (columnIndex <= names.size()) {
-            addOrderBy(names.get(columnIndex - 1), direction);
+            orderBy.add(columnIndex + direction.getSqlSuffix());
         } else if (isWildcardSelected() && columnIndex > 0) {
             // allow invalid index since it may become valid after the co.* wildcard is resolved
             // (if it remains invalid, the search engine will throw an exception)
-            orderBy.add(String.valueOf(columnIndex) + " " + direction.getSqlSuffix());
+            orderBy.add(columnIndex + " " + direction.getSqlSuffix());
         } else {
             throw new FxInvalidParameterException("column", "ex.sqlQueryBuilder.column.invalidIndex", columnIndex).asRuntimeException();
         }
@@ -643,6 +647,18 @@ public class SqlQueryBuilder implements Serializable {
      * @since 3.1
      */
     public SqlQueryBuilder orderByIndices(Pair<Integer, SortDirection>... columns) {
+        return orderByIndices(Arrays.asList(columns));
+    }
+
+    /**
+     * Order the results by the given column indices (1-based). Any previously set order by columns
+     * are removed.
+     *
+     * @param columns   the order by columns
+     * @return  this
+     * @since 3.1.5
+     */
+    public SqlQueryBuilder orderByIndices(List<Pair<Integer, SortDirection>> columns) {
         clearOrderBy();
         for (Pair<Integer, SortDirection> column : columns) {
             addOrderBy(column.getFirst(), column.getSecond());
@@ -659,6 +675,18 @@ public class SqlQueryBuilder implements Serializable {
      * @since 3.1
      */
     public SqlQueryBuilder orderByColumns(Pair<String, SortDirection>... columns) {
+        return orderByColumns(Arrays.asList(columns));
+    }
+
+    /**
+     * Order the results by the given column names. Any previously set order by columns
+     * are removed.
+     *
+     * @param columns   the order by columns
+     * @return  this
+     * @since 3.1.5
+     */
+    public SqlQueryBuilder orderByColumns(List<Pair<String, SortDirection>> columns) {
         clearOrderBy();
         for (Pair<String, SortDirection> column : columns) {
             addOrderBy(column.getFirst(), column.getSecond());
@@ -684,7 +712,7 @@ public class SqlQueryBuilder implements Serializable {
 
     /**
      * Enables or disables the default select columns. By default they are included
-     * only if no select clause was specified by {@link #select(String[])}.
+     * only if no select clause was specified by {@link #select(String...)}.
      *
      * @param includeBasicSelects   true if the pre-defined selects should be included
      * @return  this

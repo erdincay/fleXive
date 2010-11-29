@@ -31,7 +31,10 @@
  ***************************************************************/
 package com.flexive.tests.shared;
 
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.search.FxResultRow;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.search.query.AssignmentValueNode;
 import com.flexive.shared.search.query.PropertyValueComparator;
@@ -271,10 +274,10 @@ public class SqlQueryBuilderTest {
     @Test
     public void orderByTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("property", "anotherProperty").orderBy("property", SortDirection.ASCENDING);
-        Assert.assertTrue(builder.getQuery().contains("ORDER BY property"), "Order by not contained in getResult: " + builder.getQuery());
+        Assert.assertTrue(builder.getQuery().contains("ORDER BY 1"), "Order by not contained in getResult: " + builder.getQuery());
         builder.orderBy("anotherProperty", SortDirection.DESCENDING);
-        Assert.assertTrue(!builder.getQuery().contains("ORDER BY property"), "Old order by should be removed: " + builder.getQuery());
-        Assert.assertTrue(builder.getQuery().contains("ORDER BY anotherProperty DESC"), "Order by not contained in getResult: " + builder.getQuery());
+        Assert.assertTrue(!builder.getQuery().contains("ORDER BY 1"), "Old order by should be removed: " + builder.getQuery());
+        Assert.assertTrue(builder.getQuery().contains("ORDER BY 2 DESC"), "Order by not contained in getResult: " + builder.getQuery());
         builder.orderBy(1, SortDirection.ASCENDING);
         builder.orderBy(2, SortDirection.DESCENDING);
         try {
@@ -310,6 +313,16 @@ public class SqlQueryBuilderTest {
         checkInCondition(new SqlQueryBuilder().condition("title", PropertyValueComparator.IN, Arrays.asList("Hello", "World")));
     }
 
+    @Test
+    public void sortByAliasTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk as  objectId").maxRows(10).orderBy("objectId", SortDirection.ASCENDING).getResult();
+        long last = 0;
+        for (FxResultRow row : result.getResultRows()) {
+            final long id = row.getPk(1).getId();
+            Assert.assertTrue(id > last, "Result not sorted by ascending IDs");
+            last = id;
+        }
+    }
     private void checkInCondition(SqlQueryBuilder sqlQueryBuilder) {
         final String query = sqlQueryBuilder.getQuery();
         Assert.assertTrue(query.toUpperCase().contains("TITLE IN ('HELLO','WORLD')"), "Invalid 'in' condition: " + query);

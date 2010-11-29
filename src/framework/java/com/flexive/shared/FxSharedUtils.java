@@ -614,10 +614,13 @@ public final class FxSharedUtils {
      */
     public static int getColumnIndex(String[] columnNames, String name) {
         final String upperName = name.toUpperCase();
+        final String upperPropertyName = "." + upperName;
+        final String upperAliasName = "AS " + upperName;
         for (int i = 0; i < columnNames.length; i++) {
             final String columnName = columnNames[i];
             final String upperColumn = columnName.toUpperCase();
-            if (upperColumn.equals(upperName) || upperColumn.endsWith("." + upperName)) {
+            if (upperColumn.equals(upperName) || upperColumn.endsWith(upperPropertyName)
+                    || upperColumn.endsWith(upperAliasName)) {
                 return i + 1;
             }
         }
