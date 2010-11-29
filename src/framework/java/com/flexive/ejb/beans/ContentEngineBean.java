@@ -422,8 +422,6 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             con = Database.getDbConnection();
             //check edit permission on current version
             final ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
-            FxContentSecurityInfo si = storage.getContentSecurityInfo(con, content.getPk(), null);
-            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, si, true);
 
             FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclIds(), true);
             FxContent prepared = prepareSave(con, storage, content);
