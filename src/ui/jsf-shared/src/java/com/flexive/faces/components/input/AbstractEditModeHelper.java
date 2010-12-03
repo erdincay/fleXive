@@ -79,6 +79,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
     protected int rows = -1;
     protected boolean selectManyCheckboxes;
     protected boolean needEmptyElementsInSelectList;
+    protected boolean required = false;
 
     protected FxEnvironment environment;
 
@@ -90,6 +91,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         if (value != null && StringUtils.isNotBlank(value.getXPath())) {
             if (CacheAdmin.getEnvironment().assignmentExists(value.getXPath())) {
                 FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(value.getXPath());
+                required = pa.getMultiplicity().isRequired();
                 if (value instanceof FxString) {
                     multiLine = pa.isMultiLine();
                     if (multiLine) {
@@ -107,6 +109,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             }
             else if (CacheAdmin.getEnvironment().propertyExists(value.getXPath())) {
                 FxProperty p = CacheAdmin.getEnvironment().getProperty(value.getXPath());
+                required = p.getMultiplicity().isRequired();
                 if (value instanceof FxString) {
                     multiLine = p.getOption(FxStructureOption.OPTION_MULTILINE).isValueTrue();
                     if (multiLine) {
@@ -575,15 +578,19 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         checkbox.setValue(b);
         checkbox.setTitle(value.isTranslationEmpty(language) ? toolTips[2] : b ? toolTips[0] : toolTips[1]);
         addHtmlAttributes(component, checkbox);
-        checkbox.setStyleClass(
+
+        if (!required) { //FX-954: only render tri-state checkbox if not required
+            checkbox.setStyleClass(
                 CSS_VALUE_INPUT_FIELD
                 + (value.isTranslationEmpty(language) ? " " + CSS_EMPTY : "")
         );
-
-        checkbox.setOnclick("flexive.input.onTristateCheckboxChanged('" + inputId + "', new Array('"+StringUtils.join(toolTips,"' ,'") +"')" +")");
-        // render hidden input to represent "empty"
-        final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_empty", HtmlInputHidden.COMPONENT_TYPE, true);
-        hidden.setValue(value.isTranslationEmpty(language));
+            checkbox.setOnclick("flexive.input.onTristateCheckboxChanged('" + inputId + "', new Array('" + StringUtils.join(toolTips, "' ,'") + "')" + ")");
+            // render hidden input to represent "empty"
+            final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, stripForm(inputId) + "_empty", HtmlInputHidden.COMPONENT_TYPE, true);
+            hidden.setValue(value.isTranslationEmpty(language));
+        } else {
+            checkbox.setStyleClass(CSS_VALUE_INPUT_FIELD);
+        }
     }
 
     protected HtmlOutputText renderLiteral(UIComponent parent, String value, String inputId) {
