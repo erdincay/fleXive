@@ -359,7 +359,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 propertyAssignmentsAll.add((FxPropertyAssignment) curr);
                 if (curr.isEnabled())
                     propertyAssignmentsEnabled.add((FxPropertyAssignment) curr);
-                if (((FxPropertyAssignment) curr).getProperty().isSystemInternal() && curr.getAssignedType().getId() == 0)
+                if (((FxPropertyAssignment) curr).getProperty().isSystemInternal() && curr.getAssignedTypeId() == 0)
                     propertyAssignmentsSystemInternalRoot.add((FxPropertyAssignment) curr);
             } else if (curr instanceof FxGroupAssignment) {
                 groupAssignmentsAll.add((FxGroupAssignment) curr);
@@ -698,8 +698,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (!typeExists(typeName))
             throw new FxNotFoundException("ex.structure.type.notFound.name", typeName).asRuntimeException();
 
+        final long typeId = getType(typeName).getId();
         for (FxPropertyAssignment a : getPropertyAssignments(true)) {
-            if (a.getAssignedType().getId() == getType(typeName).getId() && !a.isDerivedAssignment()) {
+            if (a.getAssignedTypeId() == typeId && !a.isDerivedAssignment()) {
                 if (propertyName.toUpperCase().equals(a.getProperty().getName()))
                     return true;
             }
@@ -715,8 +716,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (!typeExists(typeName))
             throw new FxNotFoundException("ex.structure.type.notFound.name", typeName).asRuntimeException();
 
+        final long typeId = getType(typeName).getId();
         for (FxGroupAssignment a : getGroupAssignments(true)) {
-            if (a.getAssignedType().getId() == getType(typeName).getId() && !a.isDerivedAssignment()) {
+            if (a.getAssignedTypeId() == typeId && !a.isDerivedAssignment()) {
                 if (groupName.toUpperCase().equals(a.getGroup().getName()))
                     return true;
             }
@@ -1133,9 +1135,6 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                         ref = true;
                     }
                 prop.setReferenced(ref);
-                if (prop.getReferencedType() != null) {
-                    prop.resolveReferencedType(this);
-                }
             }
         if (groups != null)
             for (FxGroup group : groups) {
@@ -1171,9 +1170,10 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (!flatMappings.containsKey(mapping.getStorage()))
                 flatMappings.put(mapping.getStorage(), new HashMap<Long, Map<Integer, List<FxFlatStorageMapping>>>(10));
             Map<Long, Map<Integer, List<FxFlatStorageMapping>>> typeMap = flatMappings.get(mapping.getStorage());
-            if (!typeMap.containsKey(as.getAssignedType().getId()))
-                typeMap.put(as.getAssignedType().getId(), new HashMap<Integer, List<FxFlatStorageMapping>>(10));
-            Map<Integer, List<FxFlatStorageMapping>> levelMap = typeMap.get(as.getAssignedType().getId());
+            final long assignedTypeId = as.getAssignedTypeId();
+            if (!typeMap.containsKey(assignedTypeId))
+                typeMap.put(assignedTypeId, new HashMap<Integer, List<FxFlatStorageMapping>>(10));
+            Map<Integer, List<FxFlatStorageMapping>> levelMap = typeMap.get(assignedTypeId);
             if (!levelMap.containsKey(mapping.getLevel()))
                 levelMap.put(mapping.getLevel(), new ArrayList<FxFlatStorageMapping>(40));
             List<FxFlatStorageMapping> mapList = levelMap.get(mapping.getLevel());

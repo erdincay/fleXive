@@ -203,7 +203,7 @@ public class FxPropertyEdit extends FxProperty {
      * If creating a new property and the property name (not assignment! xalias will remain!) is taken probe for and
      * use a unique property name?
      *
-     * @param autoUniquePropertyName probe for a unique propery name if a property with the requested xalias already exist?
+     * @param autoUniquePropertyName probe for a unique property name if a property with the requested xalias already exist?
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setAutoUniquePropertyName(boolean autoUniquePropertyName) {
@@ -285,7 +285,7 @@ public class FxPropertyEdit extends FxProperty {
     }
 
     /**
-     * Set if assignments of this propery are allowed to override this properties ACL?
+     * Set if assignments of this property are allowed to override this properties ACL?
      *
      * @param overrideACL are assignments allowed to override this properties ACL?
      * @return the property itself, useful for chained calls
@@ -540,18 +540,18 @@ public class FxPropertyEdit extends FxProperty {
     }
 
     /**
-     * If this propery is a reference to a FxType, set the referenced type
+     * If this property is a reference to a FxType, set the referenced type
      *
      * @param referencedType if dataType is reference this is the referenced type
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setReferencedType(FxType referencedType) {
-        this.referencedType = referencedType;
+        this.referencedTypeId = referencedType != null ? referencedType.getId() : -1;
         return this;
     }
 
     /**
-     * If this propery is a (multi) select list, set the referenced list
+     * If this property is a (multi) select list, set the referenced list
      *
      * @param referencedList if dataType is a (multi) select list, set the referenced list
      * @return the property itself, useful for chained calls
@@ -562,7 +562,7 @@ public class FxPropertyEdit extends FxProperty {
     }
 
     /**
-     * Set the default value for this propery
+     * Set the default value for this property
      *
      * @param value default value
      * @return the property itself, useful for chained calls

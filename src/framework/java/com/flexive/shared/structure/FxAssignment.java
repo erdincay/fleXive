@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
@@ -103,7 +104,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     /**
      * FxType this assignment belongs to
      */
-    private FxType assignedType;
+    private long assignedTypeId;
 
     /**
      * Multiplicity of this assignment
@@ -180,7 +181,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
                            FxGroupAssignment parentGroupAssignment,
                            long baseAssignment, FxString label, FxString hint, List<FxStructureOption> options) {
         this.alias = (alias != null ? alias.toUpperCase() : null);
-        this.assignedType = assignedType;
+        this.assignedTypeId = assignedType != null ? assignedType.getId() : -1;
         this.assignmentId = assignmentId;
         this.multiplicity = multiplicity;
         this.defaultMultiplicity = defaultMultiplicity;
@@ -297,7 +298,17 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @return FxType this assignment is associated with
      */
     public FxType getAssignedType() {
-        return assignedType;
+        return assignedTypeId != -1 ? CacheAdmin.getEnvironment().getType(assignedTypeId) : null;
+    }
+
+    /**
+     * Return the associated FxType ID.
+     *
+     * @return  the associated FxType ID.
+     * @since   3.1.5
+     */
+    public long getAssignedTypeId() {
+        return assignedTypeId;
     }
 
     /**
@@ -412,7 +423,9 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     public FxString getDisplayLabel() {
         if (label != null && !label.isEmpty()) {
             return label;
-        } else if (assignedType != null && assignedType.getLabel() != null
+        }
+        final FxType assignedType = getAssignedType();
+        if (assignedType != null && assignedType.getLabel() != null
                 && !assignedType.getLabel().isEmpty()) {
             return assignedType.getLabel();
         } else {
@@ -604,8 +617,6 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
                 this.scriptMapping.put(event, ntypes);
             }
         }
-        //if the type has been updated, we need to replace the assigned with the most up-to-date one
-        this.assignedType = environment.getType(this.assignedType.getId());
     }
 
     /**

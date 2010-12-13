@@ -896,7 +896,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         else
             scriptedAssignments.clear();
         for (FxPropertyAssignment fxpa : fxStructure.getPropertyAssignments(true)) {
-            if (fxpa.getAssignedType().getId() != this.getId())
+            if (fxpa.getAssignedTypeId() != this.getId())
                 continue;
             if (fxpa.hasScriptMappings() && !scriptedAssignments.contains(fxpa))
                 scriptedAssignments.add(fxpa);
@@ -913,7 +913,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         else
             assignedGroups.clear();
         for (FxGroupAssignment fxga : fxStructure.getGroupAssignments(true)) {
-            if (fxga.getAssignedType().getId() != this.getId())
+            if (fxga.getAssignedTypeId() != this.getId())
                 continue;
             if (fxga.hasScriptMappings() && !scriptedAssignments.contains(fxga))
                 scriptedAssignments.add(fxga);

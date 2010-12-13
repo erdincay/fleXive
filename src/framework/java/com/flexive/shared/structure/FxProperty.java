@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -51,7 +52,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
     protected boolean overrideACL;
     protected FxDataType dataType;
     protected boolean fulltextIndexed;
-    protected FxType referencedType;
+    protected long referencedTypeId;
     protected FxSelectList referencedList;
     protected FxValue defaultValue;
     protected boolean systemInternal;
@@ -70,7 +71,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
         this.overrideACL = overrideACL;
         this.ACL = ACL;
         this.dataType = dataType;
-        this.referencedType = referencedType;
+        this.referencedTypeId = referencedType != null ? referencedType.getId() : -1;
         this.referencedList = referencedList;
         if (dataType != null && defaultValue != null) {
             //default value can only be determined once the referenced list is known
@@ -319,7 +320,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if this property references a FxType
      */
     public boolean hasReferencedType() {
-        return referencedType != null;
+        return referencedTypeId != -1;
     }
 
     /**
@@ -328,7 +329,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return referenced FxType
      */
     public FxType getReferencedType() {
-        return referencedType;
+        return referencedTypeId != -1 ? CacheAdmin.getEnvironment().getType(referencedTypeId) : null;
     }
 
     /**
@@ -364,9 +365,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @param environment reference to the environment to resolve the referenced type
      */
     public void resolveReferencedType(FxEnvironment environment) {
-        if (this.referencedType == null || environment == null)
-            return;
-        this.referencedType = environment.getType(referencedType.getId());
+        // nop, since type is no stored in FxProperty
     }
 
     /**
