@@ -324,9 +324,9 @@ public class CacheAdmin {
             final String cachePath = getContentCachePath(content.getContent().getId());
             FxCachedContentContainer container = (FxCachedContentContainer) getInstance().get(cachePath, CONTENTCACHE_KEY_STORE);
             if (container != null) {
-                getInstance().remove(cachePath, CONTENTCACHE_KEY_STORE);
-            }
-            container = new FxCachedContentContainer(content);
+                container.add(content);
+            } else
+                container = new FxCachedContentContainer(content);
             getInstance().put(cachePath, CONTENTCACHE_KEY_STORE, container);
         } catch (FxCacheException e) {
             LOG.warn(e.getMessage(), e);
@@ -368,6 +368,7 @@ public class CacheAdmin {
         if (id <= 0)
             return;
         try {
+//            System.out.println("=> Expired cache for id "+id);
             getInstance().remove(getContentCachePath(id), CONTENTCACHE_KEY_STORE);
         } catch (FxCacheException e) {
             LOG.warn(e.getMessage(), e);

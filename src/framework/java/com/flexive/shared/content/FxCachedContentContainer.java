@@ -118,10 +118,15 @@ public class FxCachedContentContainer implements Serializable {
      * @param content the content to add
      */
     public synchronized void add(FxCachedContent content) {
-        if (this.id == content.getContent().getId() && get(content.getContent().getPk()) == null) {
-            this.content.add(content);
-            this.maxVersion = content.getContent().getMaxVersion();
-            this.liveVersion = content.getContent().getLiveVersion();
+        if (this.id != content.getContent().getId())
+            return; //wrong id
+        FxCachedContent existingCopy = get(content.getContent().getPk());
+        if (existingCopy != null) {
+            this.content.remove(existingCopy);
         }
+        this.content.add(content);
+        this.maxVersion = content.getContent().getMaxVersion();
+        this.liveVersion = content.getContent().getLiveVersion();
+//        System.out.println("Current container content: "+this.content);
     }
 }

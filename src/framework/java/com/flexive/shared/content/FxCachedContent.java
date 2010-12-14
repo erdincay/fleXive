@@ -82,4 +82,12 @@ public class FxCachedContent implements Serializable {
     public void updateLock(FxLock lock) {
         this.content.updateLock(lock);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + ":" + this.content.getPk();
+    }
 }
