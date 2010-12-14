@@ -362,11 +362,13 @@ public class GenericSQLDataFilter extends DataFilter {
         // Start OR
         if (br.getElements().length > 1) {
             final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
-            // for "OR" we can only always optimize flat storage queries,
-            // as long as only one flat storage table is used and we don't have a nested 'and'
+            // for "OR" we can always optimize flat storage queries,
+            // as long as only one flat storage table is used and we don't have a nested 'and',
+            // and the brace does not contain an IS NULL condition
             if (tables.keySet().size() == 1
                     && tables.values().iterator().next().isFlatStorage()
-                    && !br.containsAnd()) {
+                    && !br.containsAnd()
+                    && !containsIsNullCondition(br)) {
                 sb.append(
                         getOptimizedFlatStorageSubquery(br, tables.keySet().iterator().next())
                 );
@@ -436,8 +438,8 @@ public class GenericSQLDataFilter extends DataFilter {
         if (br.getElements().length > 1) {
             final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
             // for "AND" we can only optimize when ALL flatstorage conditions are not multi-lang and on the same level,
-            // i.e. that table must have exactly one flat-storage entry
-            if (tables.size() == 1 && tables.values().iterator().next().isFlatStorage()) {
+            // i.e. that table must have exactly one flat-storage entry, and we cannot optimize if an IS NULL is present
+            if (tables.size() == 1 && tables.values().iterator().next().isFlatStorage() && !containsIsNullCondition(br)) {
                 sb.append(
                         getOptimizedFlatStorageSubquery(br, tables.keySet().iterator().next())
                 );
@@ -499,6 +501,24 @@ public class GenericSQLDataFilter extends DataFilter {
         sb.append(combinedConditions);
         // Close AND
         sb.append(")");
+    }
+
+    /**
+     * Check if the given brace contains a 'is null' condition (not recursively).
+     * 
+     * @param br    the brace element
+     * @return      true if the brace directly contains a IS NULL condition
+     */
+    private boolean containsIsNullCondition(Brace br) {
+        for (BraceElement braceElement : br.getElements()) {
+            if (braceElement instanceof Condition) {
+                final Condition condition = (Condition) braceElement;
+                if (condition.getComperator() == ValueComparator.IS && condition.getConstant().isNull()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private String getOptimizedMainTableConditions(Brace br) throws FxSqlSearchException {
