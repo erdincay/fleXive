@@ -1629,6 +1629,27 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void flatConditionsWithEmpty() throws FxApplicationException {
+        final ContentEngine contentEngine = EJBLookup.getContentEngine();
+        final FxContent co = contentEngine.initialize(TEST_TYPE);
+        co.setValue("/stringSearchProp", null);
+        final FxPK pk = contentEngine.save(co);
+
+        try {
+            // should return our content, even if no flat storage row exists
+            final FxResultSet rs = new SqlQueryBuilder()
+                    .filterVersion(VersionFilter.MAX)
+                    .condition(TEST_TYPE + "/stringSearchProp", PropertyValueComparator.EMPTY, null)
+                    .condition(TEST_TYPE + "/stringSearchProp", PropertyValueComparator.EMPTY, null)
+                    .getResult();
+
+            assertTrue(rs.getRowCount() > 0, "Expected at least one result");
+        } finally {
+            contentEngine.remove(pk);
+        }
+    }
+
+    @Test
     public void virtualPropertyCondition() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().condition("@pk", PropertyValueComparator.EQ, "21.1");
         try {
