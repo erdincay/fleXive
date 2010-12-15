@@ -169,13 +169,23 @@
             </snapshots>
         </repository>
 
-        <repository>
+        <!--repository>
             <id>maven2-jboss</id>
             <name>JBoss Maven Repository</name>
             <url>http://repository.jboss.org/maven2</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository-->
+
+        <repository>
+            <id>maven2-jboss-nexus</id>
+            <name>JBoss Maven Repository</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
+            <layout>default</layout>
+            <snapshots>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
