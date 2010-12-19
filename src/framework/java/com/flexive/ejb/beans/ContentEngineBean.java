@@ -830,6 +830,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         FxSharedUtils.checkParameterNull(pk, "pk");
         Connection con = null;
         try {
+            if (pk.isNew())
+                return new FxContentVersionInfo(); //return an "empty" version info
             ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
             con = Database.getDbConnection();
             return storage.getContentVersionInfo(con, pk.getId());

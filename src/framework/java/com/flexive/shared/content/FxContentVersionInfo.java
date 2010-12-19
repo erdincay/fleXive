@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.content;
 
+import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.security.LifeCycleInfo;
 
@@ -118,6 +119,22 @@ public class FxContentVersionInfo implements Serializable {
         this.liveVersion = liveVersion;
         this.lastModifiedVersion = lastModifiedVersion;
         this.versions = versions;
+        this.versionSelector = new VersionSelector(this);
+        this.vers = versions.keySet().toArray(new Integer[versions.keySet().size()]);
+        Arrays.sort(vers);
+    }
+
+    /**
+     * Ctor for a new content
+     */
+    public FxContentVersionInfo() {
+        this.id = -1;
+        this.minVersion = 1;
+        this.maxVersion = 1;
+        this.liveVersion = 1;
+        this.lastModifiedVersion = 1;
+        this.versions = new HashMap<Integer, VersionData>(1);
+        this.versions.put(1, new VersionData(LifeCycleInfoImpl.createNew(FxContext.getUserTicket()), 0));
         this.versionSelector = new VersionSelector(this);
         this.vers = versions.keySet().toArray(new Integer[versions.keySet().size()]);
         Arrays.sort(vers);
