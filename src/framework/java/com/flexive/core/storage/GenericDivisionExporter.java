@@ -719,6 +719,31 @@ con.close()
     }
 
     /**
+     * Export all resource data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportResources(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            startEntry(out, FILE_RESOURCES);
+            sb.setLength(0);
+            sb.append("<resources>\n");
+            write(out, sb);
+            dumpTable(DatabaseConst.TBL_RESOURCES, stmt, out, sb, "entry", null);
+            sb.append("</resources>\n");
+            write(out, sb);
+            endEntry(out);
+        } finally {
+            Database.closeObjects(GenericDivisionExporter.class, stmt);
+        }
+    }
+
+    /**
      * Export flatstorage meta information
      *
      * @param con an open and valid connection to read the data from

@@ -224,6 +224,7 @@ try {
             dropTableData(stmt, DatabaseConst.TBL_STRUCT_FLATSTORE_INFO);
             dropTableData(stmt, DatabaseConst.TBL_STRUCT_FLATSTORE_MAPPING);
         }
+        dropTableData(stmt, DatabaseConst.TBL_RESOURCES);
         dropTableData(stmt, DatabaseConst.TBL_HISTORY);
         dropTableData(stmt, DatabaseConst.TBL_ACCOUNT_DETAILS);
         dropTableData(stmt, DatabaseConst.TBL_LOCKS);
@@ -262,6 +263,7 @@ try {
         dropTableData(stmt, DatabaseConst.TBL_STRUCT_SELECTLIST);
         dropTableData(stmt, DatabaseConst.TBL_SCRIPTS);
 
+        setFieldNull(stmt, DatabaseConst.TBL_CONTENT_BINARY, "PREVIEW_REF");
         dropTableData(stmt, DatabaseConst.TBL_CONTENT_BINARY);
 
         dropTableData(stmt, DatabaseConst.TBL_WORKFLOW_ROUTES);
@@ -368,7 +370,9 @@ try {
      *                           and updated to the provided values in a second pass (update),
      *                           columns that should be used in the where clause have to be prefixed
      *                           with "KEY:", to assign a default value use the expression "columnname:default value",
-     *                           if the default value is "@", it will be a negative counter starting at 0, decreasing
+     *                           if the default value is "@", it will be a negative counter starting at 0, decreasing.
+     *                           If the default value starts with "%", it will be set to the column following the "%"
+     *                           character in the first pass
      * @throws Exception on errors
      */
     protected void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table,
@@ -380,26 +384,12 @@ try {
         if (rs == null)
             throw new IllegalArgumentException("Can not analyze table [" + table + "]!");
         sbInsert.append("INSERT INTO ").append(table).append(" (");
-        if (sbUpdate != null) {
-            sbUpdate.append("UPDATE ").append(table).append(" SET ");
-            int counter = 0;
-            for (String updateColumn : updateColumns) {
-                if (updateColumn.startsWith("KEY:"))
-                    continue;
-                if (counter++ > 0)
-                    sbUpdate.append(',');
-                if (updateColumn.indexOf(':') > 0)
-                    sbUpdate.append(updateColumn.substring(0, updateColumn.indexOf(':')));
-                else
-                    sbUpdate.append(updateColumn);
-                sbUpdate.append("=?");
-            }
-            sbUpdate.append(" WHERE ");
-        }
         final ResultSetMetaData md = rs.getMetaData();
         final Map<String, ColumnInfo> updateClauseColumns = updateColumns.length > 0 ? new HashMap<String, ColumnInfo>(md.getColumnCount()) : null;
-        final Map<String, ColumnInfo> updateSetColumns = updateColumns.length > 0 ? new HashMap<String, ColumnInfo>(md.getColumnCount()) : null;
+        final Map<String, ColumnInfo> updateSetColumns = updateColumns.length > 0 ? new LinkedHashMap<String, ColumnInfo>(md.getColumnCount()) : null;
         final Map<String, String> presetColumns = updateColumns.length > 0 ? new HashMap<String, String>(10) : null;
+        //preset to a referenced column (%column syntax)
+        final Map<String, String> presetRefColumns = updateColumns.length > 0 ? new HashMap<String, String>(10) : null;
         final Map<String, Integer> counters = updateColumns.length > 0 ? new HashMap<String, Integer>(10) : null;
         final Map<String, ColumnInfo> insertColumns = new HashMap<String, ColumnInfo>(md.getColumnCount() + (counters != null ? counters.size() : 0));
         int insertIndex = 1;
@@ -419,6 +409,13 @@ try {
                                 counters.put(col, 0);
                                 insertColumns.put(col, new ColumnInfo(md.getColumnType(i + 1), insertIndex++));
                                 sbInsert.append(',').append(currCol);
+                            }
+                        } else if( value.startsWith("%")) {
+                            if (currCol.equalsIgnoreCase(col)) {
+                                presetRefColumns.put(col, value.substring(1));
+                                insertColumns.put(col, new ColumnInfo(md.getColumnType(i + 1), insertIndex++));
+                                sbInsert.append(',').append(currCol);
+//                                System.out.println("==> adding presetRefColumn "+col+" with value of "+value.substring(1));
                             }
                         } else if (!presetColumns.containsKey(col))
                             presetColumns.put(col, value);
@@ -440,6 +437,14 @@ try {
             insertColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), insertIndex++));
         }
         if (updateColumns.length > 0 && executeUpdatePhase) {
+            sbUpdate.append("UPDATE ").append(table).append(" SET ");
+            int counter = 0;
+            for (String updateColumn : updateSetColumns.keySet()) {
+                if (counter++ > 0)
+                    sbUpdate.append(',');
+                sbUpdate.append(updateColumn).append("=?");
+            }
+            sbUpdate.append(" WHERE ");
             boolean hasKeyColumn = false;
             for (String col : updateColumns) {
                 if (!col.startsWith("KEY:"))
@@ -679,6 +684,10 @@ try {
                             counters.put(col, newVal);
 //                            System.out.println("new value for " + col + ": " + newVal);
                         }
+                        if (insertMode && presetRefColumns != null && presetRefColumns.get(col) != null) {
+                            value = StringEscapeUtils.unescapeXml(data.get(presetRefColumns.get(col)));
+//                            System.out.println("Set presetRefColumn for "+col+" to ["+value+"] from column ["+presetRefColumns.get(col)+"]");
+                        }
 
                         if (value == null)
                             ps.setNull(ci.index, ci.columnType);
@@ -908,11 +917,17 @@ try {
             importTable(stmt, zip, ze, "structures/properties/property_t", DatabaseConst.TBL_STRUCT_PROPERTIES + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/groups/group", DatabaseConst.TBL_STRUCT_GROUPS);
             importTable(stmt, zip, ze, "structures/groups/group_t", DatabaseConst.TBL_STRUCT_GROUPS + DatabaseConst.ML);
-            importTable(stmt, zip, ze, "structures/groups/goption", DatabaseConst.TBL_STRUCT_GROUP_OPTIONS);
-            importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS, true, true, "base:0", "parentgroup:@", "KEY:id");
+            DBStorage storage = StorageManager.getStorageImpl();
+            try {
+                stmt.execute(storage.getReferentialIntegrityChecksStatement(false));
+                importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS, true, true, "base:0", "parentgroup:%id", "pos:@", "KEY:id");
+            } finally {
+                stmt.execute(storage.getReferentialIntegrityChecksStatement(true));
+            }
             importTable(stmt, zip, ze, "structures/assignments/assignment_t", DatabaseConst.TBL_STRUCT_ASSIGNMENTS + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/selectlists/item", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
             importTable(stmt, zip, ze, "structures/selectlists/item_t", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/groups/goption", DatabaseConst.TBL_STRUCT_GROUP_OPTIONS);
             importTable(stmt, zip, ze, "structures/properties/poption", DatabaseConst.TBL_STRUCT_PROPERTY_OPTIONS);
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
@@ -1049,6 +1064,23 @@ try {
         Statement stmt = con.createStatement();
         try {
             importTable(stmt, zip, ze, "history/entry", DatabaseConst.TBL_HISTORY);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import resource data
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importResources(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_RESOURCES);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "resources/entry", DatabaseConst.TBL_RESOURCES);
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }

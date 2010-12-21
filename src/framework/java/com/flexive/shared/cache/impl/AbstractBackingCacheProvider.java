@@ -31,14 +31,17 @@
  ***************************************************************/
 package com.flexive.shared.cache.impl;
 
-import com.flexive.shared.cache.FxBackingCacheProvider;
 import com.flexive.shared.cache.FxBackingCache;
+import com.flexive.shared.cache.FxBackingCacheProvider;
 import com.flexive.shared.cache.FxCacheException;
-import org.jboss.cache.RegionManager;
-import org.jboss.cache.CacheSPI;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.cache.Fqn;
 import org.jboss.cache.Region;
-import org.jboss.cache.eviction.LRUConfiguration;
+import org.jboss.cache.config.EvictionRegionConfig;
+import org.jboss.cache.eviction.LRUAlgorithmConfig;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base backing cache provider implementation.
@@ -47,19 +50,37 @@ import org.jboss.cache.eviction.LRUConfiguration;
  * @version $Rev$
  */
 public abstract class AbstractBackingCacheProvider<T extends FxBackingCache> implements FxBackingCacheProvider {
+    private static final Log LOG = LogFactory.getLog(AbstractBackingCacheProvider.class);
+
     protected T cache;
 
     /**
      * {@inheritDoc}
      */
     public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive, boolean overwrite) throws FxCacheException {
-        RegionManager rm = ((CacheSPI) cache.getCache()).getRegionManager();
-        LRUConfiguration config = new LRUConfiguration();
-        config.setMaxNodes(maxContents);
-        config.setMaxAgeSeconds(timeToIdle);
-        config.setTimeToLiveSeconds(timeToLive);
-        if (overwrite || rm.getRegion(Fqn.fromString(path), true).getEvictionPolicy() == null) {
-            rm.getRegion(Fqn.fromString(path), true).setEvictionPolicy(config);
+        final Fqn<String> fqn = Fqn.fromString(path);
+        final Region region = cache.getCache().getRegion(fqn, true);
+        if (overwrite || !region.isActive() || region.getEvictionRegionConfig() == null) {
+            LOG.info("Setting eviction strategy for region [" + path + "] to [" + maxContents + "] contents, TTI=" +
+                    timeToIdle + ", TTL=" + timeToLive + ", overwrite=" + overwrite + ", region active:" + region.isActive());
+            LRUAlgorithmConfig lruc = new LRUAlgorithmConfig();
+            lruc.setMaxNodes(maxContents);
+            lruc.setMaxAge(timeToIdle, TimeUnit.SECONDS);
+            lruc.setTimeToLive(timeToLive, TimeUnit.SECONDS);
+            EvictionRegionConfig erc = new EvictionRegionConfig(fqn, lruc);
+            region.setEvictionRegionConfig(erc);
+            if (!region.isActive())
+                region.setActive(true);
+        } else {
+            EvictionRegionConfig erc = region.getEvictionRegionConfig();
+            if (erc.getEvictionAlgorithmConfig() instanceof LRUAlgorithmConfig) {
+                LRUAlgorithmConfig lruc = (LRUAlgorithmConfig) erc.getEvictionAlgorithmConfig();
+                LOG.info("Ignoring setEvictionStrategy request. Current settings for region [" + path + "]: [" +
+                        lruc.getMaxNodes() + "] contents, TTI=" + lruc.getMaxAge() + ", TTL=" + lruc.getTimeToLive() +
+                        ", region active:" + region.isActive()+". Requested settings: ["+ maxContents +
+                        "] contents, TTI=" + timeToIdle + ", TTL=" + timeToLive);
+            } else
+                LOG.info("Ignoring setEvictionStrategy request. Current settings for region [" + path + "] with a config of type :" + erc.getEvictionAlgorithmConfig().getEvictionAlgorithmClassName());
         }
     }
 

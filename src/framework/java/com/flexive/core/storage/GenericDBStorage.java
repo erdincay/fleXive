@@ -210,6 +210,7 @@ public abstract class GenericDBStorage implements DBStorage {
                 exporter.exportBriefcases(con, zip, sb);
                 exporter.exportScripts(con, zip, sb);
                 exporter.exportHistory(con, zip, sb);
+                exporter.exportResources(con, zip, sb);
                 exporter.exportHierarchicalStorage(con, zip, sb);
                 exporter.exportFlatStorages(con, zip, sb);
                 exporter.exportSequencers(con, zip, sb);
@@ -227,6 +228,7 @@ public abstract class GenericDBStorage implements DBStorage {
      * {@inheritDoc}
      */
     public void importDivision(Connection _con, ZipFile zip) throws Exception {
+        long startTime = System.currentTimeMillis();
         GenericDivisionImporter importer = getDivisionImporter();
         FxDivisionExportInfo exportInfo = importer.getDivisionExportInfo(zip);
         if (FxSharedUtils.getDBVersion() != exportInfo.getSchemaVersion()) {
@@ -272,6 +274,8 @@ public abstract class GenericDBStorage implements DBStorage {
                 if (isNonTX) con.commit();
                 importer.importHistory(con, zip);
                 if (isNonTX) con.commit();
+                importer.importResources(con, zip);
+                if (isNonTX) con.commit();
                 importer.importBriefcases(con, zip);
                 if (isNonTX) con.commit();
                 importer.importFlatStorages(con, zip, exportInfo);
@@ -304,6 +308,7 @@ public abstract class GenericDBStorage implements DBStorage {
                 con.setAutoCommit(autoCommit);
                 Database.closeObjects(GenericDBStorage.class, con, null);
             }
+            LOG.info(" Importing took " + FxFormatUtils.formatTimeSpan((System.currentTimeMillis() - startTime)));
         }
     }
 

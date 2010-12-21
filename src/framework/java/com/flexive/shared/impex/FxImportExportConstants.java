@@ -57,6 +57,7 @@ public interface FxImportExportConstants {
     String FILE_BRIEFCASES = "briefcases.xml";
     String FILE_SCRIPTS = "scripts.xml";
     String FILE_HISTORY = "history.xml";
+    String FILE_RESOURCES = "resources.xml";
     String FILE_FLATSTORAGE_META = "flatstorage.xml";
     String FILE_BINARIES = "binaries.xml";
     String FILE_DATA_HIERARCHICAL = "data_hierarchical.xml";
