@@ -90,7 +90,11 @@ public enum FxContentExceptionCause implements ObjectWithLabel {
     /**
      * Group mode is not valid (e.g. more than one required property for a one-of rstriction) 
      */
-    InvalidGroupMode;
+    InvalidGroupMode,
+    /**
+     * Invalid value (validation error)
+     */
+    InvalidValue;
 
 
     /**
