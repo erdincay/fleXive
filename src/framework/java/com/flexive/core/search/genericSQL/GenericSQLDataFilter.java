@@ -547,7 +547,7 @@ public class GenericSQLDataFilter extends DataFilter {
             }
         };
         return "(SELECT DISTINCT cd.id, cd.ver, " + getEmptyLanguage() + " as lang FROM \n"
-                + flatStorageTable + " cd WHERE "
+                + flatContentDataTable(flatStorageTable) + " cd WHERE "
                 + getPlainConditions(br, conditionBuilder)
                 + getSubQueryLimit()
                 + ")";

@@ -255,12 +255,15 @@ public class SearchEngineTest {
     @Test
     public void briefcaseQueryTest() throws FxApplicationException {
         // create briefcase
-        final String selectFolders = new SqlQueryBuilder().select("@pk").type("FOLDER").getQuery();
+        final String captionQuery = "test caption 1*";
+        final String selectFolders = new SqlQueryBuilder().select("@pk").type(FxType.FOLDER)
+            .condition("#folder/caption", PropertyValueComparator.LIKE, captionQuery)
+            .getQuery();
         final FxSQLSearchParams params = new FxSQLSearchParams().saveResultInBriefcase("test briefcase", "description", (Long) null);
         final FxResultSet result = getSearchEngine().search(selectFolders, 0, Integer.MAX_VALUE, params);
         long bcId = result.getCreatedBriefcaseId();
         try {
-            assertTrue(result.getRowCount() > 1);
+            assertEquals(result.getRowCount(), 11);
             assertTrue(result.getCreatedBriefcaseId() != -1, "Briefcase should have been created, but no ID returned.");
 
             // store some metadata
@@ -286,6 +289,31 @@ public class SearchEngineTest {
             final List<FxReferenceMetaData<FxPK>> meta = briefcase.collectColumn(3);
             assertEquals(FxReferenceMetaData.findByContent(meta, meta1.getReference()).get("firstkey"), "somevalue");
             assertEquals(FxReferenceMetaData.findByContent(meta, meta2.getReference()).get("secondkey"), "anothervalue");
+
+            // select in briefcase, with conditions. Comment is typically stored in flat storage,
+            // which gives us another twist for testing
+            final FxResultSet filteredBriefcase = new SqlQueryBuilder()
+                .select("@pk")
+                .filterBriefcase(result.getCreatedBriefcaseId())
+                .orSub()
+                .condition("#folder/comment", PropertyValueComparator.LIKE, "folder comment 1*")
+                .condition("#folder/comment", PropertyValueComparator.LIKE, "*")
+                .closeSub()
+                .getResult();
+
+            assertTrue(filteredBriefcase.getTotalRowCount() > 0, "No rows returned");
+            assertEquals(filteredBriefcase.getTotalRowCount(), briefcase.getTotalRowCount(), "Condition on briefcase should not have affected result");
+
+            // 'optimized' main table query
+            assertEquals(
+                    new SqlQueryBuilder().filterBriefcase(result.getCreatedBriefcaseId())
+                    .condition("typedef", EQ, FxType.FOLDER)
+                    .condition("typedef", EQ, FxType.FOLDER)
+                    .getResult().getTotalRowCount(),
+                    briefcase.getTotalRowCount(),
+                    "Optimzed content table query did not filter the briefcase correctly"
+            );
+
         } finally {
             getBriefcaseEngine().remove(bcId);
         }

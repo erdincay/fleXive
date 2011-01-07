@@ -176,7 +176,7 @@ public class GenericSQLDataSelector extends DataSelector {
         // Build the final select statement
 
         select.append("SELECT \n")
-                .append(filterProperties((String[]) INTERNAL_RESULTCOLS.toArray(new String[INTERNAL_RESULTCOLS.size()])))
+                .append(filterProperties(INTERNAL_RESULTCOLS.toArray(new String[INTERNAL_RESULTCOLS.size()])))
                 .append(' ');
         for (SubSelectValues ssv : values) {
             for (SubSelectValues.Item item : ssv.getItems()) {
