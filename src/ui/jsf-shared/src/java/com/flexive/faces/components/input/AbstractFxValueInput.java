@@ -171,6 +171,7 @@ public abstract class AbstractFxValueInput extends UIInput {
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+        setTransient(readOnly);
     }
 
     /**

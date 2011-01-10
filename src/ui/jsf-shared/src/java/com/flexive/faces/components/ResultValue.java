@@ -101,6 +101,11 @@ public class ResultValue extends UIOutput {
         this.linkFormatter = linkFormatter;
     }
 
+    @Override
+    public boolean isTransient() {
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -117,7 +122,8 @@ public class ResultValue extends UIOutput {
                 input = (AbstractFxValueInput) FxJsfUtils.addChildComponent(
                         this,
                         StringUtils.isNotBlank(getId()) ? getId() + "_input" : null,
-                        AbstractFxValueInput.COMPONENT_TYPE
+                        AbstractFxValueInput.COMPONENT_TYPE,
+                        true
                 );
             }
             input.setValueExpression("value", getValueExpression("value"));
