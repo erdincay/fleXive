@@ -42,6 +42,7 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import groovy.lang.GroovySystem;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -56,6 +57,7 @@ import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -1675,22 +1677,34 @@ public final class FxSharedUtils {
      */
     public static class ItemLabelSorter implements Comparator<FxSelectListItem>, Serializable {
         private static final long serialVersionUID = 2366364003069358945L;
-        private long language;
+        private final FxLanguage language;
+        private final Collator collator;
+        private final Map<String, CollationKey> uppercaseLabels;
 
         /**
          * Ctor
          *
          * @param language the language used for sorting
          */
-        public ItemLabelSorter(long language) {
+        public ItemLabelSorter(FxLanguage language) {
             this.language = language;
+            this.collator = Collator.getInstance(language.getLocale());
+            this.uppercaseLabels = Maps.newHashMap();   // cache collation keys for case-insensitive comparisons
         }
 
         /**
          * {@inheritDoc}
          */
         public int compare(FxSelectListItem i1, FxSelectListItem i2) {
-            return i1.getLabel().getBestTranslation(language).compareToIgnoreCase(i2.getLabel().getBestTranslation(language));
+            final String label1 = i1.getLabel().getBestTranslation(language);
+            final String label2 = i2.getLabel().getBestTranslation(language);
+            if (!uppercaseLabels.containsKey(label1)) {
+                uppercaseLabels.put(label1, collator.getCollationKey(StringUtils.defaultString(label1).toUpperCase(language.getLocale())));
+            }
+            if (!uppercaseLabels.containsKey(label2)) {
+                uppercaseLabels.put(label2, collator.getCollationKey(StringUtils.defaultString(label2).toUpperCase(language.getLocale())));
+            }
+            return uppercaseLabels.get(label1).compareTo(uppercaseLabels.get(label2));
         }
     }
 

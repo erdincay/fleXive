@@ -288,9 +288,15 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
         return sorted;
     }
 
+    /**
+     *
+     * @return  all items sorted by the label in the calling user's language.
+     *
+     * @since 3.1.5
+     */
     public final List<FxSelectListItem> getItemsSortedByLabel() {
         List<FxSelectListItem> sorted = new ArrayList<FxSelectListItem>(items.values());
-        Collections.sort(sorted, new FxSharedUtils.ItemLabelSorter(FxContext.getUserTicket().getLanguage().getId()));
+        Collections.sort(sorted, new FxSharedUtils.ItemLabelSorter(FxContext.getUserTicket().getLanguage()));
         return sorted;
     }
 

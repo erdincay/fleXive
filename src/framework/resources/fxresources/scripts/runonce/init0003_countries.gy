@@ -81,6 +81,6 @@ def createItem = { trans ->
 } */
 // now store other countries
 translations.each(createItem)
-
+selectList.setSortEntries(true)
 EJBLookup.selectListEngine.save(selectList)
 

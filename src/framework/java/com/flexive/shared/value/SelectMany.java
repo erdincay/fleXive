@@ -251,7 +251,7 @@ public class SelectMany implements Serializable {
     }
 
     private void sortSelected() {
-        Collections.sort(selected, list.isSortEntries() ? new FxSharedUtils.ItemLabelSorter(FxContext.getUserTicket().getLanguage().getId()) : new FxSharedUtils.ItemPositionSorter());
+        Collections.sort(selected, list.isSortEntries() ? new FxSharedUtils.ItemLabelSorter(FxContext.getUserTicket().getLanguage()) : new FxSharedUtils.ItemPositionSorter());
     }
 
     @Override
