@@ -82,7 +82,7 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.6</version>
             <optional>false</optional>
         </dependency>
 
@@ -141,6 +141,10 @@
                 <exclusion>
                     <groupId>javax.transaction</groupId>
                     <artifactId>jta</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jboss.javaee</groupId>
+                    <artifactId>jboss-transaction-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
