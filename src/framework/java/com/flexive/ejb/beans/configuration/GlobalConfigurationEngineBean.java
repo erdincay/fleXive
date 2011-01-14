@@ -97,6 +97,7 @@ import javax.annotation.sql.DataSourceDefinitions;
         user = "sa",
         password = "sa",
         transactional=true
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
     ),
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS + "NoTX",
@@ -105,6 +106,7 @@ import javax.annotation.sql.DataSourceDefinitions;
         user = "sa",
         password = "sa",
         transactional=false
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
     ),
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS_CONFIG,
@@ -113,6 +115,7 @@ import javax.annotation.sql.DataSourceDefinitions;
         user = "sa",
         password = "sa",
         transactional=true
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
     ),
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS_INIT,
@@ -121,6 +124,7 @@ import javax.annotation.sql.DataSourceDefinitions;
         user = "sa",
         password = "sa",
         transactional=false
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
     )
 })
 @TransactionManagement(TransactionManagementType.CONTAINER)

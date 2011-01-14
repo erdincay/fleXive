@@ -411,7 +411,7 @@ public final class Database {
         Statement stmt = null;
         try {
             DataSource ds = (DataSource) c.lookup(dataSourceName);
-            if (!isDefaultDataSourceInitialized(ds)) {
+            if (ds != null && !isDefaultDataSourceInitialized(ds)) {
                 // try to initialize schema
                 con = getDefaultInitConnection(c);
                 if (con != null) {
@@ -504,6 +504,7 @@ public final class Database {
                 "java:" + dataSourceName,
                 "java:comp/env/" + dataSourceName,
                 "java:openejb/Resource/" + dataSourceName,
+                "java:jdbc/" + dataSourceName
         };
     }
 
