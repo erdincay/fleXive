@@ -619,7 +619,16 @@ public class FxContext implements Serializable {
      * @since 3.1
      */
     public void replace() {
-        info.set(this);
+        setThreadLocal(this);
+    }
+
+    /**
+     * Remove the thread-local FxContext instance.
+     *
+     * @since 3.1.5
+     */
+    public static void remove() {
+        removeThreadLocal();
     }
 
     /**
@@ -699,8 +708,7 @@ public class FxContext implements Serializable {
      */
     public static FxContext storeInfos(HttpServletRequest request, boolean dynamicContent, int divisionId, boolean isWebdav) {
         FxContext si = new FxContext(request, divisionId, isWebdav);
-        // Set basic informations needed for the user ticket retrieval
-        info.set(si);
+        setThreadLocal(si);
         // Do user ticket retrieval and store it in the threadlocal
         final HttpSession session = request.getSession();
         if (session.getAttribute(SESSION_DIVISIONID) == null) {
@@ -748,7 +756,7 @@ public class FxContext implements Serializable {
                 si.setTicket(getTicketFromEJB(session));
             }
         }
-        info.set(si);
+        setThreadLocal(si);
         return si;
     }
 
@@ -756,8 +764,8 @@ public class FxContext implements Serializable {
      * Performs a cleanup of the stored informations.
      */
     public static void cleanup() {
-        // clean up cache invocation context (JBoss cache workaround)
         try {
+            // clean up cache invocation context (JBoss cache workaround)
             CacheAdmin.getInstance().cleanupAfterRequest();
         } catch (Exception ex) {
             if (LOG.isWarnEnabled()) {
@@ -768,7 +776,7 @@ public class FxContext implements Serializable {
         // remove FxContext threadlocal
         if (info.get() != null) {
             info.get().clearCachedAttributes();
-            info.remove();
+            removeThreadLocal();
         }
     }
 
@@ -828,7 +836,7 @@ public class FxContext implements Serializable {
         FxContext result = info.get();
         if (result == null) {
             result = new FxContext();
-            info.set(result);
+            setThreadLocal(result);
         }
         return result;
     }
@@ -892,4 +900,20 @@ public class FxContext implements Serializable {
         ctx.division = template.division;
         return ctx;
     }
+
+    private static void setThreadLocal(FxContext si) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Setting FxContext ThreadLocal in thread " + Thread.currentThread().getName());
+        }
+        info.set(si);
+    }
+
+    private static void removeThreadLocal() {
+        if (LOG.isTraceEnabled()) {
+        }
+            LOG.trace("Removing FxContext ThreadLocal from thread " + Thread.currentThread().getName());
+        info.remove();
+    }
+
+
 }

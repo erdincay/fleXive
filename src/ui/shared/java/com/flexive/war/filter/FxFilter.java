@@ -70,6 +70,7 @@ public class FxFilter implements Filter {
     private static final Log LOG = LogFactory.getLog(FxFilter.class);
 
     private static final String CATALINA_CLIENT_ABORT = "org.apache.catalina.connector.ClientAbortException";
+    private static final String MSG_SKIP_CLEANUP = "Skipping cleanup since cache is already uninstalled.";
     private static final String X_POWERED_BY_VALUE = "[fleXive]";
     private static final String JSON_RPC_MARKER = "fxFilterMarker";
     private static final Object JSON_RPC_LOCK = new Object();
@@ -96,15 +97,6 @@ public class FxFilter implements Filter {
     }
 
     public void destroy() {
-        final String deploymentId;
-        try {
-            deploymentId = CacheAdmin.getInstance().getDeploymentId();
-        } catch (Exception e) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Skipping cleanup since cache is already uninstalled.");
-            }
-            return;
-        }
         try {
             // shutdown timer service if it is installed - cannot use EJB call here since we're shutting down
             FxQuartz.shutdown();
@@ -112,12 +104,7 @@ public class FxFilter implements Filter {
             // cleanup MIME detectors
             FxMimeType.shutdownDetectors();
 
-            if (MBeanHelper.DEPLOYMENT_ID.equals(deploymentId)) {
-                // Destroy local cache instance.
-                // This also stops local streaming servers, since they cannot use EJB calls from a shutdown context.
-
-                CacheAdmin.uninstallLocalInstance();
-            }
+            cleanupCache();
 
             EJBLookup.clearCache();
 
@@ -135,6 +122,31 @@ public class FxFilter implements Filter {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(ex.getMessage(), ex);
             }
+        } finally {
+            FxContext.remove();
+        }
+    }
+
+    private void cleanupCache() throws Exception {
+        final String deploymentId;
+        if (!CacheAdmin.isCacheMBeanInstalled()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(MSG_SKIP_CLEANUP);
+            }
+            return;
+        }
+        try {
+            deploymentId = CacheAdmin.getInstance().getDeploymentId();
+        } catch (Exception e) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(MSG_SKIP_CLEANUP);
+            }
+            return;
+        }
+        if (MBeanHelper.DEPLOYMENT_ID.equals(deploymentId)) {
+            // Destroy local cache instance.
+            // This also stops local streaming servers, since they cannot use EJB calls from a shutdown context.
+            CacheAdmin.uninstallLocalInstance();
         }
     }
 
