@@ -104,7 +104,7 @@ public class FxContentView extends UIOutput {
     private String var;
     private FxContent content;
     private Map<ContentKey, FxContent> contentMap = new HashMap<ContentKey, FxContent>();
-    private boolean preserveContent = false;
+    private Boolean preserveContent;
     private boolean explode = true;
 
     public FxContentView() {
@@ -360,7 +360,9 @@ public class FxContentView extends UIOutput {
             if (content != null) {
                 // we need to make sure the content instance still exists at
                 // the next request, so we store it in the component
-                preserveContent = true;
+                if (preserveContent == null) {
+                    preserveContent = true;
+                }
                 if (isExplode()) {
                     // initialize empty fields
                     content.getRootGroup().explode(true);
@@ -376,7 +378,7 @@ public class FxContentView extends UIOutput {
 
     public boolean isPreserveContent() {
         final Boolean value = FxJsfComponentUtils.getBooleanValue(this, "preserveContent");
-        return value != null ? value : preserveContent;
+        return value != null ? value : preserveContent != null && preserveContent;
     }
 
     public void setPreserveContent(boolean preserveContent) {
@@ -392,7 +394,7 @@ public class FxContentView extends UIOutput {
         state[3] = getType();
         state[4] = typeName;
         state[5] = preserveContent;
-        state[6] = preserveContent ? content : null;
+        state[6] = isPreserveContent() ? content : null;
         state[7] = explode;
         return state;
     }
@@ -406,7 +408,7 @@ public class FxContentView extends UIOutput {
         type = (Long) state[3];
         typeName = (String) state[4];
         preserveContent = (Boolean) state[5];
-        content = preserveContent ? (FxContent) state[6] : null;
+        content = (FxContent) state[6];
         explode = (Boolean) state[7];
     }
 
