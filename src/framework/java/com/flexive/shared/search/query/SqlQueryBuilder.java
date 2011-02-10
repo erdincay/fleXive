@@ -115,6 +115,9 @@ public class SqlQueryBuilder implements Serializable {
                 new HashSet<Table>(other.tables), (Stack<Operator>) other.operatorStack.clone(),
                 (Stack<Integer>) other.expressionCounter.clone(),
                 other.includeBasicSelects, other.frozen, other.location, other.viewType);
+        this.startRow = other.startRow;
+        this.fetchRows = other.fetchRows;
+        this.maxRows = other.maxRows;
     }
     
     private SqlQueryBuilder(List<String> selectColumns, List<String> filters, StringBuilder whereConditions,
