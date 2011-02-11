@@ -333,6 +333,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             } else {
                 boolean newVersion = false;
                 if (type.isAutoVersion()) {
+                    content.getRootGroup().removeEmptyEntries();
+                    content.compact();
                     FxDelta delta = FxDelta.processDelta(storage.contentLoad(con, content.getPk(), CacheAdmin.getEnvironment(), null), content);
                     newVersion = delta.isDataChanged();
                 }

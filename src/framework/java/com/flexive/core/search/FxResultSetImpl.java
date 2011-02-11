@@ -39,14 +39,13 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.*;
 import com.flexive.sqlParser.FxStatement;
 import com.flexive.sqlParser.SelectedValue;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * FxResultSet implementation
@@ -82,6 +81,7 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
 
     // cached properties
     private transient String[] columnLabels;
+    private transient Map<String, Integer> columnNameLookup;
 
     private class RowIterator implements Iterator<FxResultRow> {
         int index = 0;
@@ -171,7 +171,13 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
      * {@inheritDoc} *
      */
     public int getColumnIndex(String name) {
-        return FxSharedUtils.getColumnIndex(columnNames, name);
+        if (columnNameLookup == null || !columnNameLookup.containsKey(name)) {
+            if (columnNameLookup == null) {
+                columnNameLookup = Maps.newHashMap();
+            }
+            columnNameLookup.put(name, FxSharedUtils.getColumnIndex(columnNames, name));
+        }
+        return columnNameLookup.get(name);
     }
 
     /**
