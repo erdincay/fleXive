@@ -35,8 +35,10 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 
+import javax.xml.xpath.XPath;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -391,6 +393,38 @@ public class XPathElement implements Serializable {
         if (type != null)
             return type + xpc.toString();
         return xpc.toString();
+    }
+
+    /**
+     * Get the given XPath with full multiplicity information.
+     * Please note that no checks are performed and that the XPath is assumed to be uppercase and valid
+     *
+     * @param XPath   valid XPath without type information and without indices
+     * @param indices indices to apply (comma separated)
+     * @return XPath with full multiplicity information
+     */
+    public static String toXPathMult(String XPath, String indices) {
+        if (XPath == null || "/".equals(XPath) || XPath.length() == 0)
+            return "/";
+        if (XPath.charAt(0) != '/')
+            XPath = XPath.substring(XPath.indexOf('/'));
+        String[] ind = indices.split(",");
+        StringBuilder xp = new StringBuilder(XPath.length() + ind.length * 3);
+        int curr = -1;
+        try {
+            for (char c : XPath.toCharArray()) {
+                if (c == '/') {
+                    if (curr >= 0)
+                        xp.append('[').append(ind[curr]).append(']');
+                    curr++;
+                }
+                xp.append(c);
+            }
+            xp.append('[').append(ind[curr]).append(']');
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
+        }
+        return xp.toString();
     }
 
     /**

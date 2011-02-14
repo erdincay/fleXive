@@ -111,9 +111,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //20         21          22       23      24
             "MODIFIED_BY,MODIFIED_AT,MANDATOR,DBIN_ID,DBIN_ACL FROM " + TBL_CONTENT;
 
-    //                                                  1   2    3      4     5         6     7       8
-    protected static final String CONTENT_DATA_LOAD = "SELECT POS,LANG,ASSIGN,XPATH,XPATHMULT,XMULT,ISGROUP,ISMLDEF," +
-            //9     10     11    12    13   14      15        16      17     18    19      20
+    //                                                        1   2    3      4     5       6
+    protected static final String CONTENT_DATA_LOAD = "SELECT POS,LANG,ASSIGN,XMULT,ISGROUP,ISMLDEF," +
+            //7     8      9     10    11   12      13        14      15     16    17      18
             "FDATE1,FDATE2,FBLOB,FCLOB,FINT,FBIGINT,FTEXT1024,FDOUBLE,FFLOAT,FBOOL,FSELECT,FREF FROM " + TBL_CONTENT_DATA +
             //         1         2
             " WHERE ID=? AND VER=? ORDER BY XDEPTH ASC, POS ASC, ASSIGN ASC, XMULT ASC";
@@ -438,8 +438,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     protected int getValueDataLoadPos(FxDataType dataType) {
         if (dataType == FxDataType.Number || dataType == FxDataType.SelectMany)
-            return 14; //FBIGINT
-        return 13; //FINT
+            return 12; //FBIGINT
+        return 11; //FINT
     }
 
     /**
@@ -1596,7 +1596,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxLockException e) {
             throw new FxLoadException(e);
         } finally {
-            Database.closeObjects(GenericHierarchicalStorage.class, conNoTX, ps);;
+            Database.closeObjects(GenericHierarchicalStorage.class, conNoTX, ps);
         }
     }
 
@@ -1651,13 +1651,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ResultSet rs = ps.executeQuery();
             String currXPath = null;
             int currXDepth = 0;
-            FxAssignment currAssignment = null;
+            FxAssignment currAssignment = null, thisAssignment = null;
             int currPos = -1;
             long currLang;
             long defLang = FxLanguage.SYSTEM_ID;
             boolean isGroup = true;
             boolean isMLDef;
             boolean multiLang = false;
+            String currXMult;
             FxValue currValue = null;
             String[] columns = null;
             List<ServerLocation> server = CacheAdmin.getStreamServers();
@@ -1666,7 +1667,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     ? FxFlatStorageManager.getInstance().loadContent(this, con, type.getId(), pk, requestedVersion)
                     : null;
             while (rs != null && rs.next()) {
-                if (currXPath != null && !currXPath.equals(rs.getString(5))) {
+
+                if (thisAssignment == null || thisAssignment.getId() != rs.getLong(3)) {
+                    //new data type
+                    thisAssignment = env.getAssignment(rs.getLong(3));
+                }
+                currXMult = rs.getString(4);
+
+                if (currXPath != null && !currXPath.equals(XPathElement.toXPathMult(thisAssignment.getXPath(), currXMult))) {
                     //add this property
                     if (!isGroup) {
                         currValue.setDefaultLanguage(defLang);
@@ -1684,22 +1692,22 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     defLang = FxLanguage.SYSTEM_ID;
                 }
                 //read next row
-                currXPath = rs.getString(5);
+                currPos = rs.getInt(1);
+                currLang = rs.getInt(2);
+                isMLDef = rs.getBoolean(6);
+                isGroup = rs.getBoolean(5);
+                if( currAssignment == null || currAssignment.getId() != thisAssignment.getId()) {
+                    currAssignment = thisAssignment;
+                    if (!isGroup)
+                        columns = getColumns(((FxPropertyAssignment) currAssignment).getProperty());
+                }
+
+                currXPath = XPathElement.toXPathMult(currAssignment.getXPath(), currXMult);
                 if (flatContainer != null) {
                     //calculate xdepth
                     currXDepth = 1;
-                    for (char c : rs.getString(6).toCharArray())
+                    for (char c : currXMult.toCharArray())
                         if (c == ',') currXDepth++;
-                }
-                currPos = rs.getInt(1);
-                currLang = rs.getInt(2);
-                isMLDef = rs.getBoolean(8);
-                isGroup = rs.getBoolean(7);
-                if (currAssignment == null || currAssignment.getId() != rs.getLong(3)) {
-                    //new data type
-                    currAssignment = env.getAssignment(rs.getLong(3));
-                    if (!isGroup)
-                        columns = getColumns(((FxPropertyAssignment) currAssignment).getProperty());
                 }
 
 
@@ -2023,7 +2031,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return;
         if (assignment instanceof FxGroupAssignment) {
             root.addGroup(xPath, (FxGroupAssignment) assignment, pos);
-            root.getGroup(xPath.substring(0, xPath.length() - 1)).removeNonInternalData();
+            root.getGroup(xPath).removeNonInternalData();
         } else {
             root.addProperty(xPath, (FxPropertyAssignment) assignment, value, pos);
         }
