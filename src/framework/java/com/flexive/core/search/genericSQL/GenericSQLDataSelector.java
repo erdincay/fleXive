@@ -383,7 +383,10 @@ public class GenericSQLDataSelector extends DataSelector {
                         result.addItem(val, resultPos, false);
                     }
 //                    String xpath = "concat(filter.xpathPref," + getContentDataSubselect("XPATHMULT", entry, true) + ")";
-                    String xpath = search.getStorage().concat("filter.xpathPref", getContentDataSubselect("XPATHMULT", entry, true));
+                    String xpath = search.getStorage().concat("filter.xpathPref", "\'-\'",
+                            entry.isAssignment() ? '\'' + entry.getAssignment().getXPath() + '\'' : getContentDataSubselect("ASSIGN", entry, true),
+                            "\'-\'",
+                            getContentDataSubselect("XMULT", entry, true));
                     result.addItem(xpath, resultPos, true);
                     break;
                 case T_CONTENT_DATA_FLAT:

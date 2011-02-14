@@ -123,7 +123,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
             if (sqlMapperFactory.getSqlDialect().isPropertyPermissionsEnabled(column)
                     && PropertyResolver.Table.T_CONTENT_DATA.equals(entry.getTableType())) {
                 columns.add(
-                        getSelect(sqlMapperFactory.getSqlDialect(), "xpath",
+                        getSelect(sqlMapperFactory.getSqlDialect(), "assign",
                                 column.getSelectedObject(),
                                 column.getSelectedObject().getReferencedAssignments(),
                                 languageId)

@@ -688,7 +688,7 @@ public class PropertyEntry {
 
             if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
                 // Get the XPATH if we are reading from the content data table
-                result.setXPath(rs.getString(positionInResultSet + getReadColumns().length));
+                result.setXPath(rebuildXPath(rs.getString(positionInResultSet + getReadColumns().length)));
             } else if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
                 // set XPath for system-internal properties
                 result.setXPath("ROOT/" + property.getName());
@@ -702,6 +702,41 @@ public class PropertyEntry {
         } catch (SQLException e) {
             throw new FxSqlSearchException(e);
         }
+    }
+
+    /**
+     * Rebuild an xpath from the code <prefix>-<assignment id || assignment xpath>-<xmult>
+     *
+     * @param xpathCode encoded xpath
+     * @return rebuilt xpath
+     */
+    private String rebuildXPath(String xpathCode) {
+        if (xpathCode == null)
+            return null;
+        String[] data = xpathCode.split("\\-");
+        if( data.length == 1) { //CMIS-SQL selects only the assignment
+            try {
+                return CacheAdmin.getEnvironment().getAssignment(Long.parseLong(xpathCode)).getXPath();
+            } catch (NumberFormatException e) {
+                LOG.error("Invalid assignment id: " + data[1]);
+                return xpathCode;
+            }
+        }
+        if (data.length != 3) {
+            LOG.error("Invalid XPath-Code: " + xpathCode);
+            return xpathCode;
+        }
+        char first = data[1].charAt(0);
+        if (first >= '0' && first <= '9') {
+            //assignment id
+            try {
+                data[1] = CacheAdmin.getEnvironment().getAssignment(Long.parseLong(data[1])).getXPath();
+            } catch (NumberFormatException e) {
+                LOG.error("Invalid assignment id: " + data[1]);
+            }
+        }
+        return data[0] + XPathElement.toXPathMult(data[1], data[2]);
+//        System.out.println("XPath=[" + ret + "], rebuilt from [" + xpathCode + "]");
     }
 
     /**
