@@ -38,6 +38,7 @@ import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.google.common.collect.Lists;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -148,18 +149,40 @@ public class FxSQLSearchParams implements Serializable {
         }
     }
 
+    private static final CacheMode CACHE_MODE_DEFAULT = CacheMode.READ_ONLY;
 
     private BriefcaseCreationData bcd = null;
     private int queryTimeout = -1;
     private List<FxLanguage> resultLanguages;
     private CacheMode cacheMode = CacheMode.OFF;
-    private static final CacheMode CACHE_MODE_DEFAULT = CacheMode.READ_ONLY;
+    private List<Long> hintTypes = null;
 
     /**
      * Constructor.
      */
     public FxSQLSearchParams() {
         // empty
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other the instance to be copied
+     * @since       3.1.6
+     */
+    protected FxSQLSearchParams(FxSQLSearchParams other) {
+        this.bcd = other.bcd == null ? null : new BriefcaseCreationData(other.bcd.name, other.bcd.description, other.bcd.aclId);
+        this.queryTimeout = other.queryTimeout;
+        this.resultLanguages = other.resultLanguages == null ? null : Lists.newArrayList(other.resultLanguages);
+        this.cacheMode = other.cacheMode;
+        this.hintTypes = other.hintTypes == null ? null : Lists.newArrayList(other.hintTypes);
+    }
+
+    /**
+     * @return  an independent copy of this parameter set
+     */
+    public FxSQLSearchParams copy() {
+        return new FxSQLSearchParams(this);
     }
 
     /**
@@ -275,4 +298,28 @@ public class FxSQLSearchParams implements Serializable {
         return (queryTimeout < 0) ? SearchEngine.DEFAULT_QUERY_TIMEOUT : queryTimeout;
     }
 
+    /**
+     * @return  the list of types the caller expects this query to return.
+     * @since   3.1.6
+     */
+    public List<Long> getHintTypes() {
+        return hintTypes;
+    }
+
+    /**
+     * Set the list of types the caller expects this query to return.
+     * This allows optimizations for security filters, since FxSQL queries always operate
+     * on the flat virtual table defined by all types.
+     * <p>
+     * <strong>Use with care!</strong>
+     * When the result contains a type that is not covered by this list, security restrictions
+     * may not be applied to the type.
+     * </p>
+     *
+     * @param hintTypes the list of types the query may return
+     * @since   3.1.6
+     */
+    public void setHintTypes(List<Long> hintTypes) {
+        this.hintTypes = hintTypes;
+    }
 }

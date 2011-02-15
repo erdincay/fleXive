@@ -118,6 +118,7 @@ public class SqlQueryBuilder implements Serializable {
         this.startRow = other.startRow;
         this.fetchRows = other.fetchRows;
         this.maxRows = other.maxRows;
+        this.params = other.params == null ? null : other.params.copy();
     }
     
     private SqlQueryBuilder(List<String> selectColumns, List<String> filters, StringBuilder whereConditions,
@@ -924,6 +925,17 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     /**
+     * @return  the optional search parameters for submitting the query.
+     * @since   3.1.6
+     */
+    public FxSQLSearchParams getParams() {
+        if (params == null) {
+            params = new FxSQLSearchParams();
+        }
+        return params;
+    }
+
+    /**
      * Render the given condition in the current scope.
      *
      * @param condition the condition to be rendered.
@@ -981,12 +993,5 @@ public class SqlQueryBuilder implements Serializable {
     private boolean isWildcardSelected() {
         final List<String> names = getColumnNames();
         return names.contains(SearchEngine.PROP_WILDCARD) || names.contains(SearchEngine.PROP_USERWILDCARD);
-    }
-
-    private FxSQLSearchParams getParams() {
-        if (params == null) {
-            params = new FxSQLSearchParams();
-        }
-        return params;
     }
 }

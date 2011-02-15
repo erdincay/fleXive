@@ -32,25 +32,15 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.*;
-import static com.flexive.shared.EJBLookup.*;
-import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
-import static com.flexive.shared.EJBLookup.getContentEngine;
-import static com.flexive.shared.FxLanguage.ENGLISH;
-import static com.flexive.shared.FxLanguage.GERMAN;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.CmisSearchEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
-import static com.flexive.shared.search.query.PropertyValueComparator.EQ;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
@@ -63,15 +53,12 @@ import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
-import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -82,6 +69,15 @@ import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import static com.flexive.shared.EJBLookup.*;
+import static com.flexive.shared.FxLanguage.ENGLISH;
+import static com.flexive.shared.FxLanguage.GERMAN;
+import static com.flexive.shared.search.query.PropertyValueComparator.EQ;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static org.testng.Assert.*;
 
 /**
  * FxSQL search query engine tests.
@@ -170,7 +166,7 @@ public class SearchEngineTest {
 
     @Test
     public void combinedFlatAssignment() throws FxApplicationException {
-        final FxType type = CacheAdmin.getEnvironment().getType(TEST_TYPE);
+        final FxType type = getEnvironment().getType(TEST_TYPE);
         if (!type.isContainsFlatStorageAssignments()) {
             return;     // test affects only flat storage queries
         }
@@ -245,7 +241,7 @@ public class SearchEngineTest {
     public void filterByTypeTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("typedef").filterType("FOLDER").getResult();
         assertTrue(result.getRowCount() > 0);
-        final FxType folderType = CacheAdmin.getEnvironment().getType("FOLDER");
+        final FxType folderType = getEnvironment().getType("FOLDER");
         for (FxResultRow row : result.getResultRows()) {
             assertTrue(folderType.getId() == ((FxLargeNumber) row.getValue(1)).getBestTranslation(),
                     "Unexpected result type: " + row.getValue(1) + ", expected: " + folderType.getId());
@@ -336,7 +332,7 @@ public class SearchEngineTest {
 
         try {
             final String property = TEST_TYPE + "/stringSearchProp";
-            final FxPropertyAssignment prop = CacheAdmin.getEnvironment().getPropertyAssignment(property);
+            final FxPropertyAssignment prop = getEnvironment().getPropertyAssignment(property);
             if (prop.getFlatStorageMapping() == null) {
                 // may happen if tested with a dummy flat storage, run the test anyway but print a warning
                 System.err.println("Warning: assignment " + prop.getXPath()
@@ -383,7 +379,7 @@ public class SearchEngineTest {
     @Test
     public void typeConditionTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("typedef").type(FxType.CONTACTDATA).getResult();
-        final FxType cdType = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA);
+        final FxType cdType = getEnvironment().getType(FxType.CONTACTDATA);
         assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             assertTrue(((FxLargeNumber) row.getFxValue(1)).getDefaultTranslation() == cdType.getId(),
@@ -443,7 +439,7 @@ public class SearchEngineTest {
     @Test(dataProvider = "testProperties")
     public void genericSelectNullTest(String name, FxDataType dataType) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select(TEST_TYPE + "/" + getTestPropertyName(name))
-                .condition("typedef", PropertyValueComparator.NE, CacheAdmin.getEnvironment().getType(TEST_TYPE).getName())
+                .condition("typedef", PropertyValueComparator.NE, getEnvironment().getType(TEST_TYPE).getName())
                 .getResult();
         assertTrue(result.getRowCount() > 0);
         final int idx = 1;
@@ -641,7 +637,7 @@ public class SearchEngineTest {
         ), Arrays.asList(
                 new ResultOrderByInfo(Table.CONTENT, getTestPropertyName("string"), "", sortDirection)),
                 25, 100);
-        EJBLookup.getResultPreferencesEngine().save(prefs, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId(), ResultViewType.LIST, AdminResultLocations.DEFAULT);
+        EJBLookup.getResultPreferencesEngine().save(prefs, getEnvironment().getType(TEST_TYPE).getId(), ResultViewType.LIST, AdminResultLocations.DEFAULT);
     }
 
     private static List<FxPK> folderPks;
@@ -823,7 +819,7 @@ public class SearchEngineTest {
     public void selectScalarInTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk").orSub()
                 .condition("typedef", PropertyValueComparator.IN,
-                        FxSharedUtils.getSelectableObjectIdList(CacheAdmin.getEnvironment().getTypes())
+                        FxSharedUtils.getSelectableObjectIdList(getEnvironment().getTypes())
                         .subList(0, 3)
                 )
                 .condition("caption", PropertyValueComparator.IN, Arrays.asList("test1", "test2"))
@@ -979,7 +975,7 @@ public class SearchEngineTest {
                 "acl.modified_by", "acl.modified_at").type(TEST_TYPE).getResult();
         assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
-            final ACL acl = CacheAdmin.getEnvironment().getACL(row.getLong("acl"));
+            final ACL acl = getEnvironment().getACL(row.getLong("acl"));
             final FxContent content = getContentEngine().load(row.getPk(1));
             Assert.assertTrue(content.getAclIds().contains(acl.getId()),
                     "Invalid ACL for instance " + row.getPk(1) + ": " + acl.getId()
@@ -1001,8 +997,8 @@ public class SearchEngineTest {
                 "step.workflow", "step.acl").getResult();
         assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
-            final Step step = CacheAdmin.getEnvironment().getStep(row.getLong("step"));
-            final StepDefinition definition = CacheAdmin.getEnvironment().getStepDefinition(step.getStepDefinitionId());
+            final Step step = getEnvironment().getStep(row.getLong("step"));
+            final StepDefinition definition = getEnvironment().getStepDefinition(step.getStepDefinitionId());
             Assert.assertEquals(definition.getLabel().getBestTranslation(), row.getFxValue("step.label").getBestTranslation(),
                     "Invalid step label '" + row.getValue(3) + "', expected: '" + definition.getLabel() + "'");
             try {
@@ -1076,7 +1072,7 @@ public class SearchEngineTest {
                 "mandator.modified_by", "mandator.modified_at").getResult();
         assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
-            final Mandator mandator = CacheAdmin.getEnvironment().getMandator(row.getLong("mandator"));
+            final Mandator mandator = getEnvironment().getMandator(row.getLong("mandator"));
             final FxContent content = getContentEngine().load(row.getPk(1));
 
             assertEquals(mandator.getId(), content.getMandatorId(), "Search returned different mandator than content engine");
@@ -1515,7 +1511,7 @@ public class SearchEngineTest {
                     FxPropertyEdit.createNew(
                             "prop_no_delete", new FxString(""), new FxString(""),
                             FxMultiplicity.MULT_0_1,
-                            CacheAdmin.getEnvironment().getACL(aclId),
+                            getEnvironment().getACL(aclId),
                             FxDataType.String1024
                     ),
                     "/"
@@ -1741,6 +1737,38 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void testMandatorSupervisor() throws FxLoginFailedException, FxAccountInUseException, FxApplicationException {
+        login(TestUsers.MANDATOR_SUPERVISOR);
+        try {
+            final FxResultSet result = new SqlQueryBuilder().select("@pk, mandator").getResult();
+            assertTrue(result.getRowCount() > 0, "No instances selected for test mandator supervisor");
+            // add type condition
+            new SqlQueryBuilder().select("@pk").type(FxType.FOLDER).getResult();
+            assertTrue(result.getRowCount() > 0, "No instances selected for test mandator supervisor for type: FOLDER");
+        } finally {
+            login(TestUsers.REGULAR);
+        }
+    }
+
+    @Test
+    public void testHintTypes() throws FxApplicationException {
+        final long folderTypeId = getEnvironment().getType(FxType.FOLDER).getId();
+        final SqlQueryBuilder sqb = new SqlQueryBuilder().select("@pk").type("folder");
+        assertOnlyFolders(folderTypeId, sqb.getResult());
+
+        sqb.getParams().setHintTypes(Arrays.asList(folderTypeId));
+        assertOnlyFolders(folderTypeId, sqb.getResult());
+
+        sqb.getParams().setHintTypes(Arrays.asList(FxType.ROOT_ID));
+        assertEquals(sqb.getResult().getRowCount(), 0, "Invalid type hint should have removed rows that don't match");
+    }
+
+    private void assertOnlyFolders(long folderTypeId, FxResultSet result) throws FxApplicationException {
+        assertEquals(result.getContentTypes().size(), 1, "Expected one found type");
+        assertEquals(result.getContentTypes().get(0).getContentTypeId(), folderTypeId, "Expected only folder instances");
+    }
+
+    @Test
     public void testOwnerPermission() throws FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException, FxApplicationException {
         // FX-946: owner permission applied to all users
         logout();
@@ -1763,7 +1791,7 @@ public class SearchEngineTest {
                 newType.setUsePropertyPermissions(false);
                 newType.setUseStepPermissions(false);
                 newType.setUseTypePermissions(true);
-                newType.setACL(CacheAdmin.getEnvironment().getACL(aclId));
+                newType.setACL(getEnvironment().getACL(aclId));
                 type = newType.save();
 
                 // create a test instance for user regular2
@@ -1851,7 +1879,7 @@ public class SearchEngineTest {
     }
 
     private FxPropertyAssignment getTestPropertyAssignment(String baseName) {
-        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/" + getTestPropertyName(baseName));
+        return (FxPropertyAssignment) getEnvironment().getAssignment(TEST_TYPE + "/" + getTestPropertyName(baseName));
     }
 
     private void assertAscendingOrder(FxResultSet result, int column) {
@@ -1876,7 +1904,7 @@ public class SearchEngineTest {
     }
 
     private long getTestTypeId() {
-        return CacheAdmin.getEnvironment().getType(TEST_TYPE).getId();
+        return getEnvironment().getType(TEST_TYPE).getId();
     }
 
     private int getTestInstanceCount() throws FxApplicationException {

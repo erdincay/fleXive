@@ -41,33 +41,25 @@ import com.flexive.core.search.cmis.impl.sql.mapper.ConditionColumnMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
 import com.flexive.core.search.cmis.model.*;
-import com.flexive.core.DatabaseConst;
-import com.flexive.core.storage.DBStorage;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.Pair;
+import com.flexive.shared.cmis.search.CmisResultColumnDefinition;
+import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.cmis.search.CmisResultSet;
+import com.flexive.shared.cmis.search.CmisResultValue;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.search.SortDirection;
-import com.flexive.shared.cmis.search.*;
-import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.security.ACLPermission;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.workflow.Step;
-import com.flexive.shared.workflow.Workflow;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -535,124 +527,9 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
      * {@inheritDoc}
      */
     public String getSecurityFilter(TableReference table, String tableAlias, boolean contentTable) {
-        final UserTicket ticket = FxContext.getUserTicket();
-        if (ticket.isGlobalSupervisor()) {
-            return "1=1";
-        }
-        if (!contentTable) {
-            // not selected from content table, main table properties for optimized security filter are not available
-            final DBStorage storage = StorageManager.getStorageImpl();
-            return "mayReadInstance2(" + tableAlias + ".id," + tableAlias + ".ver," + ticket.getUserId() + ","
-                    + ticket.getMandatorId() + "," + storage.getBooleanExpression(ticket.isMandatorSupervisor()) +
-                    "," + storage.getBooleanExpression(ticket.isGlobalSupervisor()) + ")="+storage.getBooleanTrueExpression();
-        }
-        // create security filters per type - the conditions will be joined with "OR"
-        // property permissions are not handled by this filter, this is the responsibility of the
-        // methods that return data from selected properties
-        final List<String> conditions = new ArrayList<String>();
-        if (ticket.isMandatorSupervisor()) {
-            conditions.add(tableAlias + ".mandator=" + ticket.getMandatorId());
-        }
-        for (FxType type : table.getReferencedTypes()) {
-            final String tdef = tableAlias + ".tdef=" + type.getId();
-            if (!type.isUsePermissions()) {
-                // no filtering at all needed for this type
-                conditions.add(tdef);
-                continue;
-            }
-            final List<String> typeFilter = new ArrayList<String>();
-            typeFilter.add(tdef);
-            if (type.isUseTypePermissions() && !ticket.mayReadACL(type.getACL().getId(), -1)) {
-                if (!ticket.mayReadACL(type.getACL().getId(), ticket.getUserId())) {
-                    // neither general nor private read permissions - skip all instances of this type
-                    continue;
-                }
-                // ACL cannot be read, but private permissions set - select only own instances
-                typeFilter.add(tableAlias + ".created_by=" + ticket.getUserId());
-            }
-            if (type.isUseInstancePermissions()) {
-                // collect all readable instance ACLs
-                final List<Long> readable = new ArrayList<Long>(
-                        Arrays.asList(ticket.getACLsId(-1, ACLCategory.INSTANCE, ACLPermission.READ))
-                );
-                // collect all ACLs that can be read if the calling user is the owner
-                final List<Long> privateReadable = new ArrayList<Long>(
-                        Arrays.asList(ticket.getACLsId(ticket.getUserId(), ACLCategory.INSTANCE, ACLPermission.READ))
-                );
-                // remove all ACLs that are readable regardless of the owner
-                privateReadable.removeAll(readable);
-                // add ACL filter
-                typeFilter.add(
-                        contentFilterWithPrivate(ticket, tableAlias,
-                                contentAclFilter(tableAlias, readable),
-                                contentAclFilter(tableAlias, privateReadable)
-                        )
-                );
-            }
-            if (type.isUseStepPermissions()) {
-                // collect all readable workflow steps
-                final List<Long> readable = new ArrayList<Long>();
-                final List<Long> privateReadable = new ArrayList<Long>();
-                for (Workflow workflow : environment.getWorkflows()) {
-                    for (Step step : workflow.getSteps()) {
-                        if (ticket.mayReadACL(step.getAclId(), -1)) {
-                            // readable ACL
-                            readable.add(step.getId());
-                        } else if (ticket.mayReadACL(step.getAclId(), ticket.getUserId())) {
-                            // ACL readable only when the calling user is the owner
-                            privateReadable.add(step.getAclId());
-                        }
-                    }
-                }
-                // add step filter
-                typeFilter.add(
-                        contentFilterWithPrivate(ticket, tableAlias, readable, privateReadable, "step")
-                );
-            }
-            conditions.add("(" + StringUtils.join(typeFilter, " AND ") + ")");
-        }
-        return conditions.isEmpty() ? "1=0" : "(" + StringUtils.join(conditions, " OR ") + ")";
+        return SearchUtils.getSecurityFilter(tableAlias, table.getReferencedTypes(), contentTable);
     }
 
-    protected String contentAclFilter(String contentTableAlias, List<Long> acls) {
-        return acls.isEmpty() ? null :
-                // first check for contents that have the desired ACL in the main table column
-                "(" + contentTableAlias + ".acl IN (" + StringUtils.join(acls, ',') + ") " +
-                // then check for the ACL in TBL_CONTENT_ACLS 
-                "OR EXISTS(" +
-                contentAclFilter(contentTableAlias, DatabaseConst.TBL_CONTENT_ACLS, acls)
-                + "))";
-    }
-
-    protected String contentAclFilter(String contentTableAlias, String table, List<Long> acls) {
-        return "SELECT c.acl FROM " + table + " c WHERE c.id=" + contentTableAlias + ".id AND c.ver=" + contentTableAlias + ".ver " +
-                " AND c.acl IN (" + StringUtils.join(acls, ',') + ")";
-    }
-
-    protected String contentFilterWithPrivate(UserTicket ticket, String tableAlias, List<Long> readableIds, List<Long> privateReadableIds, String column) {
-        return contentFilterWithPrivate(
-                ticket,
-                tableAlias,
-                tableAlias + "." + column + " IN (" + StringUtils.join(readableIds, ',') + ")",
-                privateReadableIds.isEmpty() ? null :
-                        tableAlias + "." + column + " IN (" + StringUtils.join(privateReadableIds, ',') + ")"
-        );
-    }
-
-    private String contentFilterWithPrivate(UserTicket ticket, String contentTableAlias, String readableFilter, String privateReadableFilter) {
-        final String result;
-        if (isBlank(privateReadableFilter)) {
-            // no private permissions have to be checked
-            result = readableFilter;
-        } else {
-            // must match readable column OR owner and private readable column
-            result = "(" + readableFilter + " OR ("
-                    + contentTableAlias + ".created_by=" + ticket.getUserId() + " AND "
-                    + privateReadableFilter
-                    + "))";
-        }
-        return result;
-    }
 
     /**
      * {@inheritDoc}

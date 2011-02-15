@@ -195,16 +195,17 @@ public class GenericSQLDataFilter extends DataFilter {
         String sql = null;
         try {
             final String dataSelect;
+            final String columnFilter = "SELECT search_id, id, ver, tdef, created_by FROM ";
             if (getStatement().getType() == FxStatement.Type.ALL) {
                 // The statement will not filter the data
-                final String securityFilter = getSecurityFilter(ticket, "data2");
+                final String securityFilter = getSecurityFilter("data2");
                 final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
                         + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("data2") : "")
                         + getDeactivatedTypesFilter("data2") + getInactiveMandatorsFilter("data2");
-                dataSelect = selectOnMainTable(filters, "data2");
+                dataSelect = columnFilter + "(" + selectOnMainTable(filters, "data2") + ")";
             } else if (isMainTableQuery(getStatement().getRootBrace())) {
                 // optimize queries that operate only on FX_CONTENT
-                final String securityFilter = getSecurityFilter(ticket, "cd");
+                final String securityFilter = getSecurityFilter("cd");
                 final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
                         + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("cd") : "")
                         + getDeactivatedTypesFilter("cd")
@@ -212,7 +213,7 @@ public class GenericSQLDataFilter extends DataFilter {
                         + " AND ("
                         + getOptimizedMainTableConditions(getStatement().getRootBrace())
                         + ")";
-                dataSelect = selectOnMainTable(filters, "cd");
+                dataSelect = columnFilter + "(" + selectOnMainTable(filters, "cd") + ")";
             } else {
                 // The statement filters the data
                 StringBuilder result = new StringBuilder(5000);
@@ -221,9 +222,9 @@ public class GenericSQLDataFilter extends DataFilter {
                 result.deleteCharAt(0);
                 result.deleteCharAt(result.length() - 1);
                 // Finalize the select
-                final String securityFilter = getSecurityFilter(ticket, "data2");
-                dataSelect = "SELECT * FROM (SELECT DISTINCT " + search.getSearchId() +
-                        " AS search_id,data.id,data.ver,main.tdef,main.created_by \n" +
+                final String securityFilter = getSecurityFilter("data2");
+                dataSelect = columnFilter + "(SELECT DISTINCT " + search.getSearchId() +
+                        " AS search_id,data.id,data.ver,main.tdef,main.created_by,main.step,main.acl,main.mandator \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
                         "WHERE data.ver=main.ver AND data.id=main.id) data2\n"
                         + (StringUtils.isNotBlank(securityFilter)
@@ -252,16 +253,24 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     private String selectOnMainTable(String filters, String tableAlias) {
-        return "SELECT " + search.getSearchId() + " AS search_id,id,ver,tdef,created_by FROM " + tableMain + " " + tableAlias + "\n"
+        return "SELECT " + search.getSearchId() + " AS search_id,id,ver,tdef,created_by,step,acl,mandator FROM " + tableMain + " " + tableAlias + "\n"
                 + (StringUtils.isNotBlank(filters)
                 ? "WHERE " + filters + search.getStorage().getLimit(true, search.getFxStatement().getMaxResultRows()) + "\n"
                 : search.getStorage().getLimit(false, search.getFxStatement().getMaxResultRows()));
     }
 
-    protected String getSecurityFilter(UserTicket ticket, String tableAlias) {
-        return ticket.isGlobalSupervisor() ? "" :
-                "mayReadInstance2(" + tableAlias + ".id," + tableAlias + ".ver," + ticket.getUserId() + "," +
-                        ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
+    protected String getSecurityFilter(String tableAlias) {
+        final List<Long> hintTypes = search.getParams().getHintTypes();
+        final List<FxType> resultTypes;
+        if (hintTypes != null && !hintTypes.isEmpty()) {
+            resultTypes = Lists.newArrayListWithCapacity(hintTypes.size());
+            for (Long hintType : hintTypes) {
+                resultTypes.add(CacheAdmin.getEnvironment().getType(hintType));
+            }
+        } else {
+            resultTypes = CacheAdmin.getEnvironment().getTypes();
+        }
+        return SearchUtils.getSecurityFilter(tableAlias, resultTypes, true);
     }
 
     /**
