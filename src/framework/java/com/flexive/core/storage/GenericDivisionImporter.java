@@ -1186,9 +1186,9 @@ try {
         final PreparedStatement psGetAssInfo = con.prepareStatement("SELECT DISTINCT a.APROPERTY,a.XALIAS,p.DATATYPE FROM " + DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " a, " + DatabaseConst.TBL_STRUCT_PROPERTIES + " p WHERE a.ID=? AND p.ID=a.APROPERTY");
         final Map<Long, Object[]> assignmentPropAlias = new HashMap<Long, Object[]>(assignmentPositions.size());
         final String insert1 = "INSERT INTO " + DatabaseConst.TBL_CONTENT_DATA +
-                //1  2   3   4    5     6             7     8                                              9         10                 11
-                "(ID,VER,POS,LANG,TPROP,ASSIGN,XDEPTH,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,PARENTXPATH,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,";
-        final String insert2 = "(?,?,?,?,?,?,1,?,?,1,1,1,'/',?,?," + StorageManager.getBooleanFalseExpression() + ",?,";
+                //1  2   3   4    5     6      =1     =1    =1     =1          7         8          =FALSE  9       
+                "(ID,VER,POS,LANG,TPROP,ASSIGN,XDEPTH,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,";
+        final String insert2 = "(?,?,?,?,1,?,?,1,1,1,?,?," + StorageManager.getBooleanFalseExpression() + ",?,";
         final PreparedStatement psString = con.prepareStatement(insert1 + "FTEXT1024,UFTEXT1024,FSELECT,FINT)VALUES" +
                 insert2 + "?,?,0,?)");
         final PreparedStatement psText = con.prepareStatement(insert1 + "FCLOB,UFCLOB,FSELECT,FINT)VALUES" +
@@ -1388,51 +1388,51 @@ try {
                     switch (dataType) {
                         case String1024:
                             ps = psString;
-                            ps.setString(12, data.get(column));
-                            ps.setString(13, data.get(column).toUpperCase());
-                            vdPos = 14;
+                            ps.setString(10, data.get(column));
+                            ps.setString(11, data.get(column).toUpperCase());
+                            vdPos = 12;
                             break;
                         case Text:
                         case HTML:
                             ps = psText;
-                            ps.setString(12, data.get(column));
-                            ps.setString(13, data.get(column).toUpperCase());
-                            vdPos = 14;
+                            ps.setString(10, data.get(column));
+                            ps.setString(11, data.get(column).toUpperCase());
+                            vdPos = 12;
                             break;
                         case Number:
                             ps = psNumber;
-                            ps.setLong(12, Long.valueOf(data.get(column)));
-                            vdPos = 13;
+                            ps.setLong(10, Long.valueOf(data.get(column)));
+                            vdPos = 11;
                             break;
                         case LargeNumber:
                             ps = psLargeNumber;
-                            ps.setLong(12, Long.valueOf(data.get(column)));
-                            vdPos = 13;
+                            ps.setLong(10, Long.valueOf(data.get(column)));
+                            vdPos = 11;
                             break;
                         case Reference:
                             ps = psReference;
-                            ps.setLong(12, Long.valueOf(data.get(column)));
-                            vdPos = 13;
+                            ps.setLong(10, Long.valueOf(data.get(column)));
+                            vdPos = 11;
                             break;
                         case Float:
                             ps = psFloat;
-                            ps.setFloat(12, Float.valueOf(data.get(column)));
-                            vdPos = 13;
+                            ps.setFloat(10, Float.valueOf(data.get(column)));
+                            vdPos = 11;
                             break;
                         case Double:
                             ps = psDouble;
-                            ps.setDouble(12, Double.valueOf(data.get(column)));
-                            vdPos = 13;
+                            ps.setDouble(10, Double.valueOf(data.get(column)));
+                            vdPos = 11;
                             break;
                         case Boolean:
                             ps = psBoolean;
-                            ps.setBoolean(12, "1".equals(data.get(column)));
-                            vdPos = 13;
+                            ps.setBoolean(10, "1".equals(data.get(column)));
+                            vdPos = 11;
                             break;
                         case SelectOne:
                             ps = psSelectOne;
-                            ps.setLong(12, Long.valueOf(data.get(column)));
-                            vdPos = 13;
+                            ps.setLong(10, Long.valueOf(data.get(column)));
+                            vdPos = 11;
                             break;
                         default:
                             //noinspection ThrowableInstanceNeverThrown
@@ -1444,11 +1444,9 @@ try {
                     ps.setLong(4, lang);
                     ps.setLong(5, prop);
                     ps.setLong(6, assignment);
-                    ps.setString(7, "/" + xpath);
-                    ps.setString(8, "/" + xpath + "[1]");
-                    ps.setBoolean(9, isMaxVer);
-                    ps.setBoolean(10, isLiveVer);
-                    ps.setBoolean(11, mlDef);
+                    ps.setBoolean(7, isMaxVer);
+                    ps.setBoolean(8, isLiveVer);
+                    ps.setBoolean(9, mlDef);
                     if (valueData == null)
                         ps.setNull(vdPos, java.sql.Types.NUMERIC);
                     else
