@@ -202,7 +202,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
                         + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("data2") : "")
                         + getDeactivatedTypesFilter("data2") + getInactiveMandatorsFilter("data2");
-                dataSelect = columnFilter + "(" + selectOnMainTable(filters, "data2") + ")";
+                dataSelect = columnFilter + "(" + selectOnMainTable(filters, "data2") + ") r";
             } else if (isMainTableQuery(getStatement().getRootBrace())) {
                 // optimize queries that operate only on FX_CONTENT
                 final String securityFilter = getSecurityFilter("cd");
@@ -213,7 +213,7 @@ public class GenericSQLDataFilter extends DataFilter {
                         + " AND ("
                         + getOptimizedMainTableConditions(getStatement().getRootBrace())
                         + ")";
-                dataSelect = columnFilter + "(" + selectOnMainTable(filters, "cd") + ")";
+                dataSelect = columnFilter + "(" + selectOnMainTable(filters, "cd") + ") r";
             } else {
                 // The statement filters the data
                 StringBuilder result = new StringBuilder(5000);
@@ -232,7 +232,7 @@ public class GenericSQLDataFilter extends DataFilter {
                         ? "WHERE " + securityFilter + search.getStorage().getLimit(true, maxRows)
                         : search.getStorage().getLimit(false, maxRows));
             }
-            // Find all matching data enties and store them
+            // Find all matching data entities and store them
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Filter SQL: " + sql);
