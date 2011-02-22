@@ -61,8 +61,7 @@ public class FxValueRendererFactory {
     /**
      * Internal fallback default language for locale-agnostic formatters
      */
-    static final FxLanguage DEFAULT = new FxLanguage(-1, FxLanguage.DEFAULT.getIso2digit(),
-            new FxString("Default fallback formatter"), true);
+    static final FxLanguage DEFAULT = FxLanguage.DEFAULT;
 
     /**
      * FxDate formatter.

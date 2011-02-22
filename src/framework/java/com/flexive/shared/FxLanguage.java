@@ -170,7 +170,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
     public boolean equals(Object obj) {
         if (!(obj instanceof FxLanguage)) return false;
         FxLanguage comp = (FxLanguage) obj;
-        return (comp.getIso2digit().equals(this.getIso2digit()));
+        return id == comp.id && comp.getIso2digit().equals(this.getIso2digit());
     }
 
     /**
@@ -178,7 +178,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
      */
     @Override
     public int hashCode() {
-        return iso2digit.hashCode();
+        return ((int) id) * 31 + iso2digit.hashCode();
     }
 
 
