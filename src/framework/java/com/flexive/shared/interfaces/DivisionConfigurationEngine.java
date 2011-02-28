@@ -160,7 +160,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
     /**
      * Remove all resources whose key starts with keyPrefix
      *
-     * @param keyPrefix       requested key prefix
+     * @param keyPrefix requested key prefix
      * @throws FxApplicationException on errors
      * @since 3.1.4
      */
@@ -190,4 +190,17 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @since 3.1.4
      */
     public Map<String, FxString> getResourceValues(String keyPrefix, long defaultLanguage) throws FxApplicationException;
+
+    /**
+     * Get all resource FxString values that match a given key pattern.
+     * e.g. if keys "test.cat.1", "test.cat.2" and "test.cat.3" exist, a key pattern ".cat." will return these 3 entries
+     *
+     * @param keyMatch        requested part of the key that has to match
+     * @param defaultLanguage default language to set in the returned FxString, if not available the first found
+     *                        translation is the default language
+     * @return an ordered (in regards to keys) map containing all found keys and FxString values
+     * @throws FxApplicationException on errors
+     * @since 3.1.6
+     */
+    public Map<String, FxString> getResourceValuesContains(String keyMatch, long defaultLanguage) throws FxApplicationException;
 }

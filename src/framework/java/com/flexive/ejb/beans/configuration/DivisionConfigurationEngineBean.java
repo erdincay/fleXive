@@ -727,19 +727,41 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public Map<String, FxString> getResourceValues(String keyPrefix, long defaultLanguage) throws FxApplicationException {
-        Map<String, FxString> ret = new LinkedHashMap<String, FxString>(10);
-        if (StringUtils.isBlank(keyPrefix)) {
+        return getResourceValuesLike(keyPrefix + "%", defaultLanguage);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public Map<String, FxString> getResourceValuesContains(String keyMatch, long defaultLanguage) throws FxApplicationException {
+        return getResourceValuesLike("%" + keyMatch + "%", defaultLanguage);
+    }
+
+    /**
+     * Get all resource FxString values that match a given key pattern.
+     *
+     * @param keyPattern        requested keypattern including wildcards ('%')
+     * @param defaultLanguage default language to set in the returned FxString, if not available the first found
+     *                        translation is the default language
+     * @return an ordered (in regards to keys) map containing all found keys and FxString values
+     * @throws FxApplicationException on errors
+     * @since 3.1.6
+     */
+    private Map<String, FxString> getResourceValuesLike(String keyPattern, long defaultLanguage) throws FxApplicationException {
+        Map<String, FxString> ret = new LinkedHashMap<String, FxString>(10, 5.0f);
+        if (StringUtils.isBlank(keyPattern) || "%".equals(keyPattern) || "%%".equals(keyPattern)) {
             return ret;
         }
 
-        keyPrefix = keyPrefix.trim();
+        keyPattern = keyPattern.trim();
         Connection con = null;
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
             ps = con.prepareStatement("SELECT RKEY,LANG,RVAL FROM " + TBL_RESOURCES + "  WHERE RKEY LIKE ? ORDER BY RKEY ASC");
 
-            ps.setString(1, keyPrefix + "%");
+            ps.setString(1, keyPattern);
             ResultSet rs = ps.executeQuery();
 
             String currKey = null;
