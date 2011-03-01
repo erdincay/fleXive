@@ -705,6 +705,7 @@
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ejb.jar">
 			<fileset refid="jar.ejb.classes"/>
 			<fileset refid="jar.ejb.resources"/>
+            <zipfileset prefix="META-INF" dir="${flexive.resources.framework.dir}" includes="beans.xml"/>
         </jar>
 		<emma enabled="${emma.enabled}">
 			<instr
