@@ -69,26 +69,27 @@ public class SessionTimeoutListener implements HttpSessionListener {
         }
         // set parameters needed for logout
         final FxContext ctx = FxContext.get();
-        ctx.setSessionID(session.getId());
-
-        // retrieve context path
-        final ServletContext servletContext = session.getServletContext();
-        if (servletContext != null) {
-            ctx.setContextPath(servletContext.getContextPath());
-        }
-
-        // get division ID from session
-        final String divisionIdKey = FxSessionWrapper.encodeAttributeName(FxContext.SESSION_DIVISIONID);
-        if (session.getAttribute(divisionIdKey) != null) {
-            ctx.setDivisionId((Integer) session.getAttribute(divisionIdKey));
-        }
-        
-        if (ctx.getDivisionId() == -1 || !CacheAdmin.isEnvironmentLoaded()) {
-            // probably during undeploy
-            return;
-        }
         
         try {
+            ctx.setSessionID(session.getId());
+
+            // retrieve context path
+            final ServletContext servletContext = session.getServletContext();
+            if (servletContext != null) {
+                ctx.setContextPath(servletContext.getContextPath());
+            }
+
+            // get division ID from session
+            final String divisionIdKey = FxSessionWrapper.encodeAttributeName(FxContext.SESSION_DIVISIONID);
+            if (session.getAttribute(divisionIdKey) != null) {
+                ctx.setDivisionId((Integer) session.getAttribute(divisionIdKey));
+            }
+
+            if (ctx.getDivisionId() == -1 || !CacheAdmin.isEnvironmentLoaded()) {
+                // probably during undeploy
+                return;
+            }
+            
             ctx.setTicket(FxContext.getTicketFromEJB(session));
             if (!ctx.getTicket().isGuest()) {
                 // perform logout only when the user is logged in
