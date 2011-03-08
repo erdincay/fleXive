@@ -318,15 +318,20 @@ public class UserTicketStore {
             }
         }
         if (LOG.isDebugEnabled()) LOG.debug("Done flagging dirty.");
-        // update current user's ticket directly from the DB
-        try {
-            final UserTicket ticket = getUserTicket(FxContext.getUserTicket().getLoginName());
-            // remember current language (FX-329)
-            ticket.setLanguage(FxContext.getUserTicket().getLanguage());
-            // update request ticket
-            FxContext.get().setTicket(ticket);
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
+        final UserTicket currentUserTicket = FxContext.getUserTicket();
+        if ((userId != null && userId == currentUserTicket.getUserId())
+                || (groupId != null && currentUserTicket.isInGroup(groupId))
+                || aclId != null) {
+            // update current user's ticket directly from the DB 
+            try {
+                final UserTicket ticket = getUserTicket(FxContext.getUserTicket().getLoginName());
+                // remember current language (FX-329)
+                ticket.setLanguage(FxContext.getUserTicket().getLanguage());
+                // update request ticket
+                FxContext.get().setTicket(ticket);
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
         }
         // need to flag environment as dirty to force guest ticket updates (FX-349)
         StructureLoader.updateEnvironmentTimestamp();

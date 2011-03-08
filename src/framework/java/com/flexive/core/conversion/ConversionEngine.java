@@ -67,33 +67,37 @@ public class ConversionEngine {
     public static final String KEY_ACLASSIGNMENT = "aclAssignment";
     public static final String SYS_LANG = "--";
 
+    private static XStream xStream;
+
     /**
      * Get a XStream instance with all registered converters and aliases
      *
      * @return XStream instance
      */
-    public static XStream getXStream() {
-        XStream xs = new XStream();
-        xs.aliasType(KEY_VALUE, FxValue.class);
-        xs.aliasType(KEY_CONTENT, FxContent.class);
-        xs.aliasType(KEY_PROPERTY, FxPropertyData.class);
-        xs.aliasType(KEY_GROUP, FxGroupData.class);
-        xs.aliasType(KEY_TYPE, FxType.class);
-        xs.aliasType(KEY_GROUP_AS, FxGroupAssignment.class);
-        xs.aliasType(KEY_PROPERTY_AS, FxPropertyAssignment.class);
-        xs.aliasType(KEY_ACL, ACL.class);
-        xs.aliasType(KEY_ACLASSIGNMENT, ACLAssignment.class);
-        xs.registerConverter(new FxValueConverter());
-        xs.registerConverter(new FxPropertyDataConverter());
-        xs.registerConverter(new FxGroupDataConverter());
-        xs.registerConverter(new FxContentConverter());
-        xs.registerConverter(new LifeCycleInfoConverter());
-        xs.registerConverter(new FxTypeConverter());
-        xs.registerConverter(new FxPropertyAssignmentConverter());
-        xs.registerConverter(new FxGroupAssignmentConverter());
-        xs.registerConverter(new ACLConverter());
-        xs.registerConverter(new ACLAssignmentConverter());
-        return xs;
+    public static synchronized XStream getXStream() {
+        if (xStream == null) {
+            xStream = new XStream();
+            xStream.aliasType(KEY_VALUE, FxValue.class);
+            xStream.aliasType(KEY_CONTENT, FxContent.class);
+            xStream.aliasType(KEY_PROPERTY, FxPropertyData.class);
+            xStream.aliasType(KEY_GROUP, FxGroupData.class);
+            xStream.aliasType(KEY_TYPE, FxType.class);
+            xStream.aliasType(KEY_GROUP_AS, FxGroupAssignment.class);
+            xStream.aliasType(KEY_PROPERTY_AS, FxPropertyAssignment.class);
+            xStream.aliasType(KEY_ACL, ACL.class);
+            xStream.aliasType(KEY_ACLASSIGNMENT, ACLAssignment.class);
+            xStream.registerConverter(new FxValueConverter());
+            xStream.registerConverter(new FxPropertyDataConverter());
+            xStream.registerConverter(new FxGroupDataConverter());
+            xStream.registerConverter(new FxContentConverter());
+            xStream.registerConverter(new LifeCycleInfoConverter());
+            xStream.registerConverter(new FxTypeConverter());
+            xStream.registerConverter(new FxPropertyAssignmentConverter());
+            xStream.registerConverter(new FxGroupAssignmentConverter());
+            xStream.registerConverter(new ACLConverter());
+            xStream.registerConverter(new ACLAssignmentConverter());
+        }
+        return xStream;
     }
 
     /**

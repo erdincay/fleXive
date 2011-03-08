@@ -554,10 +554,10 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             // Update active UserTickets
             UserTicketStore.flagDirtyHavingGroupId(groupId);
 
-            StringBuilder sbHistory = new StringBuilder(1000);
-            ACLAssignment as = loadAssignments(aclId, groupId).get(0);
-            sbHistory.append(ConversionEngine.getXStream().toXML(as));
-            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.acl.assign", CacheAdmin.getEnvironment().getACL(aclId).getName());
+            final ACL acl = CacheAdmin.getEnvironment().getACL(aclId);
+            final ACLAssignment as = new ACLAssignment(aclId, groupId, mayRead, mayEdit, mayRelate, mayRemove,
+                    mayExport, mayCreate, acl.getCategory(), acl.getLifeCycleInfo());
+            EJBLookup.getHistoryTrackerEngine().trackData(ConversionEngine.getXStream().toXML(as), "history.acl.assign", acl.getName());
         } catch (Exception exc) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, exc, "ex.aclAssignment.createFailed");
