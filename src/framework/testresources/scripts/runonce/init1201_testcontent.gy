@@ -304,6 +304,9 @@ void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
 //    co.setValue("$prefix/inlineReferenceSearchProp", new FxReference(false, buildReferenceSearchProp(counter)))
     co.setValue("$prefix/selectOneSearchProp", new FxSelectOne(false, buildSelectOneSearchProp(counter)))
     co.setValue("$prefix/selectManySearchProp", new FxSelectMany(false, buildSelectManySearchProp(counter)))
+    co.setValue("$prefix/multiSearchProp[1]", "MultiString1 $counter".toString());
+    co.setValue("$prefix/multiSearchProp[2]", "MultiString2 $counter".toString());
+    co.setValue("$prefix/multiSearchProp[3]", "MultiString3 $counter".toString());
 }
 
 long start = System.currentTimeMillis()

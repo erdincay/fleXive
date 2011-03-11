@@ -156,6 +156,7 @@ public class FxSQLSearchParams implements Serializable {
     private List<FxLanguage> resultLanguages;
     private CacheMode cacheMode = CacheMode.OFF;
     private List<Long> hintTypes = null;
+    private boolean hintIgnoreXPath = false;
 
     /**
      * Constructor.
@@ -320,6 +321,27 @@ public class FxSQLSearchParams implements Serializable {
      * @since   3.1.6
      */
     public void setHintTypes(List<Long> hintTypes) {
-        this.hintTypes = hintTypes;
+        this.hintTypes = hintTypes != null ? Lists.newArrayList(hintTypes) : null;
     }
+
+    /**
+     * @return  whether the XPath for result values is needed by the caller
+     * @since   3.1.6
+     */
+    public boolean isHintIgnoreXPath() {
+        return hintIgnoreXPath;
+    }
+
+    /**
+     * Indicate that the caller does not need the XPaths of the values returned by the search result.
+     * XPaths may be selected if they are necessary for checking property permissions, regardless.
+     *
+     * @param hintIgnoreXPath   if the result values can ignore the XPath property
+     * @since 3.1.6
+     */
+    public void setHintIgnoreXPath(boolean hintIgnoreXPath) {
+        this.hintIgnoreXPath = hintIgnoreXPath;
+    }
+
+
 }

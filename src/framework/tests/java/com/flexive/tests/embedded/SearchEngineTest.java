@@ -1492,26 +1492,40 @@ public class SearchEngineTest {
     }
 
     @Test
-    public void searchPropertyPermissionDeleteTest() throws FxApplicationException {
-        // create a type with a property that cannot be deleted by other users
+    public void searchPropertyPermissionTest() throws FxApplicationException {
         FxContext.get().runAsSystem();
         final long typeId;
-        final long aclId;
+        final long noDeleteAclId;
+        final long noReadAclId;
+        final String typeName = "prop_delete_test";
         try {
-            typeId = getTypeEngine().save(FxTypeEdit.createNew("prop_delete_test")
+            typeId = getTypeEngine().save(FxTypeEdit.createNew(typeName)
                     .setUseInstancePermissions(false)
                     .setUsePropertyPermissions(true)
                     .setUseStepPermissions(false)
                     .setUseTypePermissions(false));
-            aclId = getAclEngine().create("prop_no_delete", new FxString(""),
+            noDeleteAclId = getAclEngine().create("prop_no_delete", new FxString(""),
                     TestUsers.getTestMandator(), "#000000", "property description", ACLCategory.STRUCTURE);
-            getAclEngine().assign(aclId, TestUsers.REGULAR.getUserGroupId(),
+            noReadAclId = getAclEngine().create("prop_no_read", new FxString(""),
+                    TestUsers.getTestMandator(), "#000000", "property description", ACLCategory.STRUCTURE);
+            getAclEngine().assign(noDeleteAclId, TestUsers.REGULAR.getUserGroupId(),
                     ACLPermission.CREATE, ACLPermission.EDIT, ACLPermission.READ);
+            getAclEngine().assign(noReadAclId, TestUsers.REGULAR.getUserGroupId(),
+                    ACLPermission.CREATE, ACLPermission.EDIT);
             getAssignmentEngine().createProperty(typeId,
                     FxPropertyEdit.createNew(
                             "prop_no_delete", new FxString(""), new FxString(""),
-                            FxMultiplicity.MULT_0_1,
-                            getEnvironment().getACL(aclId),
+                            FxMultiplicity.MULT_0_N,
+                            getEnvironment().getACL(noDeleteAclId),
+                            FxDataType.String1024
+                    ),
+                    "/"
+            );
+            getAssignmentEngine().createProperty(typeId,
+                    FxPropertyEdit.createNew(
+                            "prop_no_read", new FxString(""), new FxString(""),
+                            FxMultiplicity.MULT_0_N,
+                            getEnvironment().getACL(noReadAclId),
                             FxDataType.String1024
                     ),
                     "/"
@@ -1536,22 +1550,12 @@ public class SearchEngineTest {
             getContentEngine().remove(pk);
 
             content = getContentEngine().initialize(typeId);
-            content.setValue("/prop_no_delete", new FxString(false, "test"));
+            content.setValue("/prop_no_delete", "test");
+            content.setValue("/prop_no_read", "cannot read me");
             pk = getContentEngine().save(content);
 
-            // select this content instance and see if delete perm is set
-
-            // For performance reasons, property delete permissions are not used for the
-            // instance permission set. Thus this assert is expected to fail.
-
-            /*assert !*/
-            new SqlQueryBuilder().select("@permissions")
-                    .condition("id", PropertyValueComparator.EQ, pk.getId())
-                    .getResult()
-                    .<PermissionSet>collectColumn(1)
-                    .get(0)
-                    .isMayDelete();/*
-                    : "Delete permission should not be set because of property permissions";*/
+            checkPropertyPermissions(typeName, pk, false);
+            checkPropertyPermissions(typeName, pk, true);
 
             // removal should work now
             try {
@@ -1566,12 +1570,36 @@ public class SearchEngineTest {
                     getContentEngine().remove(pk);
                 }
                 getTypeEngine().remove(typeId);
-                getAclEngine().remove(aclId);
+                getAclEngine().remove(noDeleteAclId);
+                getAclEngine().remove(noReadAclId);
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
         }
     }
+
+    private void checkPropertyPermissions(final String typeName, FxPK pk, boolean ignoreXPathHint) throws FxApplicationException {
+        // select this content instance and see if delete perm is set
+        final SqlQueryBuilder sqb = new SqlQueryBuilder()
+                .select("@permissions", "#" + typeName + "/prop_no_delete", "#" + typeName + "/prop_no_read")
+                .condition("id", PropertyValueComparator.EQ, pk.getId());
+
+        sqb.getParams().setHintIgnoreXPath(ignoreXPathHint);
+
+        final FxResultSet result = sqb.getResult();
+        assertEquals(result.getRowCount(), 1);
+        // check if 'unreadable' property is present
+        assertTrue(result.getResultRow(0).getValue(3) instanceof FxNoAccess, "Unreadable value should not be returned: " + result.getResultRow(0).getValue(3)
+                + ", ignoreXPaths was: " + ignoreXPathHint);
+
+        // For performance reasons, property delete permissions are not used for the
+        // instance permission set. Thus this assert is expected to fail.
+        /*assert !result.<PermissionSet>collectColumn(1)
+                .get(0)
+                .isMayDelete();*//*
+                : "Delete permission should not be set because of property permissions";*/
+    }
+
 
     @Test
     public void searchLanguageFallbackTest_FX260() throws FxApplicationException {
@@ -1838,6 +1866,27 @@ public class SearchEngineTest {
             login(TestUsers.REGULAR);
         }
     }
+
+    @Test
+    public void selectWithoutXPath() throws FxApplicationException {
+        // tests the 'ignore XPath' hint of FxSQLSearchParams
+        final SqlQueryBuilder sqb = new SqlQueryBuilder()
+                .select("#" + TEST_TYPE + "/multiSearchProp", "#" + TEST_TYPE + "/" + "stringSearchProp")
+                .type(TEST_TYPE);
+
+        for (boolean ignoreXPath: new boolean[] { false, true }) {
+            sqb.getParams().setHintIgnoreXPath(ignoreXPath);
+            final FxResultSet result = sqb.getResult();
+            assertTrue(result.getRowCount() > 0);
+            for (FxResultRow row : result.getResultRows()) {
+                for (int i = 1; i <= 2; i++) {
+                    assertEquals(StringUtils.isBlank(row.getFxValue(i).getXPath()), ignoreXPath,
+                            "Expected XPath to be " + (ignoreXPath ? "not " : "") + "set: " + row.getFxValue(i).getXPath());
+                }
+            }
+        }
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());

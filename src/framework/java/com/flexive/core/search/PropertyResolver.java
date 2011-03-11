@@ -110,14 +110,14 @@ public class PropertyResolver {
         initColumnInformations(con);
     }
 
-    public void addResultSetColumn(PropertyEntry e) {
+    public void addResultSetColumn(SqlSearch search, PropertyEntry e) {
         // Store actuall resultset position
         e.setPositionInResultSet(resultSetPos);
         this.resultSetColumns.add(e);
         // compute next position to use
         resultSetPos += e.getReadColumns().length;
-        if (e.getTableType() == Table.T_CONTENT_DATA) {
-            // also select XPATH 
+        if (e.getTableType() == Table.T_CONTENT_DATA && (e.isPropertyPermsEnabled() || !search.getParams().isHintIgnoreXPath())) {
+            // also select XPATH, unless 'ignore XPath' hint is set and property permission checks are not required
             resultSetPos += 1;
         }
         // compute total result set columns

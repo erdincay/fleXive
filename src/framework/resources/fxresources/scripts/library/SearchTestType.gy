@@ -89,6 +89,7 @@ new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, u
 //    inlineReferenceSearchProp(FxDataType.InlineReference, referencedType: CacheAdmin.environment.getType("FOLDER"))
     selectOneSearchProp(FxDataType.SelectOne, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
     selectManySearchProp(FxDataType.SelectMany, multiplicity: FxMultiplicity.MULT_0_1, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
+    multiSearchProp(multiplicity: FxMultiplicity.MULT_0_N)
 
     // create a new group
     GroupTop(description: new FxString("Group at top level")) {
@@ -110,6 +111,7 @@ new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, u
 //        inlineReferenceSearchProp(assignment: "SearchTest/inlineReferenceSearchProp")
         selectOneSearchProp(assignment: "SearchTest/selectOneSearchProp")
         selectManySearchProp(assignment: "SearchTest/selectManySearchProp")
+        multiSearchProp(multiplicity: FxMultiplicity.MULT_0_N)
 
         GroupNested(description: new FxString("Nested group")) {
             stringSearchProp(assignment: "SearchTest/stringSearchProp")
@@ -130,6 +132,7 @@ new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, u
 //            inlineReferenceSearchProp(assignment: "SearchTest/inlineReferenceSearchProp")
             selectOneSearchProp(assignment: "SearchTest/selectOneSearchProp")
             selectManySearchProp(assignment: "SearchTest/selectManySearchProp")
+            multiSearchProp(multiplicity: FxMultiplicity.MULT_0_N)
         }
     }
 }

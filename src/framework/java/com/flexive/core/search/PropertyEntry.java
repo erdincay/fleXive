@@ -397,6 +397,7 @@ public class PropertyEntry {
     protected int positionInResultSet = -1;
     protected FxDataType overrideDataType;
     private FxEnvironment environment;
+    private boolean processXPath = true;
 
     /**
      * Create a new instance based on the given (search) property.
@@ -685,18 +686,21 @@ public class PropertyEntry {
                 result.setEmpty(languageId);
             }
 
-
-            if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
-                // Get the XPATH if we are reading from the content data table
-                result.setXPath(rebuildXPath(rs.getString(positionInResultSet + getReadColumns().length)));
-            } else if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
-                // set XPath for system-internal properties
-                result.setXPath("ROOT/" + property.getName());
-            } else if (getTableType() == PropertyResolver.Table.T_CONTENT_DATA_FLAT) {
-                // fill in XPath from assignment, create XPath with full type information
-                if (typeId != -1) {
-                    result.setXPath(getEnvironment().getType(typeId).getName() + "/" + assignment.getAlias());
+            if (isProcessXPath()) {
+                if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
+                    // Get the XPATH if we are reading from the content data table
+                    result.setXPath(rebuildXPath(rs.getString(positionInResultSet + getReadColumns().length)));
+                } else if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
+                    // set XPath for system-internal properties
+                    result.setXPath("ROOT/" + property.getName());
+                } else if (getTableType() == PropertyResolver.Table.T_CONTENT_DATA_FLAT) {
+                    // fill in XPath from assignment, create XPath with full type information
+                    if (typeId != -1) {
+                        result.setXPath(getEnvironment().getType(typeId).getName() + "/" + assignment.getAlias());
+                    }
                 }
+            } else {
+                result.setXPath(null);
             }
             return result;
         } catch (SQLException e) {
@@ -1014,5 +1018,38 @@ public class PropertyEntry {
         }
     }
 
+    public boolean isProcessXPath() {
+        return processXPath;
+    }
 
+    public void setProcessXPath(boolean processXPath) {
+        this.processXPath = processXPath;
+    }
+
+    public boolean isPropertyPermsEnabled() {
+        final List<FxPropertyAssignment> assignments = getAssignmentWithDerived();
+        if (assignments.isEmpty()) {
+            return true;    // play safe
+        }
+        // has the assignment (or a derived assignment) an ACL attached?
+        boolean securedAssignment = false;
+        for (FxPropertyAssignment ass : assignments) {
+            if (ass.getACL() != null && !ass.isSystemInternal()) {
+                securedAssignment = true;
+                break;
+            }
+        }
+        if (!securedAssignment) {
+            return false;   // no ACL, thus no property permissions
+        }
+        // check types + all subtypes whether property permissions are enabled
+        for (FxPropertyAssignment ass : assignments) {
+            for (FxType type : ass.getAssignedType().getDerivedTypes(true, true)) {
+                if (type.isUsePropertyPermissions()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

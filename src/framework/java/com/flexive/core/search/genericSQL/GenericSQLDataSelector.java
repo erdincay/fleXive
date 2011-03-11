@@ -46,6 +46,8 @@ import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxFlatStorageMapping;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
@@ -160,7 +162,7 @@ public class GenericSQLDataSelector extends DataSelector {
             if (value instanceof Property) {
                 final PropertyResolver pr = search.getPropertyResolver();
                 entry = pr.get(search.getFxStatement(), (Property) value);
-                pr.addResultSetColumn(entry);
+                pr.addResultSetColumn(search, entry);
             }
             values[pos] = selectFromTbl(entry, value, pos);
             pos++;
@@ -294,6 +296,10 @@ public class GenericSQLDataSelector extends DataSelector {
     protected SubSelectValues selectFromTbl(PropertyEntry entry, Value prop, int resultPos) throws FxSqlSearchException {
         final Pair<Integer, SortDirection> sortInfo = getSortInfo(resultPos);
         final SubSelectValues result = new SubSelectValues(resultPos, sortInfo.getFirst(), sortInfo.getSecond());
+
+        // disable XPath processing if corresponding hint is set
+        entry.setProcessXPath(!search.getParams().isHintIgnoreXPath());
+
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
@@ -383,11 +389,14 @@ public class GenericSQLDataSelector extends DataSelector {
                         result.addItem(val, resultPos, false);
                     }
 //                    String xpath = "concat(filter.xpathPref," + getContentDataSubselect("XPATHMULT", entry, true) + ")";
-                    String xpath = search.getStorage().concat("filter.xpathPref", "\'-\'",
-                            entry.isAssignment() ? '\'' + entry.getAssignment().getXPath() + '\'' : getContentDataSubselect("ASSIGN", entry, true),
-                            "\'-\'",
-                            getContentDataSubselect("XMULT", entry, true));
-                    result.addItem(xpath, resultPos, true);
+                    if (!search.getParams().isHintIgnoreXPath() || entry.isPropertyPermsEnabled()) {
+                        entry.setProcessXPath(true);    // re-enable flag if ignoreXPath hint was set
+                        String xpath = search.getStorage().concat("filter.xpathPref", "\'-\'",
+                                entry.isAssignment() ? '\'' + entry.getAssignment().getXPath() + '\'' : getContentDataSubselect("ASSIGN", entry, true),
+                                "\'-\'",
+                                getContentDataSubselect("XMULT", entry, true));
+                        result.addItem(xpath, resultPos, true);
+                    }
                     break;
                 case T_CONTENT_DATA_FLAT:
                     final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();

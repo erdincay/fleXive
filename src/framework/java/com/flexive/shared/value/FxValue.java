@@ -99,8 +99,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (multiLanguage) {
             if (translations == null) {
                 //valid to pass null, create an empty one
-                this.translations = new HashMap<Long, T>(5);
-                this.emptyTranslations = new HashMap<Long, Boolean>(5);
+                this.translations = new HashMap<Long, T>(4);
+                this.emptyTranslations = new HashMap<Long, Boolean>(4);
             } else {
                 this.translations = new HashMap<Long, T>(translations);
                 this.emptyTranslations = new HashMap<Long, Boolean>(translations.size());
@@ -144,8 +144,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         this.maxInputLength = -1;
         this.readOnly = false;
         if (this.multiLanguage) {
-            this.translations = new HashMap<Long, T>(5);
-            this.emptyTranslations = new HashMap<Long, Boolean>(5);
+            this.translations = new HashMap<Long, T>(4);
+            this.emptyTranslations = new HashMap<Long, Boolean>(4);
             if (this.defaultLanguage < 0) {
                 this.defaultLanguage = FxLanguage.SYSTEM_ID;
                 this.selectedLanguage = FxLanguage.SYSTEM_ID;
@@ -781,8 +781,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         }
         if (translations == null) {
             //create an empty one, not yet initialized
-            this.translations = new HashMap<Long, T>(5);
-            this.emptyTranslations = new HashMap<Long, Boolean>(5);
+            this.translations = new HashMap<Long, T>(4);
+            this.emptyTranslations = new HashMap<Long, Boolean>(4);
         }
         if (language == FxLanguage.SYSTEM_ID)
             throw new FxInvalidParameterException("language", "ex.content.value.invalid.multilanguage.sys").asRuntimeException();
