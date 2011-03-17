@@ -49,7 +49,11 @@ public class OpenUrl {
             System.err.println("\nUsage: java -jar openUrl.jar URL\n");
             System.exit(-1);
         }
-        Server.openBrowser(args[0]);
+        try {
+            Server.openBrowser(args[0]);
+        } catch (Exception e) {
+            System.err.println("Could not open browser: " + e.getMessage());
+        }
     }
-    
+
 }
