@@ -45,6 +45,7 @@ import org.apache.commons.lang.ArrayUtils;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -353,7 +354,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     @SuppressWarnings({"unchecked"})
     public TDerived setXPath(String XPath) {
         if (!this.readOnly) {
-            this.XPath = XPath;
+            this.XPath = XPath != null ? XPath.toUpperCase(Locale.ENGLISH) : null;
         }
         return (TDerived) this;
     }

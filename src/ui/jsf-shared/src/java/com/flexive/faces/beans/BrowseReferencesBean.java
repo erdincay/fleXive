@@ -51,6 +51,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Provides a simple reference browser, currently without pagination.
@@ -88,7 +89,7 @@ public class BrowseReferencesBean implements ActionBean, Serializable {
         if (StringUtils.isBlank(xPath)) {
             return null;
         }
-        if (!XPathElement.isValidXPath(xPath)) {
+        if (!XPathElement.isValidXPath(xPath.toUpperCase(Locale.ENGLISH))) {
             if (xPath.endsWith("/")) {
                 // only type part of XPath present
                 return CacheAdmin.getEnvironment().getType(xPath.substring(0, xPath.length() - 1));

@@ -41,6 +41,7 @@ import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * FxGroupAssignment for editing
@@ -191,9 +192,9 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      * @throws FxInvalidParameterException on errors
      */
     public FxGroupAssignmentEdit setXPath(String XPath) throws FxInvalidParameterException {
-        if (StringUtils.isEmpty(XPath) || !XPathElement.isValidXPath(XPath))
+        if (StringUtils.isEmpty(XPath) || !XPathElement.isValidXPath(XPath.toUpperCase(Locale.ENGLISH)))
             throw new FxInvalidParameterException("XPATH", "ex.structure.assignment.noXPath");
-        this.XPath = XPath.trim().toUpperCase();
+        this.XPath = XPath.trim().toUpperCase(Locale.ENGLISH);
         //synchronize back the alias unless we're the virtual root group
         if (!"/".equals(this.XPath))
             this.alias = XPathElement.lastElement(this.XPath).getAlias();

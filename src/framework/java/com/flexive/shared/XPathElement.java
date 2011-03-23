@@ -41,11 +41,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A single XPath element (alias and multiplicity)
+ * A single XPath element (alias and multiplicity).
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -145,6 +146,8 @@ public class XPathElement implements Serializable {
     /**
      * Split an XPath into its elements
      *
+     * <p>For performance reasons, this method expects that the xPath is already in upper case form.</p>
+     *
      * @param XPath the XPath
      * @return XPathElement array
      */
@@ -166,7 +169,9 @@ public class XPathElement implements Serializable {
     }
 
     /**
-     * Get the last (rightmost) element of an XPath
+     * Get the last (rightmost) element of an XPath.
+     *
+     * <p>For performance reasons, this method expects that the xPath is already in upper case form.</p>
      *
      * @param XPath the XPath
      * @return last (rightmost) element of an XPath
@@ -198,8 +203,10 @@ public class XPathElement implements Serializable {
     }
 
     /**
-     * Check if this XPath is valid
+     * Check if this XPath is valid.
      *
+     * <p>For performance reasons, this method expects that the xPath is already in upper case form.</p>
+     * 
      * @param XPath the XPath
      * @return valid or not
      */
