@@ -125,6 +125,16 @@ public interface AccountEngine {
     Account loadForContactData(FxPK contactDataPK) throws FxApplicationException;
 
     /**
+     * Load the password hash for the given account ID. May only be called by global supervisors.
+     *
+     * @param accountId the account ID
+     * @return          the hashed password
+     * @throws FxApplicationException   on errors
+     * @since 3.1.6
+     */
+    String getPasswordHash(long accountId) throws FxApplicationException;
+
+    /**
      * Gets the user ticket for the current request.
      *
      * @return the user ticket for the current request.

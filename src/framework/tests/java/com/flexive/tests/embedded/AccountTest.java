@@ -35,6 +35,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.AccountEngine;
@@ -444,6 +445,29 @@ public class AccountTest {
                 logout();
                 FxContext.stopRunningAsSystem();
             }
+        } finally {
+            login(TestUsers.SUPERVISOR);
+        }
+    }
+
+    @Test
+    public void loadPasswordHashTest() throws FxLogoutFailedException, FxLoginFailedException, FxAccountInUseException, FxApplicationException {
+        logout();
+        try {
+            Assert.assertFalse(FxContext.getUserTicket().isGlobalSupervisor());
+            final TestUser user = TestUsers.REGULAR;
+            login(user);
+            try {
+                accountEngine.getPasswordHash(user.getUserId());
+                Assert.fail("Normal users should not be able to call getPasswordHash");
+            } catch (FxNoAccessException e) {
+                // pass
+            }
+
+            login(TestUsers.SUPERVISOR);
+            final String dbHash = accountEngine.getPasswordHash(user.getUserId());
+            assertEquals(dbHash, FxSharedUtils.hashPassword(COUNT, user.getUserName(), user.getPassword()),
+                    "DB hash does not match computed hash");
         } finally {
             login(TestUsers.SUPERVISOR);
         }

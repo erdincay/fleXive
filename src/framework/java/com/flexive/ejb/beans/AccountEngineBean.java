@@ -239,6 +239,35 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public String getPasswordHash(long accountId) throws FxApplicationException {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
+            throw new FxNoAccessException("ex.structure.noAccess.needSupervisor");
+        }
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = Database.getDbConnection();
+
+            stmt = con.prepareStatement("SELECT password FROM " + TBL_ACCOUNTS + " WHERE id=?");
+            stmt.setLong(1, accountId);
+
+            final ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString(1);
+            } else {
+                throw new FxNotFoundException("ex.account.notFound", accountId);
+            }
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e);
+        } finally {
+            Database.closeObjects(AccountEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public UserTicket getUserTicket() {
         return UserTicketStore.getTicket();
     }
