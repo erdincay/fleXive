@@ -31,7 +31,10 @@
  ***************************************************************/
 package com.flexive.shared;
 
+import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -44,6 +47,8 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import groovy.lang.GroovySystem;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -643,17 +648,60 @@ public final class FxSharedUtils {
     }
 
     /**
-     * Compute the hash of the given flexive password.
+     * Compute the hash of the given flexive password, using the user ID.
      *
      * @param accountId the user account ID
      * @param password  the cleartext password
      * @return a hashed password
      */
-    public synchronized static String hashPassword(long accountId, String password) {
+    public static String hashPassword(long accountId, String password) {
         try {
             return sha1Hash(getBytes("FX-SALT" + accountId + password));
         } catch (NoSuchAlgorithmException e) {
             throw new FxCreateException("Failed to load the SHA1 algorithm.").asRuntimeException();
+        }
+    }
+
+    /**
+     * Compute the hash of the given flexive password using the login name. This is the default algorithm
+     * for installations since flexive 3.1.6.
+     *
+     * @param loginName the user login name
+     * @param password  the cleartext password
+     * @return          the hashed password
+     * @since 3.1.6
+     */
+    public static String hashPassword(String loginName, String password) {
+        try {
+            return sha1Hash(getBytes("FX-SALT-" + loginName + "-" + password));
+        } catch (NoSuchAlgorithmException e) {
+            throw new FxCreateException("Failed to load the SHA1 algorithm.").asRuntimeException();
+        }
+    }
+
+    /**
+     * Compute the hash of the given password according to the setting in
+     * {@link com.flexive.shared.configuration.SystemParameters#PASSWORD_SALT_METHOD} (either with the user ID, or the user name).
+     *
+     * @param accountId the user account ID
+     * @param loginName the login name
+     * @param password  the cleartext password
+     * @return          the hashed password
+     * @since 3.1.6
+     */
+    public static String hashPassword(long accountId, String loginName, String password) {
+        final String method;
+        try {
+            method = EJBLookup.getConfigurationEngine().get(SystemParameters.PASSWORD_SALT_METHOD);
+        } catch (FxApplicationException ex) {
+            throw ex.asRuntimeException();
+        }
+        if ("userid".equals(method)) {
+            return hashPassword(accountId, password);
+        } else if ("loginname".equals(method)) {
+            return hashPassword(loginName, password);
+        } else {
+            throw new IllegalArgumentException("Unknown hash method: " + method);
         }
     }
 

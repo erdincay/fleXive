@@ -451,7 +451,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Get a new Id
             long newId = seq.getId(FxSystemSequencer.ACCOUNT);
 
-            password = password == null ? "" : FxFormatUtils.encodePassword(newId, password);
+            password = password == null ? "" : FxFormatUtils.encodePassword(newId, userName, password);
             curSql = "INSERT INTO " + TBL_ACCOUNTS + "(" +
                     //1 2        3        4          5        6     7          8    9
                     "ID,MANDATOR,USERNAME,LOGIN_NAME,PASSWORD,EMAIL,CONTACT_ID,LANG,VALID_FROM," +
@@ -1214,7 +1214,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (loginName != null) loginName = checkLoginName(loginName);
             if (email != null) email = FxFormatUtils.checkEmail(email);
             if (password != null) {
-                password = FxFormatUtils.encodePassword(accountId, password.trim());
+                password = FxFormatUtils.encodePassword(accountId, loginName, password.trim());
             }
             if (lang != null && !language.isValid(lang))
                 throw new FxInvalidParameterException("LANGUAGE", "ex.account.languageInvalid", lang);
@@ -1338,7 +1338,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         if (loginName != null) loginName = checkLoginName(loginName);
         if (email != null) email = FxFormatUtils.checkEmail(email);
         if (password != null) {
-            password = FxFormatUtils.encodePassword(accountId, password.trim());
+            password = FxFormatUtils.encodePassword(accountId, account.getLoginName(), password.trim());
         }
 
         if (lang != null && !language.isValid(lang))

@@ -69,7 +69,7 @@ INSERT INTO FXS_ACCOUNTS VALUES
 UNIX_TIMESTAMP()*1000,UNIX_TIMESTAMP('2020-01-01 00:00:00')*1000,'', 1,UNIX_TIMESTAMP()*1000,1,UNIX_TIMESTAMP()*1000,TRUE,TRUE,1,'Guest',TRUE,null,null);
 
 INSERT INTO FXS_ACCOUNTS VALUES
-(2,0,'SUPERVISOR','86e826da9d415a777c0b6bd371e40a7a5b8fa1f9','supervisor@flexive.com',null,
+(2,0,'SUPERVISOR','64d4e9d19fd918dbae8ebcaa7d2ccdc6e4817fdb','supervisor@flexive.com',null,
 UNIX_TIMESTAMP()*1000,UNIX_TIMESTAMP('2020-01-01 00:00:00')*1000,'', 1,UNIX_TIMESTAMP()*1000,1,UNIX_TIMESTAMP()*1000,TRUE,TRUE,1,'SUPERVISOR',FALSE,null,null);
 
 INSERT INTO FXS_ACCOUNTS VALUES
@@ -627,3 +627,8 @@ INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, HINT ) VALUES (
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, HINT ) VALUES (
    19/*ID*/, 2, 'Modifiziert am', 'Datum und Uhrzeit der letzten Modifikation');
 
+
+
+-- system configuration (which must be performed before the runonce scripts)
+
+INSERT INTO FXS_DIVISIONCONFIGURATION(cpath, ckey, cvalue, classname) VALUES ('/division/config', 'passwordSaltMethod', 'loginname', 'java.lang.String');

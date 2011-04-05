@@ -143,4 +143,15 @@ public class SystemParameters {
      * If the flat storage is enabled, automatically flatten matching assignments
      */
     public static final Parameter<Boolean> FLATSTORAGE_AUTO = ParameterFactory.newInstance(Boolean.class, DIVISION_CONFIG, "flatStorageAuto", Boolean.TRUE);
+    
+    /**
+     * Set the password hash method for the division. Possible values are:
+     *
+     * <ul>
+     * <li>{@code userid}: the default hash includes the user ID for salting (the only method until version 3.1.5).</li>
+     * <li>{@code loginname} (default since 3.1.6): use the login name for the password salting, this allows to migrate accounts between
+     * different databases (where user IDs might differ, thus invalidating all passwords hashed with the {@code userid} method).</li>
+     * </ul>
+     */
+    public static final Parameter<String> PASSWORD_SALT_METHOD = ParameterFactory.newInstance(String.class, DIVISION_CONFIG, "passwordSaltMethod", "userid");
 }

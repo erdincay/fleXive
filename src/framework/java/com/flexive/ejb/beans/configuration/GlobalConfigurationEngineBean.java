@@ -680,7 +680,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      * @return the hashed password for the given input.
      */
     private String getHashedPassword(String userPassword) {
-        return FxSharedUtils.hashPassword(31289, userPassword);
+        return FxSharedUtils.hashPassword(31289, "global-system-user", userPassword);
     }
 
 

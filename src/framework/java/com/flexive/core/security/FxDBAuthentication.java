@@ -67,7 +67,7 @@ public final class FxDBAuthentication {
     /**
      * Login a user using flexive's database
      *
-     * @param username name of the user
+     * @param loginname name of the user
      * @param password plaintext password
      * @param callback callback providing datasource, ejb context and "take over"
      * @return Authenticated UserTicket
@@ -75,13 +75,13 @@ public final class FxDBAuthentication {
      * @throws FxLoginFailedException    on errors
      * @throws FxAccountExpiredException on errors
      */
-    public static UserTicket login(String username, String password, FxCallback callback) throws FxAccountInUseException, FxLoginFailedException, FxAccountExpiredException {
+    public static UserTicket login(String loginname, String password, FxCallback callback) throws FxAccountInUseException, FxLoginFailedException, FxAccountExpiredException {
         final long SYS_UP = CacheAdmin.getInstance().getSystemStartTime();
         FxContext inf = FxContext.get();
 
         // Avoid null pointer exceptions
         if (password == null) password = "";
-        if (username == null) username = "";
+        if (loginname == null) loginname = "";
 
         String curSql;
         PreparedStatement ps = null;
@@ -97,7 +97,7 @@ public final class FxDBAuthentication {
                     " WHERE APPLICATION=? ORDER BY LAST_LOGIN DESC) d ON a.ID=d.ID WHERE UPPER(a.LOGIN_NAME)=UPPER(?)";
             ps = con.prepareStatement(curSql);
             ps.setString(1, inf.getApplicationId());
-            ps.setString(2, username);
+            ps.setString(2, loginname);
             final ResultSet rs = ps.executeQuery();
 
             // Anything found?
@@ -106,7 +106,7 @@ public final class FxDBAuthentication {
 
             // check if the hashed password matches the hash stored in the database
             final long id = rs.getLong(7);
-            final boolean passwordMatches = FxSharedUtils.hashPassword(id, password).equals(rs.getString(14));
+            final boolean passwordMatches = FxSharedUtils.hashPassword(id, loginname, password).equals(rs.getString(14));
             if (!passwordMatches) {
                 increaseFailedLoginAttempts(con, id);
                 throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
@@ -128,7 +128,7 @@ public final class FxDBAuthentication {
             // Account active?
             if (!active || !validated ||
                     (CacheAdmin.isEnvironmentLoaded() && !CacheAdmin.getEnvironment().getMandator(mandator).isActive())) {
-                if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + username +
+                if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + loginname +
                         "] failed, account is inactive. Active=" + active + ", Validated=" + validated +
                         ", Mandator active: " + CacheAdmin.getEnvironment().getMandator(mandator).isActive());
                 increaseFailedLoginAttempts(con, id);
@@ -143,17 +143,17 @@ public final class FxDBAuthentication {
             if (validFrom.getTime() > dbNow.getTime() || endDate.getTimeInMillis() < dbNow.getTime()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
                 if (LOG.isDebugEnabled())
-                    LOG.debug("Login for user [" + username +
+                    LOG.debug("Login for user [" + loginname +
                             "] failed, from/to date not valid. from='" + sdf.format(validFrom) + "' to='" + validTo + "'");
                 increaseFailedLoginAttempts(con, id);
-                throw new FxAccountExpiredException(username, dbNow);
+                throw new FxAccountExpiredException(loginname, dbNow);
             }
 
             // Check 'Account in use and takeOver false'
             if (!allowMultiLogin && !callback.getTakeOverSession() && loggedIn && lastLogin != null) {
                 // Only if the last login time was AFTER the system started
                 if (lastLogin.getTime() >= SYS_UP) {
-                    FxAccountInUseException aiu = new FxAccountInUseException(username, lastLoginFrom, lastLogin);
+                    FxAccountInUseException aiu = new FxAccountInUseException(loginname, lastLoginFrom, lastLogin);
                     if (LOG.isInfoEnabled()) LOG.info(aiu);
                     // don't log this as an invalid login attempt - this happens routinely when a session times
                     // out and the cached session data has not been evicted by the maintenance task yet
@@ -189,7 +189,7 @@ public final class FxDBAuthentication {
 
             // Load the user and construct a user ticket
             try {
-                final UserTicketImpl ticket = (UserTicketImpl) UserTicketStore.getUserTicket(username);
+                final UserTicketImpl ticket = (UserTicketImpl) UserTicketStore.getUserTicket(loginname);
                 ticket.setFailedLoginAttempts(failedAttempts);
                 ticket.setAuthenticationSource(AuthenticationSource.Database);
                 return ticket;
@@ -326,7 +326,7 @@ public final class FxDBAuthentication {
             if(id != currentTicket.getUserId())
                 throw new FxLoginFailedException("User not authorized to perform login check", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
 
-            return FxSharedUtils.hashPassword(id, password).equals(rs.getString(14));
+            return FxSharedUtils.hashPassword(id, username, password).equals(rs.getString(14));
 
         } catch (SQLException exc) {
             throw new FxDbException("Database error: " + exc.getMessage(), FxLoginFailedException.TYPE_SQL_ERROR);
