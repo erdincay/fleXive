@@ -31,19 +31,26 @@
  ***************************************************************/
 package com.flexive.tests.embedded.roles;
 
+import com.flexive.shared.EJBLookup;
 import static com.flexive.shared.EJBLookup.getAccountEngine;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.AccountEdit;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.Role;
 import static com.flexive.shared.security.Role.AccountManagement;
+import com.flexive.tests.embedded.TestUser;
+import com.flexive.tests.embedded.TestUsers;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.testng.Assert;
 
 /**
  * Account management role tests.

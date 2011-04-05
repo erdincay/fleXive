@@ -83,6 +83,7 @@ public final class LoginLogoutHandler {
         try {
             // Actually logged in?
             UserTicket ticket = UserTicketStore.getTicket();
+            final boolean calledAsSupervisor = ticket.isGlobalSupervisor();
             if (!ticket.isGuest()) {
                 doLogout();
             }
@@ -97,6 +98,7 @@ public final class LoginLogoutHandler {
             callback.setTakeOverSession(takeOver);
             callback.setSessionContext(ctx);
             callback.setDataSource(ds);
+            callback.setCalledAsSupervisor(calledAsSupervisor);
             ticket = FxAuthenticationHandler.login(username, password, callback);
             // Log out any other sessions of the user
             if (!ticket.isMultiLogin() && !ticket.isWebDav()) {

@@ -52,6 +52,7 @@ public class FxCallback implements Callback, java.io.Serializable {
     private boolean takeOverSession = false;
     private transient SessionContext sessionContext = null;
     private transient DataSource dataSource = null;
+    private boolean calledAsSupervisor = false;
 
     /**
      * If takeOver is disabled the login attempt fails if a other session is already
@@ -87,6 +88,24 @@ public class FxCallback implements Callback, java.io.Serializable {
 
     public SessionContext getSessionContext() {
         return this.sessionContext;
+    }
+
+    /**
+     * @return  true when the login method was called by a global supervisor
+     * @since 3.1.6
+     */
+    public boolean isCalledAsGlobalSupervisor() {
+        return calledAsSupervisor;
+    }
+
+    /**
+     * Indicate that the login method was called by the global supervisor.
+     *
+     * @param calledAsSupervisor    true if the login method was called by a global supervisor
+     * @since 3.1.6
+     */
+    public void setCalledAsSupervisor(boolean calledAsSupervisor) {
+        this.calledAsSupervisor = calledAsSupervisor;
     }
 
 }

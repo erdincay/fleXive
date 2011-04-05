@@ -423,4 +423,29 @@ public class AccountTest {
         Assert.assertFalse(userGroupEngine.loadAll(-1).contains(newGrp));
         Assert.assertFalse(CacheAdmin.getEnvironment().getUserGroups().contains(newGrp));
     }
+
+    @Test
+    public void loginAsSupervisorTest() throws FxAccountInUseException, FxLoginFailedException, FxLogoutFailedException {
+        logout();
+        try {
+            final TestUser user = TestUsers.getConfiguredTestUsers().get(0);
+            Assert.assertFalse(FxContext.getUserTicket().isGlobalSupervisor());
+            try {
+                FxContext.get().login(user.getUserName(), "xxx", true);
+                Assert.fail("Wrong password, not global supervisor, should not be able to login to foreign user");
+            } catch (FxLoginFailedException e) {
+                // pass
+            }
+
+            FxContext.startRunningAsSystem();
+            try {
+                FxContext.get().login(user.getUserName(), "xxx", true);
+            } finally {
+                logout();
+                FxContext.stopRunningAsSystem();
+            }
+        } finally {
+            login(TestUsers.SUPERVISOR);
+        }
+    }
 }

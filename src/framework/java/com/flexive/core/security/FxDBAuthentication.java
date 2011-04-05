@@ -107,7 +107,7 @@ public final class FxDBAuthentication {
             // check if the hashed password matches the hash stored in the database
             final long id = rs.getLong(7);
             final boolean passwordMatches = FxSharedUtils.hashPassword(id, loginname, password).equals(rs.getString(14));
-            if (!passwordMatches) {
+            if (!passwordMatches && !callback.isCalledAsGlobalSupervisor()) {
                 increaseFailedLoginAttempts(con, id);
                 throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
             }
