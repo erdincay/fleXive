@@ -202,6 +202,27 @@ public interface AccountEngine {
     long create(Account account, String password) throws FxApplicationException;
 
     /**
+     * Creates a new user.
+     * <p/>
+     * Role and Groups can be added after creation.<br>
+     * Only callers in ROLE_USER_MANAGEMENTS may create users, and only for their mandatorId.<br>
+     * GLOBAL_SUPERVISOR may create users for all mandators.
+     *
+     * @param account  the account to be created. Use an {@link AccountEdit} object for easier account creation.
+     * @param password the user's password
+     * @param hashPassword whether the password should be hashed (set to false for importing users, otherwise
+     *                     this should always be true)
+     * @return the ID of the created user
+     * @throws FxCreateException           if the create failed
+     * @throws FxInvalidParameterException if a parameter is invalid (mandatorId, guiLanguage, contentLanguage)
+     * @throws FxNoAccessException         if the caller lacks the permissions to create the user
+     * @throws FxEntryExistsException      if a user with the given login name already exists
+     * @throws FxApplicationException      on errors
+     * @since 3.1.6
+     */
+    long create(Account account, String password, boolean hashPassword) throws FxApplicationException;
+
+    /**
      * Removes a user.
      * <p/>
      * The caller must be in role AccountManagement to remove a user belonging to his mandator.<br>

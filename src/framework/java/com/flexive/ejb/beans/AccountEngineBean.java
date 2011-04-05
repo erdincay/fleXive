@@ -405,6 +405,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(Account account, String password) throws FxApplicationException {
+        return create(account, password, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long create(Account account, String password, boolean hashPassword) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
         return create(account.getName(), account.getLoginName(), password, account.getEmail(),
                 account.getLanguage() != null ? account.getLanguage().getId() : FxLanguage.DEFAULT.getId(),
@@ -413,12 +420,12 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 account.getValidFrom() != null ? account.getValidFrom() : new Date(),
                 account.getValidTo() != null ? account.getValidTo() : Account.VALID_FOREVER,
                 account.getDefaultNode(), account.getDescription(), account.isAllowMultiLogin(),
-                true);
+                true, hashPassword);
     }
 
     private long create(String userName, String loginName, String password, String email, long lang,
                         long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
-                        String description, boolean allowMultiLogin, boolean checkUserRoles)
+                        String description, boolean allowMultiLogin, boolean checkUserRoles, boolean hashPassword)
             throws FxApplicationException {
 
         final UserTicket ticket = FxContext.getUserTicket();
@@ -480,7 +487,10 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Get a new Id
             long newId = seq.getId(FxSystemSequencer.ACCOUNT);
 
-            password = password == null ? "" : FxFormatUtils.encodePassword(newId, userName, password);
+            if (hashPassword) {
+                password = password == null ? "" : FxFormatUtils.encodePassword(newId, userName, password);
+            }
+
             curSql = "INSERT INTO " + TBL_ACCOUNTS + "(" +
                     //1 2        3        4          5        6     7          8    9
                     "ID,MANDATOR,USERNAME,LOGIN_NAME,PASSWORD,EMAIL,CONTACT_ID,LANG,VALID_FROM," +
