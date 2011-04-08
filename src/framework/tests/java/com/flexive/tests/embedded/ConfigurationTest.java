@@ -31,10 +31,12 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import static com.flexive.shared.EJBLookup.getApplicationConfigurationEngine;
 import static com.flexive.shared.EJBLookup.getUserConfigurationEngine;
 import static com.flexive.shared.EJBLookup.getNodeConfigurationEngine;
+import static com.flexive.shared.EJBLookup.getMandatorConfigurationEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.*;
 import com.flexive.shared.configuration.parameters.ParameterFactory;
@@ -43,6 +45,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Account;
+import com.flexive.shared.security.Mandator;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.shared.TestParameters;
@@ -68,6 +71,7 @@ public class ConfigurationTest {
     private UserConfigurationEngine userConfiguration;
     private ApplicationConfigurationEngine applicationConfiguration;
     private NodeConfigurationEngine nodeConfiguration;
+    private MandatorConfigurationEngine mandatorConfiguration;
     private ConfigurationEngine configuration;
 
     public ConfigurationTest() {
@@ -98,6 +102,7 @@ public class ConfigurationTest {
         configuration = EJBLookup.getConfigurationEngine();
         applicationConfiguration = getApplicationConfigurationEngine();
         nodeConfiguration = getNodeConfigurationEngine();
+        mandatorConfiguration = getMandatorConfigurationEngine();
     }
 
     @BeforeMethod
@@ -166,7 +171,7 @@ public class ConfigurationTest {
         /**
          * Check if the default parameter value is returned properly.
          *
-         * @throws Exception if an error occured
+         * @throws Exception if an error occurred
          */
         private void testDefaultValue() throws Exception {
             try {
@@ -183,7 +188,7 @@ public class ConfigurationTest {
         /**
          * Test storing a parameter in the configuration
          *
-         * @throws Exception if an error occured
+         * @throws Exception if an error occurred
          */
         private void testPut() throws Exception {
             try {
@@ -206,7 +211,7 @@ public class ConfigurationTest {
         /**
          * Test deleting a parameter
          *
-         * @throws Exception if an error occured
+         * @throws Exception if an error occurred
          */
         private void testDelete() throws Exception {
             try {
@@ -237,7 +242,7 @@ public class ConfigurationTest {
         /**
          * Test updating a parameter
          *
-         * @throws Exception if an error occured
+         * @throws Exception if an error occurred
          */
         private void testUpdate() throws Exception {
             try {
@@ -260,7 +265,7 @@ public class ConfigurationTest {
         /**
          * Test retrieving a group of parameters stored in a path.
          *
-         * @throws Exception if an error occured
+         * @throws Exception if an error occurred
          */
         private void testGetAll() throws Exception {
             try {
@@ -323,7 +328,7 @@ public class ConfigurationTest {
          * Returns true if the current user may update this test's config
          *
          * @return true if the current user may update this test's config
-         * @throws FxLookupException if a lookup error occured
+         * @throws FxLookupException if a lookup error occurred
          */
         private boolean mayUpdateConfig() throws FxLookupException {
             final UserTicket ticket = FxContext.getUserTicket();
@@ -346,7 +351,8 @@ public class ConfigurationTest {
                     || (checkConfiguration instanceof DivisionConfigurationEngine && ticket.isGlobalSupervisor())
                     || (checkConfiguration instanceof ApplicationConfigurationEngine && ticket.isGlobalSupervisor())
                     || (checkConfiguration instanceof NodeConfigurationEngine && ticket.isGlobalSupervisor())
-                    || (checkConfiguration instanceof UserConfigurationEngine && !ticket.isGuest());
+                    || (checkConfiguration instanceof UserConfigurationEngine && !ticket.isGuest())
+                    || (checkConfiguration instanceof MandatorConfigurationEngine && ticket.isMandatorSupervisor());
         }
 
 
@@ -355,7 +361,7 @@ public class ConfigurationTest {
     /**
      * Test the global configuration
      *
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     @Test
     public void globalConfiguration() throws Exception {
@@ -410,7 +416,7 @@ public class ConfigurationTest {
     /**
      * Test the per-division configuration
      *
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     @Test
     public void divisionConfiguration() throws Exception {
@@ -420,17 +426,22 @@ public class ConfigurationTest {
     /**
      * Test the per-application configuration
      *
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     @Test
     public void applicationConfiguration() throws Exception {
         testGenericConfiguration(applicationConfiguration);
     }
 
+    @Test
+    public void mandatorConfiguration() throws Exception {
+        testGenericConfiguration(mandatorConfiguration);
+    }
+
     /**
      * Test the per-user configuration
      *
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     @Test
     public void userConfiguration() throws Exception {
@@ -440,7 +451,7 @@ public class ConfigurationTest {
     /**
      * Test the node configuration
      *
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     @Test
     public void nodeConfiguration() throws Exception {
@@ -450,7 +461,7 @@ public class ConfigurationTest {
     /**
      * Test the FxConfiguration wrapper
      *
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     @Test
     public void fxConfiguration() throws Exception {
@@ -520,6 +531,11 @@ public class ConfigurationTest {
     }
 
     @Test
+    public void putInForeignMandator() throws FxApplicationException {
+        foreignDomainTest(mandatorConfiguration, CacheAdmin.getEnvironment().getMandator(Mandator.MANDATOR_FLEXIVE).getName());
+    }
+
+    @Test
     public void putInForeignNode() throws FxApplicationException {
         foreignDomainTest(getNodeConfigurationEngine(), "mynode");
     }
@@ -533,8 +549,8 @@ public class ConfigurationTest {
                 assertTrue(supervisor, "User configuration engine must not allow domain listings except for global supervisors.");
             }
         } catch (FxNoAccessException e) {
-            assertTrue(dce instanceof UserConfigurationEngine && !supervisor,
-                    "Only user configuration engine should prohibit domain listings.");
+            assertTrue((dce instanceof UserConfigurationEngine || dce instanceof MandatorConfigurationEngine) && !supervisor,
+                    "Only user or mandator configuration engine should prohibit domain listings.");
         }
 
         // the following block is expected to fail unless the user is a global supervisor
@@ -654,7 +670,7 @@ public class ConfigurationTest {
      * @param <T>       parameter value type to be tested
      * @param parameter parameter to be tested
      * @param value     the value to be tested
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     private <T extends Serializable> void testFallbacks(Parameter<T> parameter, T value) throws Exception {
         cleanup(parameter);
@@ -822,6 +838,8 @@ public class ConfigurationTest {
             scope = ParameterScope.USER;
         } else if (configuration instanceof GlobalConfigurationEngine) {
             scope = ParameterScope.GLOBAL;
+        } else if (configuration instanceof MandatorConfigurationEngine) {
+            scope = ParameterScope.MANDATOR;
         } else {
             throw new IllegalArgumentException("Unknown configuration engine: " + configuration);
         }

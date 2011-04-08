@@ -140,6 +140,11 @@ public final class DatabaseConst {
      */
     public static final String TBL_CONFIG_APPLICATION = "FXS_APPLICATIONCONFIGURATION";
     /**
+     * Mandator configuration table
+     * @since   3.1.6
+     */
+    public static final String TBL_CONFIG_MANDATOR = "FXS_MANDATORCONFIGURATION";
+    /**
      * Node configuration table
      */
     public static final String TBL_CONFIG_NODE = "FXS_NODECONFIGURATION";

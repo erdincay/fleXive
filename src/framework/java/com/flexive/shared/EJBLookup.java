@@ -194,6 +194,16 @@ public class EJBLookup {
     }
 
     /**
+     * Lookup of the MandatorConfigurationEngine EJB.
+     * 
+     * @return  a reference to the MandatorConfigurationEngine EJB
+     * @since   3.1.6
+     */
+    public static MandatorConfigurationEngine getMandatorConfigurationEngine() {
+        return getEngine(MandatorConfigurationEngine.class);
+    }
+
+    /**
      * Lookup of the GlobalConfigurationBean EJB.
      *
      * @return a reference to the GlobalConfigurationBean EJB.

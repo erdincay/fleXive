@@ -78,6 +78,18 @@ public enum ParameterScope {
      */
     APPLICATION_ONLY,
     /**
+     * Mandator parameter scope (with division configuration fallback).
+     *
+     * @since 3.1.6
+     */
+    MANDATOR(ParameterScope.DIVISION_ONLY),
+    /**
+     * Mandator parameter scope (without fallback).
+     *
+     * @since 3.1.6
+     */
+    MANDATOR_ONLY,
+    /**
      * User parameter (with application configuration fallback)
      */
     USER(ParameterScope.APPLICATION),
