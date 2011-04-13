@@ -61,6 +61,8 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     private ApplicationConfigurationEngineLocal applicationConfiguration;
     @EJB
     private NodeConfigurationEngineLocal nodeConfiguration;
+    @EJB
+    private MandatorConfigurationEngineLocal mandatorConfiguration;
 
     /**
      * {@inheritDoc}
@@ -299,6 +301,8 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
             return applicationConfiguration;
         } else if (scope == ParameterScope.NODE || scope == ParameterScope.NODE_ONLY) {
             return nodeConfiguration;
+        } else if (scope == ParameterScope.MANDATOR || scope == ParameterScope.MANDATOR_ONLY) {
+            return mandatorConfiguration;
         } else {
             throw new FxInvalidParameterException("SCOPE", "ex.configuration.parameter.scope.invalid", scope);
         }
@@ -309,7 +313,8 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
                 divisionConfiguration,
                 nodeConfiguration,
                 applicationConfiguration,
-                userConfiguration
+                userConfiguration,
+                mandatorConfiguration
         );
     }
 }
