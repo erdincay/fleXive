@@ -211,7 +211,8 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     public boolean isForeignKeyViolation(Exception exc) {
         final int errorCode = Database.getSqlErrorCode(exc);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
-        return errorCode == 23002 || errorCode == 23003;
+        return errorCode == 23002 || errorCode == 23003 // H2 <= 1.2
+                || errorCode == 23503 /* H2 >= 1.3 */;
     }
 
     /**
@@ -220,7 +221,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     public boolean isQueryTimeout(Exception e) {
         final int errorCode = Database.getSqlErrorCode(e);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
-        return errorCode == 90051;
+        return errorCode == 90051 /* H2 <= 1.2 */ || errorCode == 57014 /* H2 >= 1.3 */;
     }
 
     /**
@@ -236,7 +237,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     public boolean isUniqueConstraintViolation(Exception exc) {
         final int sqlErr = Database.getSqlErrorCode(exc);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
-        return sqlErr == 23001;
+        return sqlErr == 23001 /* H2 <= 1.2 */ || sqlErr == 23505 /* H2 >= 1.3 */;
     }
 
     /**
@@ -252,8 +253,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
      * {@inheritDoc}
      */
     public boolean isDuplicateKeyViolation(SQLException exc) {
-        //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
-        return Database.getSqlErrorCode(exc) == 23001;
+        return isUniqueConstraintViolation(exc);
     }
 
     /**
@@ -372,7 +372,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
         schema = schema.trim();
         try {
             if (dropIfExist) {
-                System.out.println("Resetting division schema " + schema);
+                LOG.info("Resetting division schema " + schema);
                 cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema);
                 cnt += stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
             }
@@ -380,7 +380,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
 
             for (String script : s) {
                 if (script.indexOf('/') == -1 || script.startsWith("tree/")) {
-                    System.out.println("Executing " + script + " ...");
+                    LOG.info("Executing " + script + " ...");
                     cnt += new FxSharedUtils.SQLExecutor(con, scripts.get(script),
                             script.startsWith("SP") || script.startsWith("tree/") ? "|" : ";",
                             false, true, System.out).
@@ -392,7 +392,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
                 stmt.close();
         }
         if (cnt > 0)
-            System.out.println("Executed " + cnt + " statements");
+            LOG.info("Executed " + cnt + " statements");
         return cnt > 0;
     }
 }
