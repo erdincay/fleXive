@@ -208,10 +208,10 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
     /**
      * Get all resource keys that match a given key prefix, but do not load the associated values.
      *
-     * @param keyPrefix the key prefix
+     * @param keyMatch  the key prefix, or, if a wildcard ('%') is contained, the exact query string
      * @return          all resource keys that match the prefix
      * @throws FxApplicationException   on errors
      * @since 3.1.6
      */
-    Set<String> getResourceKeys(String keyPrefix) throws FxApplicationException;
+    Set<String> getResourceKeysMatching(String keyMatch) throws FxApplicationException;
 }

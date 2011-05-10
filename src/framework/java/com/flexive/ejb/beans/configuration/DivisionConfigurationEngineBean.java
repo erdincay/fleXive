@@ -799,8 +799,8 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
 
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public Set<String> getResourceKeys(String keyPrefix) throws FxApplicationException {
-        FxSharedUtils.checkParameterNull(keyPrefix, "keyPrefix");
+    public Set<String> getResourceKeysMatching(String keyMatch) throws FxApplicationException {
+        FxSharedUtils.checkParameterNull(keyMatch, "keyPrefix");
 
         final Set<String> keys = Sets.newHashSet();
         Connection con = null;
@@ -809,7 +809,12 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             con = Database.getDbConnection();
             ps = con.prepareStatement("SELECT RKEY FROM " + TBL_RESOURCES + " WHERE RKEY LIKE ?");
 
-            ps.setString(1, keyPrefix.trim() + "%");
+            String queryValue = keyMatch.trim();
+            if (queryValue.indexOf('%') == -1) {
+                queryValue += "%";
+            }
+
+            ps.setString(1, queryValue);
 
             final ResultSet rs = ps.executeQuery();
 
