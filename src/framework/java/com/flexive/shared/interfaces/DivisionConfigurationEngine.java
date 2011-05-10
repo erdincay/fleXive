@@ -39,6 +39,7 @@ import com.flexive.shared.value.FxString;
 import javax.ejb.Remote;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -110,7 +111,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @param selectColumns number of Select/Boolean columns
      * @throws FxApplicationException on errors
      */
-    public void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns,
+    void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns,
                                   int doubleColumns, int selectColumns) throws FxApplicationException;
 
     /**
@@ -119,7 +120,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @param name name of the flat storage
      * @throws FxApplicationException on errors
      */
-    public void removeFlatStorage(String name) throws FxApplicationException;
+    void removeFlatStorage(String name) throws FxApplicationException;
 
     /**
      * Export the current division to a file on the local application server
@@ -127,7 +128,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @param localFileName name (and path) of the file on the local application server
      * @throws FxApplicationException on errors
      */
-    public void exportDivision(String localFileName) throws FxApplicationException;
+    void exportDivision(String localFileName) throws FxApplicationException;
 
 
     /**
@@ -137,7 +138,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @return FxDivisionExportInfo
      * @throws FxApplicationException on errors
      */
-    public FxDivisionExportInfo getDivisionExportInfo(String localFileName) throws FxApplicationException;
+    FxDivisionExportInfo getDivisionExportInfo(String localFileName) throws FxApplicationException;
 
     /**
      * Import the current division from a file on the local application server
@@ -145,7 +146,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @param localFileName name (and path) of the file on the local application server
      * @throws FxApplicationException on errors
      */
-    public void importDivision(String localFileName) throws FxApplicationException;
+    void importDivision(String localFileName) throws FxApplicationException;
 
     /**
      * Set a resource value. If the passed value is empty or <code>null</code> the entry will be removed
@@ -155,7 +156,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      * @since 3.1.4
      */
-    public void setResourceValue(String key, FxString value) throws FxApplicationException;
+    void setResourceValue(String key, FxString value) throws FxApplicationException;
 
     /**
      * Remove all resources whose key starts with keyPrefix
@@ -164,7 +165,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      * @since 3.1.4
      */
-    public void removeResourceValues(String keyPrefix) throws FxApplicationException;
+    void removeResourceValues(String keyPrefix) throws FxApplicationException;
 
     /**
      * Get a resource FxString value or <code>null</code> if not set
@@ -176,7 +177,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      * @since 3.1.4
      */
-    public FxString getResourceValue(String key, long defaultLanguage) throws FxApplicationException;
+    FxString getResourceValue(String key, long defaultLanguage) throws FxApplicationException;
 
     /**
      * Get all resource FxString values that match a given key prefix.
@@ -189,7 +190,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      * @since 3.1.4
      */
-    public Map<String, FxString> getResourceValues(String keyPrefix, long defaultLanguage) throws FxApplicationException;
+    Map<String, FxString> getResourceValues(String keyPrefix, long defaultLanguage) throws FxApplicationException;
 
     /**
      * Get all resource FxString values that match a given key pattern.
@@ -202,5 +203,15 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      * @since 3.1.6
      */
-    public Map<String, FxString> getResourceValuesContains(String keyMatch, long defaultLanguage) throws FxApplicationException;
+    Map<String, FxString> getResourceValuesContains(String keyMatch, long defaultLanguage) throws FxApplicationException;
+
+    /**
+     * Get all resource keys that match a given key prefix, but do not load the associated values.
+     *
+     * @param keyPrefix the key prefix
+     * @return          all resource keys that match the prefix
+     * @throws FxApplicationException   on errors
+     * @since 3.1.6
+     */
+    Set<String> getResourceKeys(String keyPrefix) throws FxApplicationException;
 }

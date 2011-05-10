@@ -45,6 +45,7 @@ public class ResourceTest {
 
         //clean up first
         dc.removeResourceValues("res.test.");
+        Assert.assertEquals(dc.getResourceKeys("res.test.").size(), 0);
 
         //single language
         Assert.assertNull(dc.getResourceValue(key1, FxLanguage.SYSTEM_ID));
@@ -60,6 +61,10 @@ public class ResourceTest {
         dc.setResourceValue(key1, test);
         Assert.assertNotNull(dc.getResourceValue(key1, FxLanguage.SYSTEM_ID));
         Assert.assertNull(dc.getResourceValue(key1mixed, FxLanguage.SYSTEM_ID));
+
+        Set<String> keys = dc.getResourceKeys("res.test.");
+        Assert.assertEquals(keys.size(), 1, "Expected one resource key, got: " + keys);
+
         dc.setResourceValue(key1, null);
         Assert.assertNull(dc.getResourceValue(key1, FxLanguage.SYSTEM_ID));
 
@@ -110,8 +115,11 @@ public class ResourceTest {
         dc.setResourceValue("test.mr.s1", valSingle1);
         dc.setResourceValue("test.mr.m1", valMult1);
         Assert.assertEquals(dc.getResourceValues("test.mr.", FxLanguage.ENGLISH).size(), 4);
+        Assert.assertEquals(dc.getResourceKeys("test.mr.").size(), 4);
         Assert.assertEquals(dc.getResourceValues("test.mr.m", FxLanguage.ENGLISH).size(), 2);
+        Assert.assertEquals(dc.getResourceKeys("test.mr.m").size(), 2);
         Assert.assertEquals(dc.getResourceValues("test.mr.s", FxLanguage.ENGLISH).size(), 2);
+        Assert.assertEquals(dc.getResourceKeys("test.mr.s").size(), 2);
         Map<String, FxString> test = dc.getResourceValues("test.mr.", FxLanguage.ENGLISH);
         Assert.assertTrue(test.containsKey("test.mr.m1"));
         Assert.assertTrue(test.containsKey("test.mr.m2"));

@@ -52,6 +52,7 @@ import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.interfaces.DivisionConfigurationEngineLocal;
 import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.value.FxString;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -793,6 +794,34 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(DivisionConfigurationEngine.class, con, ps);
+        }
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public Set<String> getResourceKeys(String keyPrefix) throws FxApplicationException {
+        FxSharedUtils.checkParameterNull(keyPrefix, "keyPrefix");
+
+        final Set<String> keys = Sets.newHashSet();
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("SELECT RKEY FROM " + TBL_RESOURCES + " WHERE RKEY LIKE ?");
+
+            ps.setString(1, keyPrefix.trim() + "%");
+
+            final ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                keys.add(rs.getString(1));
+            }
+
+            return keys;
+        } catch (SQLException e) {
+            throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngineBean.class, con, ps);
         }
     }
 }
