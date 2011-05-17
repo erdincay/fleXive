@@ -797,7 +797,6 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         }
     }
 
-    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public Set<String> getResourceKeysMatching(String keyMatch) throws FxApplicationException {
         FxSharedUtils.checkParameterNull(keyMatch, "keyPrefix");

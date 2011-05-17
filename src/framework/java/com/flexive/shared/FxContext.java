@@ -45,6 +45,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.management.InstanceNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
@@ -768,7 +769,12 @@ public class FxContext implements Serializable {
             // clean up cache invocation context (JBoss cache workaround)
             CacheAdmin.getInstance().cleanupAfterRequest();
         } catch (Exception ex) {
-            if (LOG.isWarnEnabled()) {
+            if (ex.getCause() instanceof InstanceNotFoundException) {
+                // cache already removed, so no cleanup necessary/possible
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Failed to clean up cache context because cache was already removed", ex);
+                }
+            } else if (LOG.isWarnEnabled()) {
                 LOG.warn("Failed to clean up cache context: " + ex.getMessage(), ex);
             }
         }

@@ -56,4 +56,8 @@ public class FxCacheException extends Exception {
     public FxCacheException(String message) {
         super(message);
     }
+
+    public FxCacheException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

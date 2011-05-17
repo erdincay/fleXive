@@ -111,12 +111,11 @@ public class FxCacheProxy implements FxCacheMBean {
             return unmarshal(server.invoke(name, "get", new Object[]{divisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"}));
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -128,12 +127,11 @@ public class FxCacheProxy implements FxCacheMBean {
             server.invoke(name, "put", new Object[]{divisionEncodePath(path), key, marshal(value)},
                     new String[]{"java.lang.String", "java.lang.Object", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -145,12 +143,11 @@ public class FxCacheProxy implements FxCacheMBean {
             server.invoke(name, "remove", new Object[]{divisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -162,12 +159,11 @@ public class FxCacheProxy implements FxCacheMBean {
             server.invoke(name, "remove", new Object[]{divisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -179,12 +175,11 @@ public class FxCacheProxy implements FxCacheMBean {
             return (Set) server.invoke(name, "getKeys", new Object[]{divisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -196,12 +191,11 @@ public class FxCacheProxy implements FxCacheMBean {
             return (Set) server.invoke(name, "globalGetKeys", new Object[]{globalDivisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -213,12 +207,11 @@ public class FxCacheProxy implements FxCacheMBean {
             return unmarshal(server.invoke(name, "globalGet", new Object[]{globalDivisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"}));
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -230,12 +223,11 @@ public class FxCacheProxy implements FxCacheMBean {
             return (Boolean) server.invoke(name, "globalExists", new Object[]{globalDivisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -247,12 +239,11 @@ public class FxCacheProxy implements FxCacheMBean {
             return (Boolean) server.invoke(name, "exists", new Object[]{divisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -264,12 +255,11 @@ public class FxCacheProxy implements FxCacheMBean {
             server.invoke(name, "globalPut", new Object[]{globalDivisionEncodePath(path), key, marshal(value)},
                     new String[]{"java.lang.String", "java.lang.Object", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -281,12 +271,11 @@ public class FxCacheProxy implements FxCacheMBean {
             server.invoke(name, "globalRemove", new Object[]{globalDivisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -298,12 +287,11 @@ public class FxCacheProxy implements FxCacheMBean {
             server.invoke(name, "globalRemove", new Object[]{globalDivisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -315,12 +303,11 @@ public class FxCacheProxy implements FxCacheMBean {
             return (Set) server.invoke(name, "getChildrenNames", new Object[]{divisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -386,12 +373,11 @@ public class FxCacheProxy implements FxCacheMBean {
             server.invoke(name, "reloadEnvironment", new Object[]{divisionId},
                     new String[]{"java.lang.Integer"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -434,12 +420,11 @@ public class FxCacheProxy implements FxCacheMBean {
                             "java.lang.Integer",
                             "java.lang.Boolean"});
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
     }
 
@@ -447,13 +432,25 @@ public class FxCacheProxy implements FxCacheMBean {
         try {
             server.invoke(name, "cleanupAfterRequest", new Object[0], new String[0]);
         } catch (InstanceNotFoundException e) {
-            throw new FxCacheException("No FxCache instance found!");
+            throw newNotFoundException(e);
         } catch (MBeanException e) {
-            throw new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
-                    (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()));
+            throw newMBeanException(e);
         } catch (ReflectionException e) {
-            throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
+            throw newReflectionException(e);
         }
+    }
+
+    private FxCacheException newReflectionException(ReflectionException e) {
+        return new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage(), e);
+    }
+
+    private FxCacheException newMBeanException(MBeanException e) {
+        return new FxCacheException("Cache error invoking the managed bean: " + e.getMessage() + ", TargetException: " +
+                (e.getTargetException() == null ? "(unknown)" : e.getTargetException().getMessage()), e.getTargetException());
+    }
+
+    private FxCacheException newNotFoundException(InstanceNotFoundException e) {
+        return new FxCacheException("No FxCache instance found!", e);
     }
 
 
