@@ -40,10 +40,7 @@ import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.security.ACLPermission;
-import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.*;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
@@ -52,14 +49,12 @@ import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.StepDefinition;
-import static com.flexive.tests.embedded.FxTestUtils.*;
 import com.flexive.tests.embedded.ScriptingTest;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
-import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -67,10 +62,12 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Date;
+import java.util.List;
+
+import static com.flexive.tests.embedded.FxTestUtils.*;
+import static org.testng.Assert.*;
 
 /**
  * Tests for the ContentEngine
@@ -2201,5 +2198,95 @@ public class ContentEngineTest {
 
         assertEquals(content.getMaxIndex("/TestProperty4"), 1, "TestProperty4: Unexpected cardinality after exploding 10 times");
         assertEquals(content.getMaxIndex("/TestGroup1"), 1, "TestGroup1: Unexpected cardinality after exploding 10 times");
+    }
+
+    @Test(groups = {"ejb", "content"})
+    public void forceContentPKTest() throws FxApplicationException, FxLogoutFailedException, FxLoginFailedException, FxAccountInUseException {
+        long id = -1;
+        try {
+            FxContent content = ce.initialize("SearchTest");
+            content.setValue("/stringSearchProp", "test");
+            content.setForcePkOnCreate(true);
+
+            logout();
+            try {
+                id = ce.save(content).getId();
+                Assert.fail("Should not be able to save content with a specific PK");
+            } catch (FxNoAccessException e) {
+                // pass
+            }
+
+            login(TestUsers.SUPERVISOR);
+            content.setValue("/version", 2);
+            FxPK pk = ce.save(content);
+            id = pk.getId();
+
+            assertEquals(pk.getVersion(), 2, "Version not set correctly");
+
+            content = ce.initialize("SearchTest");
+            content.setValue("/stringSearchProp", "test in version 5");
+            content.setValue("/id", id);
+            content.setValue("/version", 5);
+            content.setForcePkOnCreate(true);
+            pk = ce.save(content);
+
+            assertEquals(pk.getVersion(), 5, "Version not set correctly");
+            assertEquals(pk.getId(), id, "Id not set correctly");
+        } finally {
+            login(TestUsers.SUPERVISOR);
+            if (id != -1) {
+                ce.remove(new FxPK(id));
+            }
+        }
+    }
+
+    @Test(groups = {"ejb", "content"})
+    public void forceLifeCycleInfoTest() throws FxLoginFailedException, FxAccountInUseException, FxApplicationException, FxLogoutFailedException {
+        long id = -1;
+        try {
+            FxContent content = ce.initialize("SearchTest");
+            content.setValue("/stringSearchProp", "test");
+            content.setForceLifeCycle(true);
+
+            logout();
+            try {
+                id = ce.save(content).getId();
+                Assert.fail("Should not be able to save content with specific lifecycle info");
+            } catch (FxNoAccessException e) {
+                // pass
+            }
+
+            login(TestUsers.SUPERVISOR);
+            content.setValue("/created_at", new Date(0));
+            content.setValue("/created_by", 1L);
+            content.setValue("/modified_at", new Date(1000));
+            content.setValue("/modified_by", 1L);
+            id = ce.save(content).getId();
+
+            content = ce.load(new FxPK(id));
+            final LifeCycleInfo lci = content.getLifeCycleInfo();
+            assertEquals(lci.getCreationTime(), 0);
+            assertEquals(lci.getModificationTime(), 1000);
+            assertEquals(lci.getCreatorId(), 1);
+            assertEquals(lci.getModificatorId(), 1);
+
+            // update lifecycle info of existing content version
+            content.setValue("/created_at", new Date(1234));
+            content = ce.load(ce.save(content));
+
+            assertEquals(content.getLifeCycleInfo().getCreationTime(), 0,
+                    "LifeCycleInfo was updated although force flag was not set");
+
+            content.setValue("/created_at", new Date(5678));
+            content.setForceLifeCycle(true);
+            content = ce.load(ce.save(content));
+
+            assertEquals(content.getLifeCycleInfo().getCreationTime(), 5678);
+        } finally {
+            login(TestUsers.SUPERVISOR);
+            if (id != -1) {
+                ce.remove(new FxPK(id));
+            }
+        }
     }
 }

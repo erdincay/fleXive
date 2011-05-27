@@ -52,6 +52,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxLargeNumber;
 import com.flexive.shared.workflow.Step;
 import com.thoughtworks.xstream.converters.ConversionException;
 import org.apache.commons.logging.Log;
@@ -261,6 +262,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxPK save(FxContent content) throws FxApplicationException {
+        content.checkForceSystemPropertyPermissions();
         Connection con = null;
         PreparedStatement ps = null;
         FxPK pk;
@@ -326,8 +328,10 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 }
             }
             //scripting before end
-            if (content.getPk().isNew()) {
-                pk = storage.contentCreate(con, env, null, seq.getId(FxSystemSequencer.CONTENT), content);
+            if (content.getPk().isNew() || content.isForcePkOnCreate()) {
+                final Long contentId = content.getValue(FxLargeNumber.class, "/id").getBestTranslation();
+                pk = storage.contentCreate(con, env, null, content.isForcePkOnCreate() && contentId != -1
+                        ? contentId : seq.getId(FxSystemSequencer.CONTENT), content);
                 if (LOG.isDebugEnabled())
                     LOG.debug("creating new content for type " + CacheAdmin.getEnvironment().getType(content.getTypeId()).getName());
             } else {
@@ -408,6 +412,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxPK createNewVersion(FxContent content) throws FxApplicationException {
+        content.checkForceSystemPropertyPermissions();
         Connection con = null;
         PreparedStatement ps = null;
         if (content.getPk().isNew())

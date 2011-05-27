@@ -93,6 +93,9 @@ public class FxContent implements Serializable {
     private long binaryPreviewId;
     private long binaryPreviewACL;
 
+    private boolean forcePkOnCreate;
+    private boolean forceLifeCycle;
+
     private volatile boolean captionResolved = false;
     private volatile boolean hasCaption = false;
     private volatile FxString caption = null;
@@ -1891,4 +1894,81 @@ public class FxContent implements Serializable {
     public void updateLock(FxLock lock) {
         this.lock = lock;
     }
+
+    /**
+     * If true, forces the content engine to use the lifecycle (created at, ...) of the content instance
+     * when creating or updating the content, instead of calculating the values. Used for imports.
+     *
+     * @return  true if the lifecycle information should be taken from the content
+     * @since   3.1.6
+     * @see     #setForceLifeCycle(boolean)
+     */
+    public final boolean isForceLifeCycle() {
+        return forceLifeCycle;
+    }
+
+    /**
+     * If true, forces the content engine to use the lifecycle (created at, ...) of the content instance
+     * when creating or updating the content, instead of calculating the values. Used for imports.
+     *
+     * <p>
+     *     The flag may be set by anyone, but the content engine will fail if the caller has no global supervisor
+     *     privileges.
+     * </p>
+     *
+     * @param forceLifeCycle    true if the lifecycle information should be taken from the content
+     * @since 3.1.6
+     */
+    public final void setForceLifeCycle(boolean forceLifeCycle) {
+        this.forceLifeCycle = forceLifeCycle;
+    }
+
+    /**
+     * If true, the ID and/or version of the content will be used for saving. Used for imports that need to
+     * preserve the version number or the entire PK.
+     *
+     * @return  if true, the ID and/or version of the content will be used for saving.
+     * @since   3.1.6
+     * @see     #setForcePkOnCreate(boolean)
+     */
+    public final boolean isForcePkOnCreate() {
+        return forcePkOnCreate;
+    }
+
+    /**
+     * If true, the ID and/or version of the content will be used for saving.
+     *
+     * <p>
+     *     When both the ID and version are set, a content with the exact PK will be created
+     *     (unless one already exists, in which case saving will cause an error).
+     *     If only the version is set, a new ID will be generated as with creating a completely new instance,
+     *     but the version will be set to the given value.
+     * </p>
+     *
+     * <p>
+     *     The flag may be set by anyone, but the content engine will fail if the caller has no global supervisor
+     *      privileges.
+     * </p>
+     *
+     * @param forcePkOnCreate   whether a specific PK should be used for saving the instance
+     * @since 3.1.6
+     */
+    public final void setForcePkOnCreate(boolean forcePkOnCreate) {
+        this.forcePkOnCreate = forcePkOnCreate;
+    }
+
+    /**
+     * Checks if {@link #isForceLifeCycle()} or {@link #isForcePkOnCreate()} is set and whether the current
+     * user set these flags (only the global supervisor is allowed to specify these).
+     *
+     * @throws FxNoAccessException  if PK and/or lifecycle info should be overwritten and the calling user
+     *                              is not a global supervisor
+     * @since 3.1.6
+     */
+    public final void checkForceSystemPropertyPermissions() throws FxNoAccessException {
+        if ((isForceLifeCycle() || isForcePkOnCreate()) && !FxContext.getUserTicket().isGlobalSupervisor()) {
+            throw new FxNoAccessException("ex.content.save.force.noPermission");
+        }
+    }
+
 }
