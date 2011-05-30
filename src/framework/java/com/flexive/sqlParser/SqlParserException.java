@@ -31,23 +31,25 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
-import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxExceptionMessage;
 
 
 public class SqlParserException extends Exception {
 
     Object[] params;
+    private final FxLanguage errorMessageLang;
 
     public SqlParserException(TokenMgrError pe, String query) {
         super("ex.sqlSearch.tokenMgrException");
         params=new Object[]{pe.getErrorLine(),pe.getErrorColumn(),pe.getCurCharEscaped(),pe.getErrorAfter(),query};
-
-
+        this.errorMessageLang = CacheAdmin.getEnvironment().getLanguage(FxLanguage.ENGLISH);
     }
 
     public SqlParserException(ParseException pe, String query) {
         super("ex.sqlSearch.parserException");
+        this.errorMessageLang = CacheAdmin.getEnvironment().getLanguage(FxLanguage.ENGLISH);
         String expected = "";
         String encountered = "";
 
@@ -85,12 +87,14 @@ public class SqlParserException extends Exception {
 
     public SqlParserException(String message,Throwable cause,Object... values) {
         super(message,cause);
+        this.errorMessageLang = CacheAdmin.getEnvironment().getLanguage(FxLanguage.ENGLISH);
         this.params = values;
     }
 
 
     public SqlParserException(String message,Object... values) {
         super(message);
+        this.errorMessageLang = CacheAdmin.getEnvironment().getLanguage(FxLanguage.ENGLISH);
         this.params = values;
     }
 
@@ -101,6 +105,6 @@ public class SqlParserException extends Exception {
 
     @Override
     public String getMessage() {
-        return new FxExceptionMessage(super.getMessage(), getValues()).getLocalizedMessage(FxContext.get().getLanguage().getId());
+        return new FxExceptionMessage(super.getMessage(), getValues()).getLocalizedMessage(errorMessageLang);
     }
 }
