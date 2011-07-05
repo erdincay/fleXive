@@ -732,10 +732,10 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public boolean assignmentExists(String xPath) {
         if (xPath != null && xPath.trim().length() > 0) {
-            final String xPathUpper = xPath.toUpperCase(Locale.ENGLISH);
+            String xPathUpper = xPath.toUpperCase(Locale.ENGLISH);
             if (!XPathElement.isValidXPath(xPathUpper))
                 return false; //avoid exceptions on malformed xpath's
-            xPath = XPathElement.toXPathNoMult(xPathUpper);
+            xPathUpper = XPathElement.toXPathNoMult(xPathUpper);
             return assignmentXPathLookup.containsKey(xPathUpper);
         }
         return false;
