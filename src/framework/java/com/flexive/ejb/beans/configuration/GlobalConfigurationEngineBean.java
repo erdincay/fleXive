@@ -33,10 +33,12 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import static com.flexive.core.DatabaseConst.TBL_CONFIG_GLOBAL;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.ejb.mbeans.FxCache;
-import com.flexive.shared.*;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.SimpleCacheStats;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.ParameterScope;
@@ -51,6 +53,8 @@ import com.flexive.shared.mbeans.MBeanHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.annotation.sql.DataSourceDefinition;
+import javax.annotation.sql.DataSourceDefinitions;
 import javax.ejb.*;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -70,8 +74,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.sql.DataSourceDefinition;
-import javax.annotation.sql.DataSourceDefinitions;
+
+import static com.flexive.core.DatabaseConst.TBL_CONFIG_GLOBAL;
 
 /**
  * Global configuration MBean.
@@ -93,38 +97,38 @@ import javax.annotation.sql.DataSourceDefinitions;
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS,
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=true
-//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0"
     ),
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS + "NoTX",
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=false
-//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0"
     ),
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS_CONFIG,
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties = "URL=jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        properties = "URL=jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=true
-//        url="jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0"
     ),
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS_INIT,
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties= "URL=jdbc:h2:h2/flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        properties= "URL=jdbc:h2:h2/flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=false
-//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0"
+//        url="jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0"
     )
 })
 @TransactionManagement(TransactionManagementType.CONTAINER)
