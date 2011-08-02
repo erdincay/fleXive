@@ -32,13 +32,12 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.storage.StorageManager;
+import com.flexive.core.security.FxDBAuthentication;
 import com.flexive.core.security.LoginLogoutHandler;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.security.UserTicketStore;
-import com.flexive.core.security.FxDBAuthentication;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -63,6 +62,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.*;
 
 /**
  * Account management
@@ -1253,7 +1254,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (loginName != null) loginName = checkLoginName(loginName);
             if (email != null) email = FxFormatUtils.checkEmail(email);
             if (password != null) {
-                password = FxFormatUtils.encodePassword(accountId, loginName, password.trim());
+                password = FxFormatUtils.encodePassword(accountId, StringUtils.defaultString(loginName, account.getLoginName()),
+                        password.trim());
             }
             if (lang != null && !language.isValid(lang))
                 throw new FxInvalidParameterException("LANGUAGE", "ex.account.languageInvalid", lang);

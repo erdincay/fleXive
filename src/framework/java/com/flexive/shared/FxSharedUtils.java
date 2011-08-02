@@ -31,9 +31,8 @@
  ***************************************************************/
 package com.flexive.shared;
 
-import com.flexive.shared.configuration.SystemParameters;
-import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -47,8 +46,6 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import groovy.lang.GroovySystem;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -697,8 +694,12 @@ public final class FxSharedUtils {
             throw ex.asRuntimeException();
         }
         if ("userid".equals(method)) {
+            if (accountId == -1) {
+                throw new IllegalArgumentException("Account-ID not set, but hash method set to userid");
+            }
             return hashPassword(accountId, password);
         } else if ("loginname".equals(method)) {
+            FxSharedUtils.checkParameterEmpty(loginName, "loginName");
             return hashPassword(loginName, password);
         } else {
             throw new IllegalArgumentException("Unknown hash method: " + method);
