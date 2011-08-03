@@ -632,7 +632,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setInt(2, live_ver);
             ps.setInt(3, max_ver);
             ps.setInt(4, live_ver);
-            ps.setLong(3, id);
+            ps.setLong(5, id);
             ps.executeUpdate();
             ps.close();
             /*ps = con.prepareStatement(CONTENT_VER_UPDATE_2);
