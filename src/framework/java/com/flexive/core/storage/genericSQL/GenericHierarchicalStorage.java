@@ -180,8 +180,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             TBL_CONTENT + " s WHERE s.STEP=(SELECT w.ID FROM " + TBL_WORKFLOW_STEP + " w, " + TBL_STRUCT_TYPES + " t WHERE w.STEPDEF=" +
             StepDefinition.LIVE_STEP_ID + " AND w.WORKFLOW=t.WORKFLOW AND t.ID=c.TDEF) AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT +
             " c WHERE c.ID=? GROUP BY c.ID,c.TDEF";
-    protected static final String CONTENT_VER_UPDATE_1 = "UPDATE " + TBL_CONTENT + " SET MAX_VER=?, LIVE_VER=? WHERE ID=?";
-    protected static final String CONTENT_VER_UPDATE_2 = "UPDATE " + TBL_CONTENT + " SET ISMAX_VER=(MAX_VER=VER), ISLIVE_VER=(LIVE_VER=VER) WHERE ID=?";
+    protected static final String CONTENT_VER_UPDATE_1 = "UPDATE " + TBL_CONTENT + " SET MAX_VER=?, LIVE_VER=?, ISMAX_VER=(VER=?), ISLIVE_VER=(VER=?) WHERE ID=?";
+//    protected static final String CONTENT_VER_UPDATE_2 = "UPDATE " + TBL_CONTENT + " SET ISMAX_VER=(MAX_VER=VER), ISLIVE_VER=(LIVE_VER=VER) WHERE ID=?";
     protected static final String CONTENT_VER_UPDATE_3 = "UPDATE " + TBL_CONTENT_DATA + " SET ISMAX_VER=(VER=?), ISLIVE_VER=(VER=?) WHERE ID=?";
 
     protected static final String CONTENT_STEP_GETVERSIONS = "SELECT VER FROM " + TBL_CONTENT + " WHERE STEP=? AND ID=? AND VER<>?";
@@ -630,13 +630,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps = con.prepareStatement(CONTENT_VER_UPDATE_1);
             ps.setInt(1, max_ver);
             ps.setInt(2, live_ver);
+            ps.setInt(3, max_ver);
+            ps.setInt(4, live_ver);
             ps.setLong(3, id);
             ps.executeUpdate();
             ps.close();
-            ps = con.prepareStatement(CONTENT_VER_UPDATE_2);
+            /*ps = con.prepareStatement(CONTENT_VER_UPDATE_2);
             ps.setLong(1, id);
             ps.executeUpdate();
-            ps.close();
+            ps.close();*/
             ps = con.prepareStatement(CONTENT_VER_UPDATE_3);
             ps.setInt(1, max_ver);
             ps.setInt(2, live_ver);

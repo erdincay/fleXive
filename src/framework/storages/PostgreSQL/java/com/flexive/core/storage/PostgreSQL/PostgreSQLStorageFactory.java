@@ -256,7 +256,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
         try {
             if (StringUtils.isBlank(database))
                 throw new IllegalArgumentException("No database name (path) specified!");
-            System.out.println("Using database [" + database + "] for " + VENDOR);
+            System.out.println("using database [" + database + "], schema [" + schema + "] for " + VENDOR);
             String url = jdbcURL;
             if (StringUtils.isBlank(url))
                 throw new IllegalArgumentException("No JDBC URL provided!");
