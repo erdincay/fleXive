@@ -649,6 +649,16 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         String curSql = null;
         try {
             con = Database.getDbConnection();
+            //Check if contents exist that the account created/modified
+            stmt = con.createStatement();
+            curSql = "SELECT COUNT(*) FROM " + TBL_CONTENT + " WHERE CREATED_BY=" + accountId + " OR MODIFIED_BY=" + accountId;
+            ResultSet rs = stmt.executeQuery(curSql);
+            if( rs != null && rs.next()) {
+                if(rs.getLong(1) > 0)
+                    throw new FxNoAccessException("ex.account.delete.contentExists");
+            }
+            stmt.close();
+
             // Delete all group assignments ..
             stmt = con.createStatement();
             curSql = "DELETE FROM " + TBL_ASSIGN_GROUPS + " WHERE ACCOUNT=" + accountId;
