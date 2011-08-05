@@ -31,6 +31,10 @@
  ***************************************************************/
 package com.flexive.core;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Database constants.
  *
@@ -254,6 +258,16 @@ public final class DatabaseConst {
      * Resource table
      */
     public static final String TBL_RESOURCES = "FX_RES";
+
+    /**
+     * Lists all tables that keep user-based lifecycle information.
+     *
+     * @see com.flexive.shared.security.LifeCycleInfo
+     */
+    public static final List<String> TABLES_WITH_LCI = Collections.unmodifiableList(Arrays.asList(
+            TBL_CONTENT, TBL_MANDATORS, TBL_ACCOUNTS, TBL_USERGROUPS, TBL_ACLS, TBL_ACLS_ASSIGNMENT,
+            TBL_STRUCT_TYPES, TBL_STRUCT_SELECTLIST_ITEM, TBL_BRIEFCASE
+    ));
 
     /**
      * General table name extension for translation tables

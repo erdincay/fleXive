@@ -32,11 +32,16 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
-import com.flexive.shared.security.Role;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.AccountEdit;
+import com.flexive.shared.security.Role;
 import org.apache.commons.lang.RandomStringUtils;
+
+import java.util.List;
 
 /**
  * Interface for test user management.
@@ -102,6 +107,16 @@ public class TestUser {
         if (userId == -1) {
             return;
         }
+
+        // delete user contents
+        final List<FxPK> userContents = new SqlQueryBuilder().select("@pk")
+                .condition("created_by", PropertyValueComparator.EQ, userId)
+                .getResult()
+                .collectColumn(1);
+        for (FxPK pk : userContents) {
+            EJBLookup.getContentEngine().remove(pk);
+        }
+
         EJBLookup.getUserGroupEngine().remove(userGroupId);
         EJBLookup.getAccountEngine().remove(userId);
     }

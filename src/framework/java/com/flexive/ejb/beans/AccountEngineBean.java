@@ -651,13 +651,26 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             con = Database.getDbConnection();
             //Check if contents exist that the account created/modified
             stmt = con.createStatement();
-            curSql = "SELECT COUNT(*) FROM " + TBL_CONTENT + " WHERE CREATED_BY=" + accountId + " OR MODIFIED_BY=" + accountId;
+            curSql = "SELECT COUNT(DISTINCT ID) FROM " + TBL_CONTENT + " WHERE CREATED_BY=" + accountId + " OR MODIFIED_BY=" + accountId;
             ResultSet rs = stmt.executeQuery(curSql);
             if( rs != null && rs.next()) {
-                if(rs.getLong(1) > 0)
+                if(rs.getLong(1) > 1)   // 1 contact data record always exists
                     throw new FxNoAccessException("ex.account.delete.contentExists");
             }
             stmt.close();
+
+            // also check all other tables with lifecycle information
+            for (String tableName : TABLES_WITH_LCI) {
+                if (!TBL_CONTENT.equals(tableName)) {
+                    stmt = con.createStatement();
+                    rs = stmt.executeQuery("SELECT COUNT(*) FROM " + tableName
+                            + " WHERE CREATED_BY=" + accountId + " OR MODIFIED_BY=" + accountId);
+                    if (rs.next() && rs.getLong(1) > 0) {
+                        // TODO: set to special user account ("deleted user")?
+                        LOG.warn("User " + accountId + " references table " + tableName + " (ignored)");
+                    }
+                }
+            }
 
             // Delete all group assignments ..
             stmt = con.createStatement();
