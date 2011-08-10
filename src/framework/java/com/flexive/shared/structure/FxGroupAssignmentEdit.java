@@ -81,7 +81,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      *          if parentXPath is invalid
      */
     private FxGroupAssignmentEdit(FxGroupAssignment ga, FxType type, String alias, String parentXPath, FxAssignment parent) throws FxNotFoundException, FxInvalidParameterException {
-        super(-1, ga.isEnabled(), type, alias, XPathElement.buildXPath(false, parentXPath, alias),
+        super(-1, ga.isEnabled(), type, alias, XPathElement.buildXPath(StringUtils.isNotBlank(parentXPath) && parentXPath.charAt(0) == '/', parentXPath, alias),
                 ga.getPosition(), new FxMultiplicity(ga.getMultiplicity()), ga.getDefaultMultiplicity(), ga.getParentGroupAssignment(),
                 ga.getId(), ga.getLabel().copy(), ga.getHint().copy(), ga.getGroup(), ga.getMode(), FxStructureOption.cloneOptions(ga.options));
         if (parent == null && !"/".equals(parentXPath)) {
