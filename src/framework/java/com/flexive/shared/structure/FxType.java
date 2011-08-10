@@ -745,11 +745,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
         final List<FxAssignment> out = new ArrayList<FxAssignment>(groupAssignments.size() * 5); //  = new ArrayList<FxAssignment>(ga.getAllChildAssignments().size());
         for (FxGroupAssignment ga : groupAssignments) {
-            if (ga.getAllChildAssignments().size() > 0)
-                out.addAll(ga.getAllChildAssignments());
-            if (ga.getAssignedGroups().size() > 0) {
-                out.addAll(recGroupAssignmentSearch(ga.getAssignedGroups()));
-            }
+            out.addAll(ga.getAllChildAssignments());
         }
         return out;
     }
