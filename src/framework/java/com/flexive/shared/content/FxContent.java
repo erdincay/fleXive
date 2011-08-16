@@ -1050,16 +1050,8 @@ public class FxContent implements Serializable {
      */
     public boolean containsXPath(String XPath) {
         try {
-            if (getValue(XPath) != null) {
-                return true;
-            }
+            return !getData(XPath).isEmpty();
         } catch (FxRuntimeException e) {
-            // ignore, XPath exists but doesn't point to a property
-        }
-        try {
-            getGroupData(XPath);
-            return true;
-        } catch (FxRuntimeException e1) {
             return false;
         }
     }

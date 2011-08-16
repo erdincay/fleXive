@@ -32,7 +32,6 @@
 package com.flexive.faces.components.content;
 
 import com.flexive.faces.FxJsfComponentUtils;
-import static com.flexive.faces.FxJsfComponentUtils.requireAttribute;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
@@ -46,30 +45,31 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
-import javax.faces.FacesException;
-import javax.faces.component.ContextCallback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.faces.component.UIOutput;
+import javax.faces.FacesException;
+import javax.faces.component.ContextCallback;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
+import javax.faces.event.AbortProcessingException;
 import javax.faces.event.FacesEvent;
 import javax.faces.event.FacesListener;
 import javax.faces.event.PhaseId;
-import javax.faces.event.AbortProcessingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.flexive.faces.FxJsfComponentUtils.requireAttribute;
 
 /**
  * <p/>
@@ -536,9 +536,17 @@ public class FxContentView extends UIOutput {
                 } else {
                     // create a content map for each child
                     List<ContentMap> rowMaps = new ArrayList<ContentMap>();
-                    for (FxData row : content.getGroupData(assignment.getId()).getElements()) {
-                        if (includeEmpty || !row.isEmpty()) {
-                            rowMaps.add(new ContentMap(content, path + "[" + row.getIndex() + "]"));
+                    List<FxData> elements = null;
+                    try {
+                        elements = content.getGroupData(path).getElements();
+                    } catch (FxRuntimeException e) {
+                        // group empty
+                    }
+                    if (elements != null) {
+                        for (FxData row : elements) {
+                            if (includeEmpty || !row.isEmpty()) {
+                                rowMaps.add(new ContentMap(content, path + "[" + row.getIndex() + "]"));
+                            }
                         }
                     }
                     return rowMaps;
