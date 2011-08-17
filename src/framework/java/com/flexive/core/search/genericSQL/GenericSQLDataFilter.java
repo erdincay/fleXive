@@ -36,11 +36,7 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.Pair;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
@@ -513,8 +509,8 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     /**
-     * Check if the given brace contains a 'is null' condition (not recursively).
-     * 
+     * Check if the given brace contains a 'is null' condition.
+     *
      * @param br    the brace element
      * @return      true if the brace directly contains a IS NULL condition
      */
@@ -523,6 +519,10 @@ public class GenericSQLDataFilter extends DataFilter {
             if (braceElement instanceof Condition) {
                 final Condition condition = (Condition) braceElement;
                 if (condition.getComperator() == ValueComparator.IS && condition.getConstant().isNull()) {
+                    return true;
+                }
+            } else if (braceElement instanceof Brace) {
+                if (containsIsNullCondition((Brace) braceElement)) {
                     return true;
                 }
             }
@@ -872,7 +872,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 return isNullSelect(entry, prop, tableContentData, filter, "tprop");
             } else if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA_FLAT) {
                 final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
-                return isNullSelect(entry, prop, 
+                return isNullSelect(entry, prop,
                         flatContentDataTable(mapping.getStorage()),
                         SearchUtils.getFlatStorageAssignmentFilter(search.getEnvironment(), "da", entry.getAssignment()),
                         mapping.getColumn()
