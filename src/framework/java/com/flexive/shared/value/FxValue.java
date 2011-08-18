@@ -758,6 +758,10 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public final TDerived setTranslation(long language, T value) {
+        if (value instanceof FxValue) {
+            throw new FxInvalidParameterException("value", "ex.content.invalid.translation.fxvalue",
+                    value.getClass().getCanonicalName()).asRuntimeException();
+        }
         if (value instanceof String) {
             try {
                 value = this.fromString((String) value);
