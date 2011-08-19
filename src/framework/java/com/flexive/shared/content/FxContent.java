@@ -733,7 +733,11 @@ public class FxContent implements Serializable {
             createXPath(XPath);
             createdXPath=XPathElement.toXPathMult(XPath);
         } else {
-            FxPropertyData pd = getPropertyDataCreate(XPathElement.stripLastElement(XPath) + "/" + XPathElement.lastElement(XPath).getAlias() +
+            String elementPath = "";
+            if (!"/".equals(XPathElement.stripLastElement(XPath))) {
+                elementPath = XPathElement.stripLastElement(XPath);
+            }
+            FxPropertyData pd = getPropertyDataCreate(elementPath + "/" + XPathElement.lastElement(XPath).getAlias() +
                 "[" + (getMaxIndex(XPath) + 1) + "]");
             createdXPath = pd.getXPathFull();
         }

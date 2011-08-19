@@ -55,7 +55,7 @@ import org.apache.commons.lang.StringUtils;
  * a property of a content instance provided by {@link FxContentView}. The output template
  * is provided by fxValueInputRow.xhtml (the component template of fx:fxValueInputRow).
  * A custom template can be specified with the <code>template</code> parameter.
- * 
+ *
  */
 public class Jsf2FxValueHandler extends TagHandler {
 
