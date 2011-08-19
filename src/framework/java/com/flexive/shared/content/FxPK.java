@@ -282,7 +282,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
      * @return      the IDs of the given PK collection.
      * @since 3.1
      */
-    public static List<Long> getIds(Collection<FxPK> pks) {
+    public static List<Long> getIds(Collection<? extends FxPK> pks) {
         final List<Long> result = new ArrayList<Long>(pks.size());
         for (FxPK pk : pks) {
             result.add(pk.getId());
