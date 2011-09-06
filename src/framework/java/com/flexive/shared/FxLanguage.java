@@ -93,6 +93,31 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
     public static final long ITALIAN = 4;
 
     /**
+     * pre defined language spanish
+     */
+    public static final long SPANISH= 29;
+
+    /**
+     * pre defined language dutch
+     */
+    public static final long DUTCH = 82;
+
+    /**
+     * pre defined language english (US)
+     */
+    public static final long ENGLISH_US = 200;
+
+    /**
+     * pre defined language english (UK)
+     */
+    public static final long ENGLISH_UK = 201;
+
+    /**
+     * pre defined language german (CH)
+     */
+    public static final long GERMAN_CH = 202;
+
+    /**
      * Language constructor.
      *
      * @param id        the language ID
@@ -133,7 +158,14 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
     }
 
     public Locale getLocale() {
-        return new Locale(getIso2digit());
+        String iso = getIso2digit();
+        if("e1".equals(iso))
+            return Locale.US;
+        else if("e2".equals(iso))
+            return Locale.UK;
+        else if("d1".equals(iso))
+            return new Locale("de", "ch");
+        return new Locale(iso);
     }
 
     /**
