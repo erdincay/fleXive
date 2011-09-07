@@ -31,19 +31,18 @@
  ***************************************************************/
 package com.flexive.shared.search;
 
+import com.flexive.shared.FxLock;
+import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.value.*;
 import com.flexive.shared.security.PermissionSet;
-import com.flexive.shared.FxReferenceMetaData;
-import com.flexive.shared.FxLock;
-import com.flexive.shared.media.FxMetadata;
+import com.flexive.shared.value.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Date;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Provides a thin wrapper for a result row of a SQL search
@@ -93,7 +92,16 @@ public class FxResultRow implements Serializable {
     }
 
     public FxPK getPk(int column) {
-        return (FxPK) getValue(column);
+        final Object value = getValue(column);
+        if (value == null) {
+            return null;
+        } else if (value instanceof FxPK) {
+            return (FxPK) value;
+        } else if (value instanceof FxReference) {
+            return ((FxReference) value).getBestTranslation();
+        } else {
+            throw new IllegalArgumentException("Not a primary key column: " + getColumnNames()[column - 1]);
+        }
     }
 
     /**
