@@ -2300,7 +2300,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     original.getBinaryPreviewACL() != content.getBinaryPreviewACL())
                 binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             enableDetailUniqueChecks(con);
-            LifeCycleInfoImpl.updateLifeCycleInfo(TBL_CONTENT, "ID", "VER",
+            if(!content.isForceLifeCycle()) //only update the lci if not forced to keep
+                LifeCycleInfoImpl.updateLifeCycleInfo(TBL_CONTENT, "ID", "VER",
                     content.getPk().getId(), content.getPk().getVersion(), false, false);
 
             //after... scripts
