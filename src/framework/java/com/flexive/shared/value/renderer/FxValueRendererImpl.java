@@ -93,10 +93,10 @@ class FxValueRendererImpl implements FxValueRenderer {
             return translation.toString();
         }
         if (formatter != null) {
-            return formatter.format(value, translation, language);
+            return formatter.format(value, translation, translationLanguage);
         }
         // use generic object formatter as fallback
-        return get(FxValue.class).format(value, translation, language);
+        return get(FxValue.class).format(value, translation, translationLanguage);
     }
 
     /** {@inheritDoc} */
