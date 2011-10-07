@@ -54,6 +54,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class FxGroupData extends FxData {
     private static final long serialVersionUID = 133412774300450631L;
     private List<FxData> data;
+    private FxValueChangeListener changeListener = null;
 
     public FxGroupData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
                        long assignmentId, FxMultiplicity assignmentMultiplicity, int pos,
@@ -233,6 +234,15 @@ public class FxGroupData extends FxData {
     public synchronized FxData addChild(FxData child) {
         if (data.contains(child)) //TODO: change to containsChild()?
             return child;
+        if (hasChangeListener()) {
+            if (child instanceof FxGroupData)
+                ((FxGroupData) child).setChangeListener(this.changeListener, true);
+            else {
+                ((FxPropertyData) child).getValue().setChangeListener(this.changeListener);
+                if (!((FxPropertyData) child).getValue().isEmpty())
+                    valueChanged(child.getXPathFull(), FxValueChangeListener.ChangeType.Add);
+            }
+        }
         int pos = (data.size() == 0 ? 0 : child.getPos());
         switch (child.getPos()) {
             case POSITION_TOP:
@@ -727,6 +737,7 @@ public class FxGroupData extends FxData {
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getXPathElement().equals(xpath)) {
                 this.data.set(i, data);
+                valueChanged(data.getXPathFull(), FxValueChangeListener.ChangeType.Update);
                 return;
             }
         }
@@ -780,7 +791,8 @@ public class FxGroupData extends FxData {
 
         if (!this.data.remove(data)) //was: if (!data.getParent().data.remove(data))
             throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull()).asRuntimeException();
-
+        if(hasChangeListener() && !data.isEmpty())
+            valueChanged(data.getXPathFull(), FxValueChangeListener.ChangeType.Remove);
         data.compact();
         compactPositions(false);
     }
@@ -799,6 +811,7 @@ public class FxGroupData extends FxData {
 
             if (!this.data.remove(data))
                 throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull()).asRuntimeException();
+            valueChanged(data.getXPathFull(), FxValueChangeListener.ChangeType.Remove);
             if (!compactCandidates.containsKey(data.getXPath()))
                 compactCandidates.put(data.getXPath(), data);
         }
@@ -808,7 +821,7 @@ public class FxGroupData extends FxData {
     }
 
     /**
-     * "Explode" this group by adding all createable assignments at the bottom
+     * "Explode" this group by adding all creatable assignments at the bottom
      *
      * @param explodeChildGroups recursively explode all <i>existing</i> child groups?
      */
@@ -901,6 +914,7 @@ public class FxGroupData extends FxData {
             for (FxData org : data)
                 cloneData.add(org.copy(clone));
             clone.data = cloneData;
+            clone.changeListener = this.changeListener;
         } catch (FxInvalidParameterException e) {
             throw e.asRuntimeException();
         }
@@ -970,5 +984,43 @@ public class FxGroupData extends FxData {
         for (FxData d : nonInternal)
             data.remove(d);
         this.compactPositions(true);
+    }
+
+    /**
+     * Is a change listener attached
+     *
+     * @return a change listener is attached
+     * @since 3.1.6
+     */
+    public boolean hasChangeListener() {
+        return changeListener != null;
+    }
+
+    /**
+     * Set the change listener
+     *
+     * @param changeListener change listener
+     * @param includeSubGroups set the change listener for subgroups as well?
+     * @since 3.1.6
+     */
+    public void setChangeListener(FxValueChangeListener changeListener, boolean includeSubGroups) {
+        this.changeListener = changeListener;
+        for (FxData child : this.data) {
+            if (includeSubGroups && child.isGroup())
+                ((FxGroupData) child).setChangeListener(changeListener, includeSubGroups);
+            else
+                ((FxPropertyData) child).getValue().setChangeListener(changeListener);
+        }
+    }
+
+    /**
+     * Called internally when a value has changed
+     *
+     * @param xpath affected xpath
+     * @param changeType type of change
+     */
+    protected void valueChanged(String xpath, FxValueChangeListener.ChangeType changeType) {
+        if(this.changeListener != null)
+            this.changeListener.onValueChanged(xpath, changeType);
     }
 }

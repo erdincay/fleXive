@@ -35,6 +35,7 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxValueChangeListener;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -69,6 +70,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     private int maxInputLength;
     private String XPath = "";
     private Integer valueData = VALUE_NODATA;
+    private FxValueChangeListener changeListener = null;
 
     private final static long[] SYSTEM_LANG_ARRAY = new long[]{FxLanguage.SYSTEM_ID};
 
@@ -276,6 +278,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         this.XPath = clone.XPath;
         this.maxInputLength = clone.maxInputLength;
         this.valueData = clone.valueData;
+        this.changeListener = clone.changeListener;
         if (clone.isImmutableValueType()) {
             if (multiLanguage) {
                 // clone only hashmap
@@ -777,6 +780,16 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             if (value == null && !isAcceptsEmptyDefaultTranslations()) {
                 throw new FxInvalidParameterException("value", "ex.content.invalid.default.empty", getClass().getSimpleName()).asRuntimeException();
             }
+            if(this.XPath != null && this.changeListener != null) {
+                if(value != null) {
+                    if(this.singleValueEmpty)
+                        this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Add);
+                    else if(!this.singleValue.equals(value))
+                        this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Update);
+                } else if(!this.singleValueEmpty) {
+                    this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Remove);
+                }
+            }
             //override the single value
             if (singleValue == null || !singleValue.equals(value))
                 this.singleValue = value;
@@ -791,6 +804,15 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         }
         if (language == FxLanguage.SYSTEM_ID)
             throw new FxInvalidParameterException("language", "ex.content.value.invalid.multilanguage.sys").asRuntimeException();
+        if(this.XPath != null && this.changeListener != null && value != null) {
+            if(this.isEmpty())
+                this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Add);
+            else {
+                if(!value.equals(translations.get(language)))
+                    this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Update);
+            }
+        }
+        boolean wasEmpty = this.changeListener != null && isEmpty(); //only evaluate if we have a change listener attached
         if (value == null) {
             translations.remove(language);
             emptyTranslations.remove(language);
@@ -799,6 +821,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                 translations.put(language, value);
             }
             emptyTranslations.put(language, false);
+        }
+        if(this.XPath != null && this.changeListener != null && value == null && !wasEmpty && isEmpty()) {
+            this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Remove);
         }
         //noinspection unchecked
         return (TDerived) this;
@@ -1102,6 +1127,16 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     public boolean hasValueData() {
         return this.valueData != null;
+    }
+
+    /**
+     * Set the change listener
+     *
+     * @param changeListener change listener
+     * @since 3.1.6
+     */
+    public void setChangeListener(FxValueChangeListener changeListener) {
+        this.changeListener = changeListener;
     }
 }
 

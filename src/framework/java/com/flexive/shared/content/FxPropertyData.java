@@ -151,6 +151,7 @@ public class FxPropertyData extends FxData {
         if (this.value == null || FxContext.get().getRunAsSystem()) {
             this.value = value;
             this.value.setXPath(this.xpPrefix + this.getXPathFull());
+            getParent().valueChanged(this.value.getXPath(), FxValueChangeListener.ChangeType.Update);
             return;
         }
         if (this.value instanceof FxNoAccess)
@@ -159,6 +160,8 @@ public class FxPropertyData extends FxData {
             throw new FxNoAccessException("ex.content.value.readOnly").setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.ReadOnly).asRuntimeException();
         this.value = value;
         this.value.setXPath(this.xpPrefix + this.getXPathFull());
+        if(getParent().hasChangeListener() && !value.isEmpty())
+            getParent().valueChanged(this.value.getXPath(), FxValueChangeListener.ChangeType.Update);
     }
 
     /**
@@ -225,7 +228,7 @@ public class FxPropertyData extends FxData {
      *
      * @throws FxInvalidParameterException if required properties are empty
      */
-    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    @SuppressWarnings({"ThrowableInstanceNeverThrown", "UnusedDeclaration"})
     public void checkRequired() throws FxInvalidParameterException {
         if (this.getAssignmentMultiplicity().isOptional())
             return;
