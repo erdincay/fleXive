@@ -158,9 +158,13 @@ public class FxPropertyData extends FxData {
             throw new FxNoAccessException("ex.content.value.noaccess").setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.NoAccess).asRuntimeException();
         if (this.value.isReadOnly())
             throw new FxNoAccessException("ex.content.value.readOnly").setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.ReadOnly).asRuntimeException();
+        final boolean hasChangeListener = getParent().hasChangeListener();
+        boolean isChange = false;
+        if (hasChangeListener)
+            isChange = this.value == null || !value.equals(this.value);
         this.value = value;
         this.value.setXPath(this.xpPrefix + this.getXPathFull());
-        if(getParent().hasChangeListener() && !value.isEmpty())
+        if (hasChangeListener && isChange)
             getParent().valueChanged(this.value.getXPath(), FxValueChangeListener.ChangeType.Update);
     }
 

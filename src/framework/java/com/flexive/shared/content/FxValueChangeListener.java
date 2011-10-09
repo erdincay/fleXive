@@ -41,7 +41,8 @@ public interface FxValueChangeListener {
     public enum ChangeType {
         Add,
         Remove,
-        Update
+        Update,
+        Move
     }
 
     /**

@@ -221,6 +221,7 @@ public class FxGroupData extends FxData {
                 data.get(i).compact();
                 aliases.remove(data.get(i).getAlias());
             }
+            valueChanged(data.get(i).getXPathFull(), FxValueChangeListener.ChangeType.Move);
         }
 
     }
