@@ -343,8 +343,8 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      */
     @Override
     public String toString() {
-        if (getData() != null)
-            return getData();
+        if (getName() != null)
+            return getName();
         else
             return super.toString();
     }
