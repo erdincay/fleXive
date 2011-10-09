@@ -998,6 +998,16 @@ public class FxGroupData extends FxData {
     }
 
     /**
+     * Get thechange listener if attached
+     *
+     * @return a change listener if attached
+     * @since 3.1.6
+     */
+    public FxValueChangeListener getChangeListener() {
+        return changeListener;
+    }
+
+    /**
      * Set the change listener
      *
      * @param changeListener change listener

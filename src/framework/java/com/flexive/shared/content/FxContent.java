@@ -897,8 +897,11 @@ public class FxContent implements Serializable {
                 missing.add(new XPathElement(elements.get(i).getAlias(), m, true));
             for (FxData currData : currGroup.getChildren()) {
                 if (currData.getXPathElement().equals(elements.get(i))) {
-                    if (currData instanceof FxPropertyData)
+                    if (currData instanceof FxPropertyData) {
+                        if(currGroup.hasChangeListener()) //ensure a change listener is attached
+                            ((FxPropertyData) currData).getValue().setChangeListener(currGroup.getChangeListener());
                         return; //last element reached and it exists
+                    }
                     found = true;
                     currGroup = (FxGroupData) currData;
                     break;
