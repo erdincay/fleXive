@@ -180,6 +180,14 @@ public class FxPropertyData extends FxData {
      * {@inheritDoc}
      */
     @Override
+    public void setEmpty() {
+        this.value = ((FxPropertyData)this.getAssignment().createEmptyData(getParent(), getIndex(), getPos())).getValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isRequiredPropertiesPresent() {
         return this.getAssignmentMultiplicity().isRequired();
     }

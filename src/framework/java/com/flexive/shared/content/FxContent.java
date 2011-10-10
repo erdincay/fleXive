@@ -1814,6 +1814,46 @@ public class FxContent implements Serializable {
     }
 
     /**
+     * Replace our data with data from another content but only for the requested xpath
+     *
+     * @param xpath the xpath to replace the data for
+     * @param con other content to take data from
+     */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    public void replaceData(String xpath, FxContent con) {
+        if (con == null || xpath == null)
+            throw new FxInvalidParameterException("con", "ex.content.import.empty").asRuntimeException();
+        if (con.getTypeId() != this.getTypeId()) {
+            throw new FxInvalidParameterException("con", "ex.content.import.wrongType",
+                    CacheAdmin.getEnvironment().getType(con.getTypeId()).getDisplayName(),
+                    CacheAdmin.getEnvironment().getType(this.getTypeId()).getDisplayName()).asRuntimeException();
+        }
+        if(!con.containsXPath(xpath)) {
+            if(!this.containsXPath(xpath))
+                return; //nothing to do
+            FxData data = isPropertyXPath(xpath) ? this.getPropertyData(xpath) : this.getGroupData(xpath);
+            for(FxData currData: data.getElements()) {
+                if(!currData.isRemoveable()) {
+                    //replace with empty data
+                    currData.setEmpty();
+                } else
+                    currData.getParent().removeChild(data);
+            }
+        }
+        FxData orgData = isPropertyXPath(xpath) ? con.getPropertyData(xpath) : con.getGroupData(xpath);
+        FxGroupData parent = this.getGroupData(orgData.getParent().getXPathFull());
+        List<FxData> rmChildren = new ArrayList<FxData>(5);
+        for(FxData check: parent.getChildren()) {
+            if(check.getAssignmentId() == orgData.getAssignmentId())
+                rmChildren.add(check);
+        }
+        parent.getChildren().removeAll(rmChildren);
+        for(FxData currData: orgData.getElements()) {
+            parent.addChild(currData.copy(parent));
+        }
+    }
+
+    /**
      * Remove all non-system data recursively
      */
     private void removeData() {

@@ -132,6 +132,17 @@ public class FxGroupData extends FxData {
      * {@inheritDoc}
      */
     @Override
+    public void setEmpty() {
+        if(this.isRootGroup())
+            return; //not possible for the root group (yet)
+        FxGroupData empty = (FxGroupData)this.getAssignment().createEmptyData(this.getParent(), this.getIndex(), this.getPos());
+        this.data = empty.data;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isRequiredPropertiesPresent() {
         for (FxData curr : this.getChildren()) {
             if (curr.isRequiredPropertiesPresent()) {

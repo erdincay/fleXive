@@ -149,6 +149,11 @@ public abstract class FxData implements Serializable {
     public abstract boolean isEmpty();
 
     /**
+     * Replace all data with empty values/groups
+     */
+    public abstract void setEmpty();
+
+    /**
      * Are there any required properties (empty or non-empty) present?
      *
      * @return true if there any required properties (empty or non-empty) present
