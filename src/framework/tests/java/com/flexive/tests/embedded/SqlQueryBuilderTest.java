@@ -29,8 +29,10 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.tests.shared;
+package com.flexive.tests.embedded;
 
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.FxResultRow;
@@ -42,16 +44,20 @@ import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.value.FxDate;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.QueryNodeTreeTests.AssignmentNodeGenerator;
-import static org.testng.Assert.assertEquals;
-import org.testng.annotations.Test;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Formatter;
-import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for the SqlQueryBuilder class.
@@ -59,7 +65,7 @@ import java.util.Arrays;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @see com.flexive.shared.search.query.SqlQueryBuilder
  */
-@Test(groups = "search")
+@Test(groups = {"ejb", "search"})
 public class SqlQueryBuilderTest {
     /**
      * A very basic query test with one condition.
@@ -323,6 +329,15 @@ public class SqlQueryBuilderTest {
             last = id;
         }
     }
+
+    @Test
+    public void searchLanguagesTest() {
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        final List<FxLanguage> languages = Arrays.asList(env.getLanguage("en"), env.getLanguage("de"));
+        final String query = new SqlQueryBuilder().select("@pk").searchLanguages(languages).getQuery();
+        assertTrue(query.contains("SEARCH_LANGUAGES=en|de"), "Search language filter not found in: " + query);
+    }
+
     private void checkInCondition(SqlQueryBuilder sqlQueryBuilder) {
         final String query = sqlQueryBuilder.getQuery();
         Assert.assertTrue(query.toUpperCase().contains("TITLE IN ('HELLO','WORLD')"), "Invalid 'in' condition: " + query);

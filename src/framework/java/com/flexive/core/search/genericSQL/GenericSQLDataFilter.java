@@ -1161,7 +1161,7 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     private String getLanguageFilter() {
-        return search.getSearchLanguage() == null ? "" : " AND lang IN (0," + search.getSearchLanguage().getId() + ") ";
+        return search.getSearchLanguageIds() == null ? "" : " AND lang IN (0," + StringUtils.join(search.getSearchLanguageIds(),  ",") + ") ";
     }
 
     private PropertyResolver.Table getTableType(FxStatement statement, Property property) throws FxSqlSearchException {

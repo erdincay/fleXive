@@ -51,6 +51,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxValue;
 import com.flexive.sqlParser.*;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -93,10 +94,11 @@ public class SqlSearch {
     private FxEnvironment environment;
     private final ResultPreferencesEngine conf;
     private FxLanguage language;
-    private FxLanguage searchLanguage;
+    private List<Long> searchLanguageIds;
 
     /**
      * Ctor
+     *
      *
      * @param seq            reference to the sequencer
      * @param briefcase      reference to the briefcase engine
@@ -109,12 +111,11 @@ public class SqlSearch {
      * @param location       the location that started the search
      * @param viewType       the view type @throws com.flexive.shared.exceptions.FxSqlSearchException
      *                       if the search failed
-     * @param searchLanguage the search language. If set, contents will be queried only in the given language.
      * @throws com.flexive.shared.exceptions.FxSqlSearchException
      *          if the search engine could not be initialized
      */
     public SqlSearch(SequencerEngine seq, BriefcaseEngine briefcase, TreeEngine treeEngine, String query, int startIndex, int maxFetchRows, FxSQLSearchParams params,
-                     ResultPreferencesEngine conf, ResultLocation location, ResultViewType viewType, FxLanguage searchLanguage) throws FxSqlSearchException {
+                     ResultPreferencesEngine conf, ResultLocation location, ResultViewType viewType) throws FxSqlSearchException {
         FxSharedUtils.checkParameterEmpty(query, "query");
         // Parameter checks
         if (startIndex < 0) {
@@ -135,7 +136,6 @@ public class SqlSearch {
         this.fetchRows = maxFetchRows == -1 ? Integer.MAX_VALUE : maxFetchRows;
         this.query = query;
         this.language = FxContext.get().getTicket().getLanguage();
-        this.searchLanguage = searchLanguage;
         this.location = location;
         this.viewType = viewType;
         this.storage = StorageManager.getStorageImpl();
@@ -207,6 +207,17 @@ public class SqlSearch {
                 default:
                     // Can never happen
                     cacheTbl = null;
+            }
+
+            // initialize search languages
+            final String[] searchLanguages = statement.getTables()[0].getSearchLanguages();
+            if (searchLanguages == null || searchLanguages.length == 0) {
+                this.searchLanguageIds = null;
+            } else {
+                this.searchLanguageIds = Lists.newArrayListWithCapacity(searchLanguages.length);
+                for (String searchLanguage : searchLanguages) {
+                    this.searchLanguageIds.add(environment.getLanguage(searchLanguage).getId());
+                }
             }
 
             con = Database.getDbConnection();
@@ -554,11 +565,11 @@ public class SqlSearch {
         return treeEngine;
     }
 
-    public FxLanguage getSearchLanguage() {
-        return searchLanguage;
-    }
-
     public FxEnvironment getEnvironment() {
         return environment;
+    }
+
+    public List<Long> getSearchLanguageIds() {
+        return searchLanguageIds;
     }
 }

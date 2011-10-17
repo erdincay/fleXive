@@ -41,6 +41,7 @@ import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.value.FxValue;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -547,6 +548,21 @@ public class SqlQueryBuilder implements Serializable {
         checkParameterNull(filter, "filter");
         removeFilter("VERSION");
         return uniqueFilter("VERSION", filter.name());
+    }
+
+    /**
+     * Limit the language(s) in which queries are performed (applied to multilingual properties only).
+     *
+     * @param languages     the language(s)
+     * @return              this
+     * @since               3.1.6
+     */
+    public SqlQueryBuilder searchLanguages(Collection<FxLanguage> languages) {
+        final List<String> isoCodes = Lists.newArrayListWithCapacity(languages.size());
+        for (FxLanguage language : languages) {
+            isoCodes.add(language.getIso2digit());
+        }
+        return uniqueFilter("SEARCH_LANGUAGES", StringUtils.join(isoCodes, "|"));
     }
 
     private SqlQueryBuilder setTypeFilter(Object value) {

@@ -1681,6 +1681,17 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void searchLanguageTest() throws FxApplicationException {
+        final SqlQueryBuilder sqb = new SqlQueryBuilder();
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        final SqlQueryBuilder base = sqb.select("@pk").condition("#" + TEST_TYPE + "/stringSearchPropML", PropertyValueComparator.NOT_EMPTY, null);
+        FxResultSet result = base.copy().searchLanguages(Arrays.asList(env.getLanguage("it"))).getResult();
+        assertEquals(result.getRowCount(), 0, "No rows in Italian expected");
+        result = base.copy().searchLanguages(Arrays.asList(env.getLanguage("de"))).getResult();
+        assertTrue(result.getRowCount() > 0, "Search in German values should have returned rows);");
+    }
+
+    @Test
     public void flatConditionsWithEmpty() throws FxApplicationException {
         final ContentEngine contentEngine = EJBLookup.getContentEngine();
         final FxContent co = contentEngine.initialize(TEST_TYPE);

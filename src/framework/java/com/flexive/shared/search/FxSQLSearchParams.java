@@ -34,8 +34,8 @@ package com.flexive.shared.search;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
 import com.google.common.collect.Lists;
@@ -214,7 +214,7 @@ public class FxSQLSearchParams implements Serializable {
     /**
      * Sets the languages that the resultset should contain.
      *
-     * @param languages the languages, if null or a emtpty array is specified the default language of the
+     * @param languages the languages, if null or a empty array is specified the default language of the
      *                  calling user will be used.
      * @return this
      */

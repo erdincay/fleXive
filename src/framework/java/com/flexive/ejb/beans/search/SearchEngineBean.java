@@ -34,6 +34,7 @@ package com.flexive.ejb.beans.search;
 import com.flexive.core.Database;
 import com.flexive.core.search.SqlSearch;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.Parameter;
@@ -44,12 +45,7 @@ import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.*;
-import com.flexive.shared.search.query.QueryOperatorNode;
-import com.flexive.shared.search.query.QueryRootNode;
-import com.flexive.ejb.beans.EJBUtils;
-import com.flexive.shared.search.query.QueryNode;
-import com.flexive.shared.search.query.QueryNodeVisitor;
-import com.flexive.shared.search.query.QueryValueNode;
+import com.flexive.shared.search.query.*;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,8 +59,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 @javax.ejb.TransactionManagement(javax.ejb.TransactionManagementType.CONTAINER)
 @Stateless(name = "SearchEngine", mappedName="SearchEngine")
@@ -115,7 +111,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
                 params = new FxSQLSearchParams();
             }
             return new SqlSearch(seq, briefcase, treeEngine, query, startIndex, fetchRows, 
-                    params, resultPreferences, location, viewType, null).executeQuery();
+                    params, resultPreferences, location, viewType).executeQuery();
         } catch (FxSqlSearchException exc) {
             EJBUtils.rollback(ctx);
             throw exc;

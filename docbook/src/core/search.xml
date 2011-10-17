@@ -763,11 +763,12 @@ ORDER BY 2]]></programlisting>
 
                     <varlistentry>
                         <term>
-                            <code>SEARCH_LANGUAGES=languageId[,languageId]?</code>
+                            <code>SEARCH_LANGUAGES=iso2Code[|iso2Code]*</code>
                         </term>
                         <listitem>
                             <para>
-                                Restrict results to languages contained in the comma separated list of language IDs.
+                                Restrict search to languages contained in the list of language ISO codes
+                                separated by "|" (e.g. SEARCH_LANGUAGES=en|de).
                             </para>
                         </listitem>
                     </varlistentry>
