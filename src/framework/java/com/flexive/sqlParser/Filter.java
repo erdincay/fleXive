@@ -33,6 +33,7 @@ package com.flexive.sqlParser;
 
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.search.query.VersionFilter;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.StringTokenizer;
 
@@ -101,15 +102,8 @@ public class Filter {
                             type,String.valueOf(TYPE.MAX_RESULTROWS));
                 }
             } else {
-                try {
-                    // use content filters as fallback
-                    initTableFilter(stmt, "co." + type, value);
-                } catch (SqlParserException e) {
-                    throw new SqlParserException("ex.sqlSearch.filter.unknownGlobalFilter",
-                            type,
-                            String.valueOf(TYPE.MAX_RESULTROWS)+","+
-                            String.valueOf(TYPE.IGNORE_CASE));
-                }
+                // use content filters as fallback
+                initTableFilter(stmt, "co." + type, value);
             }
             stmt.addFilter(this);
         }
@@ -141,7 +135,7 @@ public class Filter {
         // ----------- INVALID -------------------------------------------------------------------------------------
         else {
             throw new SqlParserException("ex.sqlSearch.filter.unknownTableFilter",
-                    type,String.valueOf(TYPE.SEARCH_LANGUAGES));
+                    type, StringUtils.join(TYPE.values(), ", "));
         }
         this.table.addFilter(this);
     }

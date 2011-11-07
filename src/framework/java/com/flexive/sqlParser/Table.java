@@ -35,6 +35,7 @@ import com.flexive.shared.search.query.VersionFilter;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  * Table
@@ -44,6 +45,9 @@ import java.util.Locale;
 public class Table {
 
     public enum TYPE { CONTENT }
+
+    private static final Pattern PAT_LANGUAGE_VARIANT = Pattern.compile("[e|d][0-9]"); // workaround for additional languages (e1, d1, ...)
+
     private String sAlias;
     private TYPE tType;
     private HashMap<Filter.TYPE,Filter> filters;
@@ -96,7 +100,8 @@ public class Table {
                     break;
                 }
             }
-            if (!found) {
+
+            if (!found && !PAT_LANGUAGE_VARIANT.matcher(code).matches()) {
                 throw new SqlParserException("ex.sqlSearch.languages.unknownIsoCode",code);
             }
         }
