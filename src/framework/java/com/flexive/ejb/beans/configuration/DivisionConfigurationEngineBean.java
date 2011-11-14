@@ -828,4 +828,44 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             Database.closeObjects(DivisionConfigurationEngineBean.class, con, ps);
         }
     }
+
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public Set<String> getResourceKeysMatching(String keyMatch, String valueMatch, long searchLanguage) throws FxApplicationException {
+        FxSharedUtils.checkParameterNull(keyMatch, "keyMatch");
+        FxSharedUtils.checkParameterNull(valueMatch, "valueMatch");
+
+        final Set<String> keys = Sets.newHashSet();
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("SELECT RKEY FROM " + TBL_RESOURCES + " WHERE RKEY LIKE ? AND RVAL LIKE ? AND LANG=?");
+
+            String keyQuery = keyMatch.trim();
+            if (keyQuery.indexOf('%') == -1) {
+                keyQuery += "%";
+            }
+
+            String valueQuery = valueMatch.trim();
+            if (valueQuery.indexOf('%') == -1) {
+                valueQuery += "%";
+            }
+
+            ps.setString(1, keyQuery);
+            ps.setString(2, valueQuery);
+            ps.setLong(3, searchLanguage);
+
+            final ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                keys.add(rs.getString(1));
+            }
+
+            return keys;
+        } catch (SQLException e) {
+            throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngineBean.class, con, ps);
+        }
+    }
 }

@@ -214,4 +214,16 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @since 3.1.6
      */
     Set<String> getResourceKeysMatching(String keyMatch) throws FxApplicationException;
+
+    /**
+     * Get all resource keys that match a given key and value prefix in a requested language, but do not load the associated values.
+     *
+     * @param keyMatch  the key prefix, or, if a wildcard ('%') is contained, the exact query string
+     * @param valueMatch  the key prefix, or, if a wildcard ('%') is contained, the exact query string
+     * @param searchLanguage language to search values
+     * @return all resource keys that match the prefix
+     * @throws FxApplicationException   on errors
+     * @since 3.1.6
+     */
+    public Set<String> getResourceKeysMatching(String keyMatch, String valueMatch, long searchLanguage) throws FxApplicationException;
 }
