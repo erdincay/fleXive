@@ -303,10 +303,10 @@ public class FxGroupData extends FxData {
      * @param pos   position in same hierarchy level
      * @return the added data element
      */
-    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxData addEmptyChild(String xPath, int pos) {
         FxType type;
         List<FxAssignment> childAssignments;
+        xPath = XPathElement.toXPathMult(xPath);
         if (this.isRootGroup()) {
             type = CacheAdmin.getEnvironment().getAssignment(this.getChildren().get(0).getAssignmentId()).getAssignedType();
             childAssignments = type.getConnectedAssignments("/");
@@ -331,9 +331,14 @@ public class FxGroupData extends FxData {
                         }
                     }
                     int index = XPathElement.lastElement(xPath).getIndex();
-                    if (as.getMultiplicity().isValidMax(index))
+                    if (as.getMultiplicity().isValidMax(index)) {
+                        for (FxData child : getChildren()) {
+                            if (child.isGroup() && child.getXPathFull().equals(xPath)) {
+                                throw new FxInvalidParameterException("pos", "ex.content.xpath.group.exists", xPath).asRuntimeException();
+                            }
+                        }
                         return this.addChild(as.createEmptyData(this, index).setPos(pos));
-                    else
+                    } else
                         throw new FxInvalidParameterException("pos", "ex.content.xpath.index.invalid", index, as.getMultiplicity(), this.getXPath()).setAffectedXPath(xPath, FxContentExceptionCause.InvalidIndex).asRuntimeException();
                 }
             }
