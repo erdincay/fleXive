@@ -74,7 +74,7 @@ public class ExtractedData implements Serializable {
 
     /**
      * Returns a compressed form of the extracted text that only contains words with at least
-     * 4 characters, and contains every distinct uppercase word only one time.
+     * 4 and at most 30 characters, and contains every distinct uppercase word only one time.
      * Additional text (eg text from html tag attributes like 'title' and 'alt') stored in the
      * FxSummaryInformation will be included.
      *
@@ -98,7 +98,7 @@ public class ExtractedData implements Serializable {
             txt = txt.replace("?", " ").replace(".", " ").replace("!", " ");
             String[] sw = txt.split("[\\s,;:=\\(\\)\"-']");
             for (String word : sw) {
-                if (word.length() < 4) continue;
+                if (word.length() < 4 || word.length() > 30) continue;
                 words.put(word.toUpperCase(), Boolean.TRUE);
             }
             for (Enumeration e = words.keys(); e.hasMoreElements();) {

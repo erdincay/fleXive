@@ -219,6 +219,9 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
                     : ((FxPropertyAssignment) change.getOriginalData().getAssignment()).getProperty();
             if (!prop.getDataType().isTextType())
                 return; //make sure only text types are fulltext indexed
+            if (!prop.isFulltextIndexed()) {
+                return; // respect fulltext flag for updates
+            }
         } catch (Exception e) {
             //could not get the property, return
             LOG.error("Could not retrieve the used FxProperty for change " + change + "!");
