@@ -42,7 +42,6 @@ import org.apache.commons.lang.StringUtils;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -258,6 +257,6 @@ public class FxValueRendererFactory {
     }
 
     private static String getEmptyMessage(FxLanguage outputLanguage) {
-        return "null"; // TODO
+        return ""; // TODO
     }
 }
