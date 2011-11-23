@@ -103,18 +103,21 @@ public class FxPermissionUtils {
         boolean typeAllowed = !type.isUseTypePermissions();
         boolean stepAllowed = !type.isUseStepPermissions();
         boolean contentAllowed = !type.isUseInstancePermissions();
+        final long userId = ticket.getUserId();
+        final long typeAclId = type.getACL().getId();
         for (ACLAssignment assignment : ticket.getACLAssignments()) {
-            if (!typeAllowed && assignment.getAclId() == type.getACL().getId())
-                typeAllowed = assignment.getPermission(permission, ownerId, ticket.getUserId());
-            if (!stepAllowed && assignment.getAclId() == stepACL)
-                stepAllowed = assignment.getPermission(permission, ownerId, ticket.getUserId());
-            if (!contentAllowed && contentACLs.contains(assignment.getAclId()))
-                contentAllowed = assignment.getPermission(permission, ownerId, ticket.getUserId());
+            final long assignmentAclId = assignment.getAclId();
+            if (!typeAllowed && assignmentAclId == typeAclId)
+                typeAllowed = assignment.getPermission(permission, ownerId, userId);
+            if (!stepAllowed && assignmentAclId == stepACL)
+                stepAllowed = assignment.getPermission(permission, ownerId, userId);
+            if (!contentAllowed && contentACLs.contains(assignmentAclId))
+                contentAllowed = assignment.getPermission(permission, ownerId, userId);
         }
         if (throwException && !(typeAllowed && stepAllowed && contentAllowed)) {
             Set<String> lacking = new HashSet<String>(3);
             if (!typeAllowed)
-                addACLName(lacking, ticket.getLanguage(), type.getACL().getId());
+                addACLName(lacking, ticket.getLanguage(), typeAclId);
             if (!stepAllowed)
                 addACLName(lacking, ticket.getLanguage(), stepACL);
             if (!contentAllowed) {
@@ -150,8 +153,9 @@ public class FxPermissionUtils {
             default:
                 checkLock = false;
         }
+        final long userId = ticket.getUserId();
         if (checkLock && si.getLock().isLocked() && !si.getLock().isUnlockable()) {
-            if (si.getLock().getUserId() != ticket.getUserId() && !ticket.isMandatorSupervisor()) {
+            if (si.getLock().getUserId() != userId && !ticket.isMandatorSupervisor()) {
                 if (throwException)
                     throw new FxNoAccessException("ex.lock.content.locked.noAccess", si.getPk());
                 return false;
@@ -166,12 +170,13 @@ public class FxPermissionUtils {
         final Set<String> lacking = (throwException ? new HashSet<String>(3) : null);
 
         for (ACLAssignment assignment : ticket.getACLAssignments()) {
-            if (!typeAllowed && assignment.getAclId() == si.getTypeACL())
-                typeAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
-            if (!stepAllowed && assignment.getAclId() == si.getStepACL())
-                stepAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
-            if (!contentAllowed && si.getContentACLs().contains(assignment.getAclId()))
-                contentAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
+            final long assignmentAclId = assignment.getAclId();
+            if (!typeAllowed && assignmentAclId == si.getTypeACL())
+                typeAllowed = assignment.getPermission(permission, si.getOwnerId(), userId);
+            if (!stepAllowed && assignmentAclId == si.getStepACL())
+                stepAllowed = assignment.getPermission(permission, si.getOwnerId(), userId);
+            if (!contentAllowed && si.getContentACLs().contains(assignmentAclId))
+                contentAllowed = assignment.getPermission(permission, si.getOwnerId(), userId);
         }
 
         if (throwException && !(typeAllowed && stepAllowed && contentAllowed)) {

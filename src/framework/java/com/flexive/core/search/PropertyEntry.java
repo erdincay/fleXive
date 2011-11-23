@@ -31,33 +31,34 @@
  ***************************************************************/
 package com.flexive.core.search;
 
-import com.flexive.core.storage.DBStorage;
-import com.flexive.core.storage.StorageManager;
-import com.flexive.shared.structure.*;
-import com.flexive.shared.exceptions.*;
-import com.flexive.shared.value.*;
-import com.flexive.shared.*;
-import com.flexive.shared.search.FxPaths;
-import com.flexive.shared.search.FxSQLFunction;
-import com.flexive.shared.search.FxResultSet;
-import com.flexive.shared.content.FxPK;
-import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.DBStorage;
+import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.*;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.exceptions.*;
+import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.FxSQLFunction;
+import com.flexive.shared.structure.*;
+import com.flexive.shared.value.*;
 import com.flexive.sqlParser.Property;
-import com.google.common.collect.*;
-import static com.google.common.collect.Lists.newArrayList;
 import com.google.common.base.Predicate;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.*;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.sql.SQLException;
-import java.util.*;
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.*;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * <p>
@@ -299,6 +300,8 @@ public class PropertyEntry {
                 final long createdBy = rs.getLong(positionInResultSet + getIndex("created_by"));
                 final long stepId = rs.getLong(positionInResultSet + getIndex("step"));
                 final long mandatorId = rs.getLong(positionInResultSet + getIndex("mandator"));
+                // TODO: cache/reuse permission sets - the permission check is relatively expensive
+                // and big results have usually only a few acl/user/step/mandator combinations anyway
                 return FxPermissionUtils.getPermissions(aclId, getEnvironment().getType(typeId),
                         getEnvironment().getStep(stepId).getAclId(), createdBy, mandatorId);
             } catch (SQLException e) {
