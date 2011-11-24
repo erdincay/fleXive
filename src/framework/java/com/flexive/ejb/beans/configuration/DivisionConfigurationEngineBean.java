@@ -839,7 +839,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            ps = con.prepareStatement("SELECT RKEY FROM " + TBL_RESOURCES + " WHERE RKEY LIKE ? AND RVAL LIKE ? AND LANG=?");
+            ps = con.prepareStatement("SELECT RKEY FROM " + TBL_RESOURCES + " WHERE RKEY LIKE ? AND UPPER(RVAL) LIKE ? AND LANG=?");
 
             String keyQuery = keyMatch.trim();
             if (keyQuery.indexOf('%') == -1) {
@@ -852,7 +852,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             }
 
             ps.setString(1, keyQuery);
-            ps.setString(2, valueQuery);
+            ps.setString(2, valueQuery.toUpperCase());
             ps.setLong(3, searchLanguage);
 
             final ResultSet rs = ps.executeQuery();
