@@ -32,9 +32,12 @@
 package com.flexive.core.security;
 
 import com.flexive.shared.*;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.interfaces.AccountEngine;
+import com.flexive.shared.interfaces.UserConfigurationEngine;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxEnvironment;
 import org.apache.commons.lang.ArrayUtils;
@@ -43,6 +46,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.text.DateFormatSymbols;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 
 /**
@@ -82,6 +88,11 @@ public class UserTicketImpl implements UserTicket, Serializable {
     private long failedLoginAttempts = 0;
     private AuthenticationSource authenticationSource = AuthenticationSource.None;
 
+    private String dateFormat;
+    private char decimalSeparator;
+    private char groupingSeparator;
+    private boolean useGroupingSeparator;
+
     /**
      * Returns a guest ticket, based on the request information data.
      * <p/>
@@ -106,10 +117,14 @@ public class UserTicketImpl implements UserTicket, Serializable {
         synchronized(UserTicketImpl.class) {
             // Don't use the class lock for the entire method, because otherwise it could
             // deadlock when reloadGuestTicketAssignments is called from another thread (FX-435)
-            
+            final Locale locale = FxLanguage.DEFAULT.getLocale();
             return new UserTicketImpl(si.getApplicationId(), si.isWebDAV(), "GUEST", "GUEST", Account.USER_GUEST,
                     guestContactData, Mandator.MANDATOR_FLEXIVE, true, guestGroups, guestRoles, guestACLAssignments,
-                    FxLanguage.DEFAULT, 0, AuthenticationSource.None);
+                    FxLanguage.DEFAULT, 0, AuthenticationSource.None,
+                    DateFormatSymbols.getInstance(locale).getLocalPatternChars(),
+                    DecimalFormatSymbols.getInstance(locale).getDecimalSeparator(),
+                    DecimalFormatSymbols.getInstance(locale).getGroupingSeparator(),
+                    DecimalFormat.getNumberInstance(locale).isGroupingUsed());
         }
     }
 
@@ -358,11 +373,16 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * @param isWebDav             true if this is a webdav ticket
      * @param failedLoginAttempts  number of failed login attempts
      * @param authenticationSource source of authentication
+     * @param dateFormat           date format pattern
+     * @param decimalSeparator     decimal separator
+     * @param groupingSeparator    grouping separator
+     * @param useGroupingSeparator use the grouping separator?
      */
     private UserTicketImpl(String applicationId, boolean isWebDav, String userName, String loginName, long userId,
                            FxPK contactData, long mandatorId,
                            boolean multiLogin, long[] groups, Role[] roles, ACLAssignment assignments[],
-                           FxLanguage language, long failedLoginAttempts, AuthenticationSource authenticationSource) {
+                           FxLanguage language, long failedLoginAttempts, AuthenticationSource authenticationSource,
+                           String dateFormat, char decimalSeparator, char groupingSeparator, boolean useGroupingSeparator) {
         this.applicationId = applicationId;
         this.userName = userName;
         this.loginName = loginName;
@@ -377,6 +397,10 @@ public class UserTicketImpl implements UserTicket, Serializable {
         this.webDav = isWebDav;
         this.failedLoginAttempts = failedLoginAttempts;
         this.authenticationSource = authenticationSource;
+        this.dateFormat = dateFormat;
+        this.decimalSeparator = decimalSeparator;
+        this.groupingSeparator = groupingSeparator;
+        this.useGroupingSeparator = useGroupingSeparator;
         populateData();
     }
 
@@ -415,6 +439,37 @@ public class UserTicketImpl implements UserTicket, Serializable {
         if (isInRole(Role.MandatorSupervisor)) {
             mandatorSupervisor = true;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void initUserSpecificSettings() {
+        final Locale locale = getLanguage().getLocale();
+        final UserConfigurationEngine uce = EJBLookup.getUserConfigurationEngine();
+        String _dateFormat = null;
+        String _decimalSeparator = null;
+        String _groupingSeparator = null;
+        Boolean _useGroupingSeparator = null;
+        if (userId > Account.NULL_ACCOUNT) {
+            try {
+                FxContext.startRunningAsSystem();
+                _dateFormat = uce.get(userId, SystemParameters.USER_DATEFORMAT, SystemParameters.USER_DATEFORMAT.getKey(), true);
+                _decimalSeparator = uce.get(userId, SystemParameters.USER_DECIMALSEPARATOR, SystemParameters.USER_DECIMALSEPARATOR.getKey(), true);
+                _groupingSeparator = uce.get(userId, SystemParameters.USER_GROUPINGSEPARATOR, SystemParameters.USER_GROUPINGSEPARATOR.getKey(), true);
+                _useGroupingSeparator = uce.get(userId, SystemParameters.USER_USEGROUPINGSEPARATOR, SystemParameters.USER_USEGROUPINGSEPARATOR.getKey(), true);
+            } catch (FxNotFoundException e) {
+                //ok, might just not be set
+            } catch (FxApplicationException e) {
+                LOG.error(e);
+            } finally {
+                FxContext.stopRunningAsSystem();
+            }
+        }
+        this.dateFormat = _dateFormat != null ? _dateFormat : DateFormatSymbols.getInstance(locale).getLocalPatternChars();
+        this.decimalSeparator = _decimalSeparator != null && _decimalSeparator.length() > 0 ? _decimalSeparator.charAt(0) : DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
+        this.groupingSeparator = _groupingSeparator != null && _groupingSeparator.length() > 0 ? _groupingSeparator.charAt(0) : DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
+        this.useGroupingSeparator = _useGroupingSeparator != null ? _useGroupingSeparator : DecimalFormat.getNumberInstance(locale).isGroupingUsed();
     }
 
     /**
@@ -462,7 +517,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
     public UserTicketImpl copy() {
         return new UserTicketImpl(this.applicationId, this.webDav, this.userName, this.loginName,
                 this.userId, this.contactData, this.mandator, this.multiLogin, this.groups.clone(), this.roles.clone(),
-                ACLAssignment.clone(this.assignments), this.language, this.failedLoginAttempts, this.authenticationSource);
+                ACLAssignment.clone(this.assignments), this.language, this.failedLoginAttempts, this.authenticationSource,
+                this.dateFormat, this.decimalSeparator, this.groupingSeparator, this.useGroupingSeparator);
     }
 
 
@@ -776,5 +832,31 @@ public class UserTicketImpl implements UserTicket, Serializable {
     public void setLanguage(FxLanguage language) {
         if (language != null)
             this.language = language;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public char getDecimalSeparator() {
+        return decimalSeparator;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public char getGroupingSeparator() {
+        return groupingSeparator;
+    }
+
+    @Override
+    public boolean useGroupingSeparator() {
+        return useGroupingSeparator;
     }
 }

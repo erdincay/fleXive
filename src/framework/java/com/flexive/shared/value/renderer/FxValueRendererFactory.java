@@ -40,10 +40,10 @@ import com.flexive.shared.value.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -115,13 +115,57 @@ public class FxValueRendererFactory {
     }
 
 
+    final static Map<Locale, Map<String, NumberFormat>> NUMBER_FORMATS = new HashMap<Locale, Map<String, NumberFormat>>(10);
+
+    /**
+     * Get a number format instance depending on the current users formatting options
+     *
+     * @return NumberFormat
+     */
+    public static NumberFormat getNumberFormatInstance() {
+        return getNumberFormatInstance(FxContext.getUserTicket().getLanguage().getLocale());
+    }
+
+    /**
+     * Get a number format instance depending on the current users formatting options
+     *
+     * @param locale locale to use
+     * @return NumberFormat
+     */
+    public static NumberFormat getNumberFormatInstance(Locale locale) {
+        final String currentUserKey = buildCurrentUserNumberFormatKey();
+        synchronized (NUMBER_FORMATS) {
+            if(NUMBER_FORMATS.containsKey(locale)) {
+                Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
+                if(map.containsKey(currentUserKey))
+                    return map.get(currentUserKey);
+            } else
+                NUMBER_FORMATS.put(locale, new HashMap<String, NumberFormat>(5));
+            Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
+            DecimalFormat format = (DecimalFormat)DecimalFormat.getNumberInstance(locale);
+            DecimalFormatSymbols dfs = (DecimalFormatSymbols)format.getDecimalFormatSymbols().clone();
+            final FxContext ctx = FxContext.get();
+            dfs.setDecimalSeparator(ctx.getDecimalSeparator());
+            dfs.setGroupingSeparator(ctx.getGroupingSeparator());
+            format.setGroupingUsed(ctx.useGroupingSeparator());
+            format.setDecimalFormatSymbols(dfs);
+            map.put(currentUserKey, format);
+            return format;
+        }
+    }
+
+    private static String buildCurrentUserNumberFormatKey() {
+        FxContext ctx = FxContext.get();
+        return String.valueOf(ctx.getDecimalSeparator())+String.valueOf(ctx.getGroupingSeparator())+String.valueOf(ctx.useGroupingSeparator());
+    }
+
     /**
      * FxDouble formatter.
      */
     private static class FxDoubleFormatter implements FxValueFormatter<Double, FxDouble> {
         public String format(FxDouble value, Double translation, FxLanguage outputLanguage) {
             return translation != null
-                    ? NumberFormat.getNumberInstance(outputLanguage.getLocale()).format(translation)
+                    ? getNumberFormatInstance(outputLanguage.getLocale()).format(translation)
                     : getEmptyMessage(outputLanguage);
         }
     }
@@ -132,7 +176,7 @@ public class FxValueRendererFactory {
     private static class FxFloatFormatter implements FxValueFormatter<Float, FxFloat> {
         public String format(FxFloat value, Float translation, FxLanguage outputLanguage) {
             return translation != null
-                    ? NumberFormat.getNumberInstance(outputLanguage.getLocale()).format(translation)
+                    ? getNumberFormatInstance(outputLanguage.getLocale()).format(translation)
                     : getEmptyMessage(outputLanguage);
         }
     }

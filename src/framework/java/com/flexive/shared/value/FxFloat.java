@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.math.NumberUtils;
 
 import java.io.Serializable;
@@ -201,5 +202,13 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
             return super.compareTo(o);
         }
         return NumberUtils.compare(getBestTranslation(), ((FxFloat) o).getBestTranslation());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getStringValue(Float value) {
+        return value == null ? "" : FxValueRendererFactory.getNumberFormatInstance().format((double)value);
     }
 }

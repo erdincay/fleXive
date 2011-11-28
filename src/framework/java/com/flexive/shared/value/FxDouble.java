@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.math.NumberUtils;
 
 import java.io.Serializable;
@@ -210,5 +211,13 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
             return super.compareTo(o);
         }
         return NumberUtils.compare(getBestTranslation(), ((FxDouble) o).getBestTranslation());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getStringValue(Double value) {
+        return value == null ? "" : FxValueRendererFactory.getNumberFormatInstance().format(value);
     }
 }

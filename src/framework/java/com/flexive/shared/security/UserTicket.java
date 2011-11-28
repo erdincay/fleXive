@@ -346,6 +346,14 @@ public interface UserTicket extends Serializable {
      */
     public void setLanguage(FxLanguage language);
 
+    public String getDateFormat();
+
+    public char getDecimalSeparator();
+
+    public char getGroupingSeparator();
+
+    public boolean useGroupingSeparator();
+
     /**
      * Creates an independent copy of this ticket.
      *
@@ -353,6 +361,11 @@ public interface UserTicket extends Serializable {
      * @since 3.1
      */
     public UserTicket copy();
+
+    /**
+     * Initialize user specific settings like formatting options
+     */
+    void initUserSpecificSettings();
 }
 
 

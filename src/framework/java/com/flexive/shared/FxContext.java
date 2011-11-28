@@ -41,7 +41,6 @@ import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.tree.FxTreeMode;
-import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -50,10 +49,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * The [fleXive] context - user session specific data like UserTickets, etc.
@@ -105,6 +103,10 @@ public class FxContext implements Serializable {
     private long nodeId = -1;
     private FxTreeMode treeMode;
     private DivisionData divisionData;
+    private String dateFormatOverride = null;
+    private char decimalSeparatorOverride = 0;
+    private char groupingSeparatorOverride = 0;
+    private Boolean useGroupingSeparatorOverride = null;
 
     private static UserTicket getLastUserTicket(HttpSession session) {
         return (UserTicket) session.getAttribute("LAST_USERTICKET");
@@ -123,6 +125,7 @@ public class FxContext implements Serializable {
 
     public void setTicket(UserTicket ticket) {
         this.ticket = ticket;
+        this.ticket.initUserSpecificSettings();
     }
 
     /**
@@ -636,7 +639,7 @@ public class FxContext implements Serializable {
      * Remove attributes that are known to be cached (before storing the context for later use).
      * This is basically a workaround since the context does not know which attributes must be
      * preserved, and there's one very large blob that may be looming around (the cached FxEnvironment).
-     * 
+     *
      * @since 3.1.3
      */
     public void clearCachedAttributes() {
@@ -649,7 +652,7 @@ public class FxContext implements Serializable {
             }
         }
     }
-    
+
     /**
      * Store a value under the given key in the current request's FxContext.
      * <p>
@@ -736,7 +739,7 @@ public class FxContext implements Serializable {
                     setLastUserTicket(session, si.ticket);  // refresh ticket with new language
                 } catch (Exception e) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Failed to use request locale from browser - unknown language: " 
+                        LOG.debug("Failed to use request locale from browser - unknown language: "
                                 + request.getLocale().getLanguage()
                                 + " - " + e.getMessage(), e);
                     }
@@ -917,9 +920,61 @@ public class FxContext implements Serializable {
     private static void removeThreadLocal() {
         if (LOG.isTraceEnabled()) {
         }
-            LOG.trace("Removing FxContext ThreadLocal from thread " + Thread.currentThread().getName());
+        LOG.trace("Removing FxContext ThreadLocal from thread " + Thread.currentThread().getName());
         info.remove();
     }
 
+    /**
+     * Get the used date format - either an override set in the context or the one defined by the current users ticket
+     *
+     * @return date format
+     */
+    public String getDateFormat() {
+        if (dateFormatOverride != null)
+            return dateFormatOverride;
+        final UserTicket ut = getTicket();
+        if(ut == null)
+            return ((SimpleDateFormat) DateFormat.getDateInstance()).toPattern();
+        return ut.getDateFormat();
+    }
 
+    /**
+     * Get the used decimal separator - either an override set in the context or the one defined by the current users ticket
+     *
+     * @return decimal separator
+     */
+    public char getDecimalSeparator() {
+        if (decimalSeparatorOverride != 0)
+            return decimalSeparatorOverride;
+        final UserTicket ut = getTicket();
+        if(ut == null)
+            return '.';
+        return ut.getDecimalSeparator();
+    }
+
+    /**
+     * Get the used grouping separator - either an override set in the context or the one defined by the current users ticket
+     *
+     * @return grouping separator
+     */
+    public char getGroupingSeparator() {
+        if (groupingSeparatorOverride != 0)
+            return groupingSeparatorOverride;
+        final UserTicket ut = getTicket();
+        if(ut == null)
+            return ',';
+        return ut.getGroupingSeparator();
+    }
+
+    /**
+     * Use the grouping separator? - either an override set in the context or the one defined by the current users ticket
+     *
+     * @return use the grouping separator
+     */
+    public boolean useGroupingSeparator() {
+        if (useGroupingSeparatorOverride != null)
+            return useGroupingSeparatorOverride;
+        final UserTicket ut = getTicket();
+        return ut != null && ut.useGroupingSeparator();
+    }
 }

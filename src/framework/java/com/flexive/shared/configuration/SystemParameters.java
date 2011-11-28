@@ -154,4 +154,24 @@ public class SystemParameters {
      * </ul>
      */
     public static final Parameter<String> PASSWORD_SALT_METHOD = ParameterFactory.newInstance(String.class, DIVISION_CONFIG, "passwordSaltMethod", "userid");
+
+    /**
+     * User specific date format
+     */
+    public static final Parameter<String> USER_DATEFORMAT = ParameterFactory.newInstance(String.class, SystemParameterPaths.USER_CONFIG_ONLY, "dateFormat", null);
+
+    /**
+     * User specific decimal separator
+     */
+    public static final Parameter<String> USER_DECIMALSEPARATOR = ParameterFactory.newInstance(String.class, SystemParameterPaths.USER_CONFIG_ONLY, "decSep", null);
+
+    /**
+     * User specific grouping separator
+     */
+    public static final Parameter<String> USER_GROUPINGSEPARATOR = ParameterFactory.newInstance(String.class, SystemParameterPaths.USER_CONFIG_ONLY, "grpSep", null);
+
+    /**
+     * User specific flag if to use the grouping separator
+     */
+    public static final Parameter<Boolean> USER_USEGROUPINGSEPARATOR = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.USER_CONFIG_ONLY, "useGrpSep", null);
 }
