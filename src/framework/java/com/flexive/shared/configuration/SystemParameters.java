@@ -161,6 +161,16 @@ public class SystemParameters {
     public static final Parameter<String> USER_DATEFORMAT = ParameterFactory.newInstance(String.class, SystemParameterPaths.USER_CONFIG_ONLY, "dateFormat", null);
 
     /**
+     * User specific date/time format
+     */
+    public static final Parameter<String> USER_DATETIMEFORMAT = ParameterFactory.newInstance(String.class, SystemParameterPaths.USER_CONFIG_ONLY, "dateTimeFormat", null);
+
+    /**
+     * User specific time format
+     */
+    public static final Parameter<String> USER_TIMEFORMAT = ParameterFactory.newInstance(String.class, SystemParameterPaths.USER_CONFIG_ONLY, "timeFormat", null);
+
+    /**
      * User specific decimal separator
      */
     public static final Parameter<String> USER_DECIMALSEPARATOR = ParameterFactory.newInstance(String.class, SystemParameterPaths.USER_CONFIG_ONLY, "decSep", null);

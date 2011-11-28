@@ -35,6 +35,7 @@ import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.math.NumberUtils;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Map;
 
 import com.flexive.shared.FxFormatUtils;
@@ -168,6 +169,14 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
     @Override
     public Double fromString(String value) {
         return FxFormatUtils.toDouble(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPortableStringValue(Double value) {
+        return FxValueRendererFactory.getPortableNumberFormatInstance().format(value);
     }
 
     /**

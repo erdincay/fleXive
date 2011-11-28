@@ -46,9 +46,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.text.DateFormatSymbols;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.text.*;
 import java.util.*;
 
 /**
@@ -88,7 +86,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     private long failedLoginAttempts = 0;
     private AuthenticationSource authenticationSource = AuthenticationSource.None;
 
-    private String dateFormat;
+    private String dateFormat, dateTimeFormat, timeFormat;
     private char decimalSeparator;
     private char groupingSeparator;
     private boolean useGroupingSeparator;
@@ -448,6 +446,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
         final Locale locale = getLanguage().getLocale();
         final UserConfigurationEngine uce = EJBLookup.getUserConfigurationEngine();
         String _dateFormat = null;
+        String _dateTimeFormat = null;
+        String _timeFormat = null;
         String _decimalSeparator = null;
         String _groupingSeparator = null;
         Boolean _useGroupingSeparator = null;
@@ -455,6 +455,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
             try {
                 FxContext.startRunningAsSystem();
                 _dateFormat = uce.get(userId, SystemParameters.USER_DATEFORMAT, SystemParameters.USER_DATEFORMAT.getKey(), true);
+                _dateTimeFormat = uce.get(userId, SystemParameters.USER_DATETIMEFORMAT, SystemParameters.USER_DATETIMEFORMAT.getKey(), true);
+                _timeFormat = uce.get(userId, SystemParameters.USER_TIMEFORMAT, SystemParameters.USER_TIMEFORMAT.getKey(), true);
                 _decimalSeparator = uce.get(userId, SystemParameters.USER_DECIMALSEPARATOR, SystemParameters.USER_DECIMALSEPARATOR.getKey(), true);
                 _groupingSeparator = uce.get(userId, SystemParameters.USER_GROUPINGSEPARATOR, SystemParameters.USER_GROUPINGSEPARATOR.getKey(), true);
                 _useGroupingSeparator = uce.get(userId, SystemParameters.USER_USEGROUPINGSEPARATOR, SystemParameters.USER_USEGROUPINGSEPARATOR.getKey(), true);
@@ -466,7 +468,9 @@ public class UserTicketImpl implements UserTicket, Serializable {
                 FxContext.stopRunningAsSystem();
             }
         }
-        this.dateFormat = _dateFormat != null ? _dateFormat : DateFormatSymbols.getInstance(locale).getLocalPatternChars();
+        this.dateFormat = _dateFormat != null ? _dateFormat : ((SimpleDateFormat)SimpleDateFormat.getDateInstance(DateFormat.SHORT, locale)).toLocalizedPattern();
+        this.timeFormat = _timeFormat != null ? _timeFormat : ((SimpleDateFormat)SimpleDateFormat.getTimeInstance(DateFormat.SHORT, locale)).toLocalizedPattern();
+        this.dateTimeFormat = _dateTimeFormat != null ? _dateTimeFormat : ((SimpleDateFormat)SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale)).toLocalizedPattern();
         this.decimalSeparator = _decimalSeparator != null && _decimalSeparator.length() > 0 ? _decimalSeparator.charAt(0) : DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
         this.groupingSeparator = _groupingSeparator != null && _groupingSeparator.length() > 0 ? _groupingSeparator.charAt(0) : DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
         this.useGroupingSeparator = _useGroupingSeparator != null ? _useGroupingSeparator : DecimalFormat.getNumberInstance(locale).isGroupingUsed();
@@ -839,6 +843,20 @@ public class UserTicketImpl implements UserTicket, Serializable {
      */
     public String getDateFormat() {
         return dateFormat;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getTimeFormat() {
+        return timeFormat;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDateTimeFormat() {
+        return dateTimeFormat;
     }
 
     /**

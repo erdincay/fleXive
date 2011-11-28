@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.tests.shared;
 
+import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRenderer;
@@ -57,22 +58,42 @@ public class FxValueRendererTest {
     @Test
     public void dateFormatTest() {
         FxDate date = new FxDate(new Date(0));
+        switchEN();
         String englishDate = FORMAT_EN.format(date);
+        switchDE();
         String germanDate = FORMAT_DE.format(date);
         Assert.assertTrue(!englishDate.equals(germanDate));
+    }
+
+    private void switchEN() {
+        FxContext.get().setDateFormatOverride("MM/dd/yyyy");
+        FxContext.get().setDecimalSeparatorOverride('.');
+        FxContext.get().setGroupingSeparatorOverride(',');
+        FxContext.get().setUseGroupingSeparatorOverride(true);
+    }
+
+    private void switchDE() {
+        FxContext.get().setDateFormatOverride("dd.MM.yyyy");
+        FxContext.get().setDecimalSeparatorOverride(',');
+        FxContext.get().setGroupingSeparatorOverride('.');
+        FxContext.get().setUseGroupingSeparatorOverride(true);
     }
 
     @Test
     public void floatFormatTest() {
         FxFloat value = new FxFloat(1234.56f);
+        switchEN();
         Assert.assertTrue("1,234.56".equals(FORMAT_EN.format(value)));
+        switchDE();
         Assert.assertTrue("1.234,56".equals(FORMAT_DE.format(value)));
     }
 
     @Test
     public void doubleFormatTest() {
         FxDouble value = new FxDouble(1234.56);
+        switchEN();
         Assert.assertTrue("1,234.56".equals(FORMAT_EN.format(value)));
+        switchDE();
         Assert.assertTrue("1.234,56".equals(FORMAT_DE.format(value)));
     }
 
@@ -81,7 +102,9 @@ public class FxValueRendererTest {
         FxString value = new FxString(true, "default");
         value.setTranslation(FxLanguage.ENGLISH, "english");
         value.setTranslation(FxLanguage.GERMAN, "deutsch");
+        switchEN();
         Assert.assertTrue("english".equals(FORMAT_EN.format(value)), "Expected english translation, got: " + FORMAT_EN.format(value));
+        switchDE();
         Assert.assertTrue("deutsch".equals(FORMAT_DE.format(value)), "Expected german translation, got: " + FORMAT_DE.format(value));
     }
 
@@ -90,7 +113,9 @@ public class FxValueRendererTest {
         Writer de = new StringWriter();
         Writer en = new StringWriter();
         FxDouble value = new FxDouble(1234.56);
+        switchEN();
         FORMAT_EN.render(en, value);
+        switchDE();
         FORMAT_DE.render(de, value);
         Assert.assertTrue("1,234.56".equals(en.toString()), "Expected 1,234.56, got: " + en);
         Assert.assertTrue("1.234,56".equals(de.toString()), "Expected 1.234,56, got: " + de);

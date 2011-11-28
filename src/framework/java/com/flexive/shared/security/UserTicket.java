@@ -346,12 +346,46 @@ public interface UserTicket extends Serializable {
      */
     public void setLanguage(FxLanguage language);
 
+    /**
+     * Get the user specific date format pattern
+     *
+     * @return user specific date format pattern
+     */
     public String getDateFormat();
 
+    /**
+     * Get the user specific time format pattern
+     *
+     * @return user specific time format pattern
+     */
+    public String getTimeFormat();
+
+    /**
+     * Get the user specific date/time format pattern
+     *
+     * @return user specific date/time format pattern
+     */
+    public String getDateTimeFormat();
+
+    /**
+     * Get the user specific decimal separator character to use
+     *
+     * @return user specific decimal separator character to use
+     */
     public char getDecimalSeparator();
 
+    /**
+     * Get the user specific grouping separator character to use
+     *
+     * @return user specific grouping separator character to use
+     */
     public char getGroupingSeparator();
 
+    /**
+     * Use the grouping separator?
+     *
+     * @return use the grouping separator?
+     */
     public boolean useGroupingSeparator();
 
     /**

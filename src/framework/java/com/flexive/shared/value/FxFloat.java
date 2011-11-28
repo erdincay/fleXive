@@ -171,6 +171,14 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPortableStringValue(Float value) {
+        return FxValueRendererFactory.getPortableNumberFormatInstance().format(value);
+    }
+
+    /**
      * Creates a copy of the given object (useful if the actual type is unknown).
      *
      * @return a copy of the given object (useful if the actual type is unknown).

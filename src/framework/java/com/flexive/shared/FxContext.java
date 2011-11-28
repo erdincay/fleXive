@@ -104,6 +104,8 @@ public class FxContext implements Serializable {
     private FxTreeMode treeMode;
     private DivisionData divisionData;
     private String dateFormatOverride = null;
+    private String timeFormatOverride = null;
+    private String dateTimeFormatOverride = null;
     private char decimalSeparatorOverride = 0;
     private char groupingSeparatorOverride = 0;
     private Boolean useGroupingSeparatorOverride = null;
@@ -924,6 +926,54 @@ public class FxContext implements Serializable {
         info.remove();
     }
 
+    public String getDateFormatOverride() {
+        return dateFormatOverride;
+    }
+
+    public void setDateFormatOverride(String dateFormatOverride) {
+        this.dateFormatOverride = dateFormatOverride;
+    }
+
+    public String getTimeFormatOverride() {
+        return timeFormatOverride;
+    }
+
+    public void setTimeFormatOverride(String timeFormatOverride) {
+        this.timeFormatOverride = timeFormatOverride;
+    }
+
+    public String getDateTimeFormatOverride() {
+        return dateTimeFormatOverride;
+    }
+
+    public void setDateTimeFormatOverride(String dateTimeFormatOverride) {
+        this.dateTimeFormatOverride = dateTimeFormatOverride;
+    }
+
+    public char getDecimalSeparatorOverride() {
+        return decimalSeparatorOverride;
+    }
+
+    public void setDecimalSeparatorOverride(char decimalSeparatorOverride) {
+        this.decimalSeparatorOverride = decimalSeparatorOverride;
+    }
+
+    public char getGroupingSeparatorOverride() {
+        return groupingSeparatorOverride;
+    }
+
+    public void setGroupingSeparatorOverride(char groupingSeparatorOverride) {
+        this.groupingSeparatorOverride = groupingSeparatorOverride;
+    }
+
+    public Boolean getUseGroupingSeparatorOverride() {
+        return useGroupingSeparatorOverride;
+    }
+
+    public void setUseGroupingSeparatorOverride(Boolean useGroupingSeparatorOverride) {
+        this.useGroupingSeparatorOverride = useGroupingSeparatorOverride;
+    }
+
     /**
      * Get the used date format - either an override set in the context or the one defined by the current users ticket
      *
@@ -934,8 +984,36 @@ public class FxContext implements Serializable {
             return dateFormatOverride;
         final UserTicket ut = getTicket();
         if(ut == null)
-            return ((SimpleDateFormat) DateFormat.getDateInstance()).toPattern();
+            return "dd.mm.yyyy";//((SimpleDateFormat) DateFormat.getDateInstance()).toPattern();
         return ut.getDateFormat();
+    }
+
+    /**
+     * Get the used time format - either an override set in the context or the one defined by the current users ticket
+     *
+     * @return time format
+     */
+    public String getTimeFormat() {
+        if (timeFormatOverride != null)
+            return timeFormatOverride;
+        final UserTicket ut = getTicket();
+        if(ut == null)
+            return "HH:mm:ss";//((SimpleDateFormat) DateFormat.getTimeInstance()).toPattern();
+        return ut.getTimeFormat();
+    }
+
+    /**
+     * Get the used date/time format - either an override set in the context or the one defined by the current users ticket
+     *
+     * @return date/time format
+     */
+    public String getDateTimeFormat() {
+        if (dateTimeFormatOverride != null)
+            return dateTimeFormatOverride;
+        final UserTicket ut = getTicket();
+        if(ut == null)
+            return "dd.mm.yyyy HH:mm:ss";//((SimpleDateFormat) DateFormat.getDateTimeInstance()).toPattern();
+        return ut.getDateTimeFormat();
     }
 
     /**

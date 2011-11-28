@@ -419,6 +419,16 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public abstract T fromString(String value);
 
     /**
+     * Convert from a portable (not locale specific format)
+     *
+     * @param value portable string value to be evaluated
+     * @return the value interpreted as T
+     */
+    public T fromPortableString(String value) {
+        return fromString(value);
+    }
+
+    /**
      * Converts the given instance of T to a string that can be
      * parsed again by {@link FxValue#fromString(String)}.
      *
@@ -428,6 +438,18 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     public String getStringValue(T value) {
         return String.valueOf(value);
+    }
+
+    /**
+     * Converts the given instance of T to a string that can be
+     * parsed again by {@link FxValue#fromPortableString(String)}.
+     *
+     * @param value the value to be converted
+     * @return a string representation of the given value that can be parsed again using
+     *         {@link FxValue#fromPortableString(String)}.
+     */
+    public String getPortableStringValue(T value) {
+        return getStringValue(value);
     }
 
     /**

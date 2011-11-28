@@ -227,7 +227,7 @@ public class FxValueConverter implements Converter {
                             sb.delete(sb.length() - 2, sb.length());
                         writer.setValue(sb.toString());
                     } else
-                        writer.setValue(value.getStringValue(value.getTranslation(lang)));
+                        writer.setValue(value.getPortableStringValue(value.getTranslation(lang)));
                     writer.endNode();
                 }
             } else
@@ -283,7 +283,7 @@ public class FxValueConverter implements Converter {
                         }
                         value = m;
                     } else
-                        value = v.fromString(reader.getValue());
+                        value = v.fromPortableString(reader.getValue());
                     v.setTranslation(lang, value);
                 }
                 reader.moveUp();
