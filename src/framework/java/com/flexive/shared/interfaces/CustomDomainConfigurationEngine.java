@@ -32,10 +32,12 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.FxApplicationException;
 
 import java.util.List;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Extension of {@link GenericConfigurationEngine} configurations with an arbitrary domain field
@@ -44,7 +46,7 @@ import java.io.Serializable;
  * When using the methods of {@link GenericConfigurationEngine}, the domain is automatically determined
  * (e.g. the current user ID). This interface adds methods to store parameters for a specific domain that
  * is not the own. For these methods, additional access restraints apply. Usually the calling user must be
- * a global supervisors to update any foreign domain. 
+ * a global supervisors to read or update any foreign domain.
  *
  * @param <T> The ID type
  * 
@@ -105,6 +107,15 @@ public interface CustomDomainConfigurationEngine<T extends Serializable> extends
      */
     <PT extends Serializable> PT get(T domain, Parameter<PT> parameter, String key, boolean ignoreDefault)
         throws FxApplicationException;
+
+    /**
+     * Return all configuration properties for a specific domain.
+     *
+     * @param domain    the requested domain
+     * @return          all parameters for the given domain
+     * @since           3.1.6
+     */
+    Map<ParameterData, Serializable> getAll(T domain) throws FxApplicationException;
 
 	/**
 	 * Set a parameter containing a value of type <code>T</code> using

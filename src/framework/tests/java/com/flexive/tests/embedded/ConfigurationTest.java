@@ -572,6 +572,8 @@ public class ConfigurationTest {
             assertEquals(dce.get(param).intValue(), 21);
             assertEquals(dce.get(otherDomainValue, param, param.getKey(), false).intValue(), 22);
 
+            assertTrue(dce.getAll(otherDomainValue).containsValue(22), "Parameter from other domain not returned");
+
             for (T domain : domains) {
                 dce.remove(domain, param, param.getKey());
             }

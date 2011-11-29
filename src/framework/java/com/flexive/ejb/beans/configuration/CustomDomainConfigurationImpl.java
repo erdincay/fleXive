@@ -34,6 +34,7 @@ package com.flexive.ejb.beans.configuration;
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -49,6 +50,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Extension of {@link GenericConfigurationImpl} configurations with an arbitrary domain field
@@ -248,6 +250,18 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
             @Override
             protected PT performAction() throws FxApplicationException {
                 return get(parameter, key, ignoreDefault);
+            }
+        }.invoke();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<ParameterData, Serializable> getAll(T domain) throws FxApplicationException {
+        return new DomainOverride<Map<ParameterData, Serializable>>(domain) {
+            @Override
+            protected Map<ParameterData, Serializable> performAction() throws FxApplicationException {
+                return getAll();
             }
         }.invoke();
     }
