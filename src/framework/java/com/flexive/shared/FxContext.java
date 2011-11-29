@@ -607,7 +607,7 @@ public class FxContext implements Serializable {
      */
     public FxContext copy() {
         final FxContext result = new FxContext();
-        result.setTicket(ticket.copy());
+        result.ticket = ticket.copy();
         result.setDivisionId(division);
         result.setContextPath(contextPath);
         result.setGlobalAuthenticated(globalAuthenticated);
