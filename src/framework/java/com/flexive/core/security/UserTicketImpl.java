@@ -46,7 +46,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.text.*;
 import java.util.*;
 
 /**
@@ -115,14 +114,13 @@ public class UserTicketImpl implements UserTicket, Serializable {
         synchronized(UserTicketImpl.class) {
             // Don't use the class lock for the entire method, because otherwise it could
             // deadlock when reloadGuestTicketAssignments is called from another thread (FX-435)
-            final Locale locale = FxLanguage.DEFAULT.getLocale();
             return new UserTicketImpl(si.getApplicationId(), si.isWebDAV(), "GUEST", "GUEST", Account.USER_GUEST,
                     guestContactData, Mandator.MANDATOR_FLEXIVE, true, guestGroups, guestRoles, guestACLAssignments,
                     FxLanguage.DEFAULT, 0, AuthenticationSource.None,
-                    DateFormatSymbols.getInstance(locale).getLocalPatternChars(),
-                    DecimalFormatSymbols.getInstance(locale).getDecimalSeparator(),
-                    DecimalFormatSymbols.getInstance(locale).getGroupingSeparator(),
-                    DecimalFormat.getNumberInstance(locale).isGroupingUsed());
+                    FxFormatUtils.DATE_STD, FxFormatUtils.TIME_STD, FxFormatUtils.DATETIME_STD,
+                    FxFormatUtils.DECIMAL_SEP_STD,
+                    FxFormatUtils.GROUPING_SEP_STD,
+                    FxFormatUtils.USE_GROUPING_STD);
         }
     }
 
@@ -372,6 +370,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * @param failedLoginAttempts  number of failed login attempts
      * @param authenticationSource source of authentication
      * @param dateFormat           date format pattern
+     * @param timeFormat           time format pattern
+     * @param dateTimeFormat       date/time format pattern
      * @param decimalSeparator     decimal separator
      * @param groupingSeparator    grouping separator
      * @param useGroupingSeparator use the grouping separator?
@@ -380,7 +380,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
                            FxPK contactData, long mandatorId,
                            boolean multiLogin, long[] groups, Role[] roles, ACLAssignment assignments[],
                            FxLanguage language, long failedLoginAttempts, AuthenticationSource authenticationSource,
-                           String dateFormat, char decimalSeparator, char groupingSeparator, boolean useGroupingSeparator) {
+                           String dateFormat, String timeFormat, String dateTimeFormat,
+                           char decimalSeparator, char groupingSeparator, boolean useGroupingSeparator) {
         this.applicationId = applicationId;
         this.userName = userName;
         this.loginName = loginName;
@@ -396,6 +397,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
         this.failedLoginAttempts = failedLoginAttempts;
         this.authenticationSource = authenticationSource;
         this.dateFormat = dateFormat;
+        this.timeFormat = timeFormat;
+        this.dateTimeFormat = dateTimeFormat;
         this.decimalSeparator = decimalSeparator;
         this.groupingSeparator = groupingSeparator;
         this.useGroupingSeparator = useGroupingSeparator;
@@ -443,7 +446,6 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public void initUserSpecificSettings() {
-        final Locale locale = getLanguage().getLocale();
         final UserConfigurationEngine uce = EJBLookup.getUserConfigurationEngine();
         String _dateFormat = null;
         String _dateTimeFormat = null;
@@ -468,12 +470,12 @@ public class UserTicketImpl implements UserTicket, Serializable {
                 FxContext.stopRunningAsSystem();
             }
         }
-        this.dateFormat = _dateFormat != null ? _dateFormat : ((SimpleDateFormat)SimpleDateFormat.getDateInstance(DateFormat.SHORT, locale)).toLocalizedPattern();
-        this.timeFormat = _timeFormat != null ? _timeFormat : ((SimpleDateFormat)SimpleDateFormat.getTimeInstance(DateFormat.SHORT, locale)).toLocalizedPattern();
-        this.dateTimeFormat = _dateTimeFormat != null ? _dateTimeFormat : ((SimpleDateFormat)SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale)).toLocalizedPattern();
-        this.decimalSeparator = _decimalSeparator != null && _decimalSeparator.length() > 0 ? _decimalSeparator.charAt(0) : DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
-        this.groupingSeparator = _groupingSeparator != null && _groupingSeparator.length() > 0 ? _groupingSeparator.charAt(0) : DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
-        this.useGroupingSeparator = _useGroupingSeparator != null ? _useGroupingSeparator : DecimalFormat.getNumberInstance(locale).isGroupingUsed();
+        this.dateFormat = _dateFormat != null ? _dateFormat : FxFormatUtils.DATE_STD;
+        this.timeFormat = _timeFormat != null ? _timeFormat : FxFormatUtils.TIME_STD;
+        this.dateTimeFormat = _dateTimeFormat != null ? _dateTimeFormat : FxFormatUtils.DATETIME_STD;
+        this.decimalSeparator = _decimalSeparator != null && _decimalSeparator.length() > 0 ? _decimalSeparator.charAt(0) : FxFormatUtils.DECIMAL_SEP_STD;
+        this.groupingSeparator = _groupingSeparator != null && _groupingSeparator.length() > 0 ? _groupingSeparator.charAt(0) : FxFormatUtils.GROUPING_SEP_STD;
+        this.useGroupingSeparator = _useGroupingSeparator != null ? _useGroupingSeparator : FxFormatUtils.USE_GROUPING_STD;
     }
 
     /**
@@ -522,7 +524,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
         return new UserTicketImpl(this.applicationId, this.webDav, this.userName, this.loginName,
                 this.userId, this.contactData, this.mandator, this.multiLogin, this.groups.clone(), this.roles.clone(),
                 ACLAssignment.clone(this.assignments), this.language, this.failedLoginAttempts, this.authenticationSource,
-                this.dateFormat, this.decimalSeparator, this.groupingSeparator, this.useGroupingSeparator);
+                this.dateFormat, this.timeFormat, this.dateTimeFormat,
+                this.decimalSeparator, this.groupingSeparator, this.useGroupingSeparator);
     }
 
 
@@ -873,7 +876,9 @@ public class UserTicketImpl implements UserTicket, Serializable {
         return groupingSeparator;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public boolean useGroupingSeparator() {
         return useGroupingSeparator;
     }

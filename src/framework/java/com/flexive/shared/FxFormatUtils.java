@@ -54,6 +54,13 @@ public final class FxFormatUtils {
     public final static String DEFAULT_COLOR = "#000000";
     public final static String UNIVERSAL_TIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     public static final String CONTRAST_BACKGROUND_COLOR = "#6D6D6D";
+    //date/time standards according to ISO 8601
+    public static final String DATE_STD = "yyyy-MM-dd";
+    public static final String DATETIME_STD = "yyyy-MM-dd HH:mm:ss";
+    public static final String TIME_STD = "HH:mm:ss";
+    public static final char DECIMAL_SEP_STD = '.';
+    public static final char GROUPING_SEP_STD = ',';
+    public static final boolean USE_GROUPING_STD = false;
 
     /**
      * Private constructor to avoid instantiation

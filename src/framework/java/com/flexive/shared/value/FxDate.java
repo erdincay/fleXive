@@ -190,11 +190,6 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
 //        return DateFormat.getDateInstance().format(value);
     }
 
-    @Override
-    public String getPortableStringValue(Date value) {
-        return super.getPortableStringValue(value);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
     /**
      * Creates a copy of the given object (useful if the actual type is unknown).
      *
