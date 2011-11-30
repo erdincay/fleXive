@@ -56,6 +56,7 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -981,7 +982,12 @@ public class PropertyEntry {
                 if (constantValue == null) {
                     value = "NULL";
                 } else {
-                    final Date date = FxFormatUtils.toDateTime(constantValue);
+                    final Date date;
+                    try {
+                        date = FxFormatUtils.getDateTimeFormat().parse(FxFormatUtils.unquote(constantValue));
+                    } catch (ParseException e) {
+                        throw new FxApplicationException(e).asRuntimeException();
+                    }
                     if (isDateMillisColumn(getFilterColumn())) {
                         value = String.valueOf(date.getTime());
                     } else {
@@ -995,6 +1001,10 @@ public class PropertyEntry {
                 } else {
                     value = String.valueOf(FxPK.fromString(constantValue).getId());
                 }
+                break;
+            case Binary:
+                break;
+            case InlineReference:
                 break;
         }
         return value == null ? null : new Pair<String, String>(column, value);

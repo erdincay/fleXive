@@ -40,8 +40,10 @@ import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.StringUtils;
 
+import javax.faces.convert.ConverterException;
 import java.lang.reflect.Array;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -629,12 +631,14 @@ public final class FxFormatUtils {
      * @return Integer
      */
     public static Integer toInteger(String value) {
-        try {
-            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).intValue();
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.value.error", FxNumber.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
+        if (value == null)
+            return null;
+        ParsePosition pos = new ParsePosition(0);
+        String _value = value.trim();
+        final Number parse = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos);
+        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length() || parse.doubleValue() != (double)parse.intValue() /*truncation*/)
+            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+        return parse.intValue();
     }
 
     /**
@@ -644,12 +648,14 @@ public final class FxFormatUtils {
      * @return Long
      */
     public static Long toLong(String value) {
-        try {
-            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).longValue();
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
+        if (value == null)
+            return null;
+        ParsePosition pos = new ParsePosition(0);
+        String _value = value.trim();
+        final Number parse = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos);
+        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length() || parse.doubleValue() != (double)parse.longValue() /*truncation*/)
+            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+        return parse.longValue();
     }
 
     /**
@@ -659,12 +665,14 @@ public final class FxFormatUtils {
      * @return Double
      */
     public static Double toDouble(String value) {
-        try {
-            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).doubleValue();
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.value.error", FxDouble.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
+        if (value == null)
+            return null;
+        ParsePosition pos = new ParsePosition(0);
+        String _value = value.trim();
+        Double res = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos).doubleValue();
+        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length())
+            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+        return res;
     }
 
     /**
@@ -674,12 +682,14 @@ public final class FxFormatUtils {
      * @return Float
      */
     public static Float toFloat(String value) {
-        try {
-            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).floatValue();
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
+        if (value == null)
+            return null;
+        ParsePosition pos = new ParsePosition(0);
+        String _value = value.trim();
+        Float res = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos).floatValue();
+        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length())
+            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+        return res;
     }
 
     /**

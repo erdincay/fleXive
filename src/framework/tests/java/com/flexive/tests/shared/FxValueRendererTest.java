@@ -36,6 +36,7 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRenderer;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
@@ -63,6 +64,12 @@ public class FxValueRendererTest {
         switchDE();
         String germanDate = FORMAT_DE.format(date);
         Assert.assertTrue(!englishDate.equals(germanDate));
+    }
+
+    @AfterClass
+    public void cleanup() {
+        FxContext.get().setDecimalSeparatorOverride((char)0);
+        FxContext.get().setGroupingSeparatorOverride((char)0);
     }
 
     private void switchEN() {

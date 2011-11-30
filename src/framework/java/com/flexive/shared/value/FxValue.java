@@ -789,7 +789,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         }
         if (value instanceof String) {
             try {
-                value = this.fromString((String) value);
+                value = this.fromPortableString((String) value);
             } catch (Exception e) {
                 // do nothing. The resulting FxValue will be invalid,
                 // but the invalid value will be preserved.

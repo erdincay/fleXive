@@ -124,7 +124,9 @@ public class FxValueRendererFactory {
      * @return NumberFormat
      */
     public static NumberFormat getNumberFormatInstance() {
-        return getNumberFormatInstance(FxContext.getUserTicket().getLanguage().getLocale());
+        final UserTicket ticket = FxContext.getUserTicket();
+        final Locale locale = ticket == null ? Locale.ENGLISH : ticket.getLanguage().getLocale();
+        return getNumberFormatInstance(locale);
     }
 
     final static DecimalFormat PORTABLE_NUMBERFORMAT;

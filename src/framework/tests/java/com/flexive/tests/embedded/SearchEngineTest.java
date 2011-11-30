@@ -1915,7 +1915,7 @@ public class SearchEngineTest {
     }
 
     private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {
-        assertTrue(pks.size() == 1, "No rows returned for exact match");
+        assertTrue(pks.size() == 1, "Expected one row for exact match, got " + pks.size() + " rows");
         assertTrue(pks.get(0).equals(pk), "Exact match did not return expected column - expected " + pk + ", got: " + pks.get(0));
     }
 
