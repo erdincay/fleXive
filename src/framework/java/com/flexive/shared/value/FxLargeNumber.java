@@ -32,6 +32,8 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -166,7 +168,6 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
         return true;
     }
 
-
     /**
      * Evaluates the given string value to an object of type T.
      *
@@ -176,6 +177,27 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
     @Override
     public Long fromString(String value) {
         return FxFormatUtils.toLong(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPortableStringValue(Long value) {
+        return FxValueRendererFactory.getPortableNumberFormatInstance().format(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long fromPortableString(String value) {
+        try {
+            return FxValueRendererFactory.getPortableNumberFormatInstance().parse(value).longValue();
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
     }
 
     /**

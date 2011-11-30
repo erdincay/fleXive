@@ -32,6 +32,8 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -165,6 +167,27 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
     @Override
     public Integer fromString(String value) {
         return FxFormatUtils.toInteger(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPortableStringValue(Integer value) {
+        return FxValueRendererFactory.getPortableNumberFormatInstance().format(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Integer fromPortableString(String value) {
+        try {
+            return FxValueRendererFactory.getPortableNumberFormatInstance().parse(value).intValue();
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
     }
 
     /**

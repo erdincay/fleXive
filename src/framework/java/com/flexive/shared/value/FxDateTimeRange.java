@@ -34,8 +34,10 @@ package com.flexive.shared.value;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.text.SimpleDateFormat;
@@ -182,20 +184,45 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
     public DateRange fromString(String value) {
         try {
             String[] dates = value.split("\\$");
-            final SimpleDateFormat sdf = new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT);
-            return new DateRange(sdf.parse(dates[0]), sdf.parse(dates[1]));
+            final DateFormat df = FxValueRendererFactory.getDateTimeFormat();
+            return new DateRange(df.parse(dates[0]), df.parse(dates[1]));
         } catch (ParseException e) {
             throw new FxConversionException("ex.conversion.value.error", FxDateTimeRange.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getStringValue(DateRange value) {
-        final SimpleDateFormat sdf = new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT);
-        return sdf.format(value.getLower())+"$"+sdf.format(value.getUpper());
-//        return DateFormat.getDateInstance().format(value);
+        final DateFormat df = FxValueRendererFactory.getDateTimeFormat();
+        return df.format(value.getLower()) + "$" + df.format(value.getUpper());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPortableStringValue(DateRange value) {
+        final DateFormat df = FxFormatUtils.getUniversalDateTimeFormat();
+        return df.format(value.getLower()) + "$" + df.format(value.getUpper());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DateRange fromPortableString(String value) {
+        try {
+            String[] dates = value.split("\\$");
+            final DateFormat df = FxFormatUtils.getUniversalDateTimeFormat();
+            return new DateRange(df.parse(dates[0]), df.parse(dates[1]));
+        } catch (ParseException e) {
+            throw new FxConversionException("ex.conversion.value.error", FxDateTimeRange.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
     }
 
     /**

@@ -32,8 +32,11 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -185,9 +188,28 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
      */
     @Override
     public String getStringValue(Date value) {
-        //TODO: use a better date parser
-        return new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT).format(value);
-//        return DateFormat.getDateInstance().format(value);
+        return FxValueRendererFactory.getDateFormat().format(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPortableStringValue(Date value) {
+        return FxFormatUtils.getUniversalDateTimeFormat().format(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Date fromPortableString(String value) {
+        try {
+            return FxFormatUtils.getUniversalDateTimeFormat().parse(value);
+        } catch (ParseException e) {
+            throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
     }
 
     /**

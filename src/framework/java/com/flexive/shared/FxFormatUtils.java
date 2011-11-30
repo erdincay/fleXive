@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Array;
@@ -629,7 +630,7 @@ public final class FxFormatUtils {
      */
     public static Integer toInteger(String value) {
         try {
-            return Integer.parseInt(unquote(value));
+            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).intValue();
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.value.error", FxNumber.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
@@ -644,7 +645,7 @@ public final class FxFormatUtils {
      */
     public static Long toLong(String value) {
         try {
-            return Long.parseLong(unquote(value));
+            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).longValue();
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
@@ -659,7 +660,7 @@ public final class FxFormatUtils {
      */
     public static Double toDouble(String value) {
         try {
-            return Double.parseDouble(unquote(value).replace(',', '.'));
+            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).doubleValue();
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.value.error", FxDouble.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
@@ -674,7 +675,7 @@ public final class FxFormatUtils {
      */
     public static Float toFloat(String value) {
         try {
-            return Float.parseFloat(unquote(value).replace(',', '.'));
+            return FxValueRendererFactory.getNumberFormatInstance().parse(unquote(value)).floatValue();
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
@@ -689,9 +690,8 @@ public final class FxFormatUtils {
      */
     public static Date toDate(String value) {
         try {
-            //TODO: use a better date parser
             try {
-                return getDateFormat().parse(unquote(value));
+                return FxValueRendererFactory.getDateFormat().parse(unquote(value));
             } catch (ParseException e) {
                 //fallback to universal format if "short" format is no match
                 return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
@@ -710,9 +710,8 @@ public final class FxFormatUtils {
      */
     public static Date toDateTime(String value) {
         try {
-            //TODO: use a better date parser
             try {
-                return getDateTimeFormat().parse(unquote(value));
+                return FxValueRendererFactory.getDateTimeFormat().parse(unquote(value));
             } catch (ParseException e) {
                 try {
                     //fallback to universal format if "short" format is no match

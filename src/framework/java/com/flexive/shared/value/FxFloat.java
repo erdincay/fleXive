@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.math.NumberUtils;
 
@@ -176,6 +177,19 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
     @Override
     public String getPortableStringValue(Float value) {
         return FxValueRendererFactory.getPortableNumberFormatInstance().format(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Float fromPortableString(String value) {
+        try {
+            return FxValueRendererFactory.getPortableNumberFormatInstance().parse(value).floatValue();
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
     }
 
     /**

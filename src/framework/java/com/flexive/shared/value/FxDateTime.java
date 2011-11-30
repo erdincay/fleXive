@@ -31,10 +31,12 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.FxFormatUtils;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -167,6 +169,27 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
     @Override
     public Date fromString(String value) {
         return FxFormatUtils.toDateTime(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPortableStringValue(Date value) {
+        return FxFormatUtils.getUniversalDateTimeFormat().format(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Date fromPortableString(String value) {
+        try {
+            return FxFormatUtils.getUniversalDateTimeFormat().parse(value);
+        } catch (ParseException e) {
+            throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
     }
 
     /** {@inheritDoc} */
