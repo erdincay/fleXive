@@ -631,7 +631,7 @@ public final class FxFormatUtils {
      * @return Integer
      */
     public static Integer toInteger(String value) {
-        if (value == null)
+        if (StringUtils.isBlank(value))
             return null;
         ParsePosition pos = new ParsePosition(0);
         String _value = value.trim();
@@ -648,7 +648,7 @@ public final class FxFormatUtils {
      * @return Long
      */
     public static Long toLong(String value) {
-        if (value == null)
+        if (StringUtils.isBlank(value))
             return null;
         ParsePosition pos = new ParsePosition(0);
         String _value = value.trim();
@@ -665,7 +665,7 @@ public final class FxFormatUtils {
      * @return Double
      */
     public static Double toDouble(String value) {
-        if (value == null)
+        if (StringUtils.isBlank(value))
             return null;
         ParsePosition pos = new ParsePosition(0);
         String _value = value.trim();
@@ -682,7 +682,7 @@ public final class FxFormatUtils {
      * @return Float
      */
     public static Float toFloat(String value) {
-        if (value == null)
+        if (StringUtils.isBlank(value))
             return null;
         ParsePosition pos = new ParsePosition(0);
         String _value = value.trim();
