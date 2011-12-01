@@ -633,12 +633,18 @@ public final class FxFormatUtils {
     public static Integer toInteger(String value) {
         if (StringUtils.isBlank(value))
             return null;
-        ParsePosition pos = new ParsePosition(0);
-        String _value = value.trim();
-        final Number parse = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos);
-        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length() || parse.doubleValue() != (double)parse.intValue() /*truncation*/)
-            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
-        return parse.intValue();
+        final ParsePosition pos = new ParsePosition(0);
+        final String _value = value.trim();
+        try {
+            final Number parse = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos);
+            if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length() || parse.doubleValue() != (double) parse.intValue() /*truncation*/)
+                throw new FxConversionException("ex.conversion.value.error", FxNumber.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+            return parse.intValue();
+        } catch (NumberFormatException e) {
+            throw new FxConversionException("ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value,
+                    "Failed to parse [" + value + "] using dec.sep. [" + FxContext.get().getDecimalSeparator() + "] and grouping sep. [" + FxContext.get().getDecimalSeparator() + "]"
+            ).asRuntimeException();
+        }
     }
 
     /**
@@ -650,12 +656,18 @@ public final class FxFormatUtils {
     public static Long toLong(String value) {
         if (StringUtils.isBlank(value))
             return null;
-        ParsePosition pos = new ParsePosition(0);
-        String _value = value.trim();
-        final Number parse = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos);
-        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length() || parse.doubleValue() != (double)parse.longValue() /*truncation*/)
-            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
-        return parse.longValue();
+        final ParsePosition pos = new ParsePosition(0);
+        final String _value = value.trim();
+        try {
+            final Number parse = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos);
+            if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length() || parse.doubleValue() != (double)parse.longValue() /*truncation*/)
+                throw new FxConversionException("ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+            return parse.longValue();
+        } catch (NumberFormatException e) {
+            throw new FxConversionException("ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value,
+                    "Failed to parse [" + value + "] using dec.sep. [" + FxContext.get().getDecimalSeparator() + "] and grouping sep. [" + FxContext.get().getDecimalSeparator() + "]"
+            ).asRuntimeException();
+        }
     }
 
     /**
@@ -667,12 +679,18 @@ public final class FxFormatUtils {
     public static Double toDouble(String value) {
         if (StringUtils.isBlank(value))
             return null;
-        ParsePosition pos = new ParsePosition(0);
-        String _value = value.trim();
-        Double res = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos).doubleValue();
-        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length())
-            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
-        return res;
+        final ParsePosition pos = new ParsePosition(0);
+        final String _value = value.trim();
+        try {
+            Double res = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos).doubleValue();
+            if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length())
+                throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+            return res;
+        } catch (NumberFormatException e) {
+            throw new FxConversionException("ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value,
+                    "Failed to parse [" + value + "] using dec.sep. [" + FxContext.get().getDecimalSeparator() + "] and grouping sep. [" + FxContext.get().getDecimalSeparator() + "]"
+            ).asRuntimeException();
+        }
     }
 
     /**
@@ -684,12 +702,18 @@ public final class FxFormatUtils {
     public static Float toFloat(String value) {
         if (StringUtils.isBlank(value))
             return null;
-        ParsePosition pos = new ParsePosition(0);
-        String _value = value.trim();
-        Float res = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos).floatValue();
-        if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length())
-            throw new FxConversionException("ex.conversion.value.error", FxDouble.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
-        return res;
+        final ParsePosition pos = new ParsePosition(0);
+        final String _value = value.trim();
+        try {
+            Float res = FxValueRendererFactory.getNumberFormatInstance().parse(unquote(_value), pos).floatValue();
+            if (pos.getErrorIndex() >= 0 || pos.getIndex() != _value.length())
+                throw new FxConversionException("ex.conversion.value.error", FxFloat.class.getCanonicalName(), value, "Failed to parse " + value).asRuntimeException();
+            return res;
+        } catch (NumberFormatException e) {
+            throw new FxConversionException("ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value,
+                    "Failed to parse [" + value + "] using dec.sep. [" + FxContext.get().getDecimalSeparator() + "] and grouping sep. [" + FxContext.get().getDecimalSeparator() + "]"
+            ).asRuntimeException();
+        }
     }
 
     /**
