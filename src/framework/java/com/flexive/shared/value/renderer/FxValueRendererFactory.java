@@ -39,7 +39,6 @@ import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
 import org.apache.commons.lang.StringUtils;
 
-import java.math.RoundingMode;
 import java.text.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -112,37 +111,23 @@ public class FxValueRendererFactory {
         }
     }
 
-
-    final static Map<Locale, Map<String, NumberFormat>> NUMBER_FORMATS = new HashMap<Locale, Map<String, NumberFormat>>(10);
-    final static Map<Locale, Map<String, DateFormat>> DATE_FORMATS = new HashMap<Locale, Map<String, DateFormat>>(10);
-    final static Map<Locale, Map<String, DateFormat>> TIME_FORMATS = new HashMap<Locale, Map<String, DateFormat>>(10);
-    final static Map<Locale, Map<String, DateFormat>> DATETIME_FORMATS = new HashMap<Locale, Map<String, DateFormat>>(10);
-
     /**
      * Get a number format instance depending on the current users formatting options
      *
      * @return NumberFormat
      */
     public static NumberFormat getNumberFormatInstance() {
-        final UserTicket ticket = FxContext.getUserTicket();
-        final Locale locale = ticket == null ? Locale.ENGLISH : ticket.getLanguage().getLocale();
-        return getNumberFormatInstance(locale);
+        return FxContext.get().getNumberFormatInstance();
     }
 
-    final static DecimalFormat PORTABLE_NUMBERFORMAT;
-    static {
-        PORTABLE_NUMBERFORMAT = (DecimalFormat)DecimalFormat.getNumberInstance();
-        PORTABLE_NUMBERFORMAT.setGroupingUsed(false);
-        PORTABLE_NUMBERFORMAT.setMaximumIntegerDigits(Integer.MAX_VALUE);
-        PORTABLE_NUMBERFORMAT.setMaximumFractionDigits(Integer.MAX_VALUE);
-        DecimalFormatSymbols dfs = (DecimalFormatSymbols)PORTABLE_NUMBERFORMAT.getDecimalFormatSymbols().clone();
-        dfs.setDecimalSeparator('.');
-        dfs.setGroupingSeparator(',');
-        PORTABLE_NUMBERFORMAT.setDecimalFormatSymbols(dfs);
-    }
 
+    /**
+     * Get a portable number formatter instance
+     *
+     * @return portable number formatter instance
+     */
     public static NumberFormat getPortableNumberFormatInstance() {
-        return PORTABLE_NUMBERFORMAT;
+        return FxContext.get().getPortableNumberFormatInstance();
     }
 
     /**
@@ -152,25 +137,7 @@ public class FxValueRendererFactory {
      * @return NumberFormat
      */
     public static NumberFormat getNumberFormatInstance(Locale locale) {
-        final String currentUserKey = buildCurrentUserNumberFormatKey();
-        synchronized (NUMBER_FORMATS) {
-            if(NUMBER_FORMATS.containsKey(locale)) {
-                Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
-                if(map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                NUMBER_FORMATS.put(locale, new HashMap<String, NumberFormat>(5));
-            Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
-            DecimalFormat format = (DecimalFormat)DecimalFormat.getNumberInstance(locale);
-            DecimalFormatSymbols dfs = (DecimalFormatSymbols)format.getDecimalFormatSymbols().clone();
-            final FxContext ctx = FxContext.get();
-            dfs.setDecimalSeparator(ctx.getDecimalSeparator());
-            dfs.setGroupingSeparator(ctx.getGroupingSeparator());
-            format.setGroupingUsed(ctx.useGroupingSeparator());
-            format.setDecimalFormatSymbols(dfs);
-            map.put(currentUserKey, format);
-            return format;
-        }
+        return FxContext.get().getNumberFormatInstance(locale);
     }
 
     /**
@@ -179,7 +146,7 @@ public class FxValueRendererFactory {
      * @return DateFormat
      */
     public static DateFormat getDateFormat() {
-        return getDateFormat(FxContext.getUserTicket().getLanguage().getLocale());
+        return FxContext.get().getDateFormatter();
     }
 
     /**
@@ -189,19 +156,7 @@ public class FxValueRendererFactory {
      * @return DateFormat
      */
     public static DateFormat getDateFormat(Locale locale) {
-        final String currentUserKey = FxContext.get().getDateFormat();
-        synchronized (DATE_FORMATS) {
-            if(DATE_FORMATS.containsKey(locale)) {
-                Map<String, DateFormat> map = DATE_FORMATS.get(locale);
-                if(map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                DATE_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
-            Map<String, DateFormat> map = DATE_FORMATS.get(locale);
-            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
-            map.put(currentUserKey, format);
-            return format;
-        }
+        return FxContext.get().getDateFormatter(locale);
     }
 
     /**
@@ -210,7 +165,7 @@ public class FxValueRendererFactory {
      * @return DateFormat
      */
     public static DateFormat getTimeFormat() {
-        return getTimeFormat(FxContext.getUserTicket().getLanguage().getLocale());
+        return FxContext.get().getTimeFormatter();
     }
 
     /**
@@ -220,19 +175,7 @@ public class FxValueRendererFactory {
      * @return DateFormat
      */
     public static DateFormat getTimeFormat(Locale locale) {
-        final String currentUserKey = FxContext.get().getTimeFormat();
-        synchronized (TIME_FORMATS) {
-            if(TIME_FORMATS.containsKey(locale)) {
-                Map<String, DateFormat> map = TIME_FORMATS.get(locale);
-                if(map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                TIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
-            Map<String, DateFormat> map = TIME_FORMATS.get(locale);
-            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
-            map.put(currentUserKey, format);
-            return format;
-        }
+        return FxContext.get().getTimeFormatter(locale);
     }
 
     /**
@@ -241,7 +184,7 @@ public class FxValueRendererFactory {
      * @return DateFormat
      */
     public static DateFormat getDateTimeFormat() {
-        return getDateTimeFormat(FxContext.getUserTicket().getLanguage().getLocale());
+        return FxContext.get().getDateTimeFormatter();
     }
 
     /**
@@ -251,24 +194,7 @@ public class FxValueRendererFactory {
      * @return DateFormat
      */
     public static DateFormat getDateTimeFormat(Locale locale) {
-        final String currentUserKey = FxContext.get().getDateTimeFormat();
-        synchronized (DATETIME_FORMATS) {
-            if(DATETIME_FORMATS.containsKey(locale)) {
-                Map<String, DateFormat> map = DATETIME_FORMATS.get(locale);
-                if(map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                DATETIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
-            Map<String, DateFormat> map = DATETIME_FORMATS.get(locale);
-            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
-            map.put(currentUserKey, format);
-            return format;
-        }
-    }
-
-    private static String buildCurrentUserNumberFormatKey() {
-        FxContext ctx = FxContext.get();
-        return String.valueOf(ctx.getDecimalSeparator())+String.valueOf(ctx.getGroupingSeparator())+String.valueOf(ctx.useGroupingSeparator());
+        return FxContext.get().getDateTimeFormatter(locale);
     }
 
     /**

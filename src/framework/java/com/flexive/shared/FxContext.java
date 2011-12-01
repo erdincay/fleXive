@@ -49,8 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.net.URLDecoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 
 /**
@@ -222,7 +221,7 @@ public class FxContext implements Serializable {
      * @return the current users preferred locale (based on his preferred language)
      */
     public Locale getLocale() {
-        return ticket.getLanguage().getLocale();
+        return ticket == null ? Locale.ENGLISH : ticket.getLanguage().getLocale();
     }
 
     /**
@@ -304,6 +303,7 @@ public class FxContext implements Serializable {
         this.globalAuthenticated = request.getSession().getAttribute(ADMIN_AUTHENTICATED) != null;
         this.remoteHost = request.getRemoteHost();
         this.division = divisionId;
+        initFormatters();
     }
 
     /**
@@ -330,6 +330,7 @@ public class FxContext implements Serializable {
         webDAV = false;
         serverName = "localhost";
         serverPort = 80;
+        initFormatters();
     }
 
     /**
@@ -983,7 +984,7 @@ public class FxContext implements Serializable {
         if (dateFormatOverride != null)
             return dateFormatOverride;
         final UserTicket ut = getTicket();
-        if(ut == null)
+        if (ut == null)
             return "dd.mm.yyyy";//((SimpleDateFormat) DateFormat.getDateInstance()).toPattern();
         return ut.getDateFormat();
     }
@@ -997,7 +998,7 @@ public class FxContext implements Serializable {
         if (timeFormatOverride != null)
             return timeFormatOverride;
         final UserTicket ut = getTicket();
-        if(ut == null)
+        if (ut == null)
             return "HH:mm:ss";//((SimpleDateFormat) DateFormat.getTimeInstance()).toPattern();
         return ut.getTimeFormat();
     }
@@ -1011,7 +1012,7 @@ public class FxContext implements Serializable {
         if (dateTimeFormatOverride != null)
             return dateTimeFormatOverride;
         final UserTicket ut = getTicket();
-        if(ut == null)
+        if (ut == null)
             return "dd.mm.yyyy HH:mm:ss";//((SimpleDateFormat) DateFormat.getDateTimeInstance()).toPattern();
         return ut.getDateTimeFormat();
     }
@@ -1025,7 +1026,7 @@ public class FxContext implements Serializable {
         if (decimalSeparatorOverride != 0)
             return decimalSeparatorOverride;
         final UserTicket ut = getTicket();
-        if(ut == null)
+        if (ut == null)
             return '.';
         return ut.getDecimalSeparator();
     }
@@ -1039,7 +1040,7 @@ public class FxContext implements Serializable {
         if (groupingSeparatorOverride != 0)
             return groupingSeparatorOverride;
         final UserTicket ut = getTicket();
-        if(ut == null)
+        if (ut == null)
             return ',';
         return ut.getGroupingSeparator();
     }
@@ -1054,5 +1055,163 @@ public class FxContext implements Serializable {
             return useGroupingSeparatorOverride;
         final UserTicket ut = getTicket();
         return ut != null && ut.useGroupingSeparator();
+    }
+
+    private final DecimalFormat PORTABLE_NUMBERFORMAT = (DecimalFormat) DecimalFormat.getNumberInstance();
+    private final Map<Locale, Map<String, NumberFormat>> NUMBER_FORMATS = new HashMap<Locale, Map<String, NumberFormat>>(5);
+    private final Map<Locale, Map<String, DateFormat>> DATE_FORMATS = new HashMap<Locale, Map<String, DateFormat>>(5);
+    private final Map<Locale, Map<String, DateFormat>> TIME_FORMATS = new HashMap<Locale, Map<String, DateFormat>>(5);
+    private final Map<Locale, Map<String, DateFormat>> DATETIME_FORMATS = new HashMap<Locale, Map<String, DateFormat>>(5);
+
+    private void initFormatters() {
+        PORTABLE_NUMBERFORMAT.setGroupingUsed(false);
+        PORTABLE_NUMBERFORMAT.setMaximumIntegerDigits(Integer.MAX_VALUE);
+        PORTABLE_NUMBERFORMAT.setMaximumFractionDigits(Integer.MAX_VALUE);
+        DecimalFormatSymbols dfs = (DecimalFormatSymbols) PORTABLE_NUMBERFORMAT.getDecimalFormatSymbols().clone();
+        dfs.setDecimalSeparator('.');
+        dfs.setGroupingSeparator(',');
+        PORTABLE_NUMBERFORMAT.setDecimalFormatSymbols(dfs);
+    }
+
+    /**
+     * Get a portable number formatter instance
+     *
+     * @return portable number formatter instance
+     */
+    public NumberFormat getPortableNumberFormatInstance() {
+        return PORTABLE_NUMBERFORMAT;
+    }
+
+    /**
+     * Get a number format instance depending on the current users formatting options
+     *
+     * @return NumberFormat
+     */
+    public NumberFormat getNumberFormatInstance() {
+        return getNumberFormatInstance(getLocale());
+    }
+
+    private String buildCurrentUserNumberFormatKey() {
+        return String.valueOf(getDecimalSeparator()) + String.valueOf(getGroupingSeparator()) + String.valueOf(useGroupingSeparator());
+    }
+
+    /**
+     * Get a number format instance depending on the current users formatting options
+     *
+     * @param locale locale to use
+     * @return NumberFormat
+     */
+    public NumberFormat getNumberFormatInstance(Locale locale) {
+        final String currentUserKey = buildCurrentUserNumberFormatKey();
+        synchronized (NUMBER_FORMATS) {
+            if (NUMBER_FORMATS.containsKey(locale)) {
+                Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
+                if (map.containsKey(currentUserKey))
+                    return map.get(currentUserKey);
+            } else
+                NUMBER_FORMATS.put(locale, new HashMap<String, NumberFormat>(5));
+            Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
+            DecimalFormat format = (DecimalFormat) DecimalFormat.getNumberInstance(locale);
+            DecimalFormatSymbols dfs = (DecimalFormatSymbols) format.getDecimalFormatSymbols().clone();
+            dfs.setDecimalSeparator(getDecimalSeparator());
+            dfs.setGroupingSeparator(getGroupingSeparator());
+            format.setGroupingUsed(useGroupingSeparator());
+            format.setDecimalFormatSymbols(dfs);
+            map.put(currentUserKey, format);
+            return format;
+        }
+    }
+
+    /**
+     * Get the date formatter for the current users locale
+     *
+     * @return DateFormat
+     */
+    public DateFormat getDateFormatter() {
+        return getDateFormatter(getLocale());
+    }
+
+    /**
+     * Get the date formatter for the requested locale
+     *
+     * @param locale requested locale
+     * @return DateFormat
+     */
+    public DateFormat getDateFormatter(Locale locale) {
+        final String currentUserKey = getDateFormat();
+        synchronized (DATE_FORMATS) {
+            if (DATE_FORMATS.containsKey(locale)) {
+                Map<String, DateFormat> map = DATE_FORMATS.get(locale);
+                if (map.containsKey(currentUserKey))
+                    return map.get(currentUserKey);
+            } else
+                DATE_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+            Map<String, DateFormat> map = DATE_FORMATS.get(locale);
+            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
+            map.put(currentUserKey, format);
+            return format;
+        }
+    }
+
+    /**
+     * Get the time formatter for the current users locale
+     *
+     * @return DateFormat
+     */
+    public DateFormat getTimeFormatter() {
+        return getTimeFormatter(getLocale());
+    }
+
+    /**
+     * Get the time formatter for the requested locale
+     *
+     * @param locale requested locale
+     * @return DateFormat
+     */
+    public DateFormat getTimeFormatter(Locale locale) {
+        final String currentUserKey = getTimeFormat();
+        synchronized (TIME_FORMATS) {
+            if (TIME_FORMATS.containsKey(locale)) {
+                Map<String, DateFormat> map = TIME_FORMATS.get(locale);
+                if (map.containsKey(currentUserKey))
+                    return map.get(currentUserKey);
+            } else
+                TIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+            Map<String, DateFormat> map = TIME_FORMATS.get(locale);
+            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
+            map.put(currentUserKey, format);
+            return format;
+        }
+    }
+
+    /**
+     * Get the date/time formatter for the current users locale
+     *
+     * @return DateFormat
+     */
+    public DateFormat getDateTimeFormatter() {
+        return getDateTimeFormatter(getLocale());
+    }
+
+    /**
+     * Get the date/time formatter for the requested locale
+     *
+     * @param locale requested locale
+     * @return DateFormat
+     */
+    public DateFormat getDateTimeFormatter(Locale locale) {
+        final String currentUserKey = getDateTimeFormat();
+        synchronized (DATETIME_FORMATS) {
+            if (DATETIME_FORMATS.containsKey(locale)) {
+                Map<String, DateFormat> map = DATETIME_FORMATS.get(locale);
+                if (map.containsKey(currentUserKey))
+                    return map.get(currentUserKey);
+            } else
+                DATETIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+            Map<String, DateFormat> map = DATETIME_FORMATS.get(locale);
+            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
+            map.put(currentUserKey, format);
+            return format;
+        }
     }
 }
