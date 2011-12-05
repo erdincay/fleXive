@@ -416,6 +416,8 @@ public class FxArrayUtils {
                     int end = array.substring(start + 1).indexOf(',');
                     if (end == -1)
                         return Integer.valueOf(array.substring(start + 1));
+                    else if (end == 0)
+                        return Integer.MIN_VALUE;       // no entry
                     return Integer.valueOf(array.substring(start + 1, start + end + 1));
                 }
                 start++;
@@ -449,6 +451,8 @@ public class FxArrayUtils {
                     int end = array.substring(start + 1).indexOf(',');
                     if (end == -1)
                         return evalIntValue(array.substring(start + 1), 16);
+                    else if (end == 0)
+                        return null;
                     return evalIntValue(array.substring(start + 1, start + end + 1), 16);
                 }
                 start++;
