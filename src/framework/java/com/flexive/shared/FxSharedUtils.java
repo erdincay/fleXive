@@ -1235,14 +1235,14 @@ public final class FxSharedUtils {
         if (key == null) {
             //noinspection ThrowableInstanceNeverThrown
             LOG.error("No key given!", new Throwable());
-            return "##NO_KEY_GIVEN";
+            return "??NO_KEY_GIVEN";
         }
         String resource = lookupResource(resourceBundle, key, localeIso);
         if (resource == null) {
             //try to fallback to PluginMessages ...
             resource = lookupResource("PluginMessages", key, localeIso);
             if (resource == null) {
-                LOG.warn("Called with unlocalized Message [" + key + "]. See StackTrace for origin!", new Throwable());
+//                LOG.warn("Called with unlocalized Message [" + key + "]. See StackTrace for origin!", new Throwable());
                 return key;
             }
         }
