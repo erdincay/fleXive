@@ -118,7 +118,7 @@ public class FxContext implements Serializable {
     }
 
     public UserTicket getTicket() {
-        if (getRunAsSystem()) {
+        if (getRunAsSystem() && ticket != null) {
             return ticket.cloneAsGlobalSupervisor();
         }
         return ticket;
@@ -126,7 +126,9 @@ public class FxContext implements Serializable {
 
     public void setTicket(UserTicket ticket) {
         this.ticket = ticket;
-        this.ticket.initUserSpecificSettings();
+        if (ticket != null) {
+            this.ticket.initUserSpecificSettings();
+        }
     }
 
     /**
