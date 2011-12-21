@@ -487,15 +487,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return true if this value is valid for the actual type
      */
     public boolean isValid() {
-        //noinspection UnusedCatchParameter
-        try {
-            getErrorValue();
-            // an error value exists, thus this instance is invalid
-            return false;
-        } catch (IllegalStateException e) {
-            // this instance is valid, thus no error value could be retrieved
-            return true;
-        }
+        return _getErrorValue() == null;
     }
 
     /**
@@ -542,6 +534,20 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     @SuppressWarnings({"UnusedCatchParameter"})
     public T getErrorValue() throws IllegalStateException {
+        final T val = _getErrorValue();
+        if (val == null) {
+            // no error value is defined
+            throw new IllegalStateException();
+        }
+        return val;
+    }
+
+    /**
+     * Return the value that failed to validate.
+     *
+     * @return  the error value, or null if this FxValue instance is valid.
+     */
+    private T _getErrorValue() {
         if (multiLanguage) {
             for (T translation : translations.values()) {
                 if (translation instanceof String) {
@@ -560,7 +566,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                 return singleValue;
             }
         }
-        throw new IllegalStateException();
+        return null;
     }
 
     /**

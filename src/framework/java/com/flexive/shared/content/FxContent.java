@@ -1058,13 +1058,32 @@ public class FxContent implements Serializable {
      * @since 3.1
      */
     public boolean containsXPath(String XPath) {
-        if(XPath == null)
-            return false;
-        try {
-            return !getData(XPath).isEmpty();
-        } catch (FxRuntimeException e) {
+        if(StringUtils.isEmpty(XPath)) {
             return false;
         }
+        if ("/".equals(XPath)) {
+            return true;
+        }
+        // optimized implementation to avoid exceptions and don't create unnecessary objects
+        // since this method tends to be used often in hot spots for determining the structure of the content
+        List<FxData> currentChildren = data.getChildren();
+        for (XPathElement xpe : XPathElement.split(XPath.toUpperCase())) {
+            boolean found = false;
+            for (FxData curr : currentChildren) {
+                if (curr.getXPathElement().equals(xpe)) {
+                    if (curr.isProperty()) {
+                        return true;
+                    } else {
+                        currentChildren = ((FxGroupData) curr).getChildren();
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (!found)
+                return false;
+        }
+        return true;
     }
 
     /**
