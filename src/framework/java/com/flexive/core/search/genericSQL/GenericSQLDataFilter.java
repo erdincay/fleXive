@@ -258,13 +258,15 @@ public class GenericSQLDataFilter extends DataFilter {
     protected String getSecurityFilter(String tableAlias) {
         final List<Long> hintTypes = search.getParams().getHintTypes();
         final List<FxType> resultTypes;
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         if (hintTypes != null && !hintTypes.isEmpty()) {
             resultTypes = Lists.newArrayListWithCapacity(hintTypes.size());
             for (Long hintType : hintTypes) {
-                resultTypes.add(CacheAdmin.getEnvironment().getType(hintType));
+                resultTypes.add(env.getType(hintType));
             }
         } else {
-            resultTypes = CacheAdmin.getEnvironment().getTypes();
+            resultTypes = Lists.newArrayList(env.getTypes());
+            resultTypes.remove(env.getType(FxType.ROOT_ID));
         }
         return SearchUtils.getSecurityFilter(tableAlias, resultTypes, true);
     }
