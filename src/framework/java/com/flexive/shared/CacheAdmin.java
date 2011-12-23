@@ -268,7 +268,7 @@ public class CacheAdmin {
                         EJBLookup.getScriptingEngine().executeDropStartupScripts(dropName);
                     }
                     //Create eviction strategy if supported (and unless one has already been specified (FX-384))
-                    getInstance().setEvictionStrategy(ri.getDivisionId(), CONTENTCACHE_BASE, 100, 0, 120, false);
+                    getInstance().setEvictionStrategy(ri.getDivisionId(), CONTENTCACHE_BASE, 100, -1, 120, false);
 
                     // make sure we don't miss any updates in the environment
                     getInstance().reloadEnvironment(ri.getDivisionId());
