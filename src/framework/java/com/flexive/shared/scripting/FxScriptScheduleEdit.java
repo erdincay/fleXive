@@ -140,11 +140,11 @@ public class FxScriptScheduleEdit extends FxScriptSchedule {
     }
 
     public void setStartTime(Date startTime) {
-        this.startTime = startTime;
+        this.startTime = startTime != null ? (Date) startTime.clone() : null;
     }
 
     public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+        this.endTime = endTime != null ? (Date) endTime.clone() : null;
     }
 
     public void setRepeatInterval(long repeatInterval) {

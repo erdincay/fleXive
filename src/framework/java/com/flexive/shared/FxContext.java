@@ -924,8 +924,8 @@ public class FxContext implements Serializable {
 
     private static void removeThreadLocal() {
         if (LOG.isTraceEnabled()) {
+            LOG.trace("Removing FxContext ThreadLocal from thread " + Thread.currentThread().getName());
         }
-        LOG.trace("Removing FxContext ThreadLocal from thread " + Thread.currentThread().getName());
         info.remove();
     }
 

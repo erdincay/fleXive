@@ -35,13 +35,10 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 
-import javax.xml.xpath.XPath;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -588,7 +585,7 @@ public class XPathElement implements Serializable {
      */
     public static String stripLastElement(String XPath) {
         if (XPath == null)
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", "null").asRuntimeException();
         if (XPath.lastIndexOf('/') == 0)
             return "/";
         XPath = XPath.toUpperCase();

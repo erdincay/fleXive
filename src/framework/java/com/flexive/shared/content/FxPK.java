@@ -40,9 +40,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Primary key for FxContents
@@ -233,7 +233,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof FxPK))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
         final FxPK other = (FxPK) obj;
         return id == other.id && version == other.version;

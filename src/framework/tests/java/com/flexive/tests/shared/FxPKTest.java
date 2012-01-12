@@ -34,8 +34,10 @@ package com.flexive.tests.shared;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.ReferencedContent;
-import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
  * Basic FxPK tests.
@@ -58,6 +60,6 @@ public class FxPKTest {
     public void testFromObject() {
         assertEquals(FxPK.fromObject("10.1"), new FxPK(10, 1));
         assertEquals(FxPK.fromObject(new FxPK(10, 2)), new FxPK(10, 2));
-        assertEquals(FxPK.fromObject(new FxReference(false, new ReferencedContent(10))), new FxPK(10));
+        assertFalse(FxPK.fromObject(new FxReference(false, new ReferencedContent(10))).equals(new FxPK(10)));
     }
 }

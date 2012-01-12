@@ -66,7 +66,7 @@ public class FxDivisionExportInfo implements Serializable {
         this.domainMatcher = domainMatcher;
         this.drops = drops;
         this.exportUser = exportUser;
-        this.exportDate = exportDate;
+        this.exportDate = exportDate != null ? (Date) exportDate.clone() : null;
     }
 
     public int getDivisionId() {

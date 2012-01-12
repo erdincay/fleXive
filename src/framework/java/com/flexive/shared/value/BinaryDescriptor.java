@@ -643,7 +643,7 @@ public class BinaryDescriptor implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object obj) {
+    public synchronized boolean equals(Object obj) {
         if (!(obj instanceof BinaryDescriptor)) return false;
         BinaryDescriptor b = (BinaryDescriptor) obj;
 //        if( this.isNewBinary() && b.isNewBinary() )

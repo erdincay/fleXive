@@ -88,8 +88,8 @@ public class FxScriptSchedule implements Serializable, SelectableObjectWithName 
         this.scriptId = scriptId;
         this.name = name;
         this.active = active;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startTime = startTime != null ? (Date) startTime.clone() : null;
+        this.endTime = endTime != null ? (Date) endTime.clone() : null;
         this.repeatTimes = repeatTimes;
         this.repeatInterval = repeatInterval;
         this.cronString = cronString;

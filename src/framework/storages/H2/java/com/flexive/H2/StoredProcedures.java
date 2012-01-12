@@ -548,7 +548,7 @@ public class StoredProcedures {
      */
     public static String tree_FTEXT1024_Paths(Connection con, Long _contentId, Integer _lang, Long _tprop, Boolean _live) throws SQLException {
         StringBuilder sb = new StringBuilder(2000);
-        if (_live == Boolean.TRUE || _live == null) {
+        if (_live == null || _live) {
             PreparedStatement ps = con.prepareStatement("SELECT tree_FTEXT1024_Chain(ID,?,?,TRUE) CHAIN FROM FXS_TREE_LIVE WHERE REF=? ORDER BY CHAIN");
             ps.setLong(1, _lang);
             ps.setLong(2, _tprop);
@@ -564,7 +564,7 @@ public class StoredProcedures {
                 ps.close();
             }
         }
-        if (_live == Boolean.FALSE || _live == null) {
+        if (_live == null || !_live) {
             PreparedStatement ps = con.prepareStatement("SELECT tree_FTEXT1024_Chain(ID,?,?,FALSE) CHAIN FROM FXS_TREE WHERE REF=? ORDER BY CHAIN");
             ps.setLong(1, _lang);
             ps.setLong(2, _tprop);
