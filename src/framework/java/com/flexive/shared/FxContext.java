@@ -1105,23 +1105,21 @@ public class FxContext implements Serializable {
      */
     public NumberFormat getNumberFormatInstance(Locale locale) {
         final String currentUserKey = buildCurrentUserNumberFormatKey();
-        synchronized (NUMBER_FORMATS) {
-            if (NUMBER_FORMATS.containsKey(locale)) {
-                Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
-                if (map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                NUMBER_FORMATS.put(locale, new HashMap<String, NumberFormat>(5));
+        if (NUMBER_FORMATS.containsKey(locale)) {
             Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
-            DecimalFormat format = (DecimalFormat) DecimalFormat.getNumberInstance(locale);
-            DecimalFormatSymbols dfs = (DecimalFormatSymbols) format.getDecimalFormatSymbols().clone();
-            dfs.setDecimalSeparator(getDecimalSeparator());
-            dfs.setGroupingSeparator(getGroupingSeparator());
-            format.setGroupingUsed(useGroupingSeparator());
-            format.setDecimalFormatSymbols(dfs);
-            map.put(currentUserKey, format);
-            return format;
-        }
+            if (map.containsKey(currentUserKey))
+                return map.get(currentUserKey);
+        } else
+            NUMBER_FORMATS.put(locale, new HashMap<String, NumberFormat>(5));
+        Map<String, NumberFormat> map = NUMBER_FORMATS.get(locale);
+        DecimalFormat format = (DecimalFormat) DecimalFormat.getNumberInstance(locale);
+        DecimalFormatSymbols dfs = (DecimalFormatSymbols) format.getDecimalFormatSymbols().clone();
+        dfs.setDecimalSeparator(getDecimalSeparator());
+        dfs.setGroupingSeparator(getGroupingSeparator());
+        format.setGroupingUsed(useGroupingSeparator());
+        format.setDecimalFormatSymbols(dfs);
+        map.put(currentUserKey, format);
+        return format;
     }
 
     /**
@@ -1141,18 +1139,16 @@ public class FxContext implements Serializable {
      */
     public DateFormat getDateFormatter(Locale locale) {
         final String currentUserKey = getDateFormat();
-        synchronized (DATE_FORMATS) {
-            if (DATE_FORMATS.containsKey(locale)) {
-                Map<String, DateFormat> map = DATE_FORMATS.get(locale);
-                if (map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                DATE_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+        if (DATE_FORMATS.containsKey(locale)) {
             Map<String, DateFormat> map = DATE_FORMATS.get(locale);
-            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
-            map.put(currentUserKey, format);
-            return format;
-        }
+            if (map.containsKey(currentUserKey))
+                return map.get(currentUserKey);
+        } else
+            DATE_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+        Map<String, DateFormat> map = DATE_FORMATS.get(locale);
+        DateFormat format = new SimpleDateFormat(currentUserKey, locale);
+        map.put(currentUserKey, format);
+        return format;
     }
 
     /**
@@ -1172,18 +1168,16 @@ public class FxContext implements Serializable {
      */
     public DateFormat getTimeFormatter(Locale locale) {
         final String currentUserKey = getTimeFormat();
-        synchronized (TIME_FORMATS) {
-            if (TIME_FORMATS.containsKey(locale)) {
-                Map<String, DateFormat> map = TIME_FORMATS.get(locale);
-                if (map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                TIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+        if (TIME_FORMATS.containsKey(locale)) {
             Map<String, DateFormat> map = TIME_FORMATS.get(locale);
-            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
-            map.put(currentUserKey, format);
-            return format;
-        }
+            if (map.containsKey(currentUserKey))
+                return map.get(currentUserKey);
+        } else
+            TIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+        Map<String, DateFormat> map = TIME_FORMATS.get(locale);
+        DateFormat format = new SimpleDateFormat(currentUserKey, locale);
+        map.put(currentUserKey, format);
+        return format;
     }
 
     /**
@@ -1203,17 +1197,15 @@ public class FxContext implements Serializable {
      */
     public DateFormat getDateTimeFormatter(Locale locale) {
         final String currentUserKey = getDateTimeFormat();
-        synchronized (DATETIME_FORMATS) {
-            if (DATETIME_FORMATS.containsKey(locale)) {
-                Map<String, DateFormat> map = DATETIME_FORMATS.get(locale);
-                if (map.containsKey(currentUserKey))
-                    return map.get(currentUserKey);
-            } else
-                DATETIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+        if (DATETIME_FORMATS.containsKey(locale)) {
             Map<String, DateFormat> map = DATETIME_FORMATS.get(locale);
-            DateFormat format = new SimpleDateFormat(currentUserKey, locale);
-            map.put(currentUserKey, format);
-            return format;
-        }
+            if (map.containsKey(currentUserKey))
+                return map.get(currentUserKey);
+        } else
+            DATETIME_FORMATS.put(locale, new HashMap<String, DateFormat>(5));
+        Map<String, DateFormat> map = DATETIME_FORMATS.get(locale);
+        DateFormat format = new SimpleDateFormat(currentUserKey, locale);
+        map.put(currentUserKey, format);
+        return format;
     }
 }
