@@ -1898,6 +1898,18 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void mainTableBoolSearch() throws FxApplicationException {
+        // booleans in FX_CONTENT are not mapped as numbers, but as booleans and some databases don't have implicit conversions
+
+        final FxResultSet rs1 = new SqlQueryBuilder().select("@pk", "ISMAX_VER").filterVersion(VersionFilter.ALL).getResult();
+        assertTrue(rs1.getRowCount() > 0);
+
+        final FxResultSet rs2 = new SqlQueryBuilder().select("@pk").filterVersion(VersionFilter.ALL)
+                .condition("ISMAX_VER", PropertyValueComparator.EQ, true).getResult();
+        assertTrue(rs2.getRowCount() > 0);
+    }
+    
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());

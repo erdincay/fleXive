@@ -944,10 +944,18 @@ public class GenericSQLDataFilter extends DataFilter {
         final Property prop = cond.getProperty();
         final Constant constant = cond.getConstant();
         final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
-        final Pair<String, String> select = getValueCondition(prop, constant, entry, cond);
+        Pair<String, String> select = getValueCondition(prop, constant, entry, cond);
         if (select == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
                     entry.getProperty().getDataType(), prop.getPropertyName());
+        }
+        if (entry.getTableType() == PropertyResolver.Table.T_CONTENT && entry.getProperty() != null
+                && entry.getProperty().getDataType() == FxDataType.Boolean) {
+            // booleans in FX_CONTENT are mapped as booleans and not as numbers, some databases don't implicitly convert numbers
+            // to booleans (ie Postgres), so we do it manually
+            select = Pair.newPair(select.getFirst(), search.getStorage().getBooleanExpression(
+                    "1".equals(select.getSecond()) || "true".equals(select.getSecond())
+            ));
         }
         return new Pair<String, String>(
                 prop.getFunctionsStart() + select.getFirst() + prop.getFunctionsEnd(),
