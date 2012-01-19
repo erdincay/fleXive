@@ -397,6 +397,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (this.multiLanguage) {
             if (this.emptyTranslations == null)
                 this.emptyTranslations = new HashMap<Long, Boolean>(this.translations.size());
+            else
+                syncEmptyTranslations();
             this.emptyTranslations.put(language, true);
         } else {
             this.singleValueEmpty = true;

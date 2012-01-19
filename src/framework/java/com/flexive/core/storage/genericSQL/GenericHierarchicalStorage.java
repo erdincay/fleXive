@@ -2206,11 +2206,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
             }
 
-            //flatstorage adds/updates
-            if (fs != null && delta.getFlatStorageAddsUpdates().size() > 0)
-                fs.setPropertyData(con, pk, type.getId(), content.getStepId(), content.isMaxVersion(),
-                        content.isLiveVersion(), delta.getFlatStorageAddsUpdates());
-
             //delta-updates:
             List<FxDelta.FxDeltaChange> updatesRemaining = new ArrayList<FxDelta.FxDeltaChange>(delta.getUpdates());
 
@@ -2257,6 +2252,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         updatesRemaining.add(change); //add as last
                     }
                 }
+
+                //flatstorage adds/updates
+                if (fs != null && delta.getFlatStorageAddsUpdates().size() > 0)
+                    fs.setPropertyData(con, pk, type.getId(), content.getStepId(), content.isMaxVersion(),
+                            content.isLiveVersion(), delta.getFlatStorageAddsUpdates());
 
                 //delta-adds:
                 for (FxDelta.FxDeltaChange change : delta.getAdds()) {

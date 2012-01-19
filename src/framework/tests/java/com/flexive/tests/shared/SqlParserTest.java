@@ -31,23 +31,24 @@
  ***************************************************************/
 package com.flexive.tests.shared;
 
-import org.testng.annotations.Test;
-import org.testng.Assert;
-import static org.testng.Assert.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.ArrayUtils;
-import com.flexive.sqlParser.*;
-import com.flexive.shared.search.query.PropertyValueComparator;
-import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.structure.FxSelectListItem;
-import com.flexive.shared.structure.FxSelectListEdit;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.structure.FxSelectList;
+import com.flexive.shared.structure.FxSelectListEdit;
+import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
+import com.flexive.sqlParser.*;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
+
+import static org.testng.Assert.*;
 
 /**
  * Tests for the FxSQL parser. Checks various syntax features, but does not
@@ -58,7 +59,7 @@ import java.util.Arrays;
  */
 public class SqlParserTest {
 
-    @Test(groups = {"shared", "search"})
+    @Test(groups = {"search"})
     public void emptyWhereClause() throws SqlParserException {
         parse("SELECT co.id FROM content co", "id");
         parse("SELECT id", "id");
@@ -104,7 +105,7 @@ public class SqlParserTest {
         assertTrue(stmt2.getContentTypeFilter().equalsIgnoreCase("mytype"), "Content type filter was " + stmt2.getContentTypeFilter() + ", expected: mytype");
     }
 
-    @Test(groups = {"shared", "search"})
+    @Test(groups = {"search"})
     public void versionFilter() throws SqlParserException {
         assertTrue(parse("SELECT co.id FROM content co FILTER co.VERSION=max").getVersionFilter().equals(VersionFilter.MAX));
         assertTrue(parse("SELECT co.id FROM content co FILTER co.VERSION=LIVE").getVersionFilter().equals(VersionFilter.LIVE));
@@ -129,7 +130,7 @@ public class SqlParserTest {
         assertTrue(!parse("SELECT co.id FROM content co FILTER IGNORE_CASE=false").getIgnoreCase());
     }
 
-    @Test(groups = {"shared", "search"})
+    @Test(groups = {"search"})
     public void maxResultRowsFilter() throws SqlParserException {
         assertTrue(parse("SELECT co.id FROM content co FILTER MAX_RESULTROWS=21").getMaxResultRows() == 21);
         assertTrue(parse("SELECT co.id FROM content co FILTER MAX_RESULTROWS=0").getMaxResultRows() == 0);
@@ -261,7 +262,7 @@ public class SqlParserTest {
                 "Expected functions year, month, day; got: " + Arrays.asList(val1.getSqlFunctions()));
     }
 
-    @Test(groups = {"shared", "search"})
+    @Test(groups = {"search"})
     public void orderBy() throws SqlParserException {
         for (String valid : new String[]{
                 "SELECT co.id FROM content co ORDER BY co.id, 1",

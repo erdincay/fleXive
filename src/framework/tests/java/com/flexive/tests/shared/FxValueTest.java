@@ -31,17 +31,18 @@
  ***************************************************************/
 package com.flexive.tests.shared;
 
-import com.flexive.shared.value.*;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.value.*;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import org.testng.Assert;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Generic FxValue tests
@@ -164,6 +165,13 @@ public class FxValueTest {
         assertTrue(value.isValid(FxLanguage.SYSTEM_ID));
         assertTrue(value.isValid(FxLanguage.ENGLISH));
         assertFalse(value.isValid(FxLanguage.GERMAN));
+    }
+    
+    @Test
+    public void emptyCheck() {
+        final FxString val = new FxString(true, FxLanguage.ENGLISH, "a value");
+        val.setEmpty(FxLanguage.GERMAN);
+        assertFalse(val.isEmpty());
     }
 
     @DataProvider(name = "testInstances")

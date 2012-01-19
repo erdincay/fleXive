@@ -32,10 +32,9 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.conversion.ConversionEngine;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.EnvironmentLoader;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.FxPreloadGroupAssignment;
@@ -65,7 +64,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.flexive.core.DatabaseConst.*;
 
 /**
  * generic sql environment loader implementation
@@ -399,13 +403,14 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             stmt = con.createStatement();
             final ResultSet rs = stmt.executeQuery("SELECT " + idColumn + ",OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE FROM "
                     + table + " WHERE " + whereClause);
+            final Map<String, String> cachedKeys = Maps.newHashMap();
             while (rs.next()) {
                 final long id = rs.getLong(1);
                 if (!result.containsKey(id)) {
                     result.put(id, new ArrayList<FxStructureOption>());
                 }
 
-                final String dbValue = rs.getString(5);
+                final String dbValue = cachedString(cachedKeys, rs.getString(5));
                 final String value;
                 if (FxStructureOption.VALUE_FALSE.equals(dbValue)) {
                     // check string constants to avoid creating "0" and "1" strings all over the place
@@ -415,7 +420,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 } else {
                     value = dbValue;
                 }
-                FxStructureOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), rs.getBoolean(4), value);
+                FxStructureOption.setOption(result.get(id), cachedString(cachedKeys, rs.getString(2)), rs.getBoolean(3), rs.getBoolean(4), value);
             }
             return result;
         } finally {
@@ -923,5 +928,14 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             return new FxString("").setEmpty();
         }
         return values[index];
+    }
+    
+    private String cachedString(Map<String, String> cache, String value) {
+        if (cache.containsKey(value)) {
+            return cache.get(value);
+        } else {
+            cache.put(value, value);
+            return value;
+        }
     }
 }
