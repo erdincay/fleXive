@@ -2084,15 +2084,16 @@ public final class FxSharedUtils {
 
             MessageKey that = (MessageKey) o;
 
-            return key.equals(that.key) && locale.equals(that.locale);
+            if (key != null ? !key.equals(that.key) : that.key != null) return false;
+            if (locale != null ? !locale.equals(that.locale) : that.locale != null) return false;
 
+            return true;
         }
 
         @Override
         public int hashCode() {
-            int result;
-            result = locale.hashCode();
-            result = 31 * result + key.hashCode();
+            int result = locale != null ? locale.hashCode() : 0;
+            result = 31 * result + (key != null ? key.hashCode() : 0);
             return result;
         }
     }

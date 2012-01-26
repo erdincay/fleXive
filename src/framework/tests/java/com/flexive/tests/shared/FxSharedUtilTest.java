@@ -42,6 +42,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -126,6 +127,17 @@ public class FxSharedUtilTest {
         Assert.assertTrue(Math.abs(50.0 - millis) < 20.0, "Timestamp does not match expected 50ms: " + millis);
     }
 
+    @Test
+    public void messageKeyNullTest() {
+        // check null-safeness of message key (avoid throwing exceptions in exception message loaders)
+        final FxSharedUtils.MessageKey key1 = new FxSharedUtils.MessageKey(Locale.GERMAN, null);
+        final FxSharedUtils.MessageKey key2 = new FxSharedUtils.MessageKey(null, "a.b.c");
+        Assert.assertFalse(key1.equals(key2));
+        Assert.assertFalse(key2.equals(key1));
+        Assert.assertTrue(key1.hashCode() != 0);
+        Assert.assertTrue(key2.hashCode() != 0);
+    }
+    
     private void assertSplitResult(String[] result, String[] expected) {
         Assert.assertEquals(Arrays.asList(result), Arrays.asList(expected),
                 "Expected split result: " + Arrays.asList(expected) + ", got: " + Arrays.asList(result));
