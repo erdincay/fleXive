@@ -33,8 +33,6 @@ package com.flexive.core.storage.PostgreSQL;
 
 import com.flexive.core.storage.TreeStorage;
 import com.flexive.core.storage.genericSQL.GenericTreeStorageSpreaded;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Postgres specific tree storage implementation
@@ -42,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class PostgreSQLTreeStorage extends GenericTreeStorageSpreaded {
-    private static final Log LOG = LogFactory.getLog(PostgreSQLTreeStorage.class);
 
     private static final PostgreSQLTreeStorage instance = new PostgreSQLTreeStorage();
 

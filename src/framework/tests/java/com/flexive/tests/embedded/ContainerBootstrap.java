@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
         "workflow", "streaming", "scripting", "valuetest", "cache", "image", "tree", "relation",
         "search", "tutorial", "benchmark", "environment", "mandator", "importexport", "uniquemode",
         "roles", "reference", "binary", "flatstorage", "briefcase", "cmis", "lock", "sequencer", "resultset",
-        "contentconversion", "stresstest", "inheritance", "tree-stress", "resource"})
+        "contentconversion", "stresstest", "inheritance", "tree-stress", "resource", "phrase"})
 public class ContainerBootstrap {
 
     /**
@@ -69,7 +69,7 @@ public class ContainerBootstrap {
             FxContext.initializeSystem(DivisionData.DIVISION_TEST, "flexiveTests");
             TestUsers.initializeUsers();
         } catch (Exception ex) {
-            if (ex.getMessage().indexOf("Parameter /globalconfig/datasources{GLOBAL}/-2 not found.") >= 0) {
+            if (ex.getMessage().contains("Parameter /globalconfig/datasources{GLOBAL}/-2 not found.")) {
                 System.err.println("*******************************************************************");
                 System.err.println("** you should run \"ant db.update.config\" to resolve this problem **");
                 System.err.println("*******************************************************************");

@@ -367,6 +367,16 @@ public class EJBLookup {
     }
 
     /**
+     * Lookup of the PhraseEngine EJB.
+     *
+     * @return a reference to the PhraseEngine EJB
+     * @since 3.1.7
+     */
+    public static PhraseEngine getPhraseEngine() {
+        return getEngine(PhraseEngine.class);
+    }
+
+    /**
      * Get a reference of the transaction manager
      *
      * @return TransactionManager

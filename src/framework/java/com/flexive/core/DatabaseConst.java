@@ -258,6 +258,22 @@ public final class DatabaseConst {
      * Resource table
      */
     public static final String TBL_RESOURCES = "FX_RES";
+    /**
+     * Phrase table
+     */
+    public static final String TBL_PHRASE = "FX_PHRASE";
+    /**
+     * Phrase values table
+     */
+    public static final String TBL_PHRASE_VALUES = "FX_PHRASE_VAL";
+    /**
+     * Phrase tree table
+     */
+    public static final String TBL_PHRASE_TREE = "FX_PHRASE_TREE";
+    /**
+     * Phrase mapping table
+     */
+    public static final String TBL_PHRASE_MAP = "FX_PHRASE_MAP";
 
     /**
      * Lists all tables that keep user-based lifecycle information.

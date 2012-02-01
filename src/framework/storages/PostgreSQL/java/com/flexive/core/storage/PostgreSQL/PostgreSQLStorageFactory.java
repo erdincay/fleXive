@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.core.storage.PostgreSQL;
 
-import com.flexive.core.Database;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.PostgreSQL.PostgreSQLDataFilter;

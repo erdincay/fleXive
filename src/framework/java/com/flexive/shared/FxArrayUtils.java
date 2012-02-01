@@ -323,8 +323,25 @@ public class FxArrayUtils {
      * @return String representation of the array
      */
     public static String toStringArray(int[] elements, char separator) {
-        StringBuilder sb = new StringBuilder((elements.length + 20));
+        StringBuilder sb = new StringBuilder(elements.length + 20);
         for (int element : elements) {
+            sb.append(String.valueOf(element));
+            sb.append(separator);
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+
+    /**
+     * Convert an int array to a string array with the given separator
+     *
+     * @param elements  elements to convert to a String
+     * @param separator separator for the resulting String
+     * @return String representation of the array
+     * @since 3.1.7
+     */
+    public static String toStringArray(long[] elements, char separator) {
+        StringBuilder sb = new StringBuilder(elements.length + 20);
+        for (long element : elements) {
             sb.append(String.valueOf(element));
             sb.append(separator);
         }
