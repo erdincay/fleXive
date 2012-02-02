@@ -301,15 +301,10 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         for (FxProperty property : properties) {
             this.properties.put(property.getId(), property);
             this.propertyNameLookup.put(
-                    toUpperKey(property.getName()),
+                    property.getName().toUpperCase(),
                     property.getId()
             );
         }
-    }
-
-    private String toUpperKey(String key) {
-        final String upperName = key.toUpperCase();
-        return upperName.equals(key) ? key : upperName;
     }
 
     /**
@@ -331,7 +326,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         this.assignmentXPathLookup = new HashMap<String, Long>(assignments.size());
         for (FxAssignment assignment : assignments) {
             this.assignments.put(assignment.getId(), assignment);
-            this.assignmentXPathLookup.put(toUpperKey(assignment.getXPath()), assignment.getId());
+            this.assignmentXPathLookup.put(assignment.getXPath().toUpperCase(), assignment.getId());
         }
         if (propertyAssignmentsAll != null)
             propertyAssignmentsAll.clear();
