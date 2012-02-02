@@ -825,9 +825,9 @@ public class FxContent implements Serializable {
             createXPath(XPath);
         FxValue val = getPropertyData(XPath).getValue();
         if (val.isMultiLanguage())
-            val.setDefaultTranslation(value);
+            val.setDefaultTranslation(preparePrimitive(value));
         else
-            val.setValue(value);
+            val.setValue(preparePrimitive(value));
         return this;
     }
 
@@ -845,12 +845,21 @@ public class FxContent implements Serializable {
     public FxContent setValue(String XPath, long languageId, Object value) {
         FxValue val = getPropertyData(XPath).getValue();
         if (val.isMultiLanguage())
-            val.setTranslation(languageId, value);
+            val.setTranslation(languageId, preparePrimitive(value));
         else
-            val.setValue(value);
+            val.setValue(preparePrimitive(value));
         return this;
     }
 
+    private Object preparePrimitive(Object value) {
+        if (value != null && value.getClass() == FxPK.class) {
+            // promote FxPK instances to ReferencedContents, the proper value type of FxReference
+            return new ReferencedContent((FxPK) value);
+        } else {
+            return value;
+        }
+    }
+    
     /**
      * Convenience method which saves this FxContent and returns the loaded instance.
      *
