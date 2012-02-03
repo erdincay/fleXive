@@ -1412,13 +1412,12 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     man = query.getTreeNodeMappingOwner();
                 else
                     man = new Long[]{FxContext.getUserTicket().getMandatorId()};
-                for (long mandatorExclude : man) {
-                    sql.append(" AND (SELECT COUNT(*)FROM " + TBL_PHRASE_MAP + " m2 WHERE m2.MANDATOR=" + mandatorExclude +
-                            " AND m2.PHRASEID=p.ID AND m2.PMANDATOR=p.MANDATOR)=0");
-                }
+                sql.append(" AND (SELECT COUNT(m2.PHRASEID)FROM " + TBL_PHRASE_MAP + " m2 WHERE m2.MANDATOR IN (" + FxArrayUtils.toStringArray(man,',') +
+                        ") AND m2.NODEMANDATOR IN (" + FxArrayUtils.toStringArray(man,',')+
+                        ") AND m2.PHRASEID=p.ID AND m2.PMANDATOR=p.MANDATOR)=0");
             }
             if (query.isKeyMatchRestricted()) {
-                sql.append(" AND p.PKEY");
+                sql.append(" AND UPPER(p.PKEY)");
                 switch (query.getKeyMatchMode()) {
                     case CONTAINS:
                     case STARTS_WITH:
@@ -1429,7 +1428,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
             }
             if (query.isTagMatchRestricted()) {
-                sql.append(" AND " + searchAlias + ".TAG");
+                sql.append(" AND UPPER(" + searchAlias + ".TAG)");
                 switch (query.getTagMatchMode()) {
                     case CONTAINS:
                     case STARTS_WITH:
@@ -1440,8 +1439,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
             }
             if (query.isValueMatchRestricted()) {
-                sql.append(" AND " + searchAlias + ".PVAL");
-                switch (query.getTagMatchMode()) {
+                sql.append(" AND UPPER(" + searchAlias + ".PVAL)");
+                switch (query.getValueMatchMode()) {
                     case CONTAINS:
                     case STARTS_WITH:
                         sql.append(" LIKE ?");
@@ -1578,13 +1577,13 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
     private void setQueryParam(PreparedStatement ps, int queryParam, FxPhraseQuery.MatchMode matchMode, String query) throws SQLException {
         switch (matchMode) {
             case CONTAINS:
-                ps.setString(queryParam, "%" + query + "%");
+                ps.setString(queryParam, "%" + query.toUpperCase() + "%");
                 break;
             case STARTS_WITH:
-                ps.setString(queryParam, query + "%");
+                ps.setString(queryParam, query.toUpperCase() + "%");
                 break;
             case EXACT:
-                ps.setString(queryParam, query);
+                ps.setString(queryParam, query.toUpperCase());
                 break;
         }
     }
