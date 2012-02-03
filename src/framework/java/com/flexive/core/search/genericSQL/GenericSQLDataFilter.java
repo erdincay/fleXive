@@ -36,13 +36,15 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
-import com.flexive.shared.*;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.Pair;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
 import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.query.VersionFilter;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxFlatStorageMapping;
@@ -185,7 +187,6 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     @Override
     public void build() throws FxSqlSearchException, SQLException {
-        final UserTicket ticket = FxContext.getUserTicket();
         final long maxRows = search.getFxStatement().getMaxResultRows();
         Statement stmt = null;
         String sql = null;
@@ -382,6 +383,13 @@ public class GenericSQLDataFilter extends DataFilter {
                 return;
             }
 
+            if (tables.size() == 1 && tables.keys().iterator().next().equals(DatabaseConst.TBL_CONTENT)) {
+                // combine main table selects into a single one
+                sb.append("(SELECT id,ver," + getEmptyLanguage() + " as lang FROM " + DatabaseConst.TBL_CONTENT + " cd"
+                        + " WHERE " + getOptimizedMainTableConditions(br) + ")");
+                return;
+            }
+
             // check if there are two or more queries on the same flat storage that can be grouped
             try {
                 final Brace grouped = br.groupConditions(new Brace.GroupFunction() {
@@ -450,6 +458,12 @@ public class GenericSQLDataFilter extends DataFilter {
                 sb.append(
                         getOptimizedFlatStorageSubquery(br, tables.keySet().iterator().next())
                 );
+                return;
+            }
+            if (tables.size() == 1 && tables.keys().iterator().next().equals(DatabaseConst.TBL_CONTENT)) {
+                // combine main table selects into a single one
+                sb.append("(SELECT id,ver," + getEmptyLanguage() + " as lang FROM " + DatabaseConst.TBL_CONTENT + " cd"
+                        + " WHERE " + getOptimizedMainTableConditions(br) + ")");
                 return;
             }
             // check if there are two or more flat storage queries in the same level that can be grouped

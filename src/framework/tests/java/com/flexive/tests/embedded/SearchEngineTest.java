@@ -1910,6 +1910,37 @@ public class SearchEngineTest {
         assertTrue(rs2.getRowCount() > 0);
     }
     
+    @Test
+    public void mixedMainTableSearch() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "step")
+                .condition("CAPTION", PropertyValueComparator.EMPTY, null)
+                .condition("STEP", PropertyValueComparator.EQ, StepDefinition.EDIT_STEP_ID)
+                .getResult();
+        assertTrue(result.getRowCount() > 0, "Mixed main table/content table query returned no results");
+    }
+    
+    @Test
+    public void nestedMainTableSearch() throws FxApplicationException {
+        for (QueryOperatorNode.Operator op : QueryOperatorNode.Operator.values()) {
+            final FxResultSet result = new SqlQueryBuilder().select("@pk")
+                    .condition("CAPTION", PropertyValueComparator.EMPTY, null)
+                    .enterSub(op)
+                    .condition("STEP", PropertyValueComparator.EQ, StepDefinition.EDIT_STEP_ID)
+                    .type(TEST_TYPE)
+                    .closeSub()
+                    .getResult();
+            assertTrue(result.getRowCount() > 0, "Nested main table query returned no results");
+
+            final FxResultSet ref = new SqlQueryBuilder().select("@pk")
+                    .enterSub(op)
+                    .condition("STEP", PropertyValueComparator.EQ, StepDefinition.EDIT_STEP_ID)
+                    .type(TEST_TYPE)
+                    .getResult();
+
+            assertTrue(ref.getRowCount() >= result.getRowCount(), "Subquery returned more results than base query");
+        }
+    }
+    
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());
