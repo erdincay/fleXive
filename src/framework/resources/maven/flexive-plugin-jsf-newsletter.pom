@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-plugin-jsf-newsletter</artifactId>
+    <version>@FLEXIVE_VERSION@</version>
+    <description>Flexive newsletter plugin for the backend administration</description>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License (LGPL)</name>
+            <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
+        </license>
+    </licenses>
+    <url>http://www.flexive.org/</url>
+    <issueManagement>
+        <system>Atlassian JIRA</system>
+        <url>http://issuetracker.flexive.org/jira/browse/FX</url>
+    </issueManagement>
+    <organization>
+        <name>unique computing solutions GmbH (UCS)</name>
+        <url>http://www.ucs.at/</url>
+    </organization>
+    <scm>
+        <connection>scm:svn:http://svn.flexive.org/repository/flexive/@FLEXIVE_BRANCH@</connection>
+        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/ui/jsf-newsletter</url>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf-core</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+    </dependencies>
+
+</project>
