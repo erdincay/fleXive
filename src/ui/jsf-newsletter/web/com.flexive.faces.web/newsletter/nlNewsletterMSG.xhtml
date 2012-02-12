@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="nlTemplate.xhtml">
+
+            <ui:define name="title"> Newsletter list </ui:define>
+    <ui:define name="defineID">
+        <a4j:form id="form_2">
+            <a4j:jsFunction name="initID_2" reRender="scriptOverviewPanel" actionEvent="#{newsletterBean.editNewsletter}">
+                <a4j:actionparam name="curId" assignTo="#{newsletterBean.curId}"/>
+            </a4j:jsFunction>
+            <a4j:outputPanel id="scriptOverviewPanel2">
+                <script type="text/javascript">
+                    setTimeout("initID2('#{newsletterBean.typeMsg}');",500);
+                </script>
+            </a4j:outputPanel>
+        </a4j:form>
+    </ui:define>
+    <fx:yuiSetup/>
+</ui:composition>
+</body>
+</html>

@@ -1,3 +1,34 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) framework.
+ *
+ *  Copyright (c) 1999-2012
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License version 2.1 or higher as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.FxPhrase;
@@ -19,6 +50,7 @@ import java.util.List;
  * @author Markus Plesser (markus.plesser@ucs.at), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @since 3.1.7
  */
+@SuppressWarnings("UnusedDeclaration")
 @Remote
 public interface PhraseEngine {
 
@@ -36,6 +68,18 @@ public interface PhraseEngine {
     public long savePhrase(String phraseKey, FxString value, long mandator) throws FxNoAccessException;
 
     /**
+     * Save or create a phrase (tag will be removed existing phrases!)
+     *
+     * @param phraseKey   phrase key
+     * @param value       phrase value
+     * @param searchValue value used for search operations
+     * @param mandator    phrase mandator
+     * @return phrase id (for the mandator)
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public long savePhrase(String phraseKey, FxString value, FxString searchValue, long mandator) throws FxNoAccessException;
+
+    /**
      * Save or create a phrase
      *
      * @param phraseKey phrase key
@@ -46,6 +90,19 @@ public interface PhraseEngine {
      * @throws FxNoAccessException if the requested mandator is not the callers mandator
      */
     public long savePhrase(String phraseKey, FxString value, Object tag, long mandator) throws FxNoAccessException;
+
+    /**
+     * Save or create a phrase
+     *
+     * @param phraseKey   phrase key
+     * @param value       phrase value
+     * @param searchValue value used for search operations
+     * @param tag         String if single language or FxString if multilanguage
+     * @param mandator    phrase mandator
+     * @return phrase id (for the mandator)
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public long savePhrase(String phraseKey, FxString value, FxString searchValue, Object tag, long mandator) throws FxNoAccessException;
 
     /**
      * Remove the phrase identified by its key and mandator and all its mappings
@@ -123,7 +180,7 @@ public interface PhraseEngine {
      * Remove all phrases that belong to the requested mandator
      *
      * @param mandatorId requested mandator
-     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     * @throws FxNoAccessException   if the requested mandator is not the callers mandator
      * @throws FxEntryInUseException if phrases are in use by the phrase tree
      */
     public void clearPhrases(long mandatorId) throws FxNoAccessException, FxEntryInUseException;

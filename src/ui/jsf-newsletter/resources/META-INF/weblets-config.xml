@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<weblets-config xmlns="http://weblets.dev.java.net/config">
+    <weblet>
+        <weblet-name>newsletter_plugin.weblet</weblet-name>
+        <weblet-class>
+            net.java.dev.weblets.packaged.PackagedWeblet
+        </weblet-class>
+        <weblet-version>1.0</weblet-version>
+        <init-param>
+            <param-name>package</param-name>
+            <param-value>
+                newsletter_plugin.weblets
+            </param-value>
+        </init-param>
+    </weblet>
+    <weblet-mapping>
+        <weblet-name>newsletter_plugin.weblet</weblet-name>
+        <url-pattern>/newsletter-plugin-resources/*</url-pattern>
+    </weblet-mapping>
+</weblets-config>

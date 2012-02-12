@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="preHead">
+        <fx:includes htmlEditor="true" yui="true" jsonRpc="true"/>
+    </ui:define>
+    <ui:define name="head">
+        <script type="text/javascript">
+            function test() {
+                alert('test..');
+            }
+
+            function initID(id, text) {
+                setTimeout('initID_(' + id + ', ' + text + ');alert("done");',50);
+            }
+            function initID2(id) {
+//                setTimeout('initID_(' + id + ');alert("done");',50);
+                initID_(id,'-');
+            }
+        </script>
+    </ui:define>
+    <ui:define name="body">
+            <a4j:outputPanel id="newPanel">
+                <a4j:form id="frm43" enctype="multipart/form-data">
+                    <!--var="#{newsletterBean.nlContent}"-->
+                    <fx:contentEditor
+                            typeId="12"
+                            editorId="editor2"
+                            formPrefix="frm43"
+                            editMode="true"
+                            var="nlContent"
+                            disableDelete="true"
+                            disableEdit="true"
+                            disableCompact="true"
+                            disableVersion="true"
+                            >
+
+                        <c:if test="false">
+                        <ui:define name="buttons">
+                            <a4j:commandButton
+                                    value="#{fxMessageBean['Content.button.save']}"
+                                    title="#{fxMessageBean['Content.button.save']}"
+                                    action="#{newsletterBean.saveNL}"
+                                    >
+                                <f:setPropertyActionListener value="#{nlContent}"
+                                                             target="#{newsletterBean.nlContent}"/>
+                            </a4j:commandButton>
+                        </ui:define>
+                        </c:if>
+                   </fx:contentEditor>
+
+                   <fx:yuiSetup/>
+               </a4j:form>
+            </a4j:outputPanel>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

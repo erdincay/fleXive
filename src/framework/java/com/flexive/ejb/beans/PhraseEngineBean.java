@@ -1,3 +1,34 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) framework.
+ *
+ *  Copyright (c) 1999-2012
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License version 2.1 or higher as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
@@ -27,6 +58,7 @@ import static com.flexive.core.DatabaseConst.*;
  * @author Markus Plesser (markus.plesser@ucs.at), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @since 3.1.7
  */
+@SuppressWarnings("UnusedDeclaration")
 @Stateless(name = "PhraseEngine", mappedName = "PhraseEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
@@ -148,7 +180,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long savePhrase(String phraseKey, FxString value, long mandator) throws FxNoAccessException {
-        return savePhrase(phraseKey, value, null, mandator);
+        return savePhrase(phraseKey, value, null, null, mandator);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long savePhrase(String phraseKey, FxString value, FxString searchValue, long mandator) throws FxNoAccessException {
+        return savePhrase(phraseKey, value, searchValue, null, mandator);
     }
 
     /**
@@ -156,11 +196,27 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long savePhrase(String phraseKey, FxString value, Object tag, long mandator) throws FxNoAccessException {
+        return savePhrase(phraseKey, value, null, tag, mandator);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long savePhrase(String phraseKey, FxString value, FxString searchValue, Object tag, long mandator) throws FxNoAccessException {
         Connection con = null;
         PreparedStatement ps = null;
         final UserTicket userTicket = FxContext.getUserTicket();
         checkMandatorAccess(mandator, userTicket);
         checkPhraseKey(phraseKey);
+        FxString sval = searchValue == null ? value.copy() : searchValue;
+        //ensure all translations exist and are uppercase for search value
+        for (long lang : value.getTranslatedLanguages()) {
+            if (!sval.translationExists(lang))
+                sval.setTranslation(lang, value.getTranslation(lang).trim().toUpperCase());
+            else
+                sval.setTranslation(lang, sval.getTranslation(lang).trim().toUpperCase());
+        }
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -194,23 +250,24 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             }
             if (!value.isEmpty()) {
                 ps.close();
-                ps = con.prepareStatement("INSERT INTO " + TBL_PHRASE_VALUES + "(ID,MANDATOR,LANG,PVAL,TAG)VALUES(?,?,?,?,?)");
+                ps = con.prepareStatement("INSERT INTO " + TBL_PHRASE_VALUES + "(ID,MANDATOR,LANG,PVAL,SVAL,TAG)VALUES(?,?,?,?,?,?)");
                 ps.setLong(1, phraseId);
                 ps.setLong(2, mandator);
                 FxString fxTag = tag instanceof FxString ? (FxString) tag : null;
                 for (long lang : value.getTranslatedLanguages()) {
                     ps.setLong(3, lang);
                     ps.setString(4, value.getTranslation(lang));
+                    ps.setString(5, sval.getTranslation(lang));
                     if (fxTag != null) {
                         if (!fxTag.isMultiLanguage() || fxTag.translationExists(lang))
-                            ps.setString(5, fxTag.getTranslation(lang));
+                            ps.setString(6, fxTag.getTranslation(lang));
                         else
-                            ps.setNull(5, Types.VARCHAR);
+                            ps.setNull(6, Types.VARCHAR);
                     } else {
                         if (tag != null)
-                            ps.setString(5, String.valueOf(tag));
+                            ps.setString(6, String.valueOf(tag));
                         else
-                            ps.setNull(5, Types.VARCHAR);
+                            ps.setNull(6, Types.VARCHAR);
                     }
                     ps.addBatch();
                 }
@@ -1378,6 +1435,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             sql.append(",v.PVAL,v.TAG");
             if (isSortPos)
                 sql.append(",m.POS,m.MANDATOR");
+            //append SVAL to allow an order by
+            switch (query.getSortMode()) {
+                case VALUE_ASC:
+                case VALUE_DESC:
+                    sql.append(",v.SVAL");
+                    break;
+            }
+
             sql.append(" FROM " + TBL_PHRASE + " p," + TBL_PHRASE_VALUES + " v");
             if (needResultVal)
                 sql.append(", " + TBL_PHRASE_VALUES + " sv");
@@ -1412,8 +1477,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     man = query.getTreeNodeMappingOwner();
                 else
                     man = new Long[]{FxContext.getUserTicket().getMandatorId()};
-                sql.append(" AND (SELECT COUNT(m2.PHRASEID)FROM " + TBL_PHRASE_MAP + " m2 WHERE m2.MANDATOR IN (" + FxArrayUtils.toStringArray(man,',') +
-                        ") AND m2.NODEMANDATOR IN (" + FxArrayUtils.toStringArray(man,',')+
+                sql.append(" AND (SELECT COUNT(m2.PHRASEID)FROM " + TBL_PHRASE_MAP + " m2 WHERE m2.MANDATOR IN (" + FxArrayUtils.toStringArray(man, ',') +
+                        ") AND m2.NODEMANDATOR IN (" + FxArrayUtils.toStringArray(man, ',') +
                         ") AND m2.PHRASEID=p.ID AND m2.PMANDATOR=p.MANDATOR)=0");
             }
             if (query.isKeyMatchRestricted()) {
@@ -1439,7 +1504,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
             }
             if (query.isValueMatchRestricted()) {
-                sql.append(" AND UPPER(" + searchAlias + ".PVAL)");
+                sql.append(" AND " + searchAlias + ".SVAL");
                 switch (query.getValueMatchMode()) {
                     case CONTAINS:
                     case STARTS_WITH:
@@ -1485,10 +1550,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     sql.append("m.POS DESC");
                     break;
                 case VALUE_ASC:
-                    sql.append("v.PVAL ASC");
+                    sql.append("v.SVAL ASC");
                     break;
                 case VALUE_DESC:
-                    sql.append("v.PVAL DESC");
+                    sql.append("v.SVAL DESC");
                     break;
                 case KEY_ASC:
                     sql.append("p.PKEY ASC");

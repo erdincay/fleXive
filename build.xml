@@ -129,7 +129,7 @@
         <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${extractor-audio.jar},${extractor-video.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar,mime-util*,slf4j*,icepdf-core.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/audio" includes="*.jar"/>
-        <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-*,flexive-plugin-jsf2-*,flexive-backend.jar"/>
+        <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-*,flexive-plugin-jsf2-*,flexive-backend.jar,flexive-plugin-jsf-newsletter.jar"/>
         <fileset dir="${flexive.lib.dir}/antlr" includes="antlr-runtime-*.jar"/>
 
         <fileset dir="${build.ui.jar.dir}">
@@ -212,7 +212,7 @@
         <path id="__jsflibs">
             <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-*.jar,*-src.jar,jstl*, portlet.jar, jsonrpc*"/>
             <fileset refid="flexive.lib.ui.ajax4jsf"/>
-            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-*,flexive-backend.jar" excludes="flexive-plugin-jsf2-core.jar,flexive-plugin-jsf-shared.jar,flexive-plugin-jsf-testrunner.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-*,flexive-backend.jar" excludes="flexive-plugin-jsf2-core.jar,flexive-plugin-jsf-shared.jar,flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-newsletter.jar"/>
         </path>
         <path id="__jsflibs.shared">
             <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-shared.jar"/>
@@ -1019,10 +1019,10 @@
         <copy file="${build.ui.jar.dir}/flexive-backend.jar" todir="${flexive.dist.apps.dir}/flexive-backend"/>
         <!-- Include standard plugin setup -->
         <copy todir="${flexive.dist.apps.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf2-core.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-newsletter.jar,flexive-plugin-jsf2-core.jar"/>
         </copy>
         <copy todir="${flexive.dist.apps.disabled.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf2-core.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf2-core.jar,flexive-plugin-jsf-newsletter.jar"/>
         </copy>
 
         <!-- Copy build environment to root dist folder -->
@@ -1192,6 +1192,7 @@ database.vendor=MySQL
             <maven-build-sources artifactId="flexive-plugin-jsf-shared" label="[fleXive] shared JSF classes for JSF 1 and 2" srcdir="${flexive.src.ui.jsf-shared.dir}"/>
             <maven-build-sources artifactId="flexive-plugin-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
             <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
+            <maven-build-sources artifactId="flexive-plugin-jsf-newsletter" label="[fleXive] backend newsletter plugin" srcdir="${flexive.base.ui.dir}/jsf-newsletter/src/java"/>
             <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
 
             <maven-build-sources artifactId="flexive-extractor" label="[fleXive] extractors base module" srcdir="${flexive.src.framework.dir}"
@@ -1257,6 +1258,7 @@ database.vendor=MySQL
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-shared"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-globalconfig"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-feedbackPlugin"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-newsletter"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
 
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor"/>
@@ -1441,6 +1443,7 @@ database.vendor=MySQL
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
         <buildPlugin name="globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
         <buildPlugin name="jsf-feedbackPlugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin"/>
+        <buildPlugin name="jsf-newsletter" srcdir="${flexive.base.ui.dir}/jsf-newsletter"/>
         <!--emma enabled="${emma.enabled}">
 			<instr
 				instrpath="${build.ui.jar.dir}/flexive-jsf-core.jar"

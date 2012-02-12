@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="preHead">
+        <fx:includes htmlEditor="true" yui="true" jsonRpc="true"/>
+    </ui:define>
+    <ui:define name="head">
+        <script type="text/javascript">
+            function test() {
+                alert('test..');
+            }
+
+            function initID(id, text) {
+                setTimeout('initID_(' + id + ', ' + text + ');alert("done");',50);
+            }
+            function initID2(id) {
+                initID_(id,'-');
+            }
+        </script>
+    </ui:define>
+    <ui:define name="body">
+    <ui:insert name="defineID"/>
+        <!--<h : form id="frm">-->
+        <h:form id="frm" enctype="multipart/form-data">
+
+            <adm:tab label="#{fxMessageBean['Newsletter.tabtitle.admin']}" active="true" id="tabNewsletter"/>
+            <h:messages/>
+
+            <ui:insert name="title"/>
+
+            <a4j:outputPanel id="scriptOverviewPanel">
+                <c:if test="#{newsletterBean.firstRun} and false">
+                    <script type="text/javascript">
+                          setTimeout("newContent();", 200);
+                    </script>
+                </c:if>
+
+                <script type="text/javascript">
+                        // <!--
+
+
+                    function editContent(pk) {
+                        var _pk = pk.toString();
+                        editNewsletter(_pk, 'test123');
+                    }
+
+                    function editContent_(pk) {
+                        var _pk = pk.toString();
+                        showEditWindow(true);
+                        editNewsletter(_pk, 'test123');
+                        setTimeout("#{rich:component('editMPanel')}.show();", 500);
+
+                    }
+
+                    function closeEditContent() {
+                        showEditWindow(false);
+                        setTimeout("#{rich:component('editMPanel')}.hide();", 100);
+                    }
+
+                    function newContent() {
+                        showNewWindow(true);
+                        newNewsletter();
+                        setTimeout("#{rich:component('newMPanel')}.show();", 500);
+                    }
+
+                    function closeNewContent() {
+                        showNewWindow(false);
+                        setTimeout("#{rich:component('newMPanel')}.hide();", 100);
+                    }
+
+                    function deleteContent(pk) {
+                        var _pk = pk.toString();
+                        if (confirm("#{fxMessageBean['Newsletter.msg.question.delete']}"))
+                            deletItem(_pk);
+                    }
+
+                    var _actionColumnHandler = new flexive.yui.datatable.ActionColumnHandler();
+                    _actionColumnHandler.getActionColumn = function(pk, permissions) {
+                        if (pk == null) {
+                            return "";
+                        }
+                        var out = [];
+                        var pkArg = "flexive.util.parsePk(\"" + pk.toString() + "\")";
+                        if (permissions == null || permissions["edit"]) {
+                            out.push("<a href='javascript:editContent_(" + pkArg + ");'>#{fxMessageBean['Newsletter.button.edit']}</a>");
+                        }
+                        if (permissions == null || permissions["delete"]) {
+                            out.push("<a href='javascript:deleteContent(" + pkArg + ");'>#{fxMessageBean['Newsletter.button.delete']}</a>");
+                        }
+
+                        return out.join(" | ");
+                    }
+                    // -->
+                </script>
+
+                <fx:resultTable var="newsletters"
+                                id="newsTable"
+                                value="#{newsletterBean.sqlString}"
+                                viewType="list"
+                                actionColumnHandler="_actionColumnHandler"
+                                rowsPerPage="#{newsletterBean.nlListRowNumber}"
+                        />
+
+                <adm:ajaxCommandButton
+                        onclick="newContent();"
+                        id="newButton"
+                        labelKey="Newsletter.button.new"
+                        icon="new"
+                        bean="#{newsletterBean}"
+                        action="cancelEdit"/>
+
+                <adm:toolbarPluginButtons/>
+                    <fx:yuiSetup/>
+                </a4j:outputPanel>
+                 </h:form>
+
+        <a4j:form >
+            <a4j:jsFunction name="editNewsletter" reRender="editMPanel" actionEvent="#{newsletterBean.editNewsletter}">
+                <a4j:actionparam name="nlEditPK" assignTo="#{newsletterBean.nlEditPK}"/>
+                <a4j:actionparam name="testParam" assignTo="#{newsletterBean.testParam}"/>
+            </a4j:jsFunction>
+            <a4j:jsFunction name="showEditWindow" reRender="editMPanel" actionEvent="#{newsletterBean.editNewsletter}">
+                <a4j:actionparam name="showEdit" assignTo="#{newsletterBean.showEdit}"/>
+            </a4j:jsFunction>
+            <a4j:jsFunction name="showNewWindow" reRender="newMPanel" actionEvent="#{newsletterBean.editNewsletter}">
+                <a4j:actionparam name="showNew" assignTo="#{newsletterBean.showNew}"/>
+            </a4j:jsFunction>
+            <a4j:jsFunction name="initID_" reRender="scriptOverviewPanel" actionEvent="#{newsletterBean.editNewsletter}">
+                <a4j:actionparam name="curId" assignTo="#{newsletterBean.curId}"/>
+                <a4j:actionparam name="testParam" assignTo="#{newsletterBean.testParam}"/>
+            </a4j:jsFunction>
+            <a4j:jsFunction name="newNewsletter" reRender="newMPanel" actionEvent="#{newsletterBean.editNewsletter}"/>
+            <a4j:jsFunction name="deletItem" reRender="scriptOverviewPanel" actionEvent="#{newsletterBean.editNewsletter}">
+                <a4j:actionparam name="deletePk"  assignTo="#{newsletterBean.deletePk}"/>
+            </a4j:jsFunction>
+        </a4j:form>
+
+        <rich:modalPanel id="editMPanel" width="250" height="10" autosized="true">
+            <f:facet name="header">
+                <h:panelGroup>
+                    #{fxMessageBean['Newsletter.title.edit']}
+                </h:panelGroup>
+            </f:facet>
+            <f:facet name="controls">
+                <h:panelGroup>
+                    <h:form>
+                        <!--cancel icon-->
+                        <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
+                                             bean="#{newsletterBean}" action="cancelEdit"
+                                             onclick="closeEditContent();"
+                                             id="cancel_edit_M" reRender="scriptOverviewPanel">
+                            <f:setPropertyActionListener value="#{nlContent}"
+                                                         target="#{newsletterBean.nlContent}"/>
+                        </adm:ajaxCommandIcon>
+
+                    </h:form>
+                </h:panelGroup>
+            </f:facet>
+
+            <!--<t : saveState id="ssPK" value="#{newsletterBean.newsletterPK_S}"/>-->
+            <c:if test="#{newsletterBean.newsletterPK != null and newsletterBean.showEdit}">
+
+            <a4j:outputPanel id="editPanel">
+                <a4j:form id="frm42" enctype="multipart/form-data">
+                    <fx:contentEditor
+                        pk="#{newsletterBean.newsletterPK}"
+                        editorId="editor1"
+                        formPrefix="frm42"
+                        editMode="true"
+                        var="nlContent"
+                            >
+
+
+                        <ui:define name="buttons">
+                            <a4j:commandButton
+                                    value="#{fxMessageBean['Content.button.save']}"
+                                    title="#{fxMessageBean['Content.button.save']}"
+                                    action="#{newsletterBean.saveNL}"
+                                    onclick="closeEditContent();"
+                                    reRender="scriptOverviewPanel"
+                                    >
+                                <f:setPropertyActionListener value="#{nlContent}"
+                                                             target="#{newsletterBean.nlContent}"/>
+                            </a4j:commandButton>
+                        </ui:define>
+                   </fx:contentEditor>
+
+                   <fx:yuiSetup/>
+               </a4j:form>
+            </a4j:outputPanel>
+            </c:if>
+        </rich:modalPanel>
+
+        <rich:modalPanel id="newMPanel" width="250" height="10" autosized="true">
+            <f:facet name="header">
+                <h:panelGroup>
+                    #{fxMessageBean['Newsletter.title.new']}
+                </h:panelGroup>
+            </f:facet>
+            <f:facet name="controls">
+                <h:panelGroup>
+                    <h:form>
+                        <!--cancel icon-->
+                        <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
+                                             bean="#{newsletterBean}" action="cancelEdit"
+                                             onclick="closeNewContent();"
+                                             id="cancel_new_M" reRender="scriptOverviewPanel">
+                            <f:setPropertyActionListener value="#{nlContent}"
+                                                         target="#{newsletterBean.nlContent}"/>
+                        </adm:ajaxCommandIcon>
+                    </h:form>
+                </h:panelGroup>
+            </f:facet>
+
+            <!--<t : saveState id="ssPK" value="#{newsletterBean.newsletterPK_S}"/>-->
+            <c:if test="#{newsletterBean.showNew}">
+            <a4j:outputPanel id="newPanel">
+                <a4j:form id="frm43" enctype="multipart/form-data">
+                    <!--var="#{newsletterBean.nlContent}"-->
+                    <fx:contentEditor
+                            typeId="#{newsletterBean.typeID}"
+                            editorId="editor2"
+                            formPrefix="frm43"
+                            editMode="true"
+                            var="nlContent"
+                            reset="true"
+                            >
+
+
+                        <ui:define name="buttons">
+                            <a4j:commandButton
+                                    value="#{fxMessageBean['Content.button.save']}"
+                                    title="#{fxMessageBean['Content.button.save']}"
+                                    action="#{newsletterBean.saveNL}"
+                                    onclick="closeNewContent();"
+                                    reRender="scriptOverviewPanel"
+                                    >
+                                <f:setPropertyActionListener value="#{nlContent}"
+                                                             target="#{newsletterBean.nlContent}"/>
+                            </a4j:commandButton>
+                        </ui:define>
+                   </fx:contentEditor>
+
+                   <fx:yuiSetup/>
+               </a4j:form>
+            </a4j:outputPanel>
+            </c:if>
+        </rich:modalPanel>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>
