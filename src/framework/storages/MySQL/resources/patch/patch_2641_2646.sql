@@ -2,4 +2,4 @@
 -- Change: Explicit search value for phrases
 -- Author: Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
 ALTER TABLE FX_PHRASE_VAL ADD COLUMN SVAL TEXT CHARACTER SET UTF8 NOT NULL;
-CREATE INDEX FXI_PHRASE_SVAL ON FX_PHRASE_VAL(SVAL);
+CREATE INDEX FXI_PHRASE_SVAL ON FX_PHRASE_VAL(SVAL(760));
