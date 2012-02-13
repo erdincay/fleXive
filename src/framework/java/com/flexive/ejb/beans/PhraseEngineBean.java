@@ -1194,6 +1194,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             psUpdate.setLong(4, nodeMandator);
             if (checkPositioning) {
                 psFetch = con.prepareStatement("SELECT POS, PHRASEID, PMANDATOR FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? ORDER BY POS");
+                psFetch.setLong(1, assignmentOwner);
+                psFetch.setLong(2, nodeId);
+                psFetch.setLong(3, nodeMandator);
                 ResultSet rs = psFetch.executeQuery();
                 long currPos = 0;
                 while (rs != null && rs.next()) {
@@ -1465,9 +1468,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             }
             if (query.isTreeNodeRestricted()) {
                 if (!query.isIncludeChildNodes()) {
-                    sql.append(" AND m.NODEID=" + query.getTreeNode() + " AND m.NODEMANDATOR=" + query.getTreeNodeMandator() + " AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
+                    sql.append(" AND m.NODEID=" + query.getTreeNode() + " AND m.NODEMANDATOR=" + query.getTreeNodeMandator() + " AND m.PHRASEID=p.ID");
                 } else {
-                    sql.append(" AND m.PHRASEID=p.ID AND m.MANDATOR=p.MANDATOR AND m.MANDATOR IN(" + FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',') + ")");
+                    sql.append(" AND m.PHRASEID=p.ID AND m.MANDATOR IN(" + FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',') + ")");
                     ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=?");
                     sql.append("AND(1=2 ");
                     buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
