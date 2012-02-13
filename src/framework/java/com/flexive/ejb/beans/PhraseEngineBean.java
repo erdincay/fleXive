@@ -187,8 +187,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long savePhrase(String phraseKey, FxString value, FxString searchValue, long mandator) throws FxNoAccessException {
-        return savePhrase(phraseKey, value, searchValue, null, mandator);
+    public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, long mandator) throws FxNoAccessException {
+        return savePhrase(phraseKey, value, converter, null, mandator);
     }
 
     /**
@@ -203,20 +203,20 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long savePhrase(String phraseKey, FxString value, FxString searchValue, Object tag, long mandator) throws FxNoAccessException {
+    public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, Object tag, long mandator) throws FxNoAccessException {
         Connection con = null;
         PreparedStatement ps = null;
         final UserTicket userTicket = FxContext.getUserTicket();
         checkMandatorAccess(mandator, userTicket);
         checkPhraseKey(phraseKey);
-        FxString sval = searchValue == null ? value.copy() : searchValue;
+        /*FxString sval = searchValue == null ? value.copy() : searchValue;
         //ensure all translations exist and are uppercase for search value
         for (long lang : value.getTranslatedLanguages()) {
             if (!sval.translationExists(lang))
                 sval.setTranslation(lang, value.getTranslation(lang).trim().toUpperCase());
             else
                 sval.setTranslation(lang, sval.getTranslation(lang).trim().toUpperCase());
-        }
+        }*/
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -257,7 +257,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 for (long lang : value.getTranslatedLanguages()) {
                     ps.setLong(3, lang);
                     ps.setString(4, value.getTranslation(lang));
-                    ps.setString(5, sval.getTranslation(lang));
+                    if(converter != null)
+                        ps.setString(5, converter.convert(value.getTranslation(lang), lang));
+                    else
+                        ps.setString(5, value.getTranslation(lang).trim().toUpperCase());
                     if (fxTag != null) {
                         if (!fxTag.isMultiLanguage() || fxTag.translationExists(lang))
                             ps.setString(6, fxTag.getTranslation(lang));
@@ -1674,7 +1677,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void syncDivisionResources(long targetMandator) throws FxApplicationException {
+    public void syncDivisionResources(long targetMandator, FxPhraseSearchValueConverter converter) throws FxApplicationException {
         final UserTicket userTicket = FxContext.getUserTicket();
         checkMandatorAccess(targetMandator, userTicket);
         clearTree(targetMandator);
@@ -1688,7 +1691,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             psFetch = con.prepareStatement("SELECT RKEY,LANG,RVAL FROM " + TBL_RESOURCES + " ORDER BY RKEY,LANG");
             psPhrase = con.prepareStatement("INSERT INTO " + TBL_PHRASE + "  (ID,MANDATOR,PKEY)VALUES(?,?,?)");
             psPhrase.setLong(2, targetMandator);
-            psPhraseVal = con.prepareStatement("INSERT INTO " + TBL_PHRASE_VALUES + "  (ID,MANDATOR,LANG,PVAL,TAG)VALUES(?,?,?,?,NULL)");
+            psPhraseVal = con.prepareStatement("INSERT INTO " + TBL_PHRASE_VALUES + "  (ID,MANDATOR,LANG,PVAL,SVAL,TAG)VALUES(?,?,?,?,?,NULL)");
             psPhraseVal.setLong(2, targetMandator);
 
             long currentId = 0;
@@ -1705,6 +1708,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
                 psPhraseVal.setLong(3, rs.getLong(2));
                 psPhraseVal.setString(4, rs.getString(3));
+                if(converter != null)
+                    psPhraseVal.setString(5, converter.convert(rs.getString(3), rs.getLong(2)));
+                else
+                    psPhraseVal.setString(5, rs.getString(3).trim().toUpperCase());
                 psPhraseVal.executeUpdate();
             }
         } catch (SQLException exc) {

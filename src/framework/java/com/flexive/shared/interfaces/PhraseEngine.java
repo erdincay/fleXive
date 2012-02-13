@@ -31,10 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
-import com.flexive.shared.FxPhrase;
-import com.flexive.shared.FxPhraseQuery;
-import com.flexive.shared.FxPhraseQueryResult;
-import com.flexive.shared.FxPhraseTreeNode;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxEntryInUseException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -72,12 +69,12 @@ public interface PhraseEngine {
      *
      * @param phraseKey   phrase key
      * @param value       phrase value
-     * @param searchValue value used for search operations
+     * @param converter   converter for value used for search operations
      * @param mandator    phrase mandator
      * @return phrase id (for the mandator)
      * @throws FxNoAccessException if the requested mandator is not the callers mandator
      */
-    public long savePhrase(String phraseKey, FxString value, FxString searchValue, long mandator) throws FxNoAccessException;
+    public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, long mandator) throws FxNoAccessException;
 
     /**
      * Save or create a phrase
@@ -96,13 +93,13 @@ public interface PhraseEngine {
      *
      * @param phraseKey   phrase key
      * @param value       phrase value
-     * @param searchValue value used for search operations
+     * @param converter   converter for value used for search operations
      * @param tag         String if single language or FxString if multilanguage
      * @param mandator    phrase mandator
      * @return phrase id (for the mandator)
      * @throws FxNoAccessException if the requested mandator is not the callers mandator
      */
-    public long savePhrase(String phraseKey, FxString value, FxString searchValue, Object tag, long mandator) throws FxNoAccessException;
+    public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, Object tag, long mandator) throws FxNoAccessException;
 
     /**
      * Remove the phrase identified by its key and mandator and all its mappings
@@ -353,8 +350,9 @@ public interface PhraseEngine {
      * Clear all phrases for the targetMandator and copy the division resources as phrases (using the targetMandator as owner)
      *
      * @param targetMandator mandator to use for the phrases
+     * @param converter converter for search values
      * @throws FxApplicationException on errors
      * @throws FxNoAccessException    if not run as global supervisor or member of the mandator
      */
-    public void syncDivisionResources(long targetMandator) throws FxApplicationException;
+    public void syncDivisionResources(long targetMandator, FxPhraseSearchValueConverter converter) throws FxApplicationException;
 }
