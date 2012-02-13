@@ -151,8 +151,10 @@ public class NewsletterProcessor implements Serializable {
     }
 
     public static List<NewsletterSubscriber> getSubscribers(FxPK newsletterPK) throws FxApplicationException {
-        FxResultSet rs = EJBLookup.getSearchEngine().search("SELECT @pk, #Newsletter_Subscriber/Salutation, #Newsletter_Subscriber/Name, #Newsletter_Subscriber/Surname, #Newsletter_Subscriber/EMail, #Newsletter_Subscriber/SENDPLAIN, #Newsletter_Subscriber/SENDHTML, #Newsletter_Subscriber/CODE FILTER VERSION=MAX, type='Newsletter_Subscriber'\n" +
-                "where #Newsletter_Subscriber/NEWSLETTER=" + newsletterPK.getId());
+        FxResultSet rs = EJBLookup.getSearchEngine().search("SELECT @pk, #Newsletter_Subscriber/Salutation, #Newsletter_Subscriber/Name, #Newsletter_Subscriber/Surname, #Newsletter_Subscriber/EMail, #Newsletter_Subscriber/SENDPLAIN, #Newsletter_Subscriber/SENDHTML, #Newsletter_Subscriber/CODE\n" +
+                "FILTER VERSION=MAX, type='Newsletter_Subscriber', MAX_RESULTROWS=" + Integer.MAX_VALUE + "\n" +
+                "where #Newsletter_Subscriber/NEWSLETTER=" + newsletterPK.getId(),
+                0, Integer.MAX_VALUE, null);
         List<NewsletterSubscriber> result = new ArrayList<NewsletterSubscriber>(rs.getRowCount());
         for (Object[] col : rs.getRows())
             result.add(new NewsletterSubscriber((FxPK) col[0], (FxString) col[1], (FxString) col[2], (FxString) col[3],
