@@ -46,7 +46,6 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.impex.FxImportExportConstants;
 import com.flexive.shared.structure.FxDataType;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -677,7 +676,7 @@ try {
                     boolean dataSet = false;
                     for (String col : columns.keySet()) {
                         ColumnInfo ci = columns.get(col);
-                        String value = StringEscapeUtils.unescapeXml(data.get(col));
+                        String value = data.get(col);
                         if (insertMode && counters != null && counters.get(col) != null) {
                             final int newVal = counters.get(col) - 1;
                             value = String.valueOf(newVal);
@@ -685,7 +684,7 @@ try {
 //                            System.out.println("new value for " + col + ": " + newVal);
                         }
                         if (insertMode && presetRefColumns != null && presetRefColumns.get(col) != null) {
-                            value = StringEscapeUtils.unescapeXml(data.get(presetRefColumns.get(col)));
+                            value = data.get(presetRefColumns.get(col));
 //                            System.out.println("Set presetRefColumn for "+col+" to ["+value+"] from column ["+presetRefColumns.get(col)+"]");
                         }
 
