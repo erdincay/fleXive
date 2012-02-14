@@ -229,7 +229,12 @@ public class FxPhraseQuery implements Serializable {
     }
 
     public void setPhraseMandators(Long... phraseMandators) {
-        this.phraseMandators = phraseMandators;
+        if (phraseMandators == null)
+            return;
+        if (phraseMandators.length == 2 && phraseMandators[0] != null && phraseMandators[1] != null && phraseMandators[0].equals(phraseMandators[1]))
+            this.phraseMandators = new Long[]{phraseMandators[0]};
+        else
+            this.phraseMandators = phraseMandators;
     }
 
     public boolean isPhraseMandatorRestricted() {
@@ -241,7 +246,12 @@ public class FxPhraseQuery implements Serializable {
     }
 
     public void setTreeNodeMappingOwner(Long... treeNodeMappingOwner) {
-        this.treeNodeMappingOwner = treeNodeMappingOwner;
+        if (treeNodeMappingOwner == null)
+            return;
+        if (treeNodeMappingOwner.length == 2 && treeNodeMappingOwner[0] != null && treeNodeMappingOwner[1] != null && treeNodeMappingOwner[0].equals(treeNodeMappingOwner[1]))
+            this.treeNodeMappingOwner = new Long[]{treeNodeMappingOwner[0]};
+        else
+            this.treeNodeMappingOwner = treeNodeMappingOwner;
     }
 
     public boolean isTreeNodeMappingOwnerRestricted() {

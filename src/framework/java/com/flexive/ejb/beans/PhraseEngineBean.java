@@ -172,6 +172,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             return new long[]{FxContext.getUserTicket().getMandatorId()};
         if (mandators.length > 2)
             throw new FxApplicationException("ex.phrase.mandatorFilter.limited", 2).asRuntimeException();
+        if (mandators.length == 2 && mandators[0] == mandators[1])
+            return new long[]{mandators[0]};
         return mandators;
     }
 
@@ -257,7 +259,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 for (long lang : value.getTranslatedLanguages()) {
                     ps.setLong(3, lang);
                     ps.setString(4, value.getTranslation(lang));
-                    if(converter != null)
+                    if (converter != null)
                         ps.setString(5, converter.convert(value.getTranslation(lang), lang));
                     else
                         ps.setString(5, value.getTranslation(lang).trim().toUpperCase());
@@ -913,7 +915,13 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ResultSet rsPhrase = psPhrase.executeQuery();
                 if (rsPhrase == null || !rsPhrase.next())
                     throw new FxNotFoundException("ex.phrases.notFound.id", rs.getLong(5), rs.getLong(6)).asRuntimeException();
-                node = new FxPhraseTreeNode(rs.getLong(1), rs.getLong(2), FxPhraseTreeNode.NOT_SET, FxPhraseTreeNode.NOT_SET, loadPhrase(rsPhrase), null).setPos(rs.getLong(7));
+                long parentId = rs.getLong(3);
+                if (rs.wasNull())
+                    parentId = FxPhraseTreeNode.NOT_SET;
+                long parentMandatorId = rs.getLong(4);
+                if (rs.wasNull())
+                    parentMandatorId = FxPhraseTreeNode.NOT_SET;
+                node = new FxPhraseTreeNode(rs.getLong(1), rs.getLong(2), parentId, parentMandatorId, loadPhrase(rsPhrase), null).setPos(rs.getLong(7));
                 rsPhrase.close();
             }
             if (rs != null)
@@ -1375,11 +1383,46 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
             List<FxPhraseTreeNode> result = Lists.newArrayListWithCapacity(10);
+            final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
             ps = con.prepareStatement("SELECT m.NODEID, m.NODEMANDATOR FROM " + TBL_PHRASE_MAP +
-                    " m," + TBL_PHRASE + " p WHERE p.PKEY=? AND p.MANDATOR" +
-                    (mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")") +
-                    " AND m.PHRASEID=p.ID AND m.MANDATOR=p.MANDATOR");
+                    " m," + TBL_PHRASE + " p WHERE p.PKEY=? AND p.MANDATOR" + mandatorQuery +
+                    " AND m.PHRASEID=p.ID AND m.MANDATOR" + mandatorQuery);
             ps.setString(1, phraseKey);
+            ResultSet rs = ps.executeQuery();
+            while (rs != null && rs.next()) {
+                try {
+                    result.add(loadPhraseTreeNode(con, false, rs.getLong(1), rs.getLong(2), false, mandators));
+                } catch (FxNotFoundException e) {
+                    LOG.error("Failed to load node " + rs.getLong(1) + " (mandator " + rs.getLong(2) + ") found! This should not be possible!");
+                }
+            }
+            return result;
+        } catch (SQLException exc) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(PhraseEngineBean.class, con, ps);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<FxPhraseTreeNode> getAssignedNodes(long phraseId, long phraseMandator, long... _mandators) {
+        final long ownMandator = FxContext.getUserTicket().getMandatorId();
+        Connection con = null;
+        PreparedStatement ps = null;
+        long[] mandators = checkMandatorFiltering(_mandators);
+        try {
+            // Obtain a database connection
+            con = Database.getDbConnection();
+            List<FxPhraseTreeNode> result = Lists.newArrayListWithCapacity(10);
+            final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
+            ps = con.prepareStatement("SELECT m.NODEID, m.NODEMANDATOR FROM " + TBL_PHRASE_MAP +
+                    " m WHERE m.PHRASEID=? AND m.PMANDATOR=? AND m.MANDATOR" + mandatorQuery);
+            ps.setLong(1, phraseId);
+            ps.setLong(2, phraseMandator);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 try {
@@ -1711,7 +1754,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
                 psPhraseVal.setLong(3, rs.getLong(2));
                 psPhraseVal.setString(4, rs.getString(3));
-                if(converter != null)
+                if (converter != null)
                     psPhraseVal.setString(5, converter.convert(rs.getString(3), rs.getLong(2)));
                 else
                     psPhraseVal.setString(5, rs.getString(3).trim().toUpperCase());
