@@ -745,6 +745,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 if (!node.hasPos())
                     node.setPos(getNextNodePos(con, node.getParentNodeId(), node.getParentNodeMandatorId(), node.getMandatorId()));
                 ps.setLong(5, node.getPos());
+                ps.setLong(6, node.getId());
+                ps.setLong(7, node.getMandatorId());
                 ps.executeUpdate();
                 node.getPhrase().setId(checkPhrase.getId());
                 return node;
