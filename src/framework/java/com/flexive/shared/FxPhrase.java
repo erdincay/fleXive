@@ -105,6 +105,10 @@ public class FxPhrase implements Serializable {
         return key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public FxString getValue() {
         if(fxValue == null)
             return new FxString(false, value);
