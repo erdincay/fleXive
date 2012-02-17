@@ -95,6 +95,7 @@ public class SqlSearch {
     private final ResultPreferencesEngine conf;
     private FxLanguage language;
     private List<Long> searchLanguageIds;
+    private ResultPreferences resultPreferences;
 
     /**
      * Ctor
@@ -231,11 +232,10 @@ public class SqlSearch {
             df.build();
 
             // Wildcard handling depending on the found entries
-            final ResultPreferences resultPreferences = getResultPreferences(df);
-            replaceWildcard(df, resultPreferences);
+            replaceWildcard(df);
             if (statement.getOrderByValues().isEmpty()) {
                 // add user-defined order by
-                for (ResultOrderByInfo column : resultPreferences.getOrderByColumns()) {
+                for (ResultOrderByInfo column : getResultPreferences(df).getOrderByColumns()) {
                     try {
                         statement.addOrderByValue(new OrderByValue(column.getColumnName(),
                                 column.getDirection().equals(SortDirection.ASCENDING)));
@@ -496,11 +496,10 @@ public class SqlSearch {
      * @param df the datafilter
      * @throws FxSqlSearchException if the function fails
      */
-    private void replaceWildcard(DataFilter df, ResultPreferences prefs) throws FxSqlSearchException {
+    private void replaceWildcard(DataFilter df) throws FxSqlSearchException {
 
         try {
-            ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(
-                    (statement.getSelectedValues().size() - 1) + prefs.getSelectedColumns().size());
+            ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>();
             for (SelectedValue _value : statement.getSelectedValues()) {
                 final Property propValue = _value.getValue() instanceof Property ? (Property) _value.getValue() : null;
                 if (propValue != null && propValue.isWildcard()) {
@@ -511,7 +510,7 @@ public class SqlSearch {
                     }
                 } else if (propValue != null && propValue.isUserPropsWildcard()) {
                     // User preferences wildcard
-                    for (ResultColumnInfo nfo : prefs.getSelectedColumns()) {
+                    for (ResultColumnInfo nfo : getResultPreferences(df).getSelectedColumns()) {
                         Property newProp = new Property(propValue.getTableAlias(), nfo.getPropertyName(), nfo.getSuffix());
                         SelectedValue newSel = new SelectedValue(newProp, null);
                         selValues.add(newSel);
@@ -528,7 +527,10 @@ public class SqlSearch {
     }
 
     private ResultPreferences getResultPreferences(DataFilter df) throws FxApplicationException {
-        return conf.load(getContentTypeId(df), viewType, location);
+        if (resultPreferences == null) {
+            resultPreferences = conf.load(getContentTypeId(df), viewType, location);
+        }
+        return resultPreferences;
     }
 
     private long getContentTypeId(DataFilter df) {
