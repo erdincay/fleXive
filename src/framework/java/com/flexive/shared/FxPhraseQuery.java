@@ -274,6 +274,22 @@ public class FxPhraseQuery implements Serializable {
         this.sortMode = sortMode;
     }
 
+    public boolean isSortByPos() {
+        return this.sortMode == SortMode.POS_ASC || this.sortMode == SortMode.POS_DESC;
+    }
+
+    public boolean isSortByKey() {
+        return this.sortMode == SortMode.KEY_ASC || this.sortMode == SortMode.KEY_DESC;
+    }
+
+    public boolean isSortByValue() {
+        return this.sortMode == SortMode.VALUE_ASC || this.sortMode == SortMode.VALUE_DESC;
+    }
+
+    public boolean isSortByTag() {
+        return this.sortMode == SortMode.TAG_ASC || this.sortMode == SortMode.TAG_DESC;
+    }
+
     public boolean isOwnMandatorTop() {
         return ownMandatorTop;
     }

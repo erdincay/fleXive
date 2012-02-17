@@ -211,14 +211,6 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         final UserTicket userTicket = FxContext.getUserTicket();
         checkMandatorAccess(mandator, userTicket);
         checkPhraseKey(phraseKey);
-        /*FxString sval = searchValue == null ? value.copy() : searchValue;
-        //ensure all translations exist and are uppercase for search value
-        for (long lang : value.getTranslatedLanguages()) {
-            if (!sval.translationExists(lang))
-                sval.setTranslation(lang, value.getTranslation(lang).trim().toUpperCase());
-            else
-                sval.setTranslation(lang, sval.getTranslation(lang).trim().toUpperCase());
-        }*/
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -269,7 +261,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                         else
                             ps.setNull(6, Types.VARCHAR);
                     } else {
-                        if (tag != null)
+                        if (tag != null && !StringUtils.isBlank(String.valueOf(tag)))
                             ps.setString(6, String.valueOf(tag));
                         else
                             ps.setNull(6, Types.VARCHAR);
@@ -1483,7 +1475,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             final boolean needResultVal = !query.isFetchFullPhraseInfo() && query.isResultLanguageRestricted() && query.isSearchLanguageRestricted() &&
                     !query.getSearchLanguage().equals(query.getResultLanguage());
             final String searchAlias = needResultVal ? "sv" : "v";
-            sql.append(",v.PVAL,v.TAG");
+            final boolean needValueTable = needResultVal || query.isSortByTag() || query.isSortByValue() || query.isSearchLanguageRestricted();
+            if(needValueTable)
+                sql.append(",v.PVAL,v.TAG");
             if (isSortPos)
                 sql.append(",m.POS,m.MANDATOR");
             //append SVAL to allow an order by
@@ -1494,12 +1488,16 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     break;
             }
 
-            sql.append(" FROM " + TBL_PHRASE + " p," + TBL_PHRASE_VALUES + " v");
+            sql.append(" FROM " + TBL_PHRASE + " p");
+            if(needValueTable)
+                sql.append("," + TBL_PHRASE_VALUES + " v");
             if (needResultVal)
                 sql.append(", " + TBL_PHRASE_VALUES + " sv");
             if (query.isTreeNodeRestricted() /*&& !query.isIncludeChildNodes()*/)
                 sql.append(", " + TBL_PHRASE_MAP + " m");
-            sql.append(" WHERE v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
+            sql.append(" WHERE 1=1");
+            if(needValueTable)
+                sql.append(" AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
             if (needResultVal)
                 sql.append(" AND sv.ID=v.ID AND sv.MANDATOR=v.MANDATOR AND v.LANG=").append(query.getResultLanguage());
             if (query.isSearchLanguageRestricted())
@@ -1671,7 +1669,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                         psPhrase.setLong(2, rs.getLong(2));
                         ResultSet rsPhrase = psPhrase.executeQuery();
                         if (rsPhrase != null && rsPhrase.next())
-                            loadPhrase(rsPhrase);
+                            phrases.add(loadPhrase(rsPhrase));
                         if (rsPhrase != null)
                             rsPhrase.close();
                     }
@@ -1762,6 +1760,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     psPhraseVal.setString(5, rs.getString(3).trim().toUpperCase());
                 psPhraseVal.executeUpdate();
             }
+            final String SEQ_NAME = "PhraseSeq_" + targetMandator;
+            if (seq.sequencerExists(SEQ_NAME))
+                seq.removeSequencer(SEQ_NAME);
+            seq.createSequencer(SEQ_NAME, false, currentId + 1);
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
