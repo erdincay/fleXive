@@ -67,10 +67,10 @@ public interface PhraseEngine {
     /**
      * Save or create a phrase (tag will be removed existing phrases!)
      *
-     * @param phraseKey   phrase key
-     * @param value       phrase value
-     * @param converter   converter for value used for search operations
-     * @param mandator    phrase mandator
+     * @param phraseKey phrase key
+     * @param value     phrase value
+     * @param converter converter for value used for search operations
+     * @param mandator  phrase mandator
      * @return phrase id (for the mandator)
      * @throws FxNoAccessException if the requested mandator is not the callers mandator
      */
@@ -91,11 +91,11 @@ public interface PhraseEngine {
     /**
      * Save or create a phrase
      *
-     * @param phraseKey   phrase key
-     * @param value       phrase value
-     * @param converter   converter for value used for search operations
-     * @param tag         String if single language or FxString if multilanguage
-     * @param mandator    phrase mandator
+     * @param phraseKey phrase key
+     * @param value     phrase value
+     * @param converter converter for value used for search operations
+     * @param tag       String if single language or FxString if multilanguage
+     * @param mandator  phrase mandator
      * @return phrase id (for the mandator)
      * @throws FxNoAccessException if the requested mandator is not the callers mandator
      */
@@ -182,6 +182,13 @@ public interface PhraseEngine {
      */
     public void clearPhrases(long mandatorId) throws FxNoAccessException, FxEntryInUseException;
 
+    /**
+     * Synchronize the phrase sequencer to match the current max id + 1
+     *
+     * @param mandatorId mandator
+     */
+    public void syncPhraseSequencer(long mandatorId);
+
     //tree handling
 
     /**
@@ -194,6 +201,25 @@ public interface PhraseEngine {
      * @throws FxNotFoundException if either the parent node or the phrase dont exist
      */
     public FxPhraseTreeNode saveTreeNode(FxPhraseTreeNode node) throws FxNoAccessException, FxNotFoundException;
+
+    /**
+     * Set the parent of a phrase tree node
+     *
+     * @param nodeId         node id
+     * @param nodeMandator   node mandator
+     * @param parentId       parent node id
+     * @param parentMandator parent node mandator
+     * @throws FxNoAccessException if the node mandator is not the calling users mandator
+     * @throws FxNotFoundException if either of the nodes are not found
+     */
+    public void setPhraseTreeNodeParent(long nodeId, long nodeMandator, long parentId, long parentMandator) throws FxNoAccessException, FxNotFoundException;
+
+    /**
+     * Synchronize the phrase node sequencer to match the current max id + 1
+     *
+     * @param mandatorId mandator
+     */
+    public void syncPhraseNodeSequencer(long mandatorId);
 
     /**
      * Load all root nodes and child nodes for up to 2 mandators
@@ -330,9 +356,9 @@ public interface PhraseEngine {
      * Get all assignments for a phrase.
      * Returned FxPhraseTreeNode's will not be populated with children!
      *
-     * @param phraseId phrase Id
+     * @param phraseId       phrase Id
      * @param phraseMandator phrase mandator id
-     * @param mandator  assignment owner mandators
+     * @param mandator       assignment owner mandators
      * @return assigned noded (without children!)
      */
     public List<FxPhraseTreeNode> getAssignedNodes(long phraseId, long phraseMandator, long... mandator);
@@ -361,7 +387,7 @@ public interface PhraseEngine {
      * Clear all phrases for the targetMandator and copy the division resources as phrases (using the targetMandator as owner)
      *
      * @param targetMandator mandator to use for the phrases
-     * @param converter converter for search values
+     * @param converter      converter for search values
      * @throws FxApplicationException on errors
      * @throws FxNoAccessException    if not run as global supervisor or member of the mandator
      */
