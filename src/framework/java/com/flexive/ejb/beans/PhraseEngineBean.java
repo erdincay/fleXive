@@ -1487,7 +1487,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<FxPhraseTreeNode> getAssignedNodes(String phraseKey, long... _mandators) {
+    public List<FxPhraseTreeNodePosition> getAssignedNodes(String phraseKey, long... _mandators) {
         final long ownMandator = FxContext.getUserTicket().getMandatorId();
         Connection con = null;
         PreparedStatement ps = null;
@@ -1495,16 +1495,17 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            List<FxPhraseTreeNode> result = Lists.newArrayListWithCapacity(10);
+            List<FxPhraseTreeNodePosition> result = Lists.newArrayListWithCapacity(10);
             final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
-            ps = con.prepareStatement("SELECT m.NODEID, m.NODEMANDATOR FROM " + TBL_PHRASE_MAP +
+            ps = con.prepareStatement("SELECT m.NODEID,m.NODEMANDATOR,m.POS FROM " + TBL_PHRASE_MAP +
                     " m," + TBL_PHRASE + " p WHERE p.PKEY=? AND p.MANDATOR" + mandatorQuery +
                     " AND m.PHRASEID=p.ID AND m.MANDATOR" + mandatorQuery);
             ps.setString(1, phraseKey);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 try {
-                    result.add(loadPhraseTreeNode(con, false, rs.getLong(1), rs.getLong(2), false, mandators));
+                    result.add(new FxPhraseTreeNodePosition(loadPhraseTreeNode(con, false, rs.getLong(1), rs.getLong(2), false, mandators),
+                                    rs.getLong(3)));
                 } catch (FxNotFoundException e) {
                     LOG.error("Failed to load node " + rs.getLong(1) + " (mandator " + rs.getLong(2) + ") found! This should not be possible!");
                 }
@@ -1522,7 +1523,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<FxPhraseTreeNode> getAssignedNodes(long phraseId, long phraseMandator, long... _mandators) {
+    public List<FxPhraseTreeNodePosition> getAssignedNodes(long phraseId, long phraseMandator, long... _mandators) {
         final long ownMandator = FxContext.getUserTicket().getMandatorId();
         Connection con = null;
         PreparedStatement ps = null;
@@ -1530,16 +1531,17 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            List<FxPhraseTreeNode> result = Lists.newArrayListWithCapacity(10);
+            List<FxPhraseTreeNodePosition> result = Lists.newArrayListWithCapacity(10);
             final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
-            ps = con.prepareStatement("SELECT m.NODEID, m.NODEMANDATOR FROM " + TBL_PHRASE_MAP +
+            ps = con.prepareStatement("SELECT m.NODEID,m.NODEMANDATOR,m.POS FROM " + TBL_PHRASE_MAP +
                     " m WHERE m.PHRASEID=? AND m.PMANDATOR=? AND m.MANDATOR" + mandatorQuery);
             ps.setLong(1, phraseId);
             ps.setLong(2, phraseMandator);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 try {
-                    result.add(loadPhraseTreeNode(con, false, rs.getLong(1), rs.getLong(2), false, mandators));
+                    result.add(new FxPhraseTreeNodePosition(loadPhraseTreeNode(con, false, rs.getLong(1), rs.getLong(2), false, mandators),
+                            rs.getLong(3)));
                 } catch (FxNotFoundException e) {
                     LOG.error("Failed to load node " + rs.getLong(1) + " (mandator " + rs.getLong(2) + ") found! This should not be possible!");
                 }

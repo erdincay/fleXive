@@ -533,15 +533,15 @@ public class PhraseTest {
         Assert.assertEquals(result.getTotalResults(), 20);  //20 fx.phrase.search.test.xxx phrases should be unassigned
 
         //find assignments for phrases
-        List<FxPhraseTreeNode> nodes = pe.getAssignedNodes("fx.phrase.test.P1", ownMandator, testMandator);
+        List<FxPhraseTreeNodePosition> nodes = pe.getAssignedNodes("fx.phrase.test.P1", ownMandator, testMandator);
         Assert.assertTrue(nodesContain(nodes, "A1"));
         Assert.assertTrue(nodesContain(nodes, "A1.2"));
         Assert.assertTrue(nodesContain(nodes, "A2"));
     }
 
-    private boolean nodesContain(List<FxPhraseTreeNode> nodes, String postFix) {
-        for(FxPhraseTreeNode node: nodes)
-            if(node.getPhrase().getKey().endsWith(postFix))
+    private boolean nodesContain(List<FxPhraseTreeNodePosition> nodes, String postFix) {
+        for(FxPhraseTreeNodePosition node: nodes)
+            if(node.getNode().getPhrase().getKey().endsWith(postFix))
                 return true;
         return false;
     }

@@ -348,9 +348,9 @@ public interface PhraseEngine {
      *
      * @param phraseKey phrase key
      * @param mandator  assignment owner mandators
-     * @return assigned noded (without children!)
+     * @return assigned node (without children!) and the position of the phrase
      */
-    public List<FxPhraseTreeNode> getAssignedNodes(String phraseKey, long... mandator);
+    public List<FxPhraseTreeNodePosition> getAssignedNodes(String phraseKey, long... mandator);
 
     /**
      * Get all assignments for a phrase.
@@ -359,9 +359,9 @@ public interface PhraseEngine {
      * @param phraseId       phrase Id
      * @param phraseMandator phrase mandator id
      * @param mandator       assignment owner mandators
-     * @return assigned noded (without children!)
+     * @return assigned node (without children!) and the position of the phrase
      */
-    public List<FxPhraseTreeNode> getAssignedNodes(long phraseId, long phraseMandator, long... mandator);
+    public List<FxPhraseTreeNodePosition> getAssignedNodes(long phraseId, long phraseMandator, long... mandator);
 
     //query
 
