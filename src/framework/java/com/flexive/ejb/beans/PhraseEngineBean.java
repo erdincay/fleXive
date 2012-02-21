@@ -490,6 +490,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE MANDATOR=?");
             ps.setLong(1, mandator);
             count = ps.executeUpdate();
+            removePhraseSequencer(mandator);
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
@@ -1632,9 +1633,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             }
             if (query.isTreeNodeRestricted()) {
                 if (!query.isIncludeChildNodes()) {
-                    sql.append(" AND m.NODEID=" + query.getTreeNode() + " AND m.NODEMANDATOR=" + query.getTreeNodeMandator() + " AND m.PHRASEID=p.ID");
+                    sql.append(" AND m.NODEID=" + query.getTreeNode() + " AND m.NODEMANDATOR=" + query.getTreeNodeMandator() + " AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
                 } else {
-                    sql.append(" AND m.PHRASEID=p.ID AND m.MANDATOR IN(" + FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',') + ")");
+                    sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(" + FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',') + ")");
                     ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=?");
                     sql.append("AND(1=2 ");
                     buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
