@@ -31,10 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.ObjectWithColor;
-import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
@@ -49,7 +46,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxSelectListItem implements Serializable, SelectableObjectWithLabel, ObjectWithColor {
+public class FxSelectListItem implements Serializable, SelectableObjectWithLabel, SelectableObjectWithName, ObjectWithColor {
     private static final long serialVersionUID = -235396490388474264L;
 
     protected long id;
