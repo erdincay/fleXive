@@ -314,11 +314,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 FxString fxTag = tag instanceof FxString ? (FxString) tag : null;
                 for (long lang : value.getTranslatedLanguages()) {
                     ps.setLong(3, lang);
-                    ps.setString(4, value.getTranslation(lang));
+                    final String translation = value.getTranslation(lang);
+                    if(StringUtils.isBlank(translation))
+                        continue;
+                    ps.setString(4, translation);
                     if (converter != null)
-                        ps.setString(5, converter.convert(value.getTranslation(lang), lang));
+                        ps.setString(5, converter.convert(translation, lang));
                     else
-                        ps.setString(5, value.getTranslation(lang).trim().toUpperCase());
+                        ps.setString(5, translation.trim().toUpperCase());
                     if (fxTag != null) {
                         if (!fxTag.isMultiLanguage() || fxTag.translationExists(lang))
                             ps.setString(6, fxTag.getTranslation(lang));
