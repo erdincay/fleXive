@@ -118,7 +118,11 @@ public class FxPhrase implements Serializable {
     public String getSingleValue() {
         if(value != null)
             return value;
-        return fxValue.getBestTranslation();
+        return getValue().getBestTranslation();
+    }
+
+    public boolean hasValue() {
+        return this.value != null || this.fxValue != null;
     }
 
     public void setValue(FxString value) {
@@ -129,7 +133,7 @@ public class FxPhrase implements Serializable {
         if (tag != null)
             return tag;
         else
-            return fxTag.getBestTranslation();
+            return getFxTag().getBestTranslation();
     }
 
     public FxString getFxTag() {

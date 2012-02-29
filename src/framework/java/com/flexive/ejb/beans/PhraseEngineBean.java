@@ -1788,7 +1788,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             while (rs != null && rs.next()) {
                 if (currRow >= startRow && currRow < endRow) {
                     if (!query.isFetchFullPhraseInfo())
-                        phrases.add(new FxPhrase(rs.getLong(2), rs.getString(3), rs.getString(4), rs.getString(5)).setId(rs.getLong(1)));
+                        phrases.add(new FxPhrase(rs.getLong(2), rs.getString(3), needValueTable ? rs.getString(4) : null, needValueTable ? rs.getString(5) : null).setId(rs.getLong(1)));
                     else {
                         psPhrase.setLong(1, rs.getLong(1));
                         psPhrase.setLong(2, rs.getLong(2));
