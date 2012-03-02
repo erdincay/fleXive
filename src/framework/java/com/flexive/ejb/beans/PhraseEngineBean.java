@@ -1626,19 +1626,23 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             if (needResultVal)
                 sql.append(" AND sv.ID=v.ID AND sv.MANDATOR=v.MANDATOR AND v.LANG=").append(query.getResultLanguage());
             if (query.isSearchLanguageRestricted())
-                sql.append(" AND " + searchAlias + ".LANG=").append(query.getSearchLanguage());
+                sql.append(" AND ").append(searchAlias).append(".LANG=").append(query.getSearchLanguage());
             if (query.isPhraseMandatorRestricted()) {
                 sql.append(" AND p.MANDATOR");
                 if (query.getPhraseMandators().length == 1)
                     sql.append("=").append(query.getPhraseMandators()[0]);
                 else
-                    sql.append(" IN(" + FxArrayUtils.toStringArray(query.getPhraseMandators(), ',') + ")");
+                    sql.append(" IN(").append(FxArrayUtils.toStringArray(query.getPhraseMandators(), ',')).append(")");
             }
             if (query.isTreeNodeRestricted()) {
                 if (!query.isIncludeChildNodes()) {
-                    sql.append(" AND m.NODEID=" + query.getTreeNode() + " AND m.NODEMANDATOR=" + query.getTreeNodeMandator() + " AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
+                    sql.append(" AND m.NODEID=").append(query.getTreeNode()).append(" AND m.NODEMANDATOR=").
+                            append(query.getTreeNodeMandator()).append(" AND m.MANDATOR IN(").
+                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).
+                            append(")AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
                 } else {
-                    sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(" + FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',') + ")");
+                    sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(").
+                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).append(")");
                     ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=?");
                     sql.append("AND(1=2 ");
                     buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
@@ -1651,9 +1655,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     man = query.getTreeNodeMappingOwner();
                 else
                     man = new Long[]{FxContext.getUserTicket().getMandatorId()};
-                sql.append(" AND (SELECT COUNT(m2.PHRASEID)FROM " + TBL_PHRASE_MAP + " m2 WHERE m2.MANDATOR IN (" + FxArrayUtils.toStringArray(man, ',') +
-                        ") AND m2.NODEMANDATOR IN (" + FxArrayUtils.toStringArray(man, ',') +
-                        ") AND m2.PHRASEID=p.ID AND m2.PMANDATOR=p.MANDATOR)=0");
+                sql.append(" AND (SELECT COUNT(m2.PHRASEID)FROM " + TBL_PHRASE_MAP + " m2 WHERE m2.MANDATOR IN (").
+                        append(FxArrayUtils.toStringArray(man, ',')).append(") AND m2.NODEMANDATOR IN (").
+                        append(FxArrayUtils.toStringArray(man, ',')).append(") AND m2.PHRASEID=p.ID AND m2.PMANDATOR=p.MANDATOR)=0");
             }
             if (query.isKeyMatchRestricted()) {
                 sql.append(" AND UPPER(p.PKEY)");
@@ -1667,7 +1671,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
             }
             if (query.isTagMatchRestricted()) {
-                sql.append(" AND UPPER(" + searchAlias + ".TAG)");
+                sql.append(" AND UPPER(").append(searchAlias).append(".TAG)");
                 switch (query.getTagMatchMode()) {
                     case CONTAINS:
                     case STARTS_WITH:
@@ -1678,7 +1682,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
             }
             if (query.isValueMatchRestricted()) {
-                sql.append(" AND " + searchAlias + ".SVAL");
+                sql.append(" AND ").append(searchAlias).append(".SVAL");
                 switch (query.getValueMatchMode()) {
                     case CONTAINS:
                     case STARTS_WITH:
@@ -1828,7 +1832,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
     }
 
     private void buildNodeTreeSelect(StringBuilder sql, PreparedStatement ps, Long node, Long nodeMandator) throws SQLException {
-        sql.append("OR(m.NODEID=" + node + " AND m.NODEMANDATOR=" + nodeMandator + ")");
+        sql.append("OR(m.NODEID=").append(node).append(" AND m.NODEMANDATOR=").append(nodeMandator).append(")");
         ps.setLong(1, node);
         ps.setLong(2, nodeMandator);
         ResultSet rs = ps.executeQuery();
