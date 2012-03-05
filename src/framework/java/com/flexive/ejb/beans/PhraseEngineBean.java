@@ -1241,7 +1241,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
+            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=?");
+            ps.setLong(1, mandatorId);
+            ps.executeUpdate();
+            ps.close();
             ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE NODEMANDATOR=?");
+            ps.setLong(1, mandatorId);
+            ps.executeUpdate();
+            ps.close();
+            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE PMANDATOR=?");
             ps.setLong(1, mandatorId);
             ps.executeUpdate();
             ps.close();
