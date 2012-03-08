@@ -1511,7 +1511,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
             ps = con.prepareStatement("SELECT m.NODEID,m.NODEMANDATOR,m.POS FROM " + TBL_PHRASE_MAP +
                     " m," + TBL_PHRASE + " p WHERE p.PKEY=? AND p.MANDATOR" + mandatorQuery +
-                    " AND m.PHRASEID=p.ID AND m.MANDATOR" + mandatorQuery);
+                    " AND m.PHRASEID=p.ID AND m.MANDATOR" + mandatorQuery + " ORDER BY m.NODEMANDATOR,m.NODEID,m.POS");
             ps.setString(1, phraseKey);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
@@ -1546,7 +1546,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             List<FxPhraseTreeNodePosition> result = Lists.newArrayListWithCapacity(10);
             final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
             ps = con.prepareStatement("SELECT m.NODEID,m.NODEMANDATOR,m.POS FROM " + TBL_PHRASE_MAP +
-                    " m WHERE m.PHRASEID=? AND m.PMANDATOR=? AND m.MANDATOR" + mandatorQuery);
+                    " m WHERE m.PHRASEID=? AND m.PMANDATOR=? AND m.MANDATOR" + mandatorQuery + " ORDER BY m.NODEMANDATOR,m.NODEID,m.POS");
             ps.setLong(1, phraseId);
             ps.setLong(2, phraseMandator);
             ResultSet rs = ps.executeQuery();
