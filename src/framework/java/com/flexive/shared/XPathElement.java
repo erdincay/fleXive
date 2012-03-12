@@ -597,9 +597,20 @@ public class XPathElement implements Serializable {
      */
     public static String stripType(String XPath) {
         assert XPath != null : "XPath was null!";
-        if (!XPath.startsWith("/") && XPath.indexOf('/') > 0)
-            return XPath.substring(XPath.indexOf('/')).toUpperCase();
-        return XPath.toUpperCase();
+        StringBuilder sbXPath = new StringBuilder(XPath.length());
+        boolean inXPData = false;
+        for(int i=0; i<XPath.length(); i++) {
+            char c = XPath.charAt(i);
+            if(!inXPData && c == '/')
+                inXPData = true;
+            if(!inXPData)
+                continue;
+            if(c >= 'a' && c <= 'z')
+                sbXPath.append((char) (c - 32));
+            else
+                sbXPath.append(c);
+        }
+        return sbXPath.toString();
     }
 
     /**
