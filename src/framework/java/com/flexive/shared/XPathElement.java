@@ -190,10 +190,35 @@ public class XPathElement implements Serializable {
         if (StringUtils.isEmpty(alias) || alias.indexOf('/') >= 0)
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath).asRuntimeException();
         try {
-            if (alias.indexOf('[') > 0)
-                return new XPathElement(alias.substring(0, alias.indexOf('[')).toUpperCase(),
-                        Integer.valueOf(alias.substring(alias.indexOf('[') + 1, alias.length() - 1)), true);
-            return new XPathElement(alias.toUpperCase(), 1, false);
+            StringBuilder sbAlias = new StringBuilder(alias.length());
+            int index = 0;
+            boolean inIdx = false;
+            byte mult = 0;
+            for (int i = 0; i < alias.length(); i++) {
+                char c = alias.charAt(i);
+                switch (c) {
+                    case '[':
+                        inIdx = true;
+                        break;
+                    case ']':
+                        inIdx = false;
+                        break;
+                    default:
+                        if (inIdx) {
+                            if (c < '0' || c > '9')
+                                continue;
+                            if (mult++ > 0)
+                                index *= 10;
+                            index += c - '0';
+                        } else {
+                            if (c >= 'a' && c <= 'z')
+                                sbAlias.append((char) (c - 32));
+                            else
+                                sbAlias.append(c);
+                        }
+                }
+            }
+            return new XPathElement(sbAlias.toString(), index == 0 ? 1 : index, index > 0);
         } catch (Exception e) {
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath).asRuntimeException();
         }
