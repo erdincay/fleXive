@@ -263,6 +263,8 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                     // bug on MySQL, where an ALTER TABLE on the configuration table messes up
                     // subsequent SELECTs (DB schema version 1353)
                     writeParameter(conn, parameter, key, value, data, true);
+                } else {
+                    throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
                 }
             }
 
@@ -271,7 +273,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             String cachePath = getCachePath(data.getPath().getValue());
             if (cachePath != null) {
                 putCache(cachePath, key, value != null ?
-                        (Serializable) SerializationUtils.clone((Serializable) value)
+                        (Serializable) SerializationUtils.clone(value)
                         : new NullParameter());
             }
             StringBuilder sbHistory = new StringBuilder(1000);

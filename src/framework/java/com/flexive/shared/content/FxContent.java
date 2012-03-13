@@ -1034,16 +1034,18 @@ public class FxContent implements Serializable {
                     values.add((FxPropertyData)data);
             }
         }
-        Collections.sort(values, new Comparator<FxPropertyData>() {
-            public int compare(FxPropertyData o1, FxPropertyData o2) {
-                return ((Integer)o1.getIndex()).compareTo(o2.getIndex());
-            }
-        });
+        Collections.sort(values, COMPARE_INDICES);
         List<T> result = new ArrayList<T>(values.size());
         for (FxPropertyData data : values)
             result.add(clazz.cast(data.getValue()));
         return result;
     }
+    
+    private static final Comparator<FxPropertyData> COMPARE_INDICES = new Comparator<FxPropertyData>() {
+        public int compare(FxPropertyData o1, FxPropertyData o2) {
+            return Integer.valueOf(o1.getIndex()).compareTo(o2.getIndex());
+        }
+    };
 
     /**
      * Check if a value exists for the given XPath that is not empty
