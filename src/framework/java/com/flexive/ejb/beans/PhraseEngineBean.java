@@ -1799,14 +1799,21 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             }
             while (rs != null && rs.next()) {
                 if (currRow >= startRow && currRow < endRow) {
-                    if (!query.isFetchFullPhraseInfo())
-                        phrases.add(new FxPhrase(rs.getLong(2), rs.getString(3), needValueTable ? rs.getString(4) : null, needValueTable ? rs.getString(5) : null).setId(rs.getLong(1)));
-                    else {
+                    if (!query.isFetchFullPhraseInfo()) {
+                        final FxPhrase phrase = new FxPhrase(rs.getLong(2), rs.getString(3), needValueTable ? rs.getString(4) : null, needValueTable ? rs.getString(5) : null).setId(rs.getLong(1));
+                        if(isSortPos)
+                            phrase.setAssignmentMandator(rs.getLong(needValueTable ? 7 : 5));
+                        phrases.add(phrase);
+                    } else {
                         psPhrase.setLong(1, rs.getLong(1));
                         psPhrase.setLong(2, rs.getLong(2));
                         ResultSet rsPhrase = psPhrase.executeQuery();
-                        if (rsPhrase != null && rsPhrase.next())
-                            phrases.add(loadPhrase(rsPhrase));
+                        if (rsPhrase != null && rsPhrase.next()) {
+                            final FxPhrase phrase = loadPhrase(rsPhrase);
+                            if(isSortPos)
+                                phrase.setAssignmentMandator(rs.getLong(needValueTable ? 7 : 5));
+                            phrases.add(phrase);
+                        }
                         if (rsPhrase != null)
                             rsPhrase.close();
                     }

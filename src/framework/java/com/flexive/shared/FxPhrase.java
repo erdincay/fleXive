@@ -46,6 +46,7 @@ import java.io.Serializable;
 public class FxPhrase implements Serializable {
     private long id = -1L;
     private long mandator;
+    private long assignmentMandator = -1L;
     private String key;
     private String value; 
     private FxString fxValue;
@@ -167,6 +168,15 @@ public class FxPhrase implements Serializable {
 
     public boolean hasId() {
         return this.id >= 0;
+    }
+
+    public FxPhrase setAssignmentMandator(long assignmentMandator) {
+        this.assignmentMandator = assignmentMandator;
+        return this;
+    }
+
+    public long getAssignmentMandator() {
+        return assignmentMandator;
     }
 
     /**
