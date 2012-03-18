@@ -453,6 +453,7 @@ public class PhraseTest {
         query.setTreeNodeMappingOwner(ownMandator, testMandator);
         query.setOwnMandatorTop(true);
         query.setSortMode(FxPhraseQuery.SortMode.POS_ASC);
+        query.setMixMandators(false);
         result = pe.search(query, 1, 10);
         Assert.assertEquals(result.getTotalResults(), 4);
         Assert.assertTrue(checkNodeResult(result, 0, "P1", ownMandator));
@@ -461,6 +462,7 @@ public class PhraseTest {
         Assert.assertTrue(checkNodeResult(result, 3, "P2", testMandator));
 
         result.getQuery().setIncludeChildNodes(true);
+        result.getQuery().setMixMandators(true);
         result.refresh();
         //sort mode should have switched since child nodes are now included
         Assert.assertEquals(result.getQuery().getSortMode(), FxPhraseQuery.SortMode.VALUE_ASC);
@@ -509,6 +511,7 @@ public class PhraseTest {
         result.getQuery().setIncludeChildNodes(false);
         result.getQuery().setTreeNode(nodeA1.getId());
         result.getQuery().setTreeNodeMandator(nodeA1.getMandatorId());
+        result.getQuery().setMixMandators(false);
         result.refresh();
         Assert.assertEquals(result.getTotalResults(), 4);
         Assert.assertTrue(checkNodeResult(result, 0, "P2", ownMandator));

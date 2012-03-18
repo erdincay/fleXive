@@ -76,7 +76,9 @@ public class FxPhraseQuery implements Serializable {
     //fetch only single language results or "full" FxPhrase values?
     private boolean fetchFullPhraseInfo;
     private SortMode sortMode;
-    //show own mandator at the top or bottom of search results if orderd by position
+    //if sorted, mix mandators if restricted by tree node or keep them separate?
+    private boolean mixMandators;
+    //show own mandator at the top or bottom of search results
     private boolean ownMandatorTop;
     //find only phrases that are not assigned to the treeNodeMappingOwners
     private boolean onlyUnassignedPhrases;
@@ -103,6 +105,7 @@ public class FxPhraseQuery implements Serializable {
         this.phraseMandators = null;
         this.treeNodeMappingOwner = null;
         this.onlyUnassignedPhrases = false;
+        this.mixMandators = true;
         return this;
     }
 
@@ -256,6 +259,14 @@ public class FxPhraseQuery implements Serializable {
 
     public boolean isTreeNodeMappingOwnerRestricted() {
         return this.treeNodeMappingOwner != null && this.treeNodeMappingOwner.length > 0;
+    }
+
+    public boolean isMixMandators() {
+        return mixMandators;
+    }
+
+    public void setMixMandators(boolean mixMandators) {
+        this.mixMandators = mixMandators;
     }
 
     public boolean isFetchFullPhraseInfo() {

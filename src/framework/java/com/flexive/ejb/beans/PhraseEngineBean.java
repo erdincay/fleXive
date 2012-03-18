@@ -1703,7 +1703,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ps.close();
             sql.append(" ORDER BY ");
             //order by tree node mapping mandator if result is sorted by position
-            if (treeNodeRestricted && query.isTreeNodeMappingOwnerRestricted() && query.getTreeNodeMappingOwner().length == 2) {
+            if (treeNodeRestricted && !query.isMixMandators() && query.isTreeNodeMappingOwnerRestricted() && query.getTreeNodeMappingOwner().length == 2) {
                 long ownMandator = FxContext.getUserTicket().getMandatorId();
                 long otherMandator = -1;
                 Long[] mand = query.getTreeNodeMappingOwner();
