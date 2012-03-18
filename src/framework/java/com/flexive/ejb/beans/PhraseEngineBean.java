@@ -1276,7 +1276,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            ps = con.prepareStatement("SELECT POS, MAX(POS) FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND PHRASEID=? AND PMANDATOR=? GROUP BY POS");
+            ps = con.prepareStatement("SELECT POS FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND PHRASEID=? AND PMANDATOR=?");
             ps.setLong(1, assignmentOwner);
             ps.setLong(2, nodeId);
             ps.setLong(3, nodeMandator);
@@ -1286,13 +1286,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             if (rs != null && rs.next()) {
                 long orgPos = rs.getLong(1);
                 if (!rs.wasNull()) {
-                    long maxPos = rs.getLong(2);
                     if (orgPos == pos)
                         return;
                     if (pos <= 1 && orgPos == 1)
                         return; //already at the top
-                    if (orgPos == maxPos && pos >= orgPos)
-                        return; //already at the bottom
                     updatePhrasePosition(con, assignmentOwner, nodeId, nodeMandator, phraseId, phraseMandator, pos, checkPositioning);
                     return;
                 }
@@ -1590,8 +1587,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
 
             List<FxPhrase> phrases = Lists.newArrayListWithCapacity(pageSize);
             boolean isSortPos = false;
+            final boolean treeNodeRestricted = query.isTreeNodeRestricted();
             if (query.getSortMode() == FxPhraseQuery.SortMode.POS_ASC || query.getSortMode() == FxPhraseQuery.SortMode.POS_DESC) {
-                if (query.isTreeNodeRestricted() && !query.isIncludeChildNodes())
+                if (treeNodeRestricted && !query.isIncludeChildNodes())
                     isSortPos = true;
                 else {
                     //sorting by position is not possible if child tree nodes are included, fall back to value sorting
@@ -1609,10 +1607,12 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     !query.getSearchLanguage().equals(query.getResultLanguage());
             final String searchAlias = needResultVal ? "sv" : "v";
             final boolean needValueTable = needResultVal || query.isSortByTag() || query.isSortByValue() || query.isSearchLanguageRestricted();
+            if(treeNodeRestricted)
+                sql.append(",m.MANDATOR");
             if (needValueTable)
                 sql.append(",v.PVAL,v.TAG");
             if (isSortPos)
-                sql.append(",m.POS,m.MANDATOR");
+                sql.append(",m.POS");
             //append SVAL to allow an order by
             switch (query.getSortMode()) {
                 case VALUE_ASC:
@@ -1626,7 +1626,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 sql.append("," + TBL_PHRASE_VALUES + " v");
             if (needResultVal)
                 sql.append(", " + TBL_PHRASE_VALUES + " sv");
-            if (query.isTreeNodeRestricted() /*&& !query.isIncludeChildNodes()*/)
+            if (treeNodeRestricted)
                 sql.append(", " + TBL_PHRASE_MAP + " m");
             sql.append(" WHERE 1=1");
             if (needValueTable)
@@ -1642,7 +1642,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 else
                     sql.append(" IN(").append(FxArrayUtils.toStringArray(query.getPhraseMandators(), ',')).append(")");
             }
-            if (query.isTreeNodeRestricted()) {
+            if (treeNodeRestricted) {
                 if (!query.isIncludeChildNodes()) {
                     sql.append(" AND m.NODEID=").append(query.getTreeNode()).append(" AND m.NODEMANDATOR=").
                             append(query.getTreeNodeMandator()).append(" AND m.MANDATOR IN(").
@@ -1656,7 +1656,6 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
                     sql.append(")");
                 }
-//                sql.append(')');
             } else if (query.isOnlyUnassignedPhrases()) {
                 Long[] man;
                 if (query.isTreeNodeMappingOwnerRestricted())
@@ -1704,7 +1703,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ps.close();
             sql.append(" ORDER BY ");
             //order by tree node mapping mandator if result is sorted by position
-            if (isSortPos && query.isTreeNodeMappingOwnerRestricted() && query.getTreeNodeMappingOwner().length == 2) {
+            if (treeNodeRestricted && query.isTreeNodeMappingOwnerRestricted() && query.getTreeNodeMappingOwner().length == 2) {
                 long ownMandator = FxContext.getUserTicket().getMandatorId();
                 long otherMandator = -1;
                 Long[] mand = query.getTreeNodeMappingOwner();
@@ -1800,9 +1799,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             while (rs != null && rs.next()) {
                 if (currRow >= startRow && currRow < endRow) {
                     if (!query.isFetchFullPhraseInfo()) {
-                        final FxPhrase phrase = new FxPhrase(rs.getLong(2), rs.getString(3), needValueTable ? rs.getString(4) : null, needValueTable ? rs.getString(5) : null).setId(rs.getLong(1));
-                        if(isSortPos)
-                            phrase.setAssignmentMandator(rs.getLong(needValueTable ? 7 : 5));
+                        final FxPhrase phrase = new FxPhrase(rs.getLong(2), rs.getString(3), needValueTable ? rs.getString(treeNodeRestricted ? 5 : 4) : null, needValueTable ? rs.getString(treeNodeRestricted ? 6 : 5) : null).setId(rs.getLong(1));
+                        if(treeNodeRestricted)
+                            phrase.setAssignmentMandator(rs.getLong(4));
                         phrases.add(phrase);
                     } else {
                         psPhrase.setLong(1, rs.getLong(1));
@@ -1810,8 +1809,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                         ResultSet rsPhrase = psPhrase.executeQuery();
                         if (rsPhrase != null && rsPhrase.next()) {
                             final FxPhrase phrase = loadPhrase(rsPhrase);
-                            if(isSortPos)
-                                phrase.setAssignmentMandator(rs.getLong(needValueTable ? 7 : 5));
+                            if(treeNodeRestricted)
+                                phrase.setAssignmentMandator(rs.getLong(4));
                             phrases.add(phrase);
                         }
                         if (rsPhrase != null)
