@@ -25,18 +25,16 @@
 
         <h5>autocomplete</h5>
         <script type="text/javascript">
-        <!--
             var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
                 return eval("(" + flexive.util.getJsonRpc().AutoCompleteProvider.userQuery(query) + ")");
             });
 
             var customHandler = new flexive.yui.AutoCompleteHandler(function(query) {
                 var q = decodeURIComponent(query);
-                return [[q + "/a", q + ": <i>a label</i>"],
-                        [q + "/b", q + ": <i>b label</i>"],
-                        [q + "/c", q + ": <i>c label</i>"]];
+                return [[q + "/a", q + ": &lt;i>a label&lt;/i>"],
+                        [q + "/b", q + ": &lt;i>b label&lt;/i>"],
+                        [q + "/c", q + ": &lt;i>c label&lt;/i>"]];
             });
-        //-->
         </script>
         <fx:formRow id="acDefaultInput" label="Default autocomplete provider">
             <fx:fxValueInput id="acDefaultInput" value="#{fxValueInputTestBean.stringValue}" autocompleteHandler="new flexive.yui.AutoCompleteHandler()"/>

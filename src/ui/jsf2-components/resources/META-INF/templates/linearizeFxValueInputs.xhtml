@@ -18,17 +18,15 @@
             <c:set var="startIndex" value="1"/>
         </c:if>
         <script type="text/javascript">
-        <!--
             flexive.yui.require("selector");
             flexive.yui.onYahooLoaded(function() {
                 var tabIndex = #{startIndex};
                 var rootNode = '#{empty rootNode ? 'null' : rootNode}';
                 var nodes = YAHOO.util.Selector.query(".fxValueInput .fxValueField", rootNode != "null" ? rootNode : null);
-                for (var i = 0; i < nodes.length; i++) {
+                for (var i = 0; i &lt; nodes.length; i++) {
                     nodes[i].tabIndex = tabIndex++;
                 }
             });
-        //-->
         </script>
     </cc:implementation>
 

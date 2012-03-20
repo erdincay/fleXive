@@ -25,7 +25,6 @@
             </ui:repeat>
         </style>
 		<script type="text/javascript">
-		<!--
             //var contentPage=null;     tracks which page is shown in the content frame..no longer used
 
             var copyNode=null;
@@ -40,7 +39,7 @@
             var isViewFlat=true;
             var nameEQ = "viewMode=";
                 var ca = document.cookie.split(';');
-                for(var i=0;i < ca.length;i++) {
+                for(var i=0;i &lt; ca.length;i++) {
                     var c = ca[i];
                     while (c.charAt(0)==' ') c = c.substring(1,c.length);
                     if (c.indexOf(nameEQ) == 0){
@@ -149,7 +148,7 @@
                 if (nodePath == null)
                     return null;
                 var childNodeToExpand=dojo.widget.byId('structureTree');
-                for (var i=0;i<nodePath.length-1;i++) {
+                for (var i=0;i&lt;nodePath.length-1;i++) {
                     var childIndex=nodePath[i][1];
                     childNodeToExpand=childNodeToExpand.children[childIndex];
                     getFxController().expandToNode(childNodeToExpand,true);
@@ -159,7 +158,7 @@
 
             function arraycopy(source) {
                 dest = new Array(source.length);
-                for (var i=0;i<source.length;i++) {
+                for (var i=0;i&lt;source.length;i++) {
                     dest[i]=source[i];
                 }
                 return dest;
@@ -175,7 +174,7 @@
 
             function _buildExpandedArray(childArray, expandedArray) {
                 var harray=arraycopy(expandedArray);
-                for (var i=0;i<childArray.length;i++) {
+                for (var i=0;i&lt;childArray.length;i++) {
                     var node = childArray[i];
                     if (node.isExpanded) {
                        harray.push(new Array(getNodeId(node), node.nodeType));
@@ -193,13 +192,13 @@
                 reloadStructureTree();
                 try {
                     // if we show hierarchical view and there are no expanded nodes expand the root node
-                    if (ea.length == 0 && !isViewFlat) {
+                    if (ea.length == 0 &amp;&amp; !isViewFlat) {
                        expandToNodeWithId(0, true).expand();
                     }
                 } catch (e) {
                     alert (e);
                 }
-                for (var i=0;i<ea.length;i++) {
+                for (var i=0;i&lt;ea.length;i++) {
                     var node = expandToNodeWithId(ea[i][0], isType(ea[i][1]));
                     if (node != null)
                         node.expand();
@@ -224,7 +223,7 @@
              */
             function searchNode(searcharray, historyarray, id, isType) {
                 var foundnode =null;
-                for (var i=0;i<searcharray.length && foundnode==null;i++) {
+                for (var i=0;i&lt;searcharray.length &amp;&amp; foundnode==null;i++) {
                     var node = searcharray[i];
                     if (node.children) {
                         if (node.children.length >0) {
@@ -233,7 +232,7 @@
                            foundnode=searchNode(node.children, harray, id, isType);
                         }
                     }
-                    if(isType && node["typeId"]== id || !isType && node["assignmentId"]==id) {
+                    if(isType &amp;&amp; node["typeId"]== id || !isType &amp;&amp; node["assignmentId"]==id) {
                         foundnode=node;
                         historyarray.push(new Array(node,i));
                         return historyarray;
@@ -250,7 +249,7 @@
             function doContentAction(node, defaultAction, doubleClick) {
                 var nodeId = getNodeId(node);
                 var nodeType = node.nodeType;
-                if (!doubleClick && nodeId != null && nodeId != -1 && parent.frames["contentFrame"].addQueryNode) {
+                if (!doubleClick &amp;&amp; nodeId != null &amp;&amp; nodeId != -1 &amp;&amp; parent.frames["contentFrame"].addQueryNode) {
                     // add to search query
                     if (isAssignment(nodeType)) {
                         // check if assignment is searchable and add to query
@@ -308,7 +307,7 @@
                 var parentId = getNodeId(menu.getTreeNode());
 
                 promptName(function(alias) {
-                    if (alias!=null && alias!="") {
+                    if (alias!=null &amp;&amp; alias!="") {
                         try {
                             newTypeId =flexive.util.getJsonRpc().StructureTreeEditor.createDerivedType(parentId, alias);
                             reloadAndKeepExpanded();
@@ -350,9 +349,9 @@
                         assId = getContentFrame().document.getElementById("frm:struct_internal_assignmentId").value;
                     if (getContentFrame().document.getElementById("frm:struct_internal_typeId") != null)
                         typeId = getContentFrame().document.getElementById("frm:struct_internal_typeId").value;
-                    if (assId != -1 && !flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentExists(assId))
+                    if (assId != -1 &amp;&amp; !flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentExists(assId))
                         return false;
-                    if (typeId != -1 && !flexive.util.getJsonRpc().StructureTreeEditor.isTypeExists(typeId))
+                    if (typeId != -1 &amp;&amp; !flexive.util.getJsonRpc().StructureTreeEditor.isTypeExists(typeId))
                         return false;
                 }
                 return true;
@@ -372,7 +371,7 @@
                 confirmDialog(nodeType == "Group" ? messageGroup.replace("{0}", label) : messageAssignment.replace("{0}", label), function() {
                     try {
                         flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(id);
-                        if (copyNode!=null && copyNode.assignmentId ==id && (copyNode.nodeType=="Group" || copyNode.nodeType=="Assignment"))
+                        if (copyNode!=null &amp;&amp; copyNode.assignmentId ==id &amp;&amp; (copyNode.nodeType=="Group" || copyNode.nodeType=="Assignment"))
                             copyNode=null;
                         reloadAndKeepExpanded();
                         if (!isContentFrameValidAfterDeletion()) {
@@ -459,11 +458,11 @@
                 var destId = getNodeId(menu.getTreeNode());
                 var destNodeType=menu.getTreeNode().nodeType;
                 try {
-                    var isNewAlias = alias != null && alias !="";
+                    var isNewAlias = alias != null &amp;&amp; alias !="";
                     //check if nodes are at same level
                     var sameLevel = flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, destId);
                     var newAssignmentId = -1;
-                    if (copyMode || !sameLevel || (sameLevel && isNewAlias)) {
+                    if (copyMode || !sameLevel || (sameLevel &amp;&amp; isNewAlias)) {
                         //in copy mode or for different levels or for a new alias create a derived assignment
                         newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType ,alias, 1);
                         if (cutMode) {
@@ -486,7 +485,7 @@
 
             function pasteBelowAs(menuItem) {
                 promptAlias(function(alias) {
-                    if (alias!=null && alias!="") {
+                    if (alias!=null &amp;&amp; alias!="") {
                         pasteBelow(null, alias);
                     }
                 });
@@ -497,11 +496,11 @@
                 var destId = getNodeId(menu.getTreeNode());
                 var destNodeType=menu.getTreeNode().nodeType;
                 try {
-                    var isNewAlias = alias != null && alias !="";
+                    var isNewAlias = alias != null &amp;&amp; alias !="";
                     //check if nodes are at same level
                     var sameLevel = flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, destId);
                     var newAssignmentId = -1;
-                    if (copyMode || !sameLevel || (sameLevel && isNewAlias)) {
+                    if (copyMode || !sameLevel || (sameLevel &amp;&amp; isNewAlias)) {
                         //in copy mode or for different levels or for a new alias create a derived assignment
                         newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType ,alias, 0);
                         if (cutMode) {
@@ -524,7 +523,7 @@
 
             function pasteAboveAs(menuItem) {
                 promptAlias(function(alias) {
-                    if (alias!=null && alias!="") {
+                    if (alias!=null &amp;&amp; alias!="") {
                         pasteAbove(null,alias);
                     }
                 });
@@ -553,7 +552,7 @@
 
             function pasteIntoAs(menuItem) {
                 promptAlias(function(alias) {
-                    if (alias!=null && alias!="") {
+                    if (alias!=null &amp;&amp; alias!="") {
                         pasteInto(null, alias);
                     }
                 });
@@ -578,7 +577,7 @@
                 var nodeId = getNodeId(menu.getTreeNode());
                 var nodeType = menu.getTreeNode().nodeType;
 
-                if (isAssignment(nodeType) && !flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentSearchable(nodeId)) {
+                if (isAssignment(nodeType) &amp;&amp; !flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentSearchable(nodeId)) {
                     alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
                     return;
                 }
@@ -678,57 +677,57 @@
                 var lackRole = #{not fxSystemBean.isInRole['StructureManagement']};
                 var notGlobalSupervisor = #{not fxSystemBean.isInRole['GlobalSupervisor']};
                 var mayOpen = !lackRole || #{fxSystemBean.isInRole['ScriptManagement']};
-                var pasteGroupIntoSelf = copyNode != null && (node.nodeType=="Assignment" || node.nodeType =="Group") && copyNode.nodeType =="Group" && flexive.util.getJsonRpc().StructureTreeEditor.isParentAssignment(getNodeId(copyNode), getNodeId(node));
-                var isSameLevel = copyNode != null && (node.nodeType=="Assignment" || node.nodeType =="Group") && flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId);
-                setActionDisabled(menu.getTreeNode(), "editNode", !mayOpen || (node.nodeType =="AssignmentSystemInternal" && notGlobalSupervisor));
+                var pasteGroupIntoSelf = copyNode != null &amp;&amp; (node.nodeType=="Assignment" || node.nodeType =="Group") &amp;&amp; copyNode.nodeType =="Group" &amp;&amp; flexive.util.getJsonRpc().StructureTreeEditor.isParentAssignment(getNodeId(copyNode), getNodeId(node));
+                var isSameLevel = copyNode != null &amp;&amp; (node.nodeType=="Assignment" || node.nodeType =="Group") &amp;&amp; flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId);
+                setActionDisabled(menu.getTreeNode(), "editNode", !mayOpen || (node.nodeType =="AssignmentSystemInternal" &amp;&amp; notGlobalSupervisor));
                 setActionDisabled(menu.getTreeNode(), "createContent", !isType(node.nodeType));
                 setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeType=="Group" || isType(node.nodeType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeType=="Group" || isType(node.nodeType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "createDerivedType", !(node.nodeType=="Type" || lackRole));
-                setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeType!="Assignment" || lackRole || (node.nodeType =="AssignmentSystemInternal" && notGlobalSupervisor));
+                setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeType!="Assignment" || lackRole || (node.nodeType =="AssignmentSystemInternal" &amp;&amp; notGlobalSupervisor));
                 setActionDisabled(menu.getTreeNode(), "deleteGroup", node.nodeType!="Group" || lackRole);
                 setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeType) || lackRole);
-                setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeType!="Group" && node.nodeType!="Assignment");
-                setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeType) && !isAssignment(node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeType!="Group" &amp;&amp; node.nodeType!="Assignment");
+                setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeType) &amp;&amp; !isAssignment(node.nodeType));
                 setActionDisabled(menu.getTreeNode(), "searchContentsImmediate", !isType(node.nodeType));
                 setActionDisabled(menu.getTreeNode(), "searchPropertyContents", !isAssignment(node.nodeType));
-                setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeType!="Assignment" && node.nodeType!="Group");
+                setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeType!="Assignment" &amp;&amp; node.nodeType!="Group");
 
                 //paste a copied or cut assignment node below a selected node
                 //cut: only allowed if not pasting below itsself and if not pasting a group into itsself or one of its children
                 //copy: only allowed if not at the same level with selected node -> use pasteAboveAs
-                setActionDisabled(menu.getTreeNode(), "pasteBelow", lackRole || copyNode==null || (node.nodeType!="Assignment" && node.nodeType!="Group") ||
-                                (copyMode && isSameLevel) || (cutMode && getNodeId(copyNode) == getNodeId(node)) || (cutMode && pasteGroupIntoSelf));
+                setActionDisabled(menu.getTreeNode(), "pasteBelow", lackRole || copyNode==null || (node.nodeType!="Assignment" &amp;&amp; node.nodeType!="Group") ||
+                                (copyMode &amp;&amp; isSameLevel) || (cutMode &amp;&amp; getNodeId(copyNode) == getNodeId(node)) || (cutMode &amp;&amp; pasteGroupIntoSelf));
 
                 //paste a copied or cut assignment node above a selected node
                 //cut: only allowed if not pasting above ittself and if not pasting a group into itsself or one of its children
                 //copy: only allowed if not at the same level with selected node -> use pasteAboveAs
-                setActionDisabled(menu.getTreeNode(), "pasteAbove", lackRole || copyNode==null || (node.nodeType!="Assignment" && node.nodeType!="Group") ||
-                                (copyMode && isSameLevel) || (cutMode && getNodeId(copyNode) == getNodeId(node)) || (cutMode && pasteGroupIntoSelf));
+                setActionDisabled(menu.getTreeNode(), "pasteAbove", lackRole || copyNode==null || (node.nodeType!="Assignment" &amp;&amp; node.nodeType!="Group") ||
+                                (copyMode &amp;&amp; isSameLevel) || (cutMode &amp;&amp; getNodeId(copyNode) == getNodeId(node)) || (cutMode &amp;&amp; pasteGroupIntoSelf));
                 //paste a copied or cut assignment node into a selected type or group
                 //copy: only allowed if not pasting directly into the own parent -> use paste into as
                 //cut: only allowed if not pasting a group into itsself or one of its children
-                setActionDisabled(menu.getTreeNode(), "pasteInto", lackRole || copyNode==null || (!isType(node.nodeType) && node.nodeType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteInto", lackRole || copyNode==null || (!isType(node.nodeType) &amp;&amp; node.nodeType!="Group") ||
                             flexive.util.getJsonRpc().StructureTreeEditor.isDirectChild(copyNode.assignmentId, getNodeId(node), node.nodeType) 
-                            || (cutMode && getNodeId(copyNode) == getNodeId(node)) || (cutMode && pasteGroupIntoSelf));
+                            || (cutMode &amp;&amp; getNodeId(copyNode) == getNodeId(node)) || (cutMode &amp;&amp; pasteGroupIntoSelf));
 
                 //paste a copied or cut assignment below another assignment prompting for a different alias
                 //cut: only allowed if not pasting a group into itsself or one of its children
-                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", lackRole || copyNode==null ||(node.nodeType!="Assignment" && node.nodeType!="Group") ||
-                            (cutMode && pasteGroupIntoSelf));
+                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", lackRole || copyNode==null ||(node.nodeType!="Assignment" &amp;&amp; node.nodeType!="Group") ||
+                            (cutMode &amp;&amp; pasteGroupIntoSelf));
 
                 //paste a copied or cut assignment above another assignment prompting for a different alias
                 //cut: only allowed if not pasting a group into itsself or one of its children
                 setActionDisabled(menu.getTreeNode(), "pasteAboveAs", lackRole || copyNode==null ||
-                            (node.nodeType!="Assignment" && node.nodeType!="Group") || (cutMode && pasteGroupIntoSelf));
+                            (node.nodeType!="Assignment" &amp;&amp; node.nodeType!="Group") || (cutMode &amp;&amp; pasteGroupIntoSelf));
 
                 //paste a copied or cut assignment into a group assignment or type prompting for a different alias
                 //cut: only allowed if not pasting a group into itsself or one of its children
                 setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null ||
-                            (!isType(node.nodeType) && node.nodeType!="Group") || (cutMode && getNodeId(copyNode) == getNodeId(node)) || (cutMode && pasteGroupIntoSelf));
+                            (!isType(node.nodeType) &amp;&amp; node.nodeType!="Group") || (cutMode &amp;&amp; getNodeId(copyNode) == getNodeId(node)) || (cutMode &amp;&amp; pasteGroupIntoSelf));
 
                 //cut: only allowed if not pasting a group into itsself or one of its children
-                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || (cutMode && pasteGroupIntoSelf));
+                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || (cutMode &amp;&amp; pasteGroupIntoSelf));
 
                 setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || !isType(node.nodeType));
                 setActionDisabled(menu.getTreeNode(), "exportType", lackRole || !isType(node.nodeType));
@@ -780,7 +779,6 @@
                     });
                 }
             });
-        //-->
 		</script>
         <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
         <adm:tree name="structureTree" targetId="structureTreeContainer"  extensionPoint="/tree/adm/structure"

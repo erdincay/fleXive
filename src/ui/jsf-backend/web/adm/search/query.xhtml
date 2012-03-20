@@ -112,7 +112,6 @@
             <adm:shortcut elementId="frm:searchButton"/>
             
             <script type="text/javascript">
-            <!--
                 function onSaveQuery() {
                     promptDialog("#{fxMessageBean['QueryEditor.dialog.save']}", "#{fxMessageBean['QueryEditor.dialog.save.default']}",
                             function(name) {
@@ -127,11 +126,10 @@
                 }
 
                 if (#{fxQueryEditorBean.reloadSearchPanel}) {
-                    if (parent.getSearchNavFrame() != null && parent.getSearchNavFrame().reload) {
+                    if (parent.getSearchNavFrame() != null &amp;&amp; parent.getSearchNavFrame().reload) {
                         parent.getSearchNavFrame().reload();
                     }
                 }
-            //-->
             </script>
         </a4j:form>
     </ui:define>

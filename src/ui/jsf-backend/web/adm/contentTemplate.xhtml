@@ -40,7 +40,6 @@
 
 
 <script type="text/javascript">
-<!--
     // Copy the messages from the bottom of the page to the top
     if ("#{fxSystemBean.hasGroupedFxMessages}") {
         var messagesTmp = document.getElementById("fxMessagesTmp");
@@ -48,13 +47,12 @@
         var content = messagesTmp.innerHTML;
         if (content.length>0) {
             messages.style.display="inline";
-            messages.innerHTML=content+"<br>";
+            messages.innerHTML=content+"&lt;br>";
         }
     }
-    if (parent && parent.pageLoaded) {
+    if (parent &amp;&amp; parent.pageLoaded) {
         parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
     }
--->
 </script>
 
 <fx:yuiSetup/>

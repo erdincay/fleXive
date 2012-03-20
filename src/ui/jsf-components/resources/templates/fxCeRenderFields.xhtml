@@ -19,9 +19,7 @@
                 <a4j:outputPanel id="#{_ceContent.idGenerator[element]}" layout="block">
                     <!-- register group -->
                     <script type="text/javascript">
-                        <!--
-                            flexive.contentEditor.registerGroupId("#{_ceContent.editorId}","GroupContent_#{_ceContent.idGenerator[element]}");
-                        //-->
+                        flexive.contentEditor.registerGroupId("#{_ceContent.editorId}","GroupContent_#{_ceContent.idGenerator[element]}");
                     </script>
                     <div class="fxContentEditor_group" onmouseover='flexive.contentEditor.closeMenu(event,false)'>
                         <div class="header" onclick="flexive.contentEditor.toggleGroup('#{_ceContent.editorId}','GroupContent_#{_ceContent.idGenerator[element]}');">

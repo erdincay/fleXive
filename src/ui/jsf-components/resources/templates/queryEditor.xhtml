@@ -31,11 +31,10 @@ Parameters:
     </c:if>
 
     <script type="text/javascript">
-    <!--
         function onShowContextMenu() {
             try {
-                flexive.yui.setMenuItem("and", "disabled", rowSelection.selectedIds.length < 2);
-                flexive.yui.setMenuItem("or", "disabled", rowSelection.selectedIds.length < 2);
+                flexive.yui.setMenuItem("and", "disabled", rowSelection.selectedIds.length &lt; 2);
+                flexive.yui.setMenuItem("or", "disabled", rowSelection.selectedIds.length &lt; 2);
             } catch (e) {
                 alert(e);
             }
@@ -49,7 +48,6 @@ Parameters:
                 sqlPopupDialog.show();
             }
         }
-    //-->
     </script>
 
     <!-- Editor context menu -->

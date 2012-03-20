@@ -16,14 +16,13 @@
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"></script>
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('admin.js')}"></script>
     <script type="text/javascript">
-        <!--
-        if( parent != null && parent.beginPage) {
+        if( parent != null &amp;&amp; parent.beginPage) {
             parent.init();
             parent.beginPage();
         }
 
         function gotoAdmin() {
-            if( parent != null && parent.gotoNavMenu )
+            if( parent != null &amp;&amp; parent.gotoNavMenu )
                 parent.gotoNavMenu(3);
         }
 
@@ -58,7 +57,6 @@
         function getBase() {
             return "#{fxSystemBean.documentBase}";
         }
-        -->
     </script>
 </head>
 <body>
@@ -340,26 +338,21 @@
         </a4j:form>
         <ui:fragment rendered="#{not blogsRendered}">
             <script type="text/javascript">
-            <!--
                 window.setTimeout(
                         function() {
                             document.getElementById("updateBlogsForm:updateButton").onclick();
                         },
                         500
                 );
-
-            //-->
             </script>
         </ui:fragment>
 
         </a4j:outputPanel>
 
         <script type="text/javascript">
-        <!--
-            if (parent && parent.pageLoaded) {
+            if (parent &amp;&amp; parent.pageLoaded) {
                 parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
             }
-        -->
         </script>
     <fx:yuiSetup/>
 </body>

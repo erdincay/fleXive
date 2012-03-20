@@ -19,11 +19,9 @@
         <h:form id="frm">
             <t:saveState id="ssList" value="#{historyBean.list}"/>
             <script type="text/javascript">
-                <!--
                 var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
                     return eval("(" + flexive.util.getJsonRpc().AutoCompleteProvider.userQuery(query) + ")");
                 });
-                //-->
             </script>
 
             <adm:tab labelKey="History.tabtitle.main" active="true" id="tab1"/>

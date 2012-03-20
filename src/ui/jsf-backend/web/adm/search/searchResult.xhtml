@@ -18,7 +18,6 @@
         <script type="text/javascript" src="#{fx:webletUrl('com.flexive.faces.weblets','/js/lytebox.js')}"></script>
 
         <script type="text/javascript">
-        <!--
             function getBriefcaseId() {
                 return #{empty fxSearchResultBean.briefcase ? -1 : fxSearchResultBean.briefcase.id};
             }
@@ -68,8 +67,6 @@
                 "SearchResult.dialog.confirm.detachRow": "#{fxMessageBean['SearchResult.dialog.confirm.detachRow']}",
                 "ContentTree.status.removedNode": "#{fxMessageBean['ContentTree.status.removedNode']}"
             };
-
-        //-->
         </script>
     </ui:define>
 
@@ -278,7 +275,6 @@
         </a4j:form>
 
         <script type="text/javascript">
-        <!--
             if (parent.reloadBriefcases) {
                 parent.reloadBriefcases();
             }
@@ -293,7 +289,6 @@
                     subscribeResultTableEvents(resultTable, "#{fxSearchResultBean.sortColumnKey}", "#{fxSearchResultBean.sortDirection}");
                 }
             });
-        //-->
         </script>
     </ui:define>
 

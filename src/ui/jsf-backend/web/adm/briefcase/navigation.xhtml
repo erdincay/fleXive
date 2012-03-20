@@ -15,7 +15,6 @@
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('briefcasePanel.js')}"/>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('searchQueryPanel.js')}"/>
         <script type="text/javascript">
-        <!--
             // search query methods
 
             // briefcase methods
@@ -112,7 +111,7 @@
                     // since it was created in another frame
                     var ids = [];
                     var clipboardIds = parent.getContentClipboard().get();
-                    for (var i = 0; i < clipboardIds.length; i++) {
+                    for (var i = 0; i &lt; clipboardIds.length; i++) {
                         ids.push(clipboardIds[i]);
                     }
                     flexive.util.getJsonRpc().BriefcaseEditor.add(getContextBriefcaseId(), ids);
@@ -234,7 +233,6 @@
             }
 
             flexive.yui.require("animation");
-        //-->
         </script>
     </ui:define>
     <ui:define name="content">

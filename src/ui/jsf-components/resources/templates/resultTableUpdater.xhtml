@@ -33,19 +33,17 @@ Parameters:
     </c:if>
 
     <script type="text/javascript">
-        <!--
-            if (window.#{var} != null) {
-                // refresh only if datatable is already available - also prevents refresh during initial load
-                try {
-                    var currentPage = #{var}.get("paginator").getCurrentPage();
-                    #{var}.deleteRows(0, 9999999);
-                    var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResultFromColumn(value, null, firstColumn) : '{}'};
-                    #{var}._reset(result, '#{empty previewSize ? 'PREVIEW2' : previewSize}', currentPage);
-                } catch (e) {
-                    alert("Failed to update result table: " + e);
-                }
+        if (window.#{var} != null) {
+            // refresh only if datatable is already available - also prevents refresh during initial load
+            try {
+                var currentPage = #{var}.get("paginator").getCurrentPage();
+                #{var}.deleteRows(0, 9999999);
+                var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResultFromColumn(value, null, firstColumn) : '{}'};
+                #{var}._reset(result, '#{empty previewSize ? 'PREVIEW2' : previewSize}', currentPage);
+            } catch (e) {
+                alert("Failed to update result table: " + e);
             }
-        //-->
+        }
     </script>
 
 </ui:composition>

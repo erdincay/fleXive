@@ -50,9 +50,6 @@
                 </c:if>
 
                 <script type="text/javascript">
-                        // <!--
-
-
                     function editContent(pk) {
                         var _pk = pk.toString();
                         editNewsletter(_pk, 'test123');
@@ -96,15 +93,14 @@
                         var out = [];
                         var pkArg = "flexive.util.parsePk(\"" + pk.toString() + "\")";
                         if (permissions == null || permissions["edit"]) {
-                            out.push("<a href='javascript:editContent_(" + pkArg + ");'>#{fxMessageBean['Newsletter.button.edit']}</a>");
+                            out.push("&lt;a href='javascript:editContent_(" + pkArg + ");'>#{fxMessageBean['Newsletter.button.edit']}&lt;/a>");
                         }
                         if (permissions == null || permissions["delete"]) {
-                            out.push("<a href='javascript:deleteContent(" + pkArg + ");'>#{fxMessageBean['Newsletter.button.delete']}</a>");
+                            out.push("&lt;a href='javascript:deleteContent(" + pkArg + ");'>#{fxMessageBean['Newsletter.button.delete']}&lt;/a>");
                         }
 
                         return out.join(" | ");
                     }
-                    // -->
                 </script>
 
                 <fx:resultTable var="newsletters"

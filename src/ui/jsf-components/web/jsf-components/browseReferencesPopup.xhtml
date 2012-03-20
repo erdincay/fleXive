@@ -17,7 +17,6 @@
     <a4j:form id="frm">
         <c:if test="#{empty fxBrowseReferencesBean.parseRequestParameters}"> </c:if>
         <script type="text/javascript">
-        <!--
             var formId = "#{fxBrowseReferencesBean.formName}";
             var inputId = "#{fxBrowseReferencesBean.inputName}";
             function selectReference(pk, caption) {
@@ -28,7 +27,7 @@
                         parentForm[inputId].value = pk;
                         parentForm[inputId + "_caption"].value = caption;
                         window.opener.document.getElementById(inputId + "_preview").innerHTML = caption;
-                            //"<img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
+                            //"&lt;img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
                     } else {
                         // autocomplete text input field - store everything in text input field
                         if(pk != "")
@@ -55,9 +54,8 @@
                 }
             }
         
-            // set body style in JS (subtle firefox problem with <style> elements, CDATA and text/html encoding)
+            // set body style in JS (subtle firefox problem with &lt;style> elements, CDATA and text/html encoding)
             document.body.style.overflow = "scroll";
-        //-->
         </script>
 
         <adm:infoBox>

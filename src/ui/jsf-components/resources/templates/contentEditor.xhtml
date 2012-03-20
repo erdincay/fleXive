@@ -210,9 +210,7 @@
                     <!-- Properties and Groups -->
                     <!-- clear group ids from last request -->
                      <script type="text/javascript">
-                        <!--
-                            flexive.contentEditor.clearGroupIds("#{_ceContent.editorId}");
-                        //-->
+                        flexive.contentEditor.clearGroupIds("#{_ceContent.editorId}");
                     </script>
                     <div>
                         <div>
@@ -223,12 +221,10 @@
 
                     </div>
                      <script type="text/javascript">
-                        <!--
                             // apply folding
                             flexive.contentEditor.applyGroupFolding("#{_ceContent.guiSettings.formPrefix}","#{_ceContent.editorId}");
                             // highlight affected xpath
                             flexive.contentEditor.highlightAffectedXpath("#{_ceContent.guiSettings.formPrefix}","#{_ceContent.editorId}");
-                        //-->
                     </script>
                 </a4j:outputPanel>
 

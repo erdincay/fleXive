@@ -55,13 +55,12 @@ Parameters:
     </c:if>
 
     <script type="text/javascript">
-    <!-- 
         flexive.yui.require("datatable");
         flexive.yui.onYahooLoaded(function() {
             var htmlTable = YAHOO.util.Dom.get("#{id}");
             var columns = [];
             var dsColumns = [];
-            for (var i = 0; i < htmlTable.tHead.rows[0].cells.length; i++) {
+            for (var i = 0; i &lt; htmlTable.tHead.rows[0].cells.length; i++) {
                 var th = htmlTable.tHead.rows[0].cells[i];
                 columns.push({
                     key: "c" + i,
@@ -94,7 +93,6 @@ Parameters:
             document.getElementById("#{id}_container").style.display = "block";
             storeSortVals("#{sortColumn}", "#{sortOrder}");
         });
-    //-->
     </script>
 
 </ui:composition>

@@ -27,22 +27,18 @@ them explicitly if the components are not available when the page is first rende
         <h:outputStylesheet library="flexive-faces" name="css/components.css"/>
 
         <script type="text/javascript" language="javascript">
-        <!--
             flexive.baseUrl = "#{fxSystemBean.documentBase}";
             flexive.contextPath = "#{request.contextPath}";
             flexive.locale = "#{fxSystemBean.userTicket.language.iso2digit}".toLowerCase();
             flexive.guiTranslation = "#{fxSystemBean.guiTranslationLanguageIso}";
             flexive.util.initJsf2ResourceMapping("#{resource['flexive-faces:js/flexiveComponents.js']}", "js/flexiveComponents.js");
-        //-->
         </script>
 
         <c:if test="#{all or htmlEditor}">
             <h:outputScript library="flexive-faces" name="js/tiny_mce/tiny_mce.js" target="head"/>
 
             <script type="text/javascript" language="javascript">
-            <!--
                 flexive.input.initHtmlEditor(false);
-            //-->
             </script>
         </c:if>
 
