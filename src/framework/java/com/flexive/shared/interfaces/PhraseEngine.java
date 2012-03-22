@@ -306,6 +306,18 @@ public interface PhraseEngine {
     public void assignPhrase(long assignmentOwner, long nodeId, long nodeMandator, String phraseKey, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException;
 
     /**
+     * Assign phrases at a given position to a node
+     *
+     * @param position        requested position
+     * @param assignmentOwner mandator which is the "owner" of this assignment
+     * @param nodeId          node id
+     * @param nodeMandator    node mandator
+     * @param phrases         phrases to assign
+     * @throws FxApplicationException on errors
+     */
+    public void assignPhrases(long position, long assignmentOwner, long nodeId, long nodeMandator, FxPhrase[] phrases) throws FxApplicationException;
+
+    /**
      * "Move" the position of an assignment
      *
      * @param assignmentOwner mandator which is the "owner" of this assignment

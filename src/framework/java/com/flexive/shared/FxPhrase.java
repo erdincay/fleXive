@@ -47,6 +47,7 @@ public class FxPhrase implements Serializable {
     private long id = -1L;
     private long mandator;
     private long assignmentMandator = -1L;
+    private int position = -1;
     private String key;
     private String value; 
     private FxString fxValue;
@@ -177,6 +178,23 @@ public class FxPhrase implements Serializable {
 
     public long getAssignmentMandator() {
         return assignmentMandator;
+    }
+
+    public boolean hasAssignmentMandator() {
+        return assignmentMandator != -1;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public FxPhrase setPosition(int position) {
+        this.position = position;
+        return this;
+    }
+
+    public boolean hasPosition() {
+        return position != -1;
     }
 
     /**

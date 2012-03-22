@@ -1368,6 +1368,114 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void assignPhrases(long position, long assignmentOwner, long nodeId, long nodeMandator, FxPhrase[] phrases) throws FxApplicationException {
+        if(phrases == null || phrases.length == 0)
+            return;
+        checkMandatorAccess(assignmentOwner, FxContext.getUserTicket());
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            // Obtain a database connection
+            con = Database.getDbConnection();
+            long startPhraseId = -1, startPhraseMandator = -1;
+            ps = con.prepareStatement("SELECT PHRASEID,PMANDATOR FROM "+TBL_PHRASE_MAP+" WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND POS>=? ORDER BY POS ASC");
+            ps.setLong(1, assignmentOwner);
+            ps.setLong(2, nodeId);
+            ps.setLong(3, nodeMandator);
+            ps.setLong(4, position);
+            ResultSet rs = ps.executeQuery();
+            while(rs != null && rs.next()) {
+                long pid = rs.getLong(1);
+                long mid = rs.getLong(2);
+                if(!phrasesContains(phrases, pid, mid)) {
+                    startPhraseId = pid;
+                    startPhraseMandator = mid;
+                    break;
+                }
+            }
+            ps.close();
+            boolean useMaxPos = startPhraseId == -1 || startPhraseMandator == -1;
+            //remove all contained phrases
+            ps = con.prepareStatement("DELETE FROM "+TBL_PHRASE_MAP+" WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND PHRASEID=? AND PMANDATOR=?");
+            ps.setLong(1, assignmentOwner);
+            ps.setLong(2, nodeId);
+            ps.setLong(3, nodeMandator);
+            for(FxPhrase rm: phrases) {
+                ps.setLong(4, rm.getId());
+                ps.setLong(5, rm.getMandator());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            ps.close();
+            //close gaps and reposition
+            updatePhrasePosition(con, assignmentOwner, nodeId, nodeMandator, -1, -1, 0, true);
+            int insertPos = -1;
+            if (!useMaxPos) {
+                ps = con.prepareStatement("SELECT POS FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND PHRASEID=? AND PMANDATOR=?");
+                ps.setLong(1, assignmentOwner);
+                ps.setLong(2, nodeId);
+                ps.setLong(3, nodeMandator);
+                ps.setLong(4, startPhraseId);
+                ps.setLong(5, startPhraseMandator);
+                rs = ps.executeQuery();
+                if(rs != null && rs.next())
+                    insertPos = rs.getInt(1);
+                ps.close();
+            }
+            if(insertPos == -1)
+                useMaxPos = true;
+            if(!useMaxPos) {
+                //make room for the phrases to insert
+                ps = con.prepareStatement("UPDATE " + TBL_PHRASE_MAP + " SET POS=POS+" + (phrases.length) + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND POS>?");
+                ps.setLong(1, assignmentOwner);
+                ps.setLong(2, nodeId);
+                ps.setLong(3, nodeMandator);
+                ps.setLong(4, insertPos);
+                ps.executeUpdate();
+                ps.close();
+            } else {
+                ps = con.prepareStatement("SELECT MAX(POS) FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=?");
+                ps.setLong(1, assignmentOwner);
+                ps.setLong(2, nodeId);
+                ps.setLong(3, nodeMandator);
+                rs = ps.executeQuery();
+                if (rs != null && rs.next())
+                    insertPos = rs.getInt(1);
+                else
+                    insertPos = 1; //fallback: first entry
+                ps.close();
+            }
+            ps = con.prepareStatement("INSERT INTO " + TBL_PHRASE_MAP + "(MANDATOR,NODEID,NODEMANDATOR,PHRASEID,PMANDATOR,POS)VALUES(?,?,?,?,?,?)");
+            ps.setLong(1, assignmentOwner);
+            ps.setLong(2, nodeId);
+            ps.setLong(3, nodeMandator);
+            for (FxPhrase phrase : phrases) {
+                ps.setLong(4, phrase.getId());
+                ps.setLong(5, phrase.getMandator());
+                ps.setLong(6, ++insertPos);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException exc) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(PhraseEngineBean.class, con, ps);
+        }
+    }
+
+    private boolean phrasesContains(FxPhrase[] phrases, long id, long mandator) {
+        for(FxPhrase phrase: phrases) {
+            if(phrase.getId() == id && phrase.getMandator() == mandator)
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void moveTreeNodeAssignment(long assignmentOwner, long nodeId, long nodeMandatorId, long phraseId, long phraseMandator, int delta) throws FxNotFoundException, FxNoAccessException {
         if (delta == 0)
             return;
@@ -1452,7 +1560,11 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             ps.setLong(3, nodeMandator);
             ps.setLong(4, phraseId);
             ps.setLong(5, phraseMandator);
-            return ps.executeUpdate() > 0;
+            boolean found = ps.executeUpdate() > 0;
+            if(found) {
+                updatePhrasePosition(con, assignmentOwner, nodeId, nodeMandator, phraseId, phraseMandator, 0, true);
+            }
+            return found;
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
@@ -1802,6 +1914,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                         final FxPhrase phrase = new FxPhrase(rs.getLong(2), rs.getString(3), needValueTable ? rs.getString(treeNodeRestricted ? 5 : 4) : null, needValueTable ? rs.getString(treeNodeRestricted ? 6 : 5) : null).setId(rs.getLong(1));
                         if(treeNodeRestricted)
                             phrase.setAssignmentMandator(rs.getLong(4));
+                        if(isSortPos)
+                            phrase.setPosition(rs.getInt(needValueTable ? 7 : 5));
                         phrases.add(phrase);
                     } else {
                         psPhrase.setLong(1, rs.getLong(1));
@@ -1811,6 +1925,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                             final FxPhrase phrase = loadPhrase(rsPhrase);
                             if(treeNodeRestricted)
                                 phrase.setAssignmentMandator(rs.getLong(4));
+                            if(isSortPos)
+                                phrase.setPosition(rs.getInt(needValueTable ? 7 : 5));
                             phrases.add(phrase);
                         }
                         if (rsPhrase != null)
