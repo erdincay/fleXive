@@ -532,7 +532,7 @@ public class FxContentView extends UIOutput {
                 final FxAssignment assignment = env.getAssignment(typeName + path);
                 if (assignment instanceof FxPropertyAssignment) {
                     // iterate over property values
-                    return content.getPropertyData(path).getValues(false);
+                    return content.getPropertyData(path).getValues(includeEmpty);
                 } else {
                     // create a content map for each child
                     List<ContentMap> rowMaps = new ArrayList<ContentMap>();
