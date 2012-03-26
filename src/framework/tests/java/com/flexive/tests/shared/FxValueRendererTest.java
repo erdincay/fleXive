@@ -90,9 +90,9 @@ public class FxValueRendererTest {
     public void floatFormatTest() {
         FxFloat value = new FxFloat(1234.56f);
         switchEN();
-        Assert.assertTrue("1,234.56".equals(FORMAT_EN.format(value)));
+        Assert.assertEquals("1,234.56", FORMAT_EN.format(value));
         switchDE();
-        Assert.assertTrue("1.234,56".equals(FORMAT_DE.format(value)));
+        Assert.assertEquals("1.234,56", FORMAT_DE.format(value));
     }
 
     @Test
