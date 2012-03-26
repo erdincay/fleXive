@@ -1111,6 +1111,12 @@
             <rtexprvalue>true</rtexprvalue>
             <description>If set to max or live ,  it overrides the version information in the PK or binary descriptor.</description>
         </attribute>
+        <attribute>
+            <name>includeTimestamp</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, include a timestamp that forces the thumbnail to be reloaded</description>
+        </attribute>
     </tag>
 
     <tag>

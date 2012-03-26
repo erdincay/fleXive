@@ -2032,6 +2032,15 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+                        <varlistentry>
+                            <term>includeTimestamp</term>
+                            <listitem>
+                                <para>
+                                    If true, include a timestamp that forces the thumbnail to be reloaded
+                                    every time the page is rendered. (since &flexive; 3.1.7)
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
             </section>

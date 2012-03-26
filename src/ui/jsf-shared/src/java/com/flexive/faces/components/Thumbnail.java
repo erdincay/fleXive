@@ -68,11 +68,12 @@ public class Thumbnail extends UIOutput {
     private FxBinary binary;
     private UIComponent body;
     private boolean urlOnly;
-    private int width = -1;
-    private int height = -1;
-    private int rot = 0;
-    private boolean flipH = false;
-    private boolean flipV = false;
+    private Integer width;
+    private Integer height;
+    private Integer rot;
+    private Boolean flipH;
+    private Boolean flipV;
+    private Boolean includeTimestamp;
     private String forceVersion;
     private String previewSize = BinaryDescriptor.PreviewSizes.PREVIEW2.name();
 
@@ -108,16 +109,15 @@ public class Thumbnail extends UIOutput {
         }
 
         selector.setSize(previewSize);
-        if( width != -1 )
-            selector.setScaleWidth(width);
-        if( height != -1 )
-            selector.setScaleHeight(height);
-        if( rot % 360 != 0)
-            selector.setRotationAngle(rot);
-        if( flipH )
-            selector.setFlipHorizontal(true);
-        if( flipV )
-            selector.setFlipVertical(true);
+        if( getWidth() != -1 )
+            selector.setScaleWidth(getWidth());
+        if( getHeight() != -1 )
+            selector.setScaleHeight(getHeight());
+        if( getRot() % 360 != 0)
+            selector.setRotationAngle(getRot());
+        selector.setFlipHorizontal(isFlipH());
+        selector.setFlipVertical(isFlipV());
+        selector.setTimestamp(isIncludeTimestamp() ? System.currentTimeMillis() : 0);
         link = ThumbnailServlet.getLink(selector);
         if (isUrlOnly()) {
             body = FxJsfUtils.addChildComponent(this, null, HtmlOutputText.COMPONENT_TYPE);
@@ -178,6 +178,9 @@ public class Thumbnail extends UIOutput {
     }
 
     public int getWidth() {
+        if (width == null) {
+            return FxJsfComponentUtils.getIntegerValue(this, "width", -1);
+        }
         return width;
     }
 
@@ -186,6 +189,9 @@ public class Thumbnail extends UIOutput {
     }
 
     public int getHeight() {
+        if (height == null) {
+            return FxJsfComponentUtils.getIntegerValue(this, "height", -1);
+        }
         return height;
     }
 
@@ -194,6 +200,9 @@ public class Thumbnail extends UIOutput {
     }
 
     public int getRot() {
+        if (rot == null) {
+            return FxJsfComponentUtils.getIntegerValue(this, "rot", 0);
+        }
         return rot;
     }
 
@@ -202,6 +211,9 @@ public class Thumbnail extends UIOutput {
     }
 
     public boolean isFlipH() {
+        if (flipH == null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "flipH", false);
+        }
         return flipH;
     }
 
@@ -210,11 +222,25 @@ public class Thumbnail extends UIOutput {
     }
 
     public boolean isFlipV() {
+        if (flipV == null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "flipV", false);
+        }
         return flipV;
     }
 
     public void setFlipV(boolean flipV) {
         this.flipV = flipV;
+    }
+
+    public boolean isIncludeTimestamp() {
+        if (includeTimestamp == null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "includeTimestamp", false);
+        }
+        return includeTimestamp;
+    }
+
+    public void setIncludeTimestamp(boolean includeTimestamp) {
+        this.includeTimestamp = includeTimestamp;
     }
 
     public String getForceVersion() {
