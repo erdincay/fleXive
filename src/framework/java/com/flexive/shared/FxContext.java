@@ -1118,6 +1118,7 @@ public class FxContext implements Serializable {
         dfs.setGroupingSeparator(getGroupingSeparator());
         format.setGroupingUsed(useGroupingSeparator());
         format.setDecimalFormatSymbols(dfs);
+        format.setMaximumFractionDigits(10);
         map.put(currentUserKey, format);
         return format;
     }
