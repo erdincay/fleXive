@@ -221,7 +221,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
         if (getSelectList() == null) {
             throw new FxInvalidParameterException("list", "ex.content.value.select.list").asRuntimeException();
         }
-        return new FxSelectListItem(-1, null, getSelectList(), -1, null);
+        return new FxSelectListItem(-1, "", null, -1, null);
     }
 
     /**
