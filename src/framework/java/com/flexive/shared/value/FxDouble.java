@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.math.NumberUtils;
@@ -240,7 +241,8 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public String getStringValue(Double value) {
-        return value == null ? "" : FxValueRendererFactory.getNumberFormatInstance().format(value);
+        return value == null ? "" : FxValueRendererFactory.getDefaultFormatter(getClass()).format(this, value, FxContext.getUserTicket().getLanguage());
     }
 }

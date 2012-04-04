@@ -115,6 +115,7 @@ public class FxValueRendererFactory {
      * Get a number format instance depending on the current users formatting options
      *
      * @return NumberFormat
+     * @since 3.1.6
      */
     public static NumberFormat getNumberFormatInstance() {
         return FxContext.get().getNumberFormatInstance();
@@ -125,6 +126,7 @@ public class FxValueRendererFactory {
      * Get a portable number formatter instance
      *
      * @return portable number formatter instance
+     * @since 3.1.6
      */
     public static NumberFormat getPortableNumberFormatInstance() {
         return FxContext.get().getPortableNumberFormatInstance();
@@ -135,6 +137,7 @@ public class FxValueRendererFactory {
      *
      * @param locale locale to use
      * @return NumberFormat
+     * @since 3.1.6
      */
     public static NumberFormat getNumberFormatInstance(Locale locale) {
         return FxContext.get().getNumberFormatInstance(locale);
@@ -144,6 +147,7 @@ public class FxValueRendererFactory {
      * Get the date formatter for the current users locale
      *
      * @return DateFormat
+     * @since 3.1.6
      */
     public static DateFormat getDateFormat() {
         return FxContext.get().getDateFormatter();
@@ -154,6 +158,7 @@ public class FxValueRendererFactory {
      *
      * @param locale requested locale
      * @return DateFormat
+     * @since 3.1.6
      */
     public static DateFormat getDateFormat(Locale locale) {
         return FxContext.get().getDateFormatter(locale);
@@ -163,6 +168,7 @@ public class FxValueRendererFactory {
      * Get the time formatter for the current users locale
      *
      * @return DateFormat
+     * @since 3.1.6
      */
     public static DateFormat getTimeFormat() {
         return FxContext.get().getTimeFormatter();
@@ -173,6 +179,7 @@ public class FxValueRendererFactory {
      *
      * @param locale requested locale
      * @return DateFormat
+     * @since 3.1.6
      */
     public static DateFormat getTimeFormat(Locale locale) {
         return FxContext.get().getTimeFormatter(locale);
@@ -182,6 +189,7 @@ public class FxValueRendererFactory {
      * Get the date/time formatter for the current users locale
      *
      * @return DateFormat
+     * @since 3.1.6
      */
     public static DateFormat getDateTimeFormat() {
         return FxContext.get().getDateTimeFormatter();
@@ -192,19 +200,45 @@ public class FxValueRendererFactory {
      *
      * @param locale requested locale
      * @return DateFormat
+     * @since 3.1.6
      */
     public static DateFormat getDateTimeFormat(Locale locale) {
         return FxContext.get().getDateTimeFormatter(locale);
     }
 
     /**
-     * FxDouble formatter.
+     * FxDouble formatter. Prints fraction digits depending on the size of the value.
      */
     private static class FxDoubleFormatter implements FxValueFormatter<Double, FxDouble> {
         public String format(FxDouble value, Double translation, FxLanguage outputLanguage) {
-            return translation != null
-                    ? getNumberFormatInstance(outputLanguage.getLocale()).format(translation)
-                    : getEmptyMessage(outputLanguage);
+            if (translation != null) {
+                final NumberFormat format = getNumberFormatInstance(outputLanguage.getLocale());
+
+                // the format is thread-local, so we can increase the precision for doubles from
+                // the default value
+                final int oldMaxDigits = format.getMaximumFractionDigits();
+
+                // print decimal digits depending on the (absolute) value
+                final double absValue = Math.abs(translation);
+                final int digits = (int) Math.log10(absValue);
+                if (digits < -10) {
+                    format.setMaximumFractionDigits(0); // 0
+                } else if (digits < -6) {
+                    format.setMaximumFractionDigits(12);
+                } else if (digits <= 2) {
+                    format.setMaximumFractionDigits(8);
+                } else {
+                    format.setMaximumFractionDigits(3);
+                }
+
+                try {
+                    return format.format(translation);
+                } finally {
+                    format.setMaximumFractionDigits(oldMaxDigits);
+                }
+            } else {
+                return getEmptyMessage(outputLanguage);
+            }
         }
     }
 

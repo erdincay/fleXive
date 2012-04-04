@@ -425,6 +425,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @param value portable string value to be evaluated
      * @return the value interpreted as T
+     * @since 3.1.6
      */
     public T fromPortableString(String value) {
         return fromString(value);
@@ -449,6 +450,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param value the value to be converted
      * @return a string representation of the given value that can be parsed again using
      *         {@link FxValue#fromPortableString(String)}.
+     * @since 3.1.6
      */
     public String getPortableStringValue(T value) {
         return getStringValue(value);
