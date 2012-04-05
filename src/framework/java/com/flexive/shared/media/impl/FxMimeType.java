@@ -230,8 +230,12 @@ public class FxMimeType implements Serializable {
                 return new FxMimeType(EXT_REPLACEMENTS.get(extension));
             }
         }
+        
         // use extension detector from mime-utils
-        detected = MimeUtil.getMimeTypes(fileName);
+        if (StringUtils.isNotBlank(fileName)) {
+            detected = MimeUtil.getMimeTypes(fileName);
+        }
+        
         if(detected.isEmpty()) {
             return new FxMimeType(UNKNOWN);
         }

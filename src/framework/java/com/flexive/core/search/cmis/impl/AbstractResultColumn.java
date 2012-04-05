@@ -94,7 +94,7 @@ public abstract class AbstractResultColumn<V, T extends AbstractResultColumn<V, 
      */
     protected String getEscapedAlias() {
         // for a list of escaped chars see IDENT in CmisSql.g
-        return getAlias() == null ? null : getAlias().replace(':', '_');
+        return getAlias() == null ? null : getAlias().replace(':', '_').replace('/', '_');
     }
 
 
