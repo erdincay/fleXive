@@ -1663,17 +1663,51 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Primitive int comparison method (when JDK7's Integer#compare cannot be used).
+     * For float and double, see {@link org.apache.commons.lang.NumberUtils}.
+     *
+     * @param i1    the first value
+     * @param i2    the second value
+     * @return      see {@link Integer#compareTo}
+     * @since       3.1.7
+     */
+    public static int compare(int i1, int i2) {
+        if (i1 < i2) {
+            return -1;
+        } else if (i1 == i2) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    /**
+     * Primitive long comparison method (when JDK7's Long#compare cannot be used).
+     * For float and double, see {@link org.apache.commons.lang.NumberUtils}.
+     *
+     * @param i1    the first value
+     * @param i2    the second value
+     * @return      see {@link Integer#compareTo}
+     * @since       3.1.7
+     */
+    public static int compare(long i1, long i2) {
+        if (i1 < i2) {
+            return -1;
+        } else if (i1 == i2) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    /**
      * Comparator for sorting Assignments according to their position.
      */
     public static class AssignmentPositionSorter implements Comparator<FxAssignment>, Serializable {
         private static final long serialVersionUID = 9197582519027523108L;
 
         public int compare(FxAssignment o1, FxAssignment o2) {
-            if (o1.getPosition() < o2.getPosition())
-                return -1;
-            else if (o1.getPosition() == o2.getPosition())
-                return 0;
-            else return 1;
+            return FxSharedUtils.compare(o1.getPosition(), o2.getPosition());
         }
     }
 
@@ -1684,9 +1718,7 @@ public final class FxSharedUtils {
         private static final long serialVersionUID = -1786371691872260074L;
 
         public int compare(SelectableObject o1, SelectableObject o2) {
-            return o1.getId() > o2.getId()
-                    ? 1 : o1.getId() < o2.getId()
-                    ? -1 : 0;
+            return FxSharedUtils.compare(o1.getId(), o2.getId());
         }
     }
 
@@ -1717,7 +1749,7 @@ public final class FxSharedUtils {
         private static final long serialVersionUID = 3366660003069358959L;
 
         public int compare(FxSelectListItem i1, FxSelectListItem i2) {
-            return Integer.valueOf(i1.getPosition()).compareTo(i2.getPosition());
+            return FxSharedUtils.compare(i1.getPosition(), i2.getPosition());
         }
     }
 

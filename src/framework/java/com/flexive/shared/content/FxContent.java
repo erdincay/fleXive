@@ -1001,11 +1001,7 @@ public class FxContent implements Serializable {
             if (data.getAssignmentId() == assignmentId)
                 values.add((FxPropertyData)data);
         }
-        Collections.sort(values, new Comparator<FxPropertyData>() {
-            public int compare(FxPropertyData o1, FxPropertyData o2) {
-                return ((Integer)o1.getIndex()).compareTo(o2.getIndex());
-            }
-        });
+        Collections.sort(values, COMPARE_INDICES);
         List<FxValue> result = new ArrayList<FxValue>(values.size());
         for (FxPropertyData data : values)
             result.add(data.getValue());
@@ -1043,7 +1039,7 @@ public class FxContent implements Serializable {
     
     private static final Comparator<FxPropertyData> COMPARE_INDICES = new Comparator<FxPropertyData>() {
         public int compare(FxPropertyData o1, FxPropertyData o2) {
-            return Integer.valueOf(o1.getIndex()).compareTo(o2.getIndex());
+            return FxSharedUtils.compare(o1.getIndex(), o2.getIndex());
         }
     };
 

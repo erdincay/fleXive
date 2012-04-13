@@ -469,7 +469,7 @@ public class PropertyEntry {
                 );
                 Collections.sort(tables, new Comparator<Multiset.Entry<String>>() {
                     public int compare(Multiset.Entry<String> o1, Multiset.Entry<String> o2) {
-                        return Integer.valueOf(o2.getCount()).compareTo(o1.getCount());
+                        return FxSharedUtils.compare(o2.getCount(), o1.getCount());
                     }
                 });
                 final String key = tables.get(0).getElement();
