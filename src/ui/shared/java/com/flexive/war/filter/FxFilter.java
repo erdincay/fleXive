@@ -123,7 +123,7 @@ public class FxFilter implements Filter {
                 LOG.warn(ex.getMessage(), ex);
             }
         } finally {
-            FxContext.remove();
+            FxContext.cleanup();
         }
     }
 
