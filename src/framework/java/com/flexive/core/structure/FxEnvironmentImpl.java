@@ -299,10 +299,11 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         this.properties = new HashMap<Long, FxProperty>(properties.size());
         this.propertyNameLookup = new HashMap<String, Long>(properties.size());
         for (FxProperty property : properties) {
-            this.properties.put(property.getId(), property);
+            final Long key = property.getId();
+            this.properties.put(key, property);
             this.propertyNameLookup.put(
                     property.getName().toUpperCase(),
-                    property.getId()
+                    key
             );
         }
     }
@@ -325,8 +326,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         this.assignments = new HashMap<Long, FxAssignment>(assignments.size());
         this.assignmentXPathLookup = new HashMap<String, Long>(assignments.size());
         for (FxAssignment assignment : assignments) {
-            this.assignments.put(assignment.getId(), assignment);
-            this.assignmentXPathLookup.put(assignment.getXPath().toUpperCase(), assignment.getId());
+            final Long key = assignment.getId();
+            this.assignments.put(key, assignment);
+            this.assignmentXPathLookup.put(assignment.getXPath().toUpperCase(), key);
         }
         if (propertyAssignmentsAll != null)
             propertyAssignmentsAll.clear();
@@ -1166,13 +1168,14 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (!flatMappings.containsKey(mapping.getStorage()))
                 flatMappings.put(mapping.getStorage(), new HashMap<Long, Map<Integer, List<FxFlatStorageMapping>>>(10));
             Map<Long, Map<Integer, List<FxFlatStorageMapping>>> typeMap = flatMappings.get(mapping.getStorage());
-            final long assignedTypeId = as.getAssignedTypeId();
+            final Long assignedTypeId = as.getAssignedTypeId();
             if (!typeMap.containsKey(assignedTypeId))
                 typeMap.put(assignedTypeId, new HashMap<Integer, List<FxFlatStorageMapping>>(10));
             Map<Integer, List<FxFlatStorageMapping>> levelMap = typeMap.get(assignedTypeId);
-            if (!levelMap.containsKey(mapping.getLevel()))
-                levelMap.put(mapping.getLevel(), new ArrayList<FxFlatStorageMapping>(40));
-            List<FxFlatStorageMapping> mapList = levelMap.get(mapping.getLevel());
+            final Integer level = mapping.getLevel();
+            if (!levelMap.containsKey(level))
+                levelMap.put(level, new ArrayList<FxFlatStorageMapping>(40));
+            List<FxFlatStorageMapping> mapList = levelMap.get(level);
             mapList.add(mapping);
         }
     }
