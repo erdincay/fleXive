@@ -192,13 +192,25 @@ public class MessageBean extends HashMap {
     }
 
     /**
-     * Returns the resource bundle, which is cached within the request.
+     * Returns the resource translation in the current user's language.
      *
      * @param key resource key
-     * @return the resource bundle
+     * @return the resource translation
      */
     public String getResource(String key) {
         final Locale locale = FxContext.get().getLocale();
+        return getResource(key, locale);
+    }
+
+    /**
+     * Returns the resource translation in the given locale.
+     *
+     * @param key       resource key
+     * @param locale    the requested locale
+     * @return the resource translation
+     * @since 3.1.7
+     */
+    public String getResource(String key, Locale locale) {
         if (!initialized) {
             initialize();
         }
