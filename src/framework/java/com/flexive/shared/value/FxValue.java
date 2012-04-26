@@ -1138,7 +1138,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @since 3.1.4
      */
     @SuppressWarnings({"unchecked"})
-    public TDerived setValueData(int valueData) {
+    public TDerived setValueData(Integer valueData) {
         this.valueData = valueData;
         return (TDerived) this;
     }

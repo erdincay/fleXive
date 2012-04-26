@@ -211,7 +211,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      * {@inheritDoc}
      */
     @Override
-    public FxNoAccess setValueData(int valueData) {
+    public FxNoAccess setValueData(Integer valueData) {
         //not allowed
         return this;
     }
