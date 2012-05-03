@@ -32,9 +32,7 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import static com.flexive.core.Database.closeObjects;
 import com.flexive.core.DatabaseConst;
-import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
@@ -58,6 +56,9 @@ import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
 import java.util.*;
+
+import static com.flexive.core.Database.closeObjects;
+import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA;
 
 /**
  * Bean handling Briefcases.
@@ -521,6 +522,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
 
             // merge changes into existing metadata
             final List<FxReferenceMetaData<FxPK>> currentMeta = loadMetaData(con, id, -1, true);
+            final List<FxReferenceMetaData<FxPK>> newMeta = Lists.newArrayListWithCapacity(currentMeta.size());
             for (FxReferenceMetaData<FxPK> update : metaData) {
                 if (update.getReference() == null) {
                     throw new FxUpdateException(LOG, "ex.briefcase.metadata.update.reference");
@@ -528,17 +530,18 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 // find existing metadata to apply changes to
                 final FxReferenceMetaData<FxPK> oldMeta = FxReferenceMetaData.findByContent(currentMeta, update.getReference());
                 if (oldMeta == null) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("No matching row found for briefcase item " + update.getReference() + ", ignoring.");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No matching row found for briefcase item " + update.getReference() + ", ignoring.");
                     }
                 } else {
                     // merge changes
                     oldMeta.merge(update);
+                    newMeta.add(oldMeta);
                 }
             }
 
             // write back changes
-            replaceMetaData(con, id, currentMeta);
+            replaceMetaData(con, id, newMeta);
 
             success = true;
         } catch (SQLException e) {
