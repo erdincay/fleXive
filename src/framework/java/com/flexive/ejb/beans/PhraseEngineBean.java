@@ -1718,7 +1718,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             final boolean needResultVal = !query.isFetchFullPhraseInfo() && query.isResultLanguageRestricted() && query.isSearchLanguageRestricted() &&
                     !query.getSearchLanguage().equals(query.getResultLanguage());
             final String searchAlias = needResultVal ? "sv" : "v";
-            final boolean needValueTable = needResultVal || query.isSortByTag() || query.isSortByValue() || query.isSearchLanguageRestricted();
+            final boolean needValueTable = needResultVal || query.isSortByTag() || query.isSortByValue()
+                    || query.isSearchLanguageRestricted() || query.isTagMatchRestricted();
             if(treeNodeRestricted)
                 sql.append(",m.MANDATOR");
             if (needValueTable)
