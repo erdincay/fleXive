@@ -1716,7 +1716,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 }
             }
 
-            StringBuilder sql = new StringBuilder(500);
+            StringBuilder sql = new StringBuilder(2500);
             final String NVL = "COALESCE";
             String sub_restriction = "";
             if(query.isValueMatchRestricted()) {
@@ -1792,14 +1792,24 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 searchTagSubQuery = "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1) AS STAG ";
             //                 1  2        3    4    5    6    7    8
             sql.append("SELECT ID,MANDATOR,PKEY,PVAL,LANG,RTAG,SVAL,STAG");
-            if(treeNodeRestricted) //9 10
-                sql.append(",MMANDATOR,POS");
+            if(treeNodeRestricted) {
+                //9
+                sql.append(",MMANDATOR");
+                if (isSortPos) {
+                    //10
+                    sql.append(",POS");
+                }
+            }
+
             sql.append(" FROM(");
             sql.append("SELECT DISTINCT p.ID AS ID,p.MANDATOR AS MANDATOR,p.PKEY AS PKEY,").append(resultValueSubQuery).
                     append(",").append(langSubQuery).append(",").append(resultTagSubQuery).
                     append(",").append(searchValueSubQuery).append(",").append(searchTagSubQuery);
-            if(treeNodeRestricted)
-                sql.append(",m.MANDATOR AS MMANDATOR,m.POS AS POS");
+            if(treeNodeRestricted) {
+                sql.append(",m.MANDATOR AS MMANDATOR");
+                if(isSortPos)
+                    sql.append(",m.POS AS POS");
+            }
             sql.append(" FROM ").
                     append(TBL_PHRASE).append(" p");
             if (treeNodeRestricted)
@@ -1937,7 +1947,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 if(query.isTagMatchRestricted()) {
                     if(query.isValueMatchRestricted())
                         sql.append(" AND");
-                    sql.append(" R.STAG IS NOT NULL");
+                    sql.append(" R.RTAG IS NOT NULL");
                 }
                 if(query.isKeyMatchRestricted()) {
                     if(query.isValueMatchRestricted() || query.isTagMatchRestricted())
