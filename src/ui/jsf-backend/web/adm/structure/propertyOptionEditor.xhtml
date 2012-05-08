@@ -54,7 +54,6 @@
             <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="true" id="tab2"/>
         </c:if>
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyOptions']}" relativeWidth="90">
-                <adm:sortableTable id="optionsTable">
                     <table  id="optionsTable">
                         <thead>
                             <tr>
@@ -111,7 +110,6 @@
                             </ui:fragment>
                         </tbody>
                     </table>
-                </adm:sortableTable>
             </fx:fieldSet>
 
             <ui:fragment rendered="#{not propertyEditorBean.property.new}">
@@ -129,7 +127,6 @@
                             </h:commandLink>
                         </fx:formRow>
 
-                        <adm:sortableTable id="optionsTableParent">
                             <table id="optionsTableParent">
                                 <thead>
                                     <tr>
@@ -168,12 +165,10 @@
                                 </ui:repeat>
                                 </tbody>
                             </table>
-                        </adm:sortableTable>
                     </fx:fieldSet>
                 </rich:simpleTogglePanel>
 
                 <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyAssignmentOptions']}" relativeWidth="90">
-                    <adm:sortableTable id="optionsTable2">
                         <table id="optionsTable2">
                             <thead>
                                 <tr>
@@ -297,7 +292,6 @@
                                 </ui:fragment>
                             </tbody>
                         </table>
-                    </adm:sortableTable>
                 </fx:fieldSet>
             </ui:fragment>
 

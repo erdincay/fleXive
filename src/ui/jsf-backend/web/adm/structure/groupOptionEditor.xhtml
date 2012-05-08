@@ -50,7 +50,6 @@
         </c:if>
             <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.groupOptions']}" relativeWidth="90">
 
-                <adm:sortableTable id="optionsTable">
                     <table id="optionsTable">
                         <thead>
                             <tr>
@@ -114,7 +113,6 @@
                             </ui:fragment>
                         </tbody>
                     </table>
-                </adm:sortableTable>
             </fx:fieldSet>
 
             <ui:fragment rendered="#{not groupEditorBean.group.new}">
@@ -132,7 +130,6 @@
                             </h:commandLink>
                         </fx:formRow>
 
-                        <adm:sortableTable id="optionsTableParent">
                             <table id="optionsTableParent">
                                 <thead>
                                     <tr>
@@ -171,12 +168,10 @@
                                 </ui:repeat>
                                 </tbody>
                             </table>
-                        </adm:sortableTable>
                     </fx:fieldSet>
                 </rich:simpleTogglePanel>
 
                 <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.groupAssignmentOptions']}" relativeWidth="90">
-                    <adm:sortableTable id="optionsTable2">
                         <table id="optionsTable2">
                             <thead>
                                 <tr>
@@ -285,7 +280,6 @@
                                 </ui:fragment>
                             </tbody>
                         </table>
-                    </adm:sortableTable>
                 </fx:fieldSet>
             </ui:fragment>
 
