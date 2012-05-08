@@ -1691,6 +1691,315 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxPhraseQueryResult search(FxPhraseQuery query, int page, int pageSize) {
+        return query.isLanguageFallback() ? searchWithFallback(query, page, pageSize) : searchNoFallback(query, page, pageSize);
+    }
+
+    private FxPhraseQueryResult searchWithFallback(FxPhraseQuery query, int page, int pageSize) {
+        Connection con = null;
+        PreparedStatement ps = null, psPhrase = null;
+        try {
+            // Obtain a database connection
+            con = Database.getDbConnection();
+
+            List<FxPhrase> phrases = Lists.newArrayListWithCapacity(pageSize);
+            boolean isSortPos = false;
+            final boolean treeNodeRestricted = query.isTreeNodeRestricted();
+            if (query.getSortMode() == FxPhraseQuery.SortMode.POS_ASC || query.getSortMode() == FxPhraseQuery.SortMode.POS_DESC) {
+                if (treeNodeRestricted && !query.isIncludeChildNodes())
+                    isSortPos = true;
+                else {
+                    //sorting by position is not possible if child tree nodes are included, fall back to value sorting
+                    if (query.getSortMode() == FxPhraseQuery.SortMode.POS_ASC)
+                        query.setSortMode(FxPhraseQuery.SortMode.VALUE_ASC);
+                    else if (query.getSortMode() == FxPhraseQuery.SortMode.POS_DESC)
+                        query.setSortMode(FxPhraseQuery.SortMode.VALUE_DESC);
+                }
+            }
+
+            StringBuilder sql = new StringBuilder(500);
+            final String NVL = "COALESCE";
+            String sub_restriction = "";
+            if(query.isValueMatchRestricted()) {
+                sub_restriction = " AND s.SVAL";
+                String saveVal = query.getValueQuery().replaceAll("['\"\\\\]", "\\\\$0").toUpperCase();
+                switch(query.getValueMatchMode()) {
+                    case CONTAINS:
+                        sub_restriction = sub_restriction + " LIKE '%" + saveVal + "%'";
+                        break;
+                    case EXACT:
+                        sub_restriction = sub_restriction + "='" + saveVal + "'";
+                        break;
+                    case STARTS_WITH:
+                        sub_restriction = sub_restriction + " LIKE '" + saveVal + "%'";
+                        break;
+                }
+            }
+            if(query.isTagMatchRestricted()) {
+                sub_restriction = sub_restriction + " AND UPPER(s.TAG)";
+                String saveVal = query.getTagQuery().replaceAll("['\"\\\\]", "\\\\$0").toUpperCase();
+                switch(query.getTagMatchMode()) {
+                    case CONTAINS:
+                        sub_restriction = sub_restriction + " LIKE '%" + saveVal + "%'";
+                        break;
+                    case EXACT:
+                        sub_restriction = sub_restriction + "='" + saveVal + "'";
+                        break;
+                    case STARTS_WITH:
+                        sub_restriction = sub_restriction + " LIKE '" + saveVal + "%'";
+                        break;
+                }
+            }
+            final String searchValueSubQuery;
+            if (query.isSearchLanguageRestricted())
+                searchValueSubQuery = "(" + NVL + "(\n" +
+                        "(SELECT s.SVAL FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR AND s.LANG=" + query.getSearchLanguage() + sub_restriction + "),\n" +
+                        "(SELECT s.SVAL FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1)\n" +
+                        ")) AS SVAL";
+            else
+                searchValueSubQuery = "(SELECT s.PVAL FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1) AS SVAL ";
+            final String resultValueSubQuery;
+            if (query.isResultLanguageRestricted())
+                resultValueSubQuery = "(" + NVL + "(\n" +
+                        "(SELECT s.PVAL FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR AND s.LANG=" + query.getResultLanguage()+"),\n" +
+                        "(SELECT s.PVAL FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR LIMIT 1)\n" +
+                        ")) AS PVAL";
+            else
+                resultValueSubQuery = "(SELECT s.PVAL FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1) AS PVAL ";
+            final String langSubQuery;
+            if (query.isResultLanguageRestricted())
+                langSubQuery = "(" + NVL + "(\n" +
+                        "(SELECT s.LANG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR AND s.LANG=" + query.getResultLanguage() + sub_restriction + "),\n" +
+                        "(SELECT s.LANG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1)\n" +
+                        ")) AS LANG";
+            else
+                langSubQuery = "(SELECT s.LANG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1) AS LANG ";
+
+            final String resultTagSubQuery;
+            if (query.isResultLanguageRestricted())
+                resultTagSubQuery = "(" + NVL + "(\n" +
+                        "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR AND s.LANG=" + query.getResultLanguage() + sub_restriction + "),\n" +
+                        "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1)\n" +
+                        ")) AS RTAG";
+            else
+                resultTagSubQuery = "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1) AS RTAG ";
+            final String searchTagSubQuery;
+            if (query.isSearchLanguageRestricted())
+                searchTagSubQuery = "(" + NVL + "(\n" +
+                        "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR AND s.LANG=" + query.getSearchLanguage() + "),\n" +
+                        "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR LIMIT 1)\n" +
+                        ")) AS STAG";
+            else
+                searchTagSubQuery = "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1) AS STAG ";
+            //                 1  2        3    4    5    6    7    8
+            sql.append("SELECT ID,MANDATOR,PKEY,PVAL,LANG,RTAG,SVAL,STAG");
+            if(treeNodeRestricted) //9 10
+                sql.append(",MMANDATOR,POS");
+            sql.append(" FROM(");
+            sql.append("SELECT DISTINCT p.ID AS ID,p.MANDATOR AS MANDATOR,p.PKEY AS PKEY,").append(resultValueSubQuery).
+                    append(",").append(langSubQuery).append(",").append(resultTagSubQuery).
+                    append(",").append(searchValueSubQuery).append(",").append(searchTagSubQuery);
+            if(treeNodeRestricted)
+                sql.append(",m.MANDATOR AS MMANDATOR,m.POS AS POS");
+            sql.append(" FROM ").
+                    append(TBL_PHRASE).append(" p");
+            if (treeNodeRestricted)
+                sql.append(", " + TBL_PHRASE_MAP + " m");
+            sql.append(" WHERE 1=1");
+            if(query.isKeyMatchRestricted()) {
+                sql.append(" AND UPPER(p.PKEY)");
+                String saveVal = query.getKeyQuery().replaceAll("['\"\\\\]", "\\\\$0").toUpperCase();
+                switch(query.getKeyMatchMode()) {
+                    case CONTAINS:
+                        sql.append(" LIKE '%").append(saveVal).append("%'");
+                        break;
+                    case EXACT:
+                        sql.append("='").append(saveVal).append("'");
+                        break;
+                    case STARTS_WITH:
+                        sql.append(" LIKE '").append(saveVal).append("%'");
+                        break;
+                }
+            }
+            if (query.isPhraseMandatorRestricted()) {
+                sql.append(" AND p.MANDATOR");
+                if (query.getPhraseMandators().length == 1)
+                    sql.append("=").append(query.getPhraseMandators()[0]);
+                else
+                    sql.append(" IN(").append(FxArrayUtils.toStringArray(query.getPhraseMandators(), ',')).append(")");
+            }
+            if (treeNodeRestricted) {
+                if (!query.isIncludeChildNodes()) {
+                    sql.append(" AND m.NODEID=").append(query.getTreeNode()).append(" AND m.NODEMANDATOR=").
+                            append(query.getTreeNodeMandator()).append(" AND m.MANDATOR IN(").
+                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).
+                            append(")AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
+                } else {
+                    sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(").
+                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).append(")");
+                    ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=?");
+                    sql.append("AND(1=2 ");
+                    buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
+                    sql.append(")");
+                }
+            } else if (query.isOnlyUnassignedPhrases()) {
+                Long[] man;
+                if (query.isTreeNodeMappingOwnerRestricted())
+                    man = query.getTreeNodeMappingOwner();
+                else
+                    man = new Long[]{FxContext.getUserTicket().getMandatorId()};
+                sql.append(" AND (SELECT COUNT(m2.PHRASEID)FROM " + TBL_PHRASE_MAP + " m2 WHERE m2.MANDATOR IN (").
+                        append(FxArrayUtils.toStringArray(man, ',')).append(") AND m2.NODEMANDATOR IN (").
+                        append(FxArrayUtils.toStringArray(man, ',')).append(") AND m2.PHRASEID=p.ID AND m2.PMANDATOR=p.MANDATOR)=0");
+            }
+            sql.append(" ORDER BY ");
+            //order by tree node mapping mandator if result is sorted by position
+            if (treeNodeRestricted && !query.isMixMandators() && query.isTreeNodeMappingOwnerRestricted() && query.getTreeNodeMappingOwner().length == 2) {
+                long ownMandator = FxContext.getUserTicket().getMandatorId();
+                long otherMandator = -1;
+                Long[] mand = query.getTreeNodeMappingOwner();
+                if (ownMandator == mand[0])
+                    otherMandator = mand[1];
+                else if (ownMandator == mand[1])
+                    otherMandator = mand[0];
+                if (otherMandator != -1) {
+                    //own mandator is included
+                    sql.append("m.MANDATOR ");
+                    if (query.isOwnMandatorTop()) {
+                        if (ownMandator < otherMandator)
+                            sql.append("ASC,");
+                        else
+                            sql.append("DESC,");
+                    } else {
+                        if (ownMandator < otherMandator)
+                            sql.append("DESC,");
+                        else
+                            sql.append("ASC,");
+                    }
+                }
+            }
+            switch (query.getSortMode()) {
+                case POS_ASC:
+                    sql.append("POS ASC");
+                    break;
+                case POS_DESC:
+                    sql.append("POS DESC");
+                    break;
+                case VALUE_ASC:
+                    sql.append("SVAL ASC");
+                    break;
+                case VALUE_DESC:
+                    sql.append("SVAL DESC");
+                    break;
+                case KEY_ASC:
+                    sql.append("PKEY ASC");
+                    break;
+                case KEY_DESC:
+                    sql.append("PKEY DESC");
+                    break;
+                case TAG_ASC:
+                    sql.append("STAG ASC");
+                    break;
+                case TAG_DESC:
+                    sql.append("STAG DESC");
+                    break;
+            }
+            //order by phrase mandator
+            if (query.isPhraseMandatorRestricted() && query.getPhraseMandators().length == 2) {
+                long ownMandator = FxContext.getUserTicket().getMandatorId();
+                long otherMandator = -1;
+                Long[] mand = query.getPhraseMandators();
+                if (ownMandator == mand[0])
+                    otherMandator = mand[1];
+                else if (ownMandator == mand[1])
+                    otherMandator = mand[0];
+                if (otherMandator != -1) {
+                    //own mandator is included
+                    sql.append(",p.MANDATOR ");
+                    if (query.isOwnMandatorTop()) {
+                        if (ownMandator < otherMandator)
+                            sql.append("ASC");
+                        else
+                            sql.append("DESC");
+                    } else {
+                        if (ownMandator < otherMandator)
+                            sql.append("DESC");
+                        else
+                            sql.append("ASC");
+                    }
+                }
+            }
+            //PVAL,LANG,RTAG,SVAL,STAG
+            sql.append(") R");
+            if(query.isValueMatchRestricted() || query.isKeyMatchRestricted() || query.isTagMatchRestricted()) {
+                sql.append(" WHERE ");
+                if(query.isValueMatchRestricted())
+                    sql.append(" R.SVAL IS NOT NULL");
+                if(query.isTagMatchRestricted()) {
+                    if(query.isValueMatchRestricted())
+                        sql.append(" AND");
+                    sql.append(" R.STAG IS NOT NULL");
+                }
+                if(query.isKeyMatchRestricted()) {
+                    if(query.isValueMatchRestricted() || query.isTagMatchRestricted())
+                        sql.append(" AND");
+                    sql.append(" R.PKEY IS NOT NULL");
+                }
+            }
+//            System.out.println("Query: [\n" + sql.toString() + "\n]");
+            ps = con.prepareStatement(sql.toString());
+            ResultSet rs = ps.executeQuery();
+            int startRow = pageSize * (page - 1);
+            int endRow = pageSize * page;
+            int currRow = 0;
+            if (query.isFetchFullPhraseInfo()) {
+                /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key */
+                psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY FROM " + TBL_PHRASE + " p, " +
+                        TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
+            }
+            //                    1  2        3    4    5    6    7    8
+//            sql.append("SELECT ID,MANDATOR,PKEY,PVAL,LANG,RTAG,SVAL,STAG FROM(");
+            while (rs != null && rs.next()) {
+                if (currRow >= startRow && currRow < endRow) {
+                    if (!query.isFetchFullPhraseInfo()) {
+                        FxString val = new FxString(rs.getLong(5), rs.getString(4));
+                        String tag = rs.getString(6);
+                        final FxPhrase phrase = new FxPhrase(rs.getLong(2), rs.getString(3), val, tag).setId(rs.getLong(1));
+                        if(treeNodeRestricted)
+                            phrase.setAssignmentMandator(rs.getLong(9));
+                        if(isSortPos)
+                            phrase.setPosition(rs.getInt(10));
+                        phrases.add(phrase);
+                    } else {
+                        psPhrase.setLong(1, rs.getLong(1));
+                        psPhrase.setLong(2, rs.getLong(2));
+                        ResultSet rsPhrase = psPhrase.executeQuery();
+                        if (rsPhrase != null && rsPhrase.next()) {
+                            final FxPhrase phrase = loadPhrase(rsPhrase);
+                            if(treeNodeRestricted)
+                                phrase.setAssignmentMandator(rs.getLong(9));
+                            if(isSortPos)
+                                phrase.setPosition(rs.getInt(10));
+                            phrases.add(phrase);
+                        }
+                        if (rsPhrase != null)
+                            rsPhrase.close();
+                    }
+                }
+                currRow++;
+            }
+            return new FxPhraseQueryResult(query, currRow, (startRow + 1), pageSize, phrases.size(), phrases);
+        } catch (SQLException exc) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
+        } finally {
+            if (psPhrase != null)
+                Database.closeObjects(PhraseEngineBean.class, psPhrase);
+            Database.closeObjects(PhraseEngineBean.class, con, ps);
+        }
+    }
+
+
+    private FxPhraseQueryResult searchNoFallback(FxPhraseQuery query, int page, int pageSize) {
         Connection con = null;
         PreparedStatement ps = null, psPhrase = null;
         try {
@@ -1718,8 +2027,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             final boolean needResultVal = !query.isFetchFullPhraseInfo() && query.isResultLanguageRestricted() && query.isSearchLanguageRestricted() &&
                     !query.getSearchLanguage().equals(query.getResultLanguage());
             final String searchAlias = needResultVal ? "sv" : "v";
-            final boolean needValueTable = needResultVal || query.isSortByTag() || query.isSortByValue()
-                    || query.isSearchLanguageRestricted() || query.isTagMatchRestricted();
+            final boolean needValueTable = needResultVal || query.isSortByTag() || query.isSortByValue() || query.isSearchLanguageRestricted();
             if(treeNodeRestricted)
                 sql.append(",m.MANDATOR");
             if (needValueTable)
@@ -1945,7 +2253,6 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 Database.closeObjects(PhraseEngineBean.class, psPhrase);
             Database.closeObjects(PhraseEngineBean.class, con, ps);
         }
-
     }
 
     private void setQueryParam(PreparedStatement ps, int queryParam, FxPhraseQuery.MatchMode matchMode, String query) throws SQLException {

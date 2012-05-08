@@ -82,6 +82,8 @@ public class FxPhraseQuery implements Serializable {
     private boolean ownMandatorTop;
     //find only phrases that are not assigned to the treeNodeMappingOwners
     private boolean onlyUnassignedPhrases;
+    //search with fallback to other languages if no match for the search language was found?
+    private boolean languageFallback;
 
     public FxPhraseQuery() {
         reset();
@@ -106,6 +108,7 @@ public class FxPhraseQuery implements Serializable {
         this.treeNodeMappingOwner = null;
         this.onlyUnassignedPhrases = false;
         this.mixMandators = true;
+        this.languageFallback = false;
         return this;
     }
 
@@ -315,6 +318,14 @@ public class FxPhraseQuery implements Serializable {
 
     public void setOnlyUnassignedPhrases(boolean onlyUnassignedPhrases) {
         this.onlyUnassignedPhrases = onlyUnassignedPhrases;
+    }
+
+    public boolean isLanguageFallback() {
+        return languageFallback;
+    }
+
+    public void setLanguageFallback(boolean languageFallback) {
+        this.languageFallback = languageFallback;
     }
 
     /**

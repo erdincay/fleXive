@@ -11,6 +11,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -318,9 +319,13 @@ public class PhraseTest {
         }
     }
 
+    @DataProvider(name = "fallbackProvider")
+    public Boolean[][] fallbackProvider() {
+        return new Boolean[][]{{Boolean.FALSE}, {Boolean.TRUE}};
+    }
 
-    @Test
-    public void phraseTreeSearchTest() throws FxApplicationException {
+    @Test(dataProvider = "fallbackProvider")
+    public void phraseTreeSearchTest(Boolean languageFallback) throws FxApplicationException {
         final long ownMandator = FxContext.get().getTicket().getMandatorId();
         PhraseEngine pe = EJBLookup.getPhraseEngine();
         pe.clearTree(testMandator);
@@ -348,6 +353,7 @@ public class PhraseTest {
         }
 
         FxPhraseQuery query = new FxPhraseQuery();
+        query.setLanguageFallback(languageFallback);
         query.setSearchLanguage(FxLanguage.GERMAN);
         query.setResultLanguage(FxLanguage.GERMAN);
         query.setKeyQuery("fx.phrase.search.");
@@ -386,6 +392,7 @@ public class PhraseTest {
         }
 
         query.reset();
+        query.setLanguageFallback(languageFallback);
         query.setSearchLanguage(FxLanguage.GERMAN);
         query.setResultLanguage(FxLanguage.ITALIAN);
         query.setFetchFullPhraseInfo(false);
@@ -444,6 +451,7 @@ public class PhraseTest {
         Assert.assertEquals(tree.get(1).getPhrase().getSingleValue(), "B");
 
         query.reset();
+        query.setLanguageFallback(languageFallback);
         query.setResultLanguage(FxLanguage.ENGLISH);
         query.setSearchLanguage(FxLanguage.ENGLISH);
         query.setTreeNode(nodeA1.getId());
@@ -521,6 +529,7 @@ public class PhraseTest {
 
         //find all unassigned phrases with full phrase info
         query.reset();
+        query.setLanguageFallback(languageFallback);
         query.setOwnMandatorTop(true);
         query.setSortMode(FxPhraseQuery.SortMode.VALUE_ASC);
         query.setFetchFullPhraseInfo(true);
