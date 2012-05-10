@@ -401,7 +401,7 @@ public class XPathElement implements Serializable {
     public static String toXPathMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
-        XPath = XPath.toUpperCase();
+        XPath = xpToUpper(XPath);
         String type = null;
         if (XPath.charAt(0) != '/' && XPath.indexOf('/') > 0) {
             //we have a full qualified XPath with type name that needs to be stripped temporarily
@@ -465,7 +465,7 @@ public class XPathElement implements Serializable {
     public static String toXPathNoMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
-        XPath = XPath.toUpperCase();
+        XPath = xpToUpper(XPath);
         if (!isValidXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         if (XPath.indexOf('[') == -1) {
@@ -586,31 +586,20 @@ public class XPathElement implements Serializable {
                 XPath.deleteCharAt(0);
         } else if (XPath.length() == 0 && leadingSlash)
             XPath.append('/');
-        return doubleSlashPattern.matcher(XPath).replaceAll("/").toUpperCase();
+        return xpToUpper(doubleSlashPattern.matcher(XPath).replaceAll("/"));
     }
 
     /**
-     * Strip leading types from an XPath if present
+     * Strip leading types from an XPath if present, and return
+     * the XPath in upper case.
      *
      * @param XPath the XPath
      * @return XPath without leading type
      */
     public static String stripType(String XPath) {
         assert XPath != null : "XPath was null!";
-        StringBuilder sbXPath = new StringBuilder(XPath.length());
-        boolean inXPData = false;
-        for(int i=0; i<XPath.length(); i++) {
-            char c = XPath.charAt(i);
-            if(!inXPData && c == '/')
-                inXPData = true;
-            if(!inXPData)
-                continue;
-            if(c >= 'a' && c <= 'z')
-                sbXPath.append((char) (c - 32));
-            else
-                sbXPath.append(c);
-        }
-        return sbXPath.toString();
+        final int pos = XPath.indexOf('/');
+        return pos != -1 ? xpToUpper(XPath.substring(pos)) : "";
     }
 
     /**
@@ -624,7 +613,7 @@ public class XPathElement implements Serializable {
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", "null").asRuntimeException();
         if (XPath.lastIndexOf('/') == 0)
             return "/";
-        XPath = XPath.toUpperCase();
+        XPath = xpToUpper(XPath);
         if (!isValidXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         return XPath.substring(0, XPath.lastIndexOf('/'));
@@ -676,5 +665,29 @@ public class XPathElement implements Serializable {
             }
         }
         return XPath; //not found, return original
+    }
+    
+    /**
+     * Optimized uppercase method for XPaths (characters are limited to a-z).
+     * 
+     * @param xpath the XPath
+     * @return      the uppercased XPath
+     */
+    private static String xpToUpper(String xpath) {
+        StringBuilder out = null;
+        final int len = xpath.length();
+        for (int i = 0; i < len; i++) {
+            final char ch = xpath.charAt(i);
+            if (ch >= 'a' && ch <= 'z') {
+                if (out == null) {
+                    out = new StringBuilder(len);
+                    out.append(xpath.substring(0, i));
+                }
+                out.append((char) (ch - 32));
+            } else if (out != null) {
+                out.append(ch);
+            }
+        }
+        return out != null ? out.toString() : xpath;
     }
 }
