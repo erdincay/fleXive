@@ -31,10 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxValueChangeListener;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
@@ -357,7 +354,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     @SuppressWarnings({"unchecked"})
     public TDerived setXPath(String XPath) {
         if (!this.readOnly) {
-            this.XPath = XPath != null ? XPath.toUpperCase(Locale.ENGLISH) : null;
+            this.XPath = XPath != null ? XPathElement.xpToUpperCase(XPath) : null;
         }
         return (TDerived) this;
     }

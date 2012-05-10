@@ -147,7 +147,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * Log a message at a given level (or error if no level given)
      *
      * @param log     Log to use
-     * @param message magges to LOG
+     * @param message message to LOG
      * @param level   log4j level to apply
      */
     private void logMessage(Log log, String message, LogLevel level) {

@@ -401,7 +401,7 @@ public class XPathElement implements Serializable {
     public static String toXPathMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
-        XPath = xpToUpper(XPath);
+        XPath = xpToUpperCase(XPath);
         String type = null;
         if (XPath.charAt(0) != '/' && XPath.indexOf('/') > 0) {
             //we have a full qualified XPath with type name that needs to be stripped temporarily
@@ -465,7 +465,7 @@ public class XPathElement implements Serializable {
     public static String toXPathNoMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
-        XPath = xpToUpper(XPath);
+        XPath = xpToUpperCase(XPath);
         if (!isValidXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         if (XPath.indexOf('[') == -1) {
@@ -586,7 +586,7 @@ public class XPathElement implements Serializable {
                 XPath.deleteCharAt(0);
         } else if (XPath.length() == 0 && leadingSlash)
             XPath.append('/');
-        return xpToUpper(doubleSlashPattern.matcher(XPath).replaceAll("/"));
+        return xpToUpperCase(doubleSlashPattern.matcher(XPath).replaceAll("/"));
     }
 
     /**
@@ -599,7 +599,7 @@ public class XPathElement implements Serializable {
     public static String stripType(String XPath) {
         assert XPath != null : "XPath was null!";
         final int pos = XPath.indexOf('/');
-        return pos != -1 ? xpToUpper(XPath.substring(pos)) : "";
+        return pos != -1 ? xpToUpperCase(XPath.substring(pos)) : "";
     }
 
     /**
@@ -613,7 +613,7 @@ public class XPathElement implements Serializable {
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", "null").asRuntimeException();
         if (XPath.lastIndexOf('/') == 0)
             return "/";
-        XPath = xpToUpper(XPath);
+        XPath = xpToUpperCase(XPath);
         if (!isValidXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         return XPath.substring(0, XPath.lastIndexOf('/'));
@@ -672,8 +672,9 @@ public class XPathElement implements Serializable {
      * 
      * @param xpath the XPath
      * @return      the uppercased XPath
+     * @since 3.1.7
      */
-    private static String xpToUpper(String xpath) {
+    public static String xpToUpperCase(String xpath) {
         StringBuilder out = null;
         final int len = xpath.length();
         for (int i = 0; i < len; i++) {

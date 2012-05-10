@@ -540,7 +540,7 @@ public class FxContent implements Serializable {
             return base;
         List<FxData> ret = base;
         boolean found;
-        for (XPathElement xpe : XPathElement.split(XPath.toUpperCase())) {
+        for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
             found = false;
             for (FxData curr : ret) {
                 if (curr.getXPathElement().equals(xpe)) {
@@ -597,14 +597,14 @@ public class FxContent implements Serializable {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupData getGroupData(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
-        XPath = XPathElement.stripType(XPathElement.toXPathMult(XPath.toUpperCase()));
+        XPath = XPathElement.stripType(XPathElement.toXPathMult(XPath));
         //this is a slightly modified version of getData() but since groups may not contain children its safer
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return getRootGroup();
         List<FxData> currChildren = data.getChildren();
         FxGroupData group = null;
         boolean found;
-        for (XPathElement xpe : XPathElement.split(XPath)) {
+        for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
             found = false;
             for (FxData curr : currChildren) {
                 if (curr.getXPathElement().equals(xpe)) {
@@ -894,8 +894,7 @@ public class FxContent implements Serializable {
         FxEnvironment env = CacheAdmin.getEnvironment();
         if (!env.getType(this.getTypeId()).isXPathValid(XPath, true))
             throw new FxInvalidParameterException("XPATH", "ex.content.xpath.set.invalid", XPath, env.getType(getTypeId()).getName()).asRuntimeException();
-        XPath = XPath.toUpperCase();
-        List<XPathElement> elements = XPathElement.split(XPath);
+        List<XPathElement> elements = XPathElement.split(XPathElement.xpToUpperCase(XPath));
         FxGroupData currGroup = this.getRootGroup();
         boolean found;
         List<XPathElement> missing = new ArrayList<XPathElement>(20);
@@ -1074,7 +1073,7 @@ public class FxContent implements Serializable {
         // optimized implementation to avoid exceptions and don't create unnecessary objects
         // since this method tends to be used often in hot spots for determining the structure of the content
         List<FxData> currentChildren = data.getChildren();
-        for (XPathElement xpe : XPathElement.split(XPath.toUpperCase())) {
+        for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
             boolean found = false;
             for (FxData curr : currentChildren) {
                 if (curr.getXPathElement().equals(xpe)) {
