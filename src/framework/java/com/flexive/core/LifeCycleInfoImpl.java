@@ -67,7 +67,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
 
     private long creatorId;
     private long creationTime;
-    private long modifcatorId;
+    private long modificatorId;
     private long modificationTime;
 
     /**
@@ -99,7 +99,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      * @return Id of the most recent User that modified this entry
      */
     public long getModificatorId() {
-        return modifcatorId;
+        return modificatorId;
     }
 
     /**
@@ -121,7 +121,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
     }
 
     public void setModifcatorId(long modifcatorId) {
-        this.modifcatorId = modifcatorId;
+        this.modificatorId = modifcatorId;
     }
 
     public void setModificationTime(long modificationTime) {
@@ -149,7 +149,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
     public LifeCycleInfoImpl(long creatorId, long creationTime, long modificator, long modificationTime) {
         this.creatorId = creatorId;
         this.creationTime = creationTime;
-        this.modifcatorId = modificator;
+        this.modificatorId = modificator;
         this.modificationTime = modificationTime;
     }
 
@@ -310,7 +310,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
         if (obj == null || !(obj instanceof LifeCycleInfo))
             return false;
         LifeCycleInfo other = (LifeCycleInfo) obj;
-        return modifcatorId == other.getModificatorId() && modificationTime == other.getModificationTime() &&
+        return modificatorId == other.getModificatorId() && modificationTime == other.getModificationTime() &&
                 creatorId == other.getCreatorId() && creationTime == other.getCreationTime();
     }
 
@@ -319,7 +319,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
         int result;
         result = (int) (creatorId ^ (creatorId >>> 32));
         result = 31 * result + (int) (creationTime ^ (creationTime >>> 32));
-        result = 31 * result + (int) (modifcatorId ^ (modifcatorId >>> 32));
+        result = 31 * result + (int) (modificatorId ^ (modificatorId >>> 32));
         result = 31 * result + (int) (modificationTime ^ (modificationTime >>> 32));
         return result;
     }

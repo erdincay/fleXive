@@ -88,6 +88,14 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, String description, Long aclId) throws FxApplicationException {
+        return create(name, description, aclId, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long create(String name, String description, Long aclId, LifeCycleInfo forcedLifeCycleInfo) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
 
         if (description == null) {
@@ -108,6 +116,9 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             }
 
         }
+        if (forcedLifeCycleInfo != null && !ticket.isGlobalSupervisor()) {
+            throw new FxNoAccessException("ex.briefcase.lciPermission");
+        }
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -120,10 +131,10 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             // Obtain a new id
             long newId = seq.getId(FxSystemSequencer.BRIEFCASE);
 
-            sql = "INSERT INTO " + DatabaseConst.TBL_BRIEFCASE + "(" +
-                    //1,   2,  3        ,  4         , 5 ,    6        7         8              9      , 10     , 11
-                    "ID,NAME,DESCRIPTION,SOURCE_QUERY,ACL,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,MANDATOR,ICON_ID)" +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,1)";
+            sql = "INSERT INTO " + DatabaseConst.TBL_BRIEFCASE + "("
+                    + //1,   2,  3        ,  4         , 5 ,    6        7         8              9      , 10     , 11
+                    "ID,NAME,DESCRIPTION,SOURCE_QUERY,ACL,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,MANDATOR,ICON_ID)"
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,1)";
             final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
             ps.setLong(1, newId);
@@ -135,23 +146,31 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             } else {
                 ps.setNull(5, java.sql.Types.NUMERIC);
             }
-            ps.setLong(6, ticket.getUserId());
-            ps.setLong(7, NOW);
-            ps.setLong(8, ticket.getUserId());
-            ps.setLong(9, NOW);
+            if (forcedLifeCycleInfo != null) {
+                ps.setLong(6, forcedLifeCycleInfo.getCreatorId());
+                ps.setLong(7, forcedLifeCycleInfo.getCreationTime());
+                ps.setLong(8, forcedLifeCycleInfo.getModificatorId());
+                ps.setLong(9, forcedLifeCycleInfo.getModificationTime());
+            } else {
+                ps.setLong(6, ticket.getUserId());
+                ps.setLong(7, NOW);
+                ps.setLong(8, ticket.getUserId());
+                ps.setLong(9, NOW);
+            }
             ps.setLong(10, ticket.getMandatorId());
             ps.executeUpdate();
             return newId;
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            if (ctx != null)
+            if (ctx != null) {
                 EJBUtils.rollback(ctx);
-            else
+            } else {
                 try {
                     con.rollback();
                 } catch (SQLException e) {
                     LOG.warn(e.getMessage(), e);
                 }
+            }
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.briefcase.nameAlreadyExists", name);
             } else {
@@ -162,6 +181,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         }
     }
 
+    
 
     /**
      * {@inheritDoc}

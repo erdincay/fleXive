@@ -35,6 +35,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.security.LifeCycleInfo;
 
 import javax.ejb.Remote;
 import java.util.List;
@@ -63,8 +64,22 @@ public interface BriefcaseEngine {
      * @return the unique briefcase id
      * @throws FxApplicationException if the create failed
      */
-    long create(String name, String description,Long aclId) throws FxApplicationException;
+    long create(String name, String description, Long aclId) throws FxApplicationException;
 
+    /**
+     * Create a new empty briefcase, overriding the default lifecycle info (e.g. for imports).
+     * The lifecycle info may only be specified when the calling user is a global supervisor.
+     * 
+     * @param description the description (may be empty)
+     * @param aclId the ACL to use if the briefcase should be shared, or null if the briefcase is only visible for the
+     * owner.
+     * @param forcedLifeCycleInfo the lifecycle info to store for the briefcase, or null if the default values should be used
+     * @return the unique briefcase id
+     * @throws FxApplicationException if the create failed
+     * @since 3.1.7
+     */
+    long create(String name, String description, Long aclId, LifeCycleInfo forcedLifeCycleInfo) throws FxApplicationException;
+    
     /**
      * Gets a list of all briefcase for the calling user.
      *
