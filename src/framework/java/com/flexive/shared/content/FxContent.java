@@ -527,7 +527,7 @@ public class FxContent implements Serializable {
      * Get all FxData (Group or Property) entries for the given XPath.
      * <p/>
      * Note: If the XPath refers to a group, only its child entries are returned
-     * and not the FxData of the group itsself. For accessing the group data itself
+     * and not the FxData of the group itself. For accessing the group data itself
      * use {@link #getGroupData(String)} instead.
      *
      * @param XPath requested XPath
@@ -535,9 +535,18 @@ public class FxContent implements Serializable {
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public List<FxData> getData(String XPath) {
+        final List<FxData> data = findData(XPath);
+        if (data == null) {
+            throw new FxNotFoundException("ex.content.xpath.notFound", XPath).asRuntimeException();
+        }
+        return data;
+    }
+    
+    private List<FxData> findData(String XPath) {
         List<FxData> base = data.getChildren();
-        if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
+        if (StringUtils.isEmpty(XPath) || "/".equals(XPath)) {
             return base;
+        }
         List<FxData> ret = base;
         boolean found;
         for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
@@ -555,8 +564,9 @@ public class FxContent implements Serializable {
                     }
                 }
             }
-            if (!found)
-                throw new FxNotFoundException("ex.content.xpath.notFound", XPath).asRuntimeException();
+            if (!found) {
+                return null;
+            }
         }
         return ret;
     }
@@ -947,13 +957,19 @@ public class FxContent implements Serializable {
      * @see #getPropertyData(String)
      */
     public FxValue getValue(String XPath) {
-        try {
-            return getPropertyData(XPath).getValue();
-        } catch (FxRuntimeException e) {
-            if (isPropertyXPath(XPath))
+        final List<FxData> found = findData(XPath);
+        if (found == null) {
+            if (isPropertyXPath(XPath)) {
                 return null; //just not set, see FX-473
-            throw e;
+            }
+            // xpath does not exist
+            throw new FxNotFoundException("ex.content.xpath.notFound", XPath).asRuntimeException();
         }
+        // check if the data actually contains a single property
+        if (found.size() != 1 || !(found.get(0) instanceof FxPropertyData)) {
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
+        }
+        return ((FxPropertyData) found.get(0)).getValue();
     }
 
     /**
@@ -1008,12 +1024,12 @@ public class FxContent implements Serializable {
     }
 
     /**
-     * Get all values of a given class (eg FxString) and XPath, ordered by multiplicty.
+     * Get all values of a given class (eg FxString) and XPath, ordered by multiplicity.
      * If the assignment has a max. multiplicity of 1 return a list with a single entry
      *
      * @param clazz collect only instances of this class (eg FxString.class)
      * @param XPath requested XPath
-     * @return all values of a given XPath, ordered by multiplicty
+     * @return all values of a given XPath, ordered by multiplicity
      * @since 3.1.4
      */
     public <T extends FxValue> List<T> getValues(Class<T> clazz, String XPath) {
