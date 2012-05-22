@@ -87,7 +87,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query) throws FxApplicationException {
         return search(query, 0, Integer.MAX_VALUE, null);
     }
@@ -95,7 +95,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params)
             throws FxApplicationException {
         return search(query, startIndex, fetchRows, params, AdminResultLocations.DEFAULT, ResultViewType.LIST);
@@ -104,7 +104,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params, ResultLocation location, ResultViewType viewType) throws FxApplicationException {
         try {
             if (params == null) {
