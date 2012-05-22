@@ -102,6 +102,16 @@ public interface PhraseEngine {
     public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, Object tag, long mandator) throws FxNoAccessException;
 
     /**
+     * Set a phrases hidden flag
+     *
+     * @param phraseKey phrase key
+     * @param mandator phrase mandator
+     * @param hidden hidden flag
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public void setPhraseHidden(String phraseKey, long mandator, boolean hidden) throws FxNoAccessException;
+
+    /**
      * Remove the phrase identified by its key and mandator and all its mappings
      *
      * @param phraseKey phrase key

@@ -84,6 +84,8 @@ public class FxPhraseQuery implements Serializable {
     private boolean onlyUnassignedPhrases;
     //search with fallback to other languages if no match for the search language was found?
     private boolean languageFallback;
+    //include hidden phrases in search results?
+    private boolean includeHidden;
 
     public FxPhraseQuery() {
         reset();
@@ -109,6 +111,7 @@ public class FxPhraseQuery implements Serializable {
         this.onlyUnassignedPhrases = false;
         this.mixMandators = true;
         this.languageFallback = false;
+        this.includeHidden = true;
         return this;
     }
 
@@ -326,6 +329,14 @@ public class FxPhraseQuery implements Serializable {
 
     public void setLanguageFallback(boolean languageFallback) {
         this.languageFallback = languageFallback;
+    }
+
+    public boolean isIncludeHidden() {
+        return includeHidden;
+    }
+
+    public void setIncludeHidden(boolean includeHidden) {
+        this.includeHidden = includeHidden;
     }
 
     /**

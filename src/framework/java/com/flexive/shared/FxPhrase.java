@@ -32,6 +32,7 @@
 package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.interfaces.PhraseEngine;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 
@@ -53,6 +54,7 @@ public class FxPhrase implements Serializable {
     private FxString fxValue;
     private String tag;
     private FxString fxTag;
+    private boolean hidden;
 
     public FxPhrase(String key, FxString fxValue, String tag) {
         this.mandator = FxContext.getUserTicket().getMandatorId();
@@ -61,6 +63,7 @@ public class FxPhrase implements Serializable {
         this.fxValue = fxValue;
         this.tag = tag;
         this.fxTag = null;
+        this.hidden = false;
     }
 
     public FxPhrase(String key, FxString fxValue, FxString fxTag) {
@@ -70,6 +73,7 @@ public class FxPhrase implements Serializable {
         this.fxValue = fxValue;
         this.tag = null;
         this.fxTag = fxTag;
+        this.hidden = false;
     }
 
     public FxPhrase(long mandator, String key, FxString fxValue, String tag) {
@@ -79,6 +83,7 @@ public class FxPhrase implements Serializable {
         this.fxValue = fxValue;
         this.tag = tag;
         this.fxTag = null;
+        this.hidden = false;
     }
 
     public FxPhrase(long mandator, String key, FxString fxValue, FxString fxTag) {
@@ -88,6 +93,7 @@ public class FxPhrase implements Serializable {
         this.fxValue = fxValue;
         this.tag = null;
         this.fxTag = fxTag;
+        this.hidden = false;
     }
 
     public FxPhrase(long mandator, String key, String value, String tag) {
@@ -97,6 +103,7 @@ public class FxPhrase implements Serializable {
         this.fxValue = null;
         this.tag = tag;
         this.fxTag = null;
+        this.hidden = false;
     }
 
     public long getMandator() {
@@ -197,6 +204,19 @@ public class FxPhrase implements Serializable {
         return position != -1;
     }
 
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    public FxPhrase flagHidden(boolean hidden) {
+        this.hidden = hidden;
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -208,7 +228,7 @@ public class FxPhrase implements Serializable {
         try {
             return !(this.hasId() && other.hasId() && this.getId() != other.getId()) &&
                     other.getKey().equals(this.getKey()) && other.getMandator() == this.getMandator() &&
-                    other.hasTag() == this.hasTag() && other.getFxTag().equals(this.getFxTag());
+                    other.hasTag() == this.hasTag() && other.getFxTag().equals(this.getFxTag()) && other.hidden == this.hidden;
         } catch (Exception e) {
             return false;
         }
@@ -216,11 +236,13 @@ public class FxPhrase implements Serializable {
 
     @Override
     public String toString() {
-        return "{" + getSingleValue() + " (id:" + getId() + ",mandator:" + getMandator() + ")" + "}";
+        return "{" + getSingleValue() + " (id:" + getId() + ",mandator:" + getMandator() + ",hidden:" + isHidden() + ")" + "}";
     }
 
     public FxPhrase save() throws FxNoAccessException {
-        EJBLookup.getPhraseEngine().savePhrase(this.getKey(), this.getValue(), tag != null ? tag : fxTag != null ? fxTag : null, this.mandator);
+        final PhraseEngine phraseEngine = EJBLookup.getPhraseEngine();
+        phraseEngine.savePhrase(this.getKey(), this.getValue(), tag != null ? tag : fxTag != null ? fxTag : null, this.mandator);
+        phraseEngine.setPhraseHidden(this.getKey(), this.mandator, hidden);
         return this;
     }
 }
