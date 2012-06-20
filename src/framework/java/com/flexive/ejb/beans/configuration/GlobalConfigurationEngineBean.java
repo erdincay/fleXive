@@ -97,7 +97,7 @@ import static com.flexive.core.DatabaseConst.TBL_CONFIG_GLOBAL;
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS,
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
+        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;MVCC=TRUE;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=true
@@ -106,7 +106,7 @@ import static com.flexive.core.DatabaseConst.TBL_CONFIG_GLOBAL;
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS + "NoTX",
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
+        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;MVCC=TRUE;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=false
@@ -115,7 +115,7 @@ import static com.flexive.core.DatabaseConst.TBL_CONFIG_GLOBAL;
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS_CONFIG,
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties = "URL=jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
+        properties = "URL=jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;MVCC=TRUE;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=true
@@ -124,7 +124,7 @@ import static com.flexive.core.DatabaseConst.TBL_CONFIG_GLOBAL;
     @DataSourceDefinition(
         name = GlobalConfigurationEngineBean.DEFAULT_DS_INIT,
         className = "org.h2.jdbcx.JdbcDataSource",
-        properties= "URL=jdbc:h2:h2/flexive;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
+        properties= "URL=jdbc:h2:h2/flexive;MVCC=TRUE;LOCK_TIMEOUT=10000;TRACE_LEVEL_FILE=0",
         user = "sa",
         password = "sa",
         transactional=false
