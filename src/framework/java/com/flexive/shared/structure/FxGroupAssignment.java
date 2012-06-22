@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Assignment of a (structure) group to a type or another assignment of a (structure) group
@@ -247,7 +246,6 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     @Override
     public FxData createEmptyData(FxGroupData parent, int index, int position) {
-        List<FxData> children = new CopyOnWriteArrayList<FxData>();
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
@@ -258,7 +256,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             final String xPathFull = XPathElement.stripType(parent.getXPathFull() + (parent.isRootGroup() ? "" : "/") + this.getAlias() + "[" + index + "]");
             thisGroup = new FxGroupData(parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     xPathFull, XPathElement.getIndices(xPathFull),
-                    this.getId(), this.getMultiplicity(), position, parent, children, this.isSystemInternal());
+                    this.getId(), this.getMultiplicity(), position, parent, new ArrayList<FxData>(), this.isSystemInternal());
             if (this.getMode() == GroupMode.OneOf) {
                 //if One-Of more find the first non-optional child and create it (should not happen if correctly setup
                 //but still possible, multiple non-optional childs will result in errors that are thrown in an exception
@@ -317,13 +315,12 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      */
     @Override
     public FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) {
-        List<FxData> children = new CopyOnWriteArrayList<FxData>();
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
-                    this.getId(), this.getMultiplicity(), this.getPosition(), parent, children, this.isSystemInternal());
+                    this.getId(), this.getMultiplicity(), this.getPosition(), parent, new ArrayList<FxData>(), this.isSystemInternal());
             int count;
             for (FxAssignment as : assignments) {
                 if (!as.isEnabled()

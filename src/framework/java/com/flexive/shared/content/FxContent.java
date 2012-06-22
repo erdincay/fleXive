@@ -1747,6 +1747,8 @@ public class FxContent implements Serializable {
         clone = new FxContent(new FxPK(), FxLock.noLockPK(), typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
                 mainLanguage, relatedSource, relatedDestination, relatedSourcePosition, relatedDestinationPosition,
                 lifeCycleInfo, data.copy(null), binaryPreviewId, binaryPreviewACL);
+        clone.setValue("/ID", -1L);
+        clone.setValue("/VERSION", 1);
         clone.setAclIds(aclIds);
         return clone;
     }

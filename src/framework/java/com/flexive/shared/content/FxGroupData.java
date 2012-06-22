@@ -44,7 +44,6 @@ import com.google.common.collect.Collections2;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * FxData extension for groups
@@ -182,7 +181,7 @@ public class FxGroupData extends FxData {
      * @throws FxInvalidParameterException on errors
      */
     public static FxGroupData createVirtualRootGroup(String xpPrefix) throws FxInvalidParameterException {
-        return new FxGroupData(xpPrefix, "", 1, "/", "/", new int[0], -1, new FxMultiplicity(1, 1), -1, null, new CopyOnWriteArrayList<FxData>(), false);
+        return new FxGroupData(xpPrefix, "", 1, "/", "/", new int[0], -1, new FxMultiplicity(1, 1), -1, null, new ArrayList<FxData>(), false);
     }
 
     /**
@@ -927,7 +926,7 @@ public class FxGroupData extends FxData {
             clone = new FxGroupData(xpPrefix, getAlias(), getIndex(), getXPath(), getXPathFull(),
                     ArrayUtils.clone(getIndices()), getAssignmentId(), getAssignmentMultiplicity(), getPos(),
                     parent, null, isSystemInternal());
-            List<FxData> cloneData = new CopyOnWriteArrayList<FxData>();
+            List<FxData> cloneData = new ArrayList<FxData>(data.size());
             for (FxData org : data)
                 cloneData.add(org.copy(clone));
             clone.data = cloneData;
