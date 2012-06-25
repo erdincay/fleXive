@@ -330,14 +330,8 @@ public class GenericSQLDataSelector extends DataSelector {
             } else if (briefcaseFilter.length > 1) {
                 throw new FxSqlSearchException("ex.sqlSearch.briefcase.metadata.ambiguous");
             }
-            // result column: "id metadata"
-            /*final String sel = "concat(" + FILTER_ALIAS + ".id," +
-                    " concat(' '," +
-                    " (SELECT COALESCE(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
-                    + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)))";*/
-            final String sel = search.getStorage().concat(FILTER_ALIAS + ".id", "' '",
-                    "(SELECT COALESCE(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
-                            + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)");
+            // select metadata (if structured properly, you can also sort based on metadata)
+            final String sel = "(SELECT metadata FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)";
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.LOCK) {
             for (String readColumn : entry.getReadColumns()) {

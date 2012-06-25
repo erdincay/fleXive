@@ -272,14 +272,9 @@ public class PropertyEntry {
         @Override
         public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
             try {
-                final String column = rs.getString(positionInResultSet);
-                final int sep = column.indexOf(' ');    // separates ID and metadata
-                return FxReferenceMetaData.fromSerializedForm(
-                        // extract ID for column value
-                        new FxPK(Long.valueOf(column.substring(0, sep))),
-                        // extract metadata after the space
-                        column.substring(Math.min(column.length() - 1, sep + 1))
-                );
+                final long id = rs.getLong(DataSelector.COL_ID);
+                final String metadata = rs.getString(positionInResultSet);
+                return FxReferenceMetaData.fromSerializedForm(new FxPK(id), metadata);
             } catch (SQLException e) {
                 throw new FxSqlSearchException(LOG, e);
             }
