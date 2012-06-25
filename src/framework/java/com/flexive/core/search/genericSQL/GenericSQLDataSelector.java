@@ -488,8 +488,8 @@ public class GenericSQLDataSelector extends DataSelector {
                         : "TPROP=" + entry.getProperty().getId()) + " AND " +
                 "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
                 " OR " + SUBSEL_ALIAS + ".ismldef=" + search.getStorage().getBooleanTrueExpression() + ")" +
-                // fetch exact language match before default
-                " ORDER BY " + SUBSEL_ALIAS + ".ismldef " +
+                // fetch exact language match before default, sort by position to get first entry
+                " ORDER BY " + SUBSEL_ALIAS + ".ismldef, " + SUBSEL_ALIAS + ".pos " +
                 search.getStorage().getLimit(true, 1) + ")";
         if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
