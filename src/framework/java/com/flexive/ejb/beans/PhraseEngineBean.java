@@ -60,6 +60,7 @@ import static com.flexive.core.DatabaseConst.*;
  */
 @SuppressWarnings("UnusedDeclaration")
 @Stateless(name = "PhraseEngine", mappedName = "PhraseEngine")
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
     // Our logger
