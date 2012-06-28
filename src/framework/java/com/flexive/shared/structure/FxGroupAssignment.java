@@ -245,7 +245,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     @Override
-    public FxData createEmptyData(FxGroupData parent, int index, int position) {
+    public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal) {
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
@@ -265,14 +265,19 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                     if (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
                             !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
+                    if (onlySystemInternal && !as.isSystemInternal()) 
+                        continue;
                     if (as.getMultiplicity().isRequired()) {
                         if (hasRequired)
                             //noinspection ThrowableInstanceNeverThrown
                             throw new FxCreateException("ex.content.data.create.oneof.multiple",
                                     thisGroup.getXPathFull()).setAffectedXPath(thisGroup.getXPathFull(), FxContentExceptionCause.InvalidGroupMode).asRuntimeException();
                         hasRequired = true;
-                        for (int c = 0; c < as.getMultiplicity().getMin(); c++)
-                            thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));
+                        for (int c = 0; c < as.getMultiplicity().getMin(); c++) {
+                            if (!onlySystemInternal || as.isSystemInternal()) {
+                                thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));
+                            }
+                        }
                     }
                 }
             } else { // 'regular' Any-Of group
@@ -280,10 +285,13 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                     if (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
                             !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
+                    if (onlySystemInternal && !as.isSystemInternal()) 
+                        continue;
                     if (as.getMultiplicity().isOptional())
                         thisGroup.getChildren().add(as.createEmptyData(thisGroup, 1));
-                    else for (int c = 0; c < as.getMultiplicity().getMin(); c++)
-                               thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));
+                    else for (int c = 0; c < as.getMultiplicity().getMin(); c++) {
+                        thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));
+                    }
                 }
             }
             thisGroup.fixChildIndices();

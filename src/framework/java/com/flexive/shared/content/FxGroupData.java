@@ -766,11 +766,29 @@ public class FxGroupData extends FxData {
      * @param xPath             requested XPath
      * @param fxGroupAssignment the assignment of the group
      * @param pos               position
+     * @throws com.flexive.shared.exceptions.FxInvalidParameterException on errors
+     * @throws com.flexive.shared.exceptions.FxNotFoundException         on errors
+     * @throws com.flexive.shared.exceptions.FxCreateException           on errors
+     */
+    public void addGroup(String xPath, FxGroupAssignment fxGroupAssignment, int pos) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
+        addGroup(xPath, fxGroupAssignment, pos, false);
+    }
+
+    /**
+     * Add a group entry at the given XPath. Existing entries will stay untouched but position adjusted.
+     * If parent groups of this group do not exist, they will be created as well.
+     *
+     * @param xPath             requested XPath
+     * @param fxGroupAssignment the assignment of the group
+     * @param pos               position
+     * @param onlySystemInternal    when true, only system-internal groups or properties are added
      * @throws FxInvalidParameterException on errors
      * @throws FxNotFoundException         on errors
      * @throws FxCreateException           on errors
+     *
+     * @since 3.1.7
      */
-    public void addGroup(String xPath, FxGroupAssignment fxGroupAssignment, int pos) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
+    public void addGroup(String xPath, FxGroupAssignment fxGroupAssignment, int pos, boolean onlySystemInternal) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
         if (xPath.endsWith("/"))
             xPath = xPath.substring(0, xPath.length() - 1);
         List<XPathElement> xp = XPathElement.split(xPath);
@@ -782,7 +800,7 @@ public class FxGroupData extends FxData {
                 currGroup = tmp;
             } else {
                 FxGroupAssignment gaNew = (FxGroupAssignment) fxGroupAssignment.getAssignedType().getAssignment(XPathElement.buildXPath(true, currGroup.getXPath(), curr.getAlias()));
-                FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex());
+                FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex(), gaNew.getPosition(), onlySystemInternal);
                 //TODO: check if adding allowed here!
 //                System.out.println("creating " + curr + " in " + xPath);
                 if (addy.equals(curr)) {

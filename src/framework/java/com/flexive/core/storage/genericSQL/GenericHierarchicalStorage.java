@@ -2065,8 +2065,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (!assignment.isEnabled())
             return;
         if (assignment instanceof FxGroupAssignment) {
-            root.addGroup(xPath, (FxGroupAssignment) assignment, pos);
-            root.getGroup(xPath).removeNonInternalData();
+            root.addGroup(xPath, (FxGroupAssignment) assignment, pos, true);
         } else {
             root.addProperty(xPath, (FxPropertyAssignment) assignment, value, pos);
         }
