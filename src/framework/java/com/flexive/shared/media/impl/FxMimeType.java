@@ -39,11 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A general mime type / subtype implementation
@@ -59,8 +55,9 @@ public class FxMimeType implements Serializable {
     private static final Map<String, String> EXT_REPLACEMENTS;
     private static final List<String> MIME_DETECTORS = Collections.unmodifiableList(Arrays.asList(
             "eu.medsea.mimeutil.detector.MagicMimeMimeDetector",
-            // For Linux/OpenDesktop machines
-            "eu.medsea.mimeutil.detector.OpendesktopMimeDetector",
+            // For Linux/OpenDesktop machines - disabled because it is not thread-safe:
+            // http://sourceforge.net/tracker/?func=detail&aid=3007610&group_id=205064&atid=992132
+            // "eu.medsea.mimeutil.detector.OpendesktopMimeDetector",
             // For Windows machines
             "eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector",
             // Last resort - use file extension
