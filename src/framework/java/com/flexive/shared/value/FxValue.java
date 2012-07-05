@@ -805,24 +805,27 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                 // methods expecting a <T> value
             }
         }
+        FxValueChangeListener.ChangeType change = null;
         if (!multiLanguage) {
             if (value == null && !isAcceptsEmptyDefaultTranslations()) {
                 throw new FxInvalidParameterException("value", "ex.content.invalid.default.empty", getClass().getSimpleName()).asRuntimeException();
             }
-            if(this.XPath != null && this.changeListener != null) {
-                if(value != null) {
-                    if(this.singleValueEmpty)
-                        this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Add);
-                    else if(!this.singleValue.equals(value))
-                        this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Update);
-                } else if(!this.singleValueEmpty) {
-                    this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Remove);
+            if (this.XPath != null && this.changeListener != null) {
+                if (value != null) {
+                    if (this.singleValueEmpty)
+                        change = FxValueChangeListener.ChangeType.Add;
+                    else if (!this.singleValue.equals(value))
+                        change = FxValueChangeListener.ChangeType.Update;
+                } else if (!this.singleValueEmpty) {
+                    change = FxValueChangeListener.ChangeType.Remove;
                 }
             }
             //override the single value
             if (singleValue == null || !singleValue.equals(value))
                 this.singleValue = value;
             this.singleValueEmpty = value == null;
+            if (changeListener != null && change != null)
+                changeListener.onValueChanged(XPath, change);
             //noinspection unchecked
             return (TDerived) this;
         }
@@ -833,12 +836,12 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         }
         if (language == FxLanguage.SYSTEM_ID)
             throw new FxInvalidParameterException("language", "ex.content.value.invalid.multilanguage.sys").asRuntimeException();
-        if(this.XPath != null && this.changeListener != null && value != null) {
-            if(this.isEmpty())
-                this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Add);
+        if (this.XPath != null && this.changeListener != null && value != null) {
+            if (this.isEmpty())
+                change = FxValueChangeListener.ChangeType.Add;
             else {
-                if(!value.equals(translations.get(language)))
-                    this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Update);
+                if (!value.equals(translations.get(language)))
+                    change = FxValueChangeListener.ChangeType.Update;
             }
         }
         boolean wasEmpty = this.changeListener != null && isEmpty(); //only evaluate if we have a change listener attached
@@ -851,9 +854,11 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             }
             emptyTranslations.put(language, false);
         }
-        if(this.XPath != null && this.changeListener != null && value == null && !wasEmpty && isEmpty()) {
-            this.changeListener.onValueChanged(this.XPath, FxValueChangeListener.ChangeType.Remove);
+        if (this.XPath != null && this.changeListener != null && value == null && !wasEmpty && isEmpty()) {
+            change = FxValueChangeListener.ChangeType.Remove;
         }
+        if (changeListener != null && change != null)
+            changeListener.onValueChanged(XPath, change);
         //noinspection unchecked
         return (TDerived) this;
     }
