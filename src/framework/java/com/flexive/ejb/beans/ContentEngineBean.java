@@ -70,6 +70,7 @@ import java.util.*;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
+@SuppressWarnings("UnusedDeclaration")
 @Stateless(name = "ContentEngine", mappedName = "ContentEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
@@ -339,7 +340,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 if (type.isAutoVersion()) {
                     content.getRootGroup().removeEmptyEntries();
                     content.compact();
-                    FxDelta delta = FxDelta.processDelta(storage.contentLoad(con, content.getPk(), CacheAdmin.getEnvironment(), null), content);
+                    FxCachedContent cachedContent = CacheAdmin.getCachedContent(content.getPk());
+                    FxContent orgContent;
+                    if (cachedContent != null)
+                        orgContent = cachedContent.getContent();
+                    else
+                        orgContent = storage.contentLoad(con, content.getPk(), CacheAdmin.getEnvironment(), null);
+                    FxDelta delta = FxDelta.processDelta(orgContent, content);
                     newVersion = delta.isDataChanged();
                 }
                 if (newVersion)
@@ -1338,35 +1345,33 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             final List<Long> nonFlatDestinationAssignments = new ArrayList<Long>(5);
 
             for (FxAssignment a : sourceTypeAssignments) {
-                if (a.isSystemInternal() || a instanceof FxGroupAssignment)
+                if (a.isSystemInternal() || !(a instanceof FxPropertyAssignment))
                     continue;
-
-                final String sourceXPath = XPathElement.stripType(a.getXPath());
+                FxPropertyAssignment pa = (FxPropertyAssignment)a;
+                final String sourceXPath = XPathElement.stripType(pa.getXPath());
                 // get the corresponding assignment from the destination type
                 final String destinationXPath = destinationType.getName() + sourceXPath;
                 if (destPaths.contains(sourceXPath) && CacheAdmin.getEnvironment().assignmentExists(destinationXPath)) {
                     // if the dest assignment exists, test that the datatype is the same as for the source
                     final FxAssignment destAssignment = CacheAdmin.getEnvironment().getAssignment(destinationXPath);
-                    if (a instanceof FxPropertyAssignment) {
-                        if (!(destAssignment instanceof FxPropertyAssignment))
-                            throw new FxContentTypeConversionException("ex.content.typeconversion.destneqprop", destAssignment.getId());
+                    if (!(destAssignment instanceof FxPropertyAssignment))
+                        throw new FxContentTypeConversionException("ex.content.typeconversion.destneqprop", destAssignment.getId());
 
-                        final FxDataType sourceDT = ((FxPropertyAssignment) a).getProperty().getDataType();
-                        final FxDataType destDT = ((FxPropertyAssignment) destAssignment).getProperty().getDataType();
-                        if (sourceDT != destDT)
-                            throw new FxContentTypeConversionException("ex.content.typeconversion.destDTneqsourceDT", destinationXPath);
-                    }
+                    final FxDataType sourceDT = pa.getProperty().getDataType();
+                    final FxDataType destDT = ((FxPropertyAssignment) destAssignment).getProperty().getDataType();
+                    if (sourceDT != destDT)
+                        throw new FxContentTypeConversionException("ex.content.typeconversion.destDTneqsourceDT", destinationXPath);
                     if (((FxPropertyAssignment) destAssignment).isFlatStorageEntry()) {
                         flatStoreAssignments.add(destAssignment.getId());
                     } else {
                         nonFlatDestinationAssignments.add(destAssignment.getId());
                     }
-                    if (!((FxPropertyAssignment) a).isFlatStorageEntry()) {
-                        nonFlatSourceAssignments.add(a.getId());
+                    if (!pa.isFlatStorageEntry()) {
+                        nonFlatSourceAssignments.add(pa.getId());
                     }
-                    assignmentMap.put(a.getId(), destAssignment.getId());
+                    assignmentMap.put(pa.getId(), destAssignment.getId());
                 } else {
-                    assignmentMap.put(a.getId(), null);
+                    assignmentMap.put(pa.getId(), null);
                 }
             }
 

@@ -2086,7 +2086,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         final FxType type = env.getType(content.getTypeId());
         final UserTicket ticket = FxContext.getUserTicket();
         try {
-            original = contentLoad(con, content.getPk(), env, sql);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+            if (cachedContent != null)
+                original = cachedContent.getContent().copy();
+            else
+                original = contentLoad(con, content.getPk(), env, sql);
             original.getRootGroup().removeEmptyEntries();
             original.getRootGroup().compactPositions(true);
 
