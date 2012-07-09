@@ -43,7 +43,7 @@ import org.apache.commons.lang.StringUtils;
  * @since 3.1
  */
 public enum CmisVirtualProperty {
-    Id("ObjectId", "@pk"),
+    Id("ObjectId", "@pk_standalone"),
 
     Uri("Uri", null),
 

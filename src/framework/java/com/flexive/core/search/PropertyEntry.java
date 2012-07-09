@@ -101,6 +101,14 @@ public class PropertyEntry {
         PK("@pk"),
 
         /**
+         * "Standalone" PK selector that can be used outside FxSQL. @pk is optimized for FxSQL
+         * since FxSQL always provides the content ID and version in the result set.
+         *
+         * @since 3.1.7
+         */
+        PK_STANDALONE("@pk_standalone"),
+
+        /**
          * A tree node path (@path) column.
          */
         PATH("@path"),
@@ -165,6 +173,8 @@ public class PropertyEntry {
             switch (this) {
                 case PK:
                     return new PkEntry();
+                case PK_STANDALONE:
+                    return new PkStandaloneEntry();
                 case NODE_POSITION:
                     return new NodePositionEntry();
                 case PATH:
@@ -206,6 +216,29 @@ public class PropertyEntry {
         private PkEntry() {
             super(Type.PK,
                     PropertyResolver.Table.T_CONTENT,
+                    new String[0],   // id/version are always available from the search filter
+                    null, false, null);
+        }
+
+        @Override
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
+            try {
+                final long id = rs.getLong(DataSelector.COL_ID);
+                final int ver = rs.getInt(DataSelector.COL_VER);
+                return new FxPK(id, ver);
+            } catch (SQLException e) {
+                throw new FxSqlSearchException(LOG, e);
+            }
+        }
+    }
+
+    /**
+     * "Standalone" PK selector that does not rely on the FxSQL data selector.
+     */
+    private static class PkStandaloneEntry extends PropertyEntry {
+        private PkStandaloneEntry() {
+            super(Type.PK,
+                    PropertyResolver.Table.T_CONTENT,
                     new String[]{"ID", "VER"},
                     null, false, null);
         }
@@ -221,6 +254,7 @@ public class PropertyEntry {
             }
         }
     }
+
 
     /**
      * The tree path resolver (@path)
@@ -283,7 +317,7 @@ public class PropertyEntry {
     }
 
     private static class PermissionsEntry extends PropertyEntry {
-        private static final String[] READ_COLUMNS = new String[] { "acl", "created_by", "step", "tdef", "mandator" };
+        private static final String[] READ_COLUMNS = new String[] { "acl", "step", "mandator" };
         
         // cache permission sets of the result
         private final Map<RowKey, PermissionSet> rowPermissions; 
@@ -298,7 +332,7 @@ public class PropertyEntry {
         public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
             try {
                 final long aclId = rs.getLong(positionInResultSet + getIndex("acl"));
-                final long createdBy = rs.getLong(positionInResultSet + getIndex("created_by"));
+                final long createdBy = rs.getLong(DataSelector.COL_CREATED_BY);
                 final long stepId = rs.getLong(positionInResultSet + getIndex("step"));
                 final long mandatorId = rs.getLong(positionInResultSet + getIndex("mandator"));
                 

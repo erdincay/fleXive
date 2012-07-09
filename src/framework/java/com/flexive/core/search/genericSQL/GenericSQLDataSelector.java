@@ -250,8 +250,9 @@ public class GenericSQLDataSelector extends DataSelector {
 
         if (orderByNumbers.size() == 0) {
             // No order by specified = order by id and version
-            orderByNumbers.put(1, "2 asc");
-            orderByNumbers.put(2, "3 asc");
+            int idCol = supportsCounterAfterOrderBy() ? 2 : 1;
+            orderByNumbers.put(1, idCol + " asc");
+            orderByNumbers.put(2, (idCol + 1) + " asc");
         }
         sql.append("ORDER BY ");
         // insert order by columns in the order they were defined in the FxSQL query
