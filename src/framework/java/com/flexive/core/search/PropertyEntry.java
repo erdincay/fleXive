@@ -42,6 +42,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLFunction;
+import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.sqlParser.Property;
@@ -283,10 +284,14 @@ public class PropertyEntry {
 
     private static class PermissionsEntry extends PropertyEntry {
         private static final String[] READ_COLUMNS = new String[] { "acl", "created_by", "step", "tdef", "mandator" };
+        
+        // cache permission sets of the result
+        private final Map<RowKey, PermissionSet> rowPermissions; 
 
         private PermissionsEntry() {
             super(Type.PERMISSIONS, PropertyResolver.Table.T_CONTENT, READ_COLUMNS,
                     null, false, null);
+            rowPermissions = Maps.newHashMap();
         }
 
         @Override
@@ -296,10 +301,16 @@ public class PropertyEntry {
                 final long createdBy = rs.getLong(positionInResultSet + getIndex("created_by"));
                 final long stepId = rs.getLong(positionInResultSet + getIndex("step"));
                 final long mandatorId = rs.getLong(positionInResultSet + getIndex("mandator"));
-                // TODO: cache/reuse permission sets - the permission check is relatively expensive
-                // and big results have usually only a few acl/user/step/mandator combinations anyway
-                return FxPermissionUtils.getPermissions(aclId, getEnvironment().getType(typeId),
-                        getEnvironment().getStep(stepId).getAclId(), createdBy, mandatorId);
+                
+                final RowKey key = new RowKey(aclId, createdBy, stepId, mandatorId);
+                if (!rowPermissions.containsKey(key)) {
+                    final PermissionSet permissions = FxPermissionUtils.getPermissions(
+                            aclId, getEnvironment().getType(typeId), environment.getStep(stepId).getAclId(), createdBy, mandatorId
+                    );
+                    rowPermissions.put(key, permissions);
+                }
+                
+                return rowPermissions.get(key);
             } catch (SQLException e) {
                 throw new FxSqlSearchException(e);
             } catch (FxNoAccessException e) {
@@ -311,6 +322,54 @@ public class PropertyEntry {
 
         private int getIndex(String name) {
             return ArrayUtils.indexOf(READ_COLUMNS, name);
+        }
+
+        /**
+         * Key of a cached permission entry.
+         */
+        private static class RowKey {
+            private final long aclId, createdBy, stepId, mandatorId;
+
+            public RowKey(long aclId, long createdBy, long stepId, long mandatorId) {
+                this.aclId = aclId;
+                this.createdBy = createdBy;
+                this.stepId = stepId;
+                this.mandatorId = mandatorId;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == null) {
+                    return false;
+                }
+                if (getClass() != obj.getClass()) {
+                    return false;
+                }
+                final RowKey other = (RowKey) obj;
+                if (this.aclId != other.aclId) {
+                    return false;
+                }
+                if (this.createdBy != other.createdBy) {
+                    return false;
+                }
+                if (this.stepId != other.stepId) {
+                    return false;
+                }
+                if (this.mandatorId != other.mandatorId) {
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int hash = 3;
+                hash = 13 * hash + (int) (this.aclId ^ (this.aclId >>> 32));
+                hash = 13 * hash + (int) (this.createdBy ^ (this.createdBy >>> 32));
+                hash = 13 * hash + (int) (this.stepId ^ (this.stepId >>> 32));
+                hash = 13 * hash + (int) (this.mandatorId ^ (this.mandatorId >>> 32));
+                return hash;
+            }
         }
     }
 
@@ -395,8 +454,8 @@ public class PropertyEntry {
     protected final List<FxSQLFunction> functions = new ArrayList<FxSQLFunction>();
     protected int positionInResultSet = -1;
     protected FxDataType overrideDataType;
-    private FxEnvironment environment;
-    private boolean processXPath = true;
+    protected FxEnvironment environment;
+    protected boolean processXPath = true;
 
     /**
      * Create a new instance based on the given (search) property.
