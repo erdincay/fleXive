@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Extension of {@link GenericConfigurationImpl} configurations with an arbitrary domain field
@@ -196,8 +197,8 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
 
     @Override
     protected String getCachePath(String path) {
-        if (enableCaching) {
-            return "/" + configurationName + "Config/" + getInvokeDomain();
+        if (enableCaching && StringUtils.isNotBlank(path)) {
+            return "/" + configurationName + "Config/" + getInvokeDomain() + (path.startsWith("/") ? path : "/" + path);
         } else {
             return null;
         }

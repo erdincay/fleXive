@@ -22,11 +22,11 @@
       <!-- configurations for various regions--> 
         <region name="/Division1/FxContent">
             <property name="maxNodes" value="1000" />
-            <property name="timeToLive" value="1000" />
+            <property name="timeToLive" value="1000000" />  <!-- in milliseconds -->
         </region>
         <region name="/Division1/userConfig">
             <property name="maxNodes" value="10000" />
-            <property name="timeToLive" value="1000" />
+            <property name="timeToLive" value="1000000" />  <!-- in milliseconds -->
         </region>
     </eviction>
 </jbosscache>
