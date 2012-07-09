@@ -337,7 +337,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                     LOG.debug("creating new content for type " + CacheAdmin.getEnvironment().getType(content.getTypeId()).getName());
             } else {
                 boolean newVersion = false;
-                if (type.isAutoVersion()) {
+                if (type.isAutoVersion() && !FxContext.preventAutoVersioning()) {
                     content.getRootGroup().removeEmptyEntries();
                     content.compact();
                     FxCachedContent cachedContent = CacheAdmin.getCachedContent(content.getPk());

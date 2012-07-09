@@ -79,6 +79,11 @@ public class FxContext implements Serializable {
      */
     public static final String SESSION_DIVISIONID = "$flexive_division_id$";
 
+    /**
+     * Prevent auto versioning attribute
+     */
+    private final static String PREVENT_AUTOVERSIONING = "$flexive_prevAutoVers$";
+
     private static final Log LOG = LogFactory.getLog(FxContext.class);
     private static final ThreadLocal<FxContext> info = new ThreadLocal<FxContext>();
     private static boolean MANUAL_INIT_CALLED = false;
@@ -1207,5 +1212,23 @@ public class FxContext implements Serializable {
         DateFormat format = new SimpleDateFormat(currentUserKey, locale);
         map.put(currentUserKey, format);
         return format;
+    }
+
+    /**
+     * Should auto versioning be prevented for this context?
+     *
+     * @return prevent auto versioning
+     */
+    public static boolean preventAutoVersioning() {
+        return Boolean.TRUE.equals(get().getAttribute(PREVENT_AUTOVERSIONING));
+    }
+
+    /**
+     * Set auto versioning prevention flag
+     *
+     * @param flag auto versioning prevention flag
+     */
+    public static void setPreventAutoVersioning(boolean flag) {
+        get().setAttribute(PREVENT_AUTOVERSIONING, flag ? Boolean.TRUE : null);
     }
 }
