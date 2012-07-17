@@ -215,15 +215,16 @@ public class MessageBean extends HashMap {
             initialize();
         }
         final FxSharedUtils.MessageKey messageKey = new FxSharedUtils.MessageKey(locale, key);
-        if (cachedMessages.containsKey(messageKey)) {
-            return cachedMessages.get(messageKey);
+        String cachedMessage = cachedMessages.get(messageKey);
+        if (cachedMessage != null) {
+            return cachedMessage;
         }
         for (FxSharedUtils.BundleReference bundleReference : resourceBundles) {
             try {
                 final ResourceBundle bundle = getResources(bundleReference, locale);
-                final String message = bundle.getString(key);
-                cachedMessages.putIfAbsent(messageKey, message);
-                return message;
+                String message = bundle.getString(key);
+                cachedMessage = cachedMessages.putIfAbsent(messageKey, message);
+                return cachedMessage != null ? cachedMessage : message;
             } catch (MissingResourceException e) {
                 // continue with next bundle
             }
@@ -234,9 +235,9 @@ public class MessageBean extends HashMap {
             for (FxSharedUtils.BundleReference bundleReference : resourceBundles) {
                 try {
                     final ResourceBundle bundle = getResources(bundleReference, Locale.ENGLISH);
-                    final String message = bundle.getString(key);
-                    cachedMessages.putIfAbsent(messageKey, message);
-                    return message;
+                    String message = bundle.getString(key);
+                    cachedMessage = cachedMessages.putIfAbsent(messageKey, message);
+                    return cachedMessage != null ? cachedMessage : message;
                 } catch (MissingResourceException e) {
                     // continue with next bundle
                 }
@@ -256,10 +257,14 @@ public class MessageBean extends HashMap {
      */
     private ResourceBundle getResources(FxSharedUtils.BundleReference bundleReference, Locale locale) {
         final String key = bundleReference.getCacheKey(locale);
-        if (cachedBundles.get(key) == null) {
-            cachedBundles.putIfAbsent(key, bundleReference.getBundle(locale));
+        ResourceBundle bundle = cachedBundles.get(key);
+        if (bundle == null) {
+            final ResourceBundle cachedBundle = cachedBundles.putIfAbsent(key, bundle = bundleReference.getBundle(locale));
+            if (cachedBundle != null) {
+                return cachedBundle;
+            }
         }
-        return cachedBundles.get(key);
+        return bundle;
     }
 
 

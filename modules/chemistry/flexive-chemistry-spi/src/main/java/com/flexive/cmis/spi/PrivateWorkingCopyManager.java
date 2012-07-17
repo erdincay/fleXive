@@ -404,9 +404,13 @@ public class PrivateWorkingCopyManager {
 
     private Object getDivisionLock() {
         final Integer divisionId = FxContext.get().getDivisionId();
-        if (!UPDATE_LOCKS.containsKey(divisionId)) {
-            UPDATE_LOCKS.putIfAbsent(divisionId, new Object());
+        Object lock = UPDATE_LOCKS.get(divisionId);
+        if (lock == null) {
+            Object cachedLock = UPDATE_LOCKS.putIfAbsent(divisionId, lock = new Object());
+            if (cachedLock != null) {
+                lock = cachedLock;
+            }
         }
-        return UPDATE_LOCKS.get(divisionId);
+        return lock;
     }
 }

@@ -165,10 +165,14 @@ public class PluginRegistryBean implements Serializable {
                         pluginExecutorTypes.get(extensionPoint).getCanonicalName(),
                         callback.getClass().getCanonicalName()).asRuntimeException();
             }
-            if (!plugins.containsKey(extensionPoint)) {
-                plugins.put(extensionPoint, new ArrayList<Plugin>());
+            List<Plugin> list = plugins.get(extensionPoint);
+            if (list == null) {
+                List<Plugin> cachedList = plugins.putIfAbsent(extensionPoint, list = new ArrayList<Plugin>());
+                if (cachedList != null) {
+                    list = cachedList;
+                }
             }
-            plugins.get(extensionPoint).add(callback);
+            list.add(callback);
         }
     }
 

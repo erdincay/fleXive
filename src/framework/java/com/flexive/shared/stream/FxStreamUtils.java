@@ -72,16 +72,15 @@ public class FxStreamUtils {
     /**
      * List of local servers
      */
-    private static final List<ServerLocation> localServerLocations = new CopyOnWriteArrayList<ServerLocation>();
+    private static final CopyOnWriteArrayList<ServerLocation> localServerLocations = new CopyOnWriteArrayList<ServerLocation>();
 
     /**
      * Add a local server
      *
      * @param serverLocation local server location
      */
-    public static synchronized void addLocalServer(ServerLocation serverLocation) {
-        if (!localServerLocations.contains(serverLocation))
-            localServerLocations.add(serverLocation);
+    public static void addLocalServer(ServerLocation serverLocation) {
+        localServerLocations.addIfAbsent(serverLocation);
     }
 
     /**

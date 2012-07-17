@@ -37,8 +37,8 @@ import com.flexive.shared.FxSharedUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -95,22 +95,26 @@ public class RssProviderBean implements Serializable {
     }
 
     // cached feeds
-    private final Map<String, List<RssEntry>> feeds = new ConcurrentHashMap<String, List<RssEntry>>();
+    private final ConcurrentHashMap<String, List<RssEntry>> feeds = new ConcurrentHashMap<String, List<RssEntry>>();
     // Map function that returns RssEntries for String URLs
     private final Map<String, List<RssEntry>> feedMapper =
             FxSharedUtils.getMappedFunction(
                     new FxSharedUtils.ParameterMapper<String, List<RssEntry>>() {
                         private static final long serialVersionUID = -3824115213705113244L;
 
-                        public synchronized List<RssEntry> get(Object key) {
+                        public List<RssEntry> get(Object key) {
                             if (key == null) {
                                 return null;
                             }
                             final String url = key.toString();
-                            if (!feeds.containsKey(url)) {
-                                feeds.put(url, fetchFeed(url, MAX_ITEMS));
+                            List<RssEntry> list = feeds.get(url);
+                            if (list == null) {
+                                List<RssEntry> cachedList = feeds.putIfAbsent(url, list = fetchFeed(url, MAX_ITEMS));
+                                if (cachedList != null) {
+                                    list = cachedList;
+                                }
                             }
-                            return feeds.get(url);
+                            return list;
                         }
                     });
     private final Map<String, Boolean> feedAvailableMapper =

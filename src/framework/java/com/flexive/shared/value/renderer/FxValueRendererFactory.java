@@ -39,8 +39,12 @@ import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
 import org.apache.commons.lang.StringUtils;
 
-import java.text.*;
-import java.util.*;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -348,10 +352,14 @@ public class FxValueRendererFactory {
             // default renderer always exists
             return renderers.get(DEFAULT);
         }
-        if (!renderers.containsKey(language)) {
-            renderers.putIfAbsent(language, new FxValueRendererImpl(language));
+        FxValueRendererImpl renderer = renderers.get(language);
+        if (renderer == null) {
+            FxValueRendererImpl cachedRenderer = renderers.putIfAbsent(language, renderer = new FxValueRendererImpl(language));
+            if (cachedRenderer != null) {
+                return cachedRenderer;
+            }
         }
-        return renderers.get(language);
+        return renderer;
     }
 
     /**

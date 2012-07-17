@@ -31,13 +31,17 @@
  ***************************************************************/
 package com.flexive.shared.structure.export;
 
-import com.flexive.shared.structure.*;
 import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.structure.export.StructureExporterTools.*;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxGroupAssignment;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxType;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import static com.flexive.shared.structure.export.StructureExporterTools.*;
 
 /**
  * Walks through a type's properties and groups (and its dependent types and groups) and pushes the results
@@ -377,8 +381,7 @@ public class GenericStructureExporter {
      */
     private void populateTypesChecked() {
         for (Long key : dependencies.keySet()) {
-            if (!typesChecked.containsKey(key)) // only add the new ones
-                typesChecked.put(key, false);
+            typesChecked.putIfAbsent(key, false); // only add the new ones
         }
     }
 

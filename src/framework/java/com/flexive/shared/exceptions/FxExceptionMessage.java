@@ -31,8 +31,10 @@
  ***************************************************************/
 package com.flexive.shared.exceptions;
 
-import com.flexive.shared.*;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -108,15 +110,16 @@ public class FxExceptionMessage implements Serializable {
             initialize();
         }
         final FxSharedUtils.MessageKey messageKey = new FxSharedUtils.MessageKey(locale, key);
-        if (cachedMessages.containsKey(messageKey)) {
-            return cachedMessages.get(messageKey);
+        String cachedMessage = cachedMessages.get(messageKey);
+        if (cachedMessage != null) {
+            return cachedMessage;
         }
         for (FxSharedUtils.BundleReference bundleReference : resourceBundles) {
             try {
                 final ResourceBundle bundle = getResources(bundleReference, locale);
                 final String message = bundle.getString(key);
-                cachedMessages.putIfAbsent(messageKey, message);
-                return message;
+                cachedMessage = cachedMessages.putIfAbsent(messageKey, message);
+                return cachedMessage != null ? cachedMessage : message;
             } catch (MissingResourceException e) {
                 // continue with next bundle
             }
@@ -128,8 +131,8 @@ public class FxExceptionMessage implements Serializable {
                 try {
                     final ResourceBundle bundle = getResources(bundleReference, Locale.ENGLISH);
                     final String message = bundle.getString(key);
-                    cachedMessages.putIfAbsent(messageKey, message);
-                    return message;
+                    cachedMessage = cachedMessages.putIfAbsent(messageKey, message);
+                    return cachedMessage != null ? cachedMessage : message;
                 } catch (MissingResourceException e) {
                     // continue with next bundle
                 }
@@ -148,10 +151,14 @@ public class FxExceptionMessage implements Serializable {
      */
     private ResourceBundle getResources(FxSharedUtils.BundleReference bundleReference, Locale locale) {
         final String key = bundleReference.getCacheKey(locale);
-        if (cachedBundles.get(key) == null) {
-            cachedBundles.putIfAbsent(key, bundleReference.getBundle(locale));
+        ResourceBundle bundle = cachedBundles.get(key);
+        if (bundle == null) {
+            ResourceBundle cachedBundle = cachedBundles.putIfAbsent(key, bundle = bundleReference.getBundle(locale));
+            if (cachedBundle != null) {
+                return cachedBundle;
+            }
         }
-        return cachedBundles.get(key);
+        return bundle;
     }
 
     /**

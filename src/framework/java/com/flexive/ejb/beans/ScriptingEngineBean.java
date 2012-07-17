@@ -32,9 +32,7 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import com.flexive.core.security.FxPrincipal;
 import com.flexive.core.security.UserTicketImpl;
-import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.StructureLoader;
@@ -62,17 +60,12 @@ import org.codehaus.groovy.control.CompilationFailedException;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
-import javax.security.auth.Subject;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.security.Principal;
 import java.sql.*;
-import java.text.ParseException;
 import java.util.*;
-import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -623,8 +616,12 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             } catch (Throwable t) {
                 throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), t.getMessage());
             }
-            if (si.isCached())
-                LocalScriptingCache.groovyScriptCache.putIfAbsent(scriptId, script);
+            if (si.isCached()) {
+            	Script cachedScript = LocalScriptingCache.groovyScriptCache.putIfAbsent(scriptId, script);
+                if (cachedScript != null) {
+                    script = cachedScript;
+                }
+            }
         }
 
         if (binding == null)
