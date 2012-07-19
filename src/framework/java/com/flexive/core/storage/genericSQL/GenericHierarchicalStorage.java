@@ -142,6 +142,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //        17        18         19           20          21
             "WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?";
 
+    protected static final String GROUP_DATA_INSERT = "INSERT INTO " + TBL_CONTENT_DATA +
+            // 1  2   3   4    5      6     7      8           9         10         11      12      13     14
+            " (ID,VER,POS,LANG,ASSIGN,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,XDEPTH,FSELECT) " +
+            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
     /**
      * update statements for content type conversion
      */
@@ -380,7 +385,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @return if batch updates should be used for changes in content data entries
      */
     protected boolean batchContentDataChanges() {
-        return true;
+        return true;    // note: 'false' is ignored for most operations (e.g. in content create) by this storage impl.
     }
 
     /**
@@ -551,16 +556,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         FxPK pk = createMainEntry(con, newId, version, content);
         FxType type = env.getType(content.getTypeId());
-        PreparedStatement ps;
+        PreparedStatement ps = null, psGroup = null;
         FulltextIndexer ft = getFulltextIndexer(pk, con);
         try {
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            psGroup = con.prepareStatement(GROUP_DATA_INSERT);
+            createDetailEntries(con, ps, psGroup, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
 
-            if (batchContentDataChanges())
-                ps.executeBatch();
+            ps.executeBatch();
+            psGroup.executeBatch();
+
             ft.commitChanges();
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
@@ -588,6 +595,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
+            Database.closeObjects(GenericHierarchicalStorage.class, ps, psGroup);
             ft.cleanup();
         }
         return pk;
@@ -692,7 +700,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
 
         FxPK pk;
-        PreparedStatement ps = null;
+        PreparedStatement ps = null, psGroup = null;
         FulltextIndexer ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
@@ -702,9 +710,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
-            if (batchContentDataChanges())
-                ps.executeBatch();
+            psGroup = con.prepareStatement(GROUP_DATA_INSERT);
+            createDetailEntries(con, ps, psGroup, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+
+            ps.executeBatch();
+            psGroup.executeBatch();
+
             if (type.isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
@@ -714,7 +725,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             ft.commitChanges();
 
-            ps.close();
             fixContentVersionStats(con, type, content.getPk().getId());
         } catch (FxApplicationException e) {
             if (e instanceof FxCreateException)
@@ -725,7 +735,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            Database.closeObjects(GenericHierarchicalStorage.class, null, ps);
+            Database.closeObjects(GenericHierarchicalStorage.class, ps, psGroup);
             if (ft != null)
                 ft.cleanup();
         }
@@ -976,6 +986,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      *
      * @param con         an open and valid connection
      * @param ps          batch prepared statement for detail inserts
+     * @param psGroup     batch prepared statement for group data inserts
      * @param ft          fulltext indexer
      * @param sql         an optional StringBuffer
      * @param pk          primary key of the content
@@ -986,10 +997,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    protected void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, StringBuilder sql,
+    protected void createDetailEntries(Connection con, PreparedStatement ps, PreparedStatement psGroup, FulltextIndexer ft, StringBuilder sql,
                                        FxPK pk, boolean maxVersion, boolean liveVersion, List<FxData> data)
             throws FxNotFoundException, FxDbException, FxCreateException {
-        createDetailEntries(con, ps, ft, sql, pk, maxVersion, liveVersion, data, false);
+        createDetailEntries(con, ps, psGroup, ft, sql, pk, maxVersion, liveVersion, data, false);
     }
 
     /**
@@ -1008,7 +1019,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    private void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, StringBuilder sql,
+    private void createDetailEntries(Connection con, PreparedStatement ps, PreparedStatement psGroup, FulltextIndexer ft, StringBuilder sql,
                                      FxPK pk, boolean maxVersion, boolean liveVersion, List<FxData> data,
                                      boolean disregardFlatStorageEntry) throws FxNotFoundException, FxDbException, FxCreateException {
         try {
@@ -1020,8 +1031,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     if (!prop.isSystemInternal())
                         insertPropertyData(prop, data, con, ps, ft, pk, pdata, maxVersion, liveVersion, disregardFlatStorageEntry);
                 } else {
-                    insertGroupData(con, sql, pk, ((FxGroupData) curr), maxVersion, liveVersion);
-                    createDetailEntries(con, ps, ft, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
+                    insertGroupData(pk, psGroup, ((FxGroupData) curr), maxVersion, liveVersion);
+                    createDetailEntries(con, ps, psGroup, ft, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
                 }
             }
         } catch (SQLException e) {
@@ -1480,53 +1491,34 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     /**
      * Insert group detail data into the database
      *
-     * @param con       an open and valid connection
-     * @param sql       an optional StringBuffer
      * @param pk        primary key of the content
+     * @param ps        a batched statement for creating group data
      * @param groupData the group
      * @param isMaxVer  is this content in the max. version?
      * @param isLiveVer is this content in the live version?
      * @throws SQLException on errors
      */
-    protected void insertGroupData(Connection con, StringBuilder sql, FxPK pk, FxGroupData groupData,
-                                   boolean isMaxVer, boolean isLiveVer) throws SQLException {
+    protected void insertGroupData(FxPK pk, PreparedStatement ps, FxGroupData groupData, boolean isMaxVer, boolean isLiveVer) throws SQLException {
         if (groupData == null || (groupData.isEmpty() && groupData.isRemoveable()))
             return;
-        PreparedStatement ps = null;
-        if (sql == null)
-            sql = new StringBuilder(500);
-        else
-            sql.setLength(0);
-        try {
-            sql.append("INSERT INTO ").append(TBL_CONTENT_DATA).
-                    //                1  2   3   4    5      6     7      8           9         10         11      12      13     14
-                            append(" (ID,VER,POS,LANG,ASSIGN,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,XDEPTH,FSELECT");
-            sql.append(")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-            ps = con.prepareStatement(sql.toString());
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, pk.getVersion());
-            ps.setInt(3, groupData.getPos());
-            ps.setInt(4, (int) FxLanguage.SYSTEM_ID);
-            ps.setLong(5, groupData.getAssignmentId());
-//            ps.setString(6, "dummyGrp"/*groupData.getXPath() + "/"*/);
-//            ps.setString(7, "dummyGrpFull"/*groupData.getXPathFull() + "/"*/);
-            final String xmult = StringUtils.join(ArrayUtils.toObject(groupData.getIndices()), ',');
-            ps.setString(6, xmult);
-            ps.setInt(7, groupData.getIndex());
-            ps.setString(8, getParentGroupXMult(xmult));
-            ps.setBoolean(9, isMaxVer);
-            ps.setBoolean(10, isLiveVer);
-//            ps.setString(13, "dummyGrpParent"/*groupData.getParent().getXPathFull()*/);
-            ps.setBoolean(11, true);
-            ps.setBoolean(12, false);
-            ps.setInt(13, groupData.getIndices().length);
-            ps.setLong(14, 0); //FSELECT
-            ps.executeUpdate();
-        } finally {
-            if (ps != null)
-                ps.close();
-        }
+        ps.setLong(1, pk.getId());
+        ps.setInt(2, pk.getVersion());
+        ps.setInt(3, groupData.getPos());
+        ps.setInt(4, (int) FxLanguage.SYSTEM_ID);
+        ps.setLong(5, groupData.getAssignmentId());
+        final String xmult = StringUtils.join(ArrayUtils.toObject(groupData.getIndices()), ',');
+        ps.setString(6, xmult);
+        ps.setInt(7, groupData.getIndex());
+        ps.setString(8, getParentGroupXMult(xmult));
+        ps.setBoolean(9, isMaxVer);
+        ps.setBoolean(10, isLiveVer);
+        ps.setBoolean(11, true);
+        ps.setBoolean(12, false);
+        ps.setInt(13, groupData.getIndices().length);
+        ps.setLong(14, 0); //FSELECT
+
+        ps.addBatch();
     }
 
     /**
@@ -2213,10 +2205,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             List<FxDelta.FxDeltaChange> updatesRemaining = new ArrayList<FxDelta.FxDeltaChange>(delta.getUpdates());
 
             PreparedStatement ps_insert = null;
+            PreparedStatement ps_insert_group = null;
             PreparedStatement ps_update = null;
 
             try {
                 ps_insert = con.prepareStatement(CONTENT_DATA_INSERT);
+                ps_insert_group = con.prepareStatement(GROUP_DATA_INSERT);
                 ps_update = con.prepareStatement(CONTENT_DATA_UPDATE);
 
                 while (updatesRemaining.size() > 0) {
@@ -2270,7 +2264,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     }
                     if (!change.getNewData().isSystemInternal()) {
                         if (change.isGroup())
-                            insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
+                            insertGroupData(pk, ps_insert_group, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
                         else {
                             final FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
                             insertPropertyData(prop,
@@ -2284,13 +2278,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         }
                     }
                 }
-                if (batchContentDataChanges()) {
-                    ps_update.executeBatch();
-                    ps_insert.executeBatch();
-                }
+
+                ps_update.executeBatch();
+                ps_insert.executeBatch();
+                ps_insert_group.executeBatch();
             } finally {
-                if (ps_update != null) ps_update.close();
-                if (ps_insert != null) ps_insert.close();
+                Database.closeObjects(GenericHierarchicalStorage.class, ps_update, ps_insert, ps_insert_group);
             }
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
@@ -3306,7 +3299,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                    Map<Long, String> destPathsMap, Map<Long, String> sourceRemoveMap, FxEnvironment env)
             throws SQLException, FxApplicationException {
 
-        PreparedStatement ps = null;
+        PreparedStatement ps = null, ps_group = null;
         final long pkId = pk.getId();
         final Integer[] versions;
         // check if all versions should be converted or the current one only
@@ -3404,8 +3397,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     // use case 2: flat --> hierarchical
                     if (!nonFlatSourceAssignments.contains(sourceId) && nonFlatDestinationAssignments.contains(destinationId)) {
                         ps = con.prepareStatement(CONTENT_DATA_INSERT);
+                        ps_group = con.prepareStatement(GROUP_DATA_INSERT);
+
                         // data for the current xpath
-                        createDetailEntries(con, ps, null, new StringBuilder(2000), content.getPk(), content.isMaxVersion(), content.isLiveVersion(), data, true);
+                        createDetailEntries(con, ps, ps_group, null, new StringBuilder(2000), content.getPk(), content.isMaxVersion(), content.isLiveVersion(), data, true);
                         ps.executeBatch();
                         ps.close();
 
