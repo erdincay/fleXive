@@ -330,7 +330,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
             //scripting before end
             if (content.getPk().isNew() || content.isForcePkOnCreate()) {
-                final Long contentId = content.getValue(FxLargeNumber.class, "/id").getBestTranslation();
+                final Long contentId = content.getValue(FxLargeNumber.class, "/ID").getBestTranslation();
                 pk = storage.contentCreate(con, env, null, content.isForcePkOnCreate() && contentId != -1
                         ? contentId : seq.getId(FxSystemSequencer.CONTENT), content);
                 if (LOG.isDebugEnabled())

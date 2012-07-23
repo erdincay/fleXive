@@ -540,8 +540,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.getRootGroup().compactPositions(true);
         content.checkValidity();
 
-        final Integer contentVersionValue = content.getValue(FxNumber.class, "/version").getBestTranslation();
-        final Long contentIdValue = content.getValue(FxLargeNumber.class, "/id").getBestTranslation();
+        final Integer contentVersionValue = content.getValue(FxNumber.class, "/VERSION").getBestTranslation();
+        final Long contentIdValue = content.getValue(FxLargeNumber.class, "/ID").getBestTranslation();
         final int version = content.isForcePkOnCreate() && contentVersionValue != -1 ? contentVersionValue : 1;
 
         if (content.isForcePkOnCreate() && contentIdValue != -1) {

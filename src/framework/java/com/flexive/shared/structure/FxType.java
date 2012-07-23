@@ -1382,7 +1382,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @return XPath prefix like "FxType name[@pk=..]"
      */
     public String buildXPathPrefix(FxPK pk) {
-        return this.getName().toUpperCase() + "[@pk=" + pk + "]";
+        return XPathElement.xpToUpperCase(this.getName()) + "[@PK=" + pk + "]";
     }
 
     /**
