@@ -106,6 +106,7 @@ public class GenericSQLDataFilter extends DataFilter {
     private int foundEntryCount;
     private boolean truncated;
     private Connection con;
+    private String dataSelectSql;
 
     public GenericSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         super(con, search);
@@ -229,16 +230,23 @@ public class GenericSQLDataFilter extends DataFilter {
                         ? "WHERE " + securityFilter + search.getStorage().getLimit(true, maxRows)
                         : search.getStorage().getLimit(false, maxRows));
             }
-            // Find all matching data entities and store them
-            sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Filter SQL: " + sql);
+            this.dataSelectSql = dataSelect;
+
+            if (!search.getParams().isHintNoResultInfo() || !isDirectSelectSupported()) {
+                // Find all matching data entities and store them
+                sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Filter SQL: " + sql);
+                }
+                stmt = getConnection().createStatement();
+                if (isQueryTimeoutSupported())
+                    stmt.setQueryTimeout(search.getParams().getQueryTimeout());
+                stmt.executeUpdate(sql);
+
+                if (!search.getParams().isHintNoResultInfo()) {
+                    analyzeResult();
+                }
             }
-            stmt = getConnection().createStatement();
-            if (isQueryTimeoutSupported())
-                stmt.setQueryTimeout(search.getParams().getQueryTimeout());
-            stmt.executeUpdate(sql);
-            analyzeResult();
         } catch (SQLException exc) {
             LOG.error("Failed to execute (" + exc.getMessage() + "): " + sql);
             throw exc;
@@ -1209,6 +1217,22 @@ public class GenericSQLDataFilter extends DataFilter {
     @Override
     public void setVariable(Statement stmt, String variable, String value) throws SQLException {
         stmt.executeUpdate("SET @" + variable + "=" + value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDataSelectSql() {
+        return dataSelectSql;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isDirectSelectSupported() {
+        return true;
     }
 
     /**

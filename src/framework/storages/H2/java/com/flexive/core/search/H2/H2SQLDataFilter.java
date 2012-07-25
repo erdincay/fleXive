@@ -71,4 +71,12 @@ public class H2SQLDataFilter extends GenericSQLDataFilter {
     protected String fulltextMatch(String column, String expr) {
         return " UPPER(" + column + ") LIKE '%" + expr.replaceAll("'", "" ).toUpperCase() + "%'";
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isDirectSelectSupported() {
+        return false;   // H2 chokes on the complex nested select statements
+    }
 }

@@ -273,8 +273,14 @@ public class SqlSearch {
                 }
             }
 
+            if (params.isHintNoResultInfo() && df.isDirectSelectSupported()) {
+                // take the filter SQL and select directly
+                cacheTbl = "(" + df.getDataSelectSql() + ")";
+            }
+
             // Select all desired rows for the resultset
             selectSql = ds.build(con);
+
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Select SQL: " + selectSql);
             }
@@ -292,7 +298,7 @@ public class SqlSearch {
                     getTypeFilter() != null ? getTypeFilter().getId() : -1,
                     createdBriefcaseId);
             fx_result.setUserWildcardIndex(indexOfUserPropsWildcard != -1 ? indexOfUserPropsWildcard + 1 : -1);
-            fx_result.setTotalRowCount(df.getFoundEntries());
+            fx_result.setTotalRowCount(params.isHintNoResultInfo() ? -1 : df.getFoundEntries());
             fx_result.setTruncated(df.isTruncated());
 
             final long fetchStart = java.lang.System.currentTimeMillis();

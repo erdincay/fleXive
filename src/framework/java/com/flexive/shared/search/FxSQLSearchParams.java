@@ -157,6 +157,7 @@ public class FxSQLSearchParams implements Serializable {
     private CacheMode cacheMode = CacheMode.OFF;
     private List<Long> hintTypes = null;
     private boolean hintIgnoreXPath = false;
+    private boolean hintNoResultInfo = false;
 
     /**
      * Constructor.
@@ -177,6 +178,7 @@ public class FxSQLSearchParams implements Serializable {
         this.resultLanguages = other.resultLanguages == null ? null : Lists.newArrayList(other.resultLanguages);
         this.cacheMode = other.cacheMode;
         this.hintTypes = other.hintTypes == null ? null : Lists.newArrayList(other.hintTypes);
+        this.hintNoResultInfo = other.hintNoResultInfo;
     }
 
     /**
@@ -343,5 +345,24 @@ public class FxSQLSearchParams implements Serializable {
         this.hintIgnoreXPath = hintIgnoreXPath;
     }
 
+    /**
+     * @return  when true, indicates that the caller does not need 'global' information about the result set
+     * such as the total row count or the found content types
+     * @since 3.1.7
+     */
+    public boolean isHintNoResultInfo() {
+        return hintNoResultInfo;
+    }
 
+    /**
+     * Disable the retrieval of result information such as the total row count or the found content types.
+     * This allows the query engine to perform the entire query in one pass instead of populating a
+     * temporary table first.
+     *
+     * @param hintNoResultInfo    when true, no result information will be available in the {@link FxResultSet}
+     * @since 3.1.7
+     */
+    public void setHintNoResultInfo(boolean hintNoResultInfo) {
+        this.hintNoResultInfo = hintNoResultInfo;
+    }
 }

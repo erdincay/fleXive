@@ -139,17 +139,38 @@ public class SearchEngineTest {
 
     @Test
     public void simpleSelectTest() throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select("caption", "comment").enterSub(QueryOperatorNode.Operator.AND)
+        final SqlQueryBuilder sqb = new SqlQueryBuilder().select("caption", "comment").enterSub(QueryOperatorNode.Operator.AND)
                 .condition("caption", PropertyValueComparator.LIKE, "test caption%")
                 .condition("comment", PropertyValueComparator.LIKE, "folder comment%")
-                .closeSub().getResult();
-        assertTrue(result.getRowCount() == 25, "Expected to fetch 25 rows, got: " + result.getRowCount());
-        assertTrue(result.getColumnIndex("caption") == 1, "Unexpected column index for caption: " + result.getColumnIndex("caption"));
-        assertTrue(result.getColumnIndex("comment") == 2, "Unexpected column index for comment: " + result.getColumnIndex("comment"));
-        for (int i = 1; i <= result.getRowCount(); i++) {
-            assertTrue(result.getString(i, 1).startsWith("test caption"), "Unexpected column value: " + result.getString(i, 1));
-            assertTrue(result.getString(i, 2).startsWith("folder comment"), "Unexpected column value: " + result.getString(i, 2));
+                .closeSub();
+        for (boolean noResultInfo : new boolean[] { false, true }) {
+            // test basic query both with and without result info
+            sqb.getParams().setHintNoResultInfo(noResultInfo);
+            final FxResultSet result = sqb.getResult();
+            if (noResultInfo) {
+                assertEquals(result.getTotalRowCount(), -1, "Total row count should be -1");
+                assertTrue(result.getContentTypes().isEmpty(), "No content types should be returned");
+            }
+            assertTrue(result.getRowCount() == 25, "Expected to fetch 25 rows, got: " + result.getRowCount());
+            assertTrue(result.getColumnIndex("caption") == 1, "Unexpected column index for caption: " + result.getColumnIndex("caption"));
+            assertTrue(result.getColumnIndex("comment") == 2, "Unexpected column index for comment: " + result.getColumnIndex("comment"));
+            for (int i = 1; i <= result.getRowCount(); i++) {
+                assertTrue(result.getString(i, 1).startsWith("test caption"), "Unexpected column value: " + result.getString(i, 1));
+                assertTrue(result.getString(i, 2).startsWith("folder comment"), "Unexpected column value: " + result.getString(i, 2));
+            }
         }
+    }
+
+    @Test
+    public void noResultInfoTest() throws FxApplicationException {
+        // do some queries with 'no result info' enabled
+        final SqlQueryBuilder sqb = new SqlQueryBuilder();
+        sqb.select("@pk");
+        sqb.getParams().setHintNoResultInfo(true);
+
+        final FxResultSet result = sqb.getResult();
+        assertTrue(result.getRowCount() > 0);
+        assertEquals(result.getTotalRowCount(), -1);
     }
 
     @Test
