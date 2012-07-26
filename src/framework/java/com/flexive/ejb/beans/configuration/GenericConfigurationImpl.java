@@ -43,8 +43,11 @@ import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
+import com.google.common.primitives.Primitives;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.CloneFailedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -658,6 +661,23 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @throws FxCacheException if a cache exception occurred
      */
     protected Serializable getCache(String path, String key) throws FxCacheException {
-        return (Serializable) SerializationUtils.clone((Serializable) CacheAdmin.getInstance().get(path, key));
+        final Serializable value = (Serializable) CacheAdmin.getInstance().get(path, key);
+        if (value == null || value instanceof String || Primitives.isWrapperType(value.getClass())) {
+            // immutable value type
+            return value;
+        }
+        if (value instanceof Cloneable) {
+            // use clone if possible
+            try {
+                final Object clone = ObjectUtils.clone(value);
+                if (clone != null && clone instanceof Serializable) {
+                    return (Serializable) clone;
+                }
+            } catch (CloneFailedException e) {
+                LOG.warn("Failed to clone cached configuration value " + path + "/" + key, e);
+            }
+        }
+        // use generic clone via serialization
+        return (Serializable) SerializationUtils.clone(value);
     }
 }
