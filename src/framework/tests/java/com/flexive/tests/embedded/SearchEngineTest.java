@@ -148,7 +148,7 @@ public class SearchEngineTest {
             sqb.getParams().setHintNoResultInfo(noResultInfo);
             final FxResultSet result = sqb.getResult();
             if (noResultInfo) {
-                assertEquals(result.getTotalRowCount(), -1, "Total row count should be -1");
+                assertEquals(result.getTotalRowCount(), result.getRowCount(), "Total row count should be equal to result set size");
                 assertTrue(result.getContentTypes().isEmpty(), "No content types should be returned");
             }
             assertTrue(result.getRowCount() == 25, "Expected to fetch 25 rows, got: " + result.getRowCount());
@@ -170,7 +170,7 @@ public class SearchEngineTest {
 
         final FxResultSet result = sqb.getResult();
         assertTrue(result.getRowCount() > 0);
-        assertEquals(result.getTotalRowCount(), -1);
+        assertEquals(result.getTotalRowCount(), result.getRowCount());
     }
 
     @Test

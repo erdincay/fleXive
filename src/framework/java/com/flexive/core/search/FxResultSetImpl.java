@@ -279,6 +279,10 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
      * {@inheritDoc} *
      */
     public int getTotalRowCount() {
+        // total row count not selected, return size of result set
+        if (totalRowCount == -1) {
+            return getRowCount();
+        }
         // no type filter specified, return global total row count
         if (typeId == -1) {
             return totalRowCount;
