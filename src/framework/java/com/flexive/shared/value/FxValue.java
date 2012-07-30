@@ -33,6 +33,7 @@ package com.flexive.shared.value;
 
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxValueChangeListener;
+import com.flexive.shared.content.FxValueChangeListener.ChangeType;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -382,6 +383,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         } else {
             this.singleValueEmpty = true;
         }
+        if (this.changeListener != null) {
+            this.changeListener.onValueChanged(XPath, ChangeType.Remove);
+        }
         return (TDerived) this;
     }
 
@@ -399,6 +403,11 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             this.emptyTranslations.put(language, true);
         } else {
             this.singleValueEmpty = true;
+        }
+        if (this.changeListener != null) {
+            if (isEmpty()) {
+                this.changeListener.onValueChanged(XPath, ChangeType.Remove);
+            }
         }
     }
 
