@@ -2036,10 +2036,7 @@ public final class FxSharedUtils {
                 }
                 // expected format: file:/some/path/to/file.jar!{baseName}.properties if this is no JBoss 5 vfs zipfile
                 final int jarDelim = resourceURL.getPath().lastIndexOf(".jar!");
-                if (jarDelim == -1) {
-                    LOG.warn("Cannot use message resources because they are not stored in a jar file: " + resourceURL.getPath());
-                    continue;
-                }
+
                 String path = resourceURL.getPath();
                 if (!path.startsWith("file:")) {
                     if (path.startsWith("/") || path.charAt(1) == ':') {
@@ -2050,8 +2047,9 @@ public final class FxSharedUtils {
                         LOG.warn("Cannot use message resources because they are not served from the file system: " + resourceURL.getPath());
                         continue;
                     }
-                } else
+                } else if (jarDelim != -1) {
                     path = path.substring("file:".length(), jarDelim + 4);
+                } 
 
                 // "file:" and everything after ".jar" gets stripped for the class loader URL
                 final URL jarURL = new URL("file", null, path);
