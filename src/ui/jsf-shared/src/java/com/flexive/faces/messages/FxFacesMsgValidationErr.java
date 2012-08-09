@@ -46,10 +46,14 @@ public class FxFacesMsgValidationErr extends FxFacesMsgErr {
     private static final long serialVersionUID = -4251850393455801774L;
 
     private final FxValue value;
+    private final String summaryKey;
+    private final Object[] summaryParams;
 
     public FxFacesMsgValidationErr(FxValue value, String summaryKey, Object... summaryParams) {
         super(summaryKey, summaryParams);
         this.value = value;
+        this.summaryKey = summaryKey;
+        this.summaryParams = summaryParams;
     }
 
     /**
@@ -59,5 +63,21 @@ public class FxFacesMsgValidationErr extends FxFacesMsgErr {
      */
     public FxValue getValue() {
         return value;
+    }
+
+    /**
+     * @return  the message key of the message
+     * @since 3.1.7
+     */
+    public String getSummaryKey() {
+        return summaryKey;
+    }
+
+    /**
+     * @return  the parameters for the message key
+     * @since 3.1.7
+     */
+    public Object[] getSummaryParams() {
+        return summaryParams;
     }
 }
