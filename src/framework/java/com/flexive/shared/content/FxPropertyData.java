@@ -68,8 +68,9 @@ public class FxPropertyData extends FxData {
         this.value = value;
         this.propertyId = propertyId;
         this.containsDefaultValue = false;
-        if (this.value != null)
-            this.value.setXPath(xpPrefix + this.getXPathFull());
+        if (this.value != null) {
+            setValueXPath();
+        }
         this.maxLength=maxLength;
     }
 
@@ -150,7 +151,7 @@ public class FxPropertyData extends FxData {
         this.containsDefaultValue = false;
         if (this.value == null || FxContext.get().getRunAsSystem()) {
             this.value = value;
-            this.value.setXPath(this.xpPrefix + this.getXPathFull());
+            setValueXPath();
             getParent().valueChanged(this.value.getXPath(), FxValueChangeListener.ChangeType.Update);
             return;
         }
@@ -163,7 +164,7 @@ public class FxPropertyData extends FxData {
         if (hasChangeListener)
             isChange = this.value == null || !value.equals(this.value);
         this.value = value;
-        this.value.setXPath(this.xpPrefix + this.getXPathFull());
+        setValueXPath();
         if (hasChangeListener && isChange)
             getParent().valueChanged(this.value.getXPath(), FxValueChangeListener.ChangeType.Update);
     }
@@ -231,7 +232,7 @@ public class FxPropertyData extends FxData {
         this.indices = XPathElement.getIndices(this.XPathFull);
         if (this.value != null) {
             // apply updated XPath to FxValue (FX-920)
-            this.value.setXPath(this.xpPrefix + this.XPathFull);
+            setValueXPath();
         }
     }
 
@@ -336,6 +337,14 @@ public class FxPropertyData extends FxData {
             }
         }
         return values;
+    }
+
+    private void setValueXPath() {
+        final String xPath = xpPrefix + this.getXPathFull();
+        this.value.setXPath(xPath);
+
+        // re-use the value's XPath string for the property data to save some memory
+        XPathFull = xPath.substring(xpPrefix.length());
     }
 
     /**

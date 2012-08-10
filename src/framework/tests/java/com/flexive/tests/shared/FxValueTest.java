@@ -41,8 +41,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * Generic FxValue tests
@@ -172,6 +171,17 @@ public class FxValueTest {
         final FxString val = new FxString(true, FxLanguage.ENGLISH, "a value");
         val.setEmpty(FxLanguage.GERMAN);
         assertFalse(val.isEmpty());
+    }
+
+    @Test
+    public void defaultTranslationTest() {
+        final FxString val = new FxString(true, FxLanguage.ENGLISH, "en");
+        assertEquals(val.getBestTranslation(), "en");
+        val.setTranslation(FxLanguage.GERMAN, "de");
+        assertEquals(val.getBestTranslation(FxLanguage.GERMAN), "de");
+        val.setEmpty(FxLanguage.GERMAN);
+        assertEquals(val.getBestTranslation(FxLanguage.GERMAN), "en");
+        assertEquals(val.getBestTranslation(), "en");
     }
 
     @DataProvider(name = "testInstances")

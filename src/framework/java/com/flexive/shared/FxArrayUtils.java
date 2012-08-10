@@ -91,7 +91,7 @@ public class FxArrayUtils {
         long iInts[] = new long[sInts.length];
         for (int i = 0; i < sInts.length; i++) {
             try {
-                iInts[i] = new Long(sInts[i]).intValue();
+                iInts[i] = Integer.parseInt(sInts[i]);
             } catch (Exception exc) {
                 throw new FxInvalidParameterException("'" + list + "' can not be converted to a long[] array using separator '" +
                         separator + "'", sInts[i]);

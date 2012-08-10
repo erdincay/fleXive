@@ -328,7 +328,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     @Override
     public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal) {
         String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias();
-        String XPath = (this.hasParentGroupAssignment() && parent != null ? parent.getXPath() : "") + "/" + this.getAlias();
+        String XPath = XPathElement.stripType(getXPath());
         final FxMultiplicity fxMultiplicity = this.getMultiplicity();
         // if we need to check minMulti then it has to be valid otherwise it has only valid maxMulti
         if (!fxMultiplicity.isValidMax(index))

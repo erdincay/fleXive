@@ -32,28 +32,28 @@
 package com.flexive.faces;
 
 import com.flexive.faces.beans.MessageBean;
+import com.flexive.faces.components.Thumbnail;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
-import com.flexive.faces.components.Thumbnail;
 import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.*;
-import com.flexive.shared.search.FxPaths;
-import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.FxBinary;
-import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxBoolean;
+import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.FxRequest;
-import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.war.filter.FxResponseWrapper;
+import com.flexive.war.servlet.ThumbnailServlet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,14 +63,14 @@ import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
-import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletContext;
-import javax.servlet.http.*;
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
 import java.text.Collator;
 import java.util.*;
+
+import static javax.faces.context.FacesContext.getCurrentInstance;
 
 
 /**
@@ -382,7 +382,7 @@ public class FxJsfUtils {
         try {
             valueText = FacesContext.getCurrentInstance().
                     getExternalContext().getRequestParameterMap().get(parameterName);
-            return new Long(valueText);
+            return Long.parseLong(valueText);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Couldn't parse '" + parameterName + "'='" + valueText + "' as a long");
         }

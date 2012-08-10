@@ -38,20 +38,20 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.faces.model.FxResultSetDataModel;
-import static com.flexive.shared.EJBLookup.getSearchEngine;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.ResultViewType;
-import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.war.beans.admin.content.BeContentEditorBean;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
 
-import org.apache.commons.lang.StringUtils;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 
 /**
  * This Bean provides access the the sql search.
@@ -82,7 +82,7 @@ public class SqlSearchBean implements Serializable {
     public void setActionPk(String actionPk) {
         BeContentEditorBean ceb = (BeContentEditorBean) FxJsfUtils.getManagedBean("beContentEditorBean");
         String pk[] = actionPk.split("\\.");
-        ceb.initEditor(new FxPK(new Long(pk[0]), new Integer(pk[1])), true);
+        ceb.initEditor(new FxPK(Long.parseLong(pk[0]), Integer.parseInt(pk[1])), true);
         this.actionPk = actionPk;
     }
 

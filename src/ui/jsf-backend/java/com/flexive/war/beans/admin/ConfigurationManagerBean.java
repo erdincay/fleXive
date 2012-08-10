@@ -373,11 +373,11 @@ public class ConfigurationManagerBean {
                     break;
                 case INTEGER_VALUE:
                     curClass = Integer.class;
-                    value = new Integer(curEdit_STR_Value);
+                    value = Integer.valueOf(curEdit_STR_Value);
                     break;
                 case LONG_VALUE:
                     curClass = Long.class;
-                    value = new Long(curEdit_STR_Value);
+                    value = Long.valueOf(curEdit_STR_Value);
                     break;
                 case STRING_VALUE:
                     curClass = String.class;

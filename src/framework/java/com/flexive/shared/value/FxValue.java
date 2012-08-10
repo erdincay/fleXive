@@ -44,7 +44,6 @@ import org.apache.commons.lang.ArrayUtils;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -53,7 +52,7 @@ import java.util.Map.Entry;
  * Common base classed is used for multilingual properties, etc.
  * <p/>
  * To check if a value is empty a flag is used for each language resp. the single value.
- * Use the setEmpty() method to explicity set a value to be empty
+ * Use the setEmpty() method to explicitly set a value to be empty
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -630,7 +629,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (!multiLanguage) //redundant but faster
             return singleValue;
         T ret = getTranslation(lang);
-        if (ret != null)
+        if (ret != null && !isTranslationEmpty(lang))
             return ret;
         return getDefaultTranslation();
     }
