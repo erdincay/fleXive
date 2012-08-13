@@ -20,6 +20,11 @@
     <dependencies>
         <dependency>
             <groupId>com.flexive</groupId>
+            <artifactId>flexive-shared</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
             <artifactId>flexive-ejb</artifactId>
             <type>ejb</type>
             <exclusions>
