@@ -283,9 +283,7 @@ public class FxContext implements Serializable {
      * @param ticket ticket to override with
      */
     public void overrideTicket(UserTicket ticket) {
-        if (!getRunAsSystem()) {
-            setTicket(ticket);
-        }
+        setTicket(ticket);
     }
 
     /**
