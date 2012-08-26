@@ -35,6 +35,7 @@ import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
 import static com.flexive.shared.EJBLookup.getSearchEngine;
 import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.search.BriefcaseItemData;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -48,6 +49,8 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import static org.testng.Assert.*;
+
+import com.google.common.collect.Lists;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -129,6 +132,88 @@ public class BriefcaseTest {
     }
 
     @Test
+    public void itemDataTest() throws FxApplicationException {
+        final BriefcaseEngine be = getBriefcaseEngine();
+        final long briefcaseId = be.create("test briefcase", "test description", null);
+        try {
+            // get some objects
+            final List<FxPK> ids = getFolders();
+            assertTrue(!ids.isEmpty(), "No objects found for testing the briefcase engine");
+            be.addItems(briefcaseId, ids);
+            assertEquals(be.getItems(briefcaseId).length, ids.size());
+
+            long itemId = ids.get(0).getId();
+            long itemId2 = ids.get(1).getId();
+            BriefcaseItemData data1 = BriefcaseItemData.createBriefCaseItemData(briefcaseId, itemId, "TEST1");
+            data1.setIntFlag1(1);
+            data1.setIntFlag2(20);
+            data1.setLongFlag1(1000L);
+            data1.setLongFlag2(1001L);
+            be.addItemData(briefcaseId, data1);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, null, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, null, null, null, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, "TEST1", null, null, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, "TEST1", 1, null, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, "TEST1", 1, 20, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, "TEST1", 1, 20, null, 1000L, 1001L), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, "TEST1", 1, 20, 0, 1000L, 1001L), 0);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, "TEST2", 1, 20, null, 1000L, 1001L), 0);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId + 1, null, null, null, null, null, null), 0);
+            be.removeItemData(briefcaseId, itemId);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, null, null, null, null), 0);
+
+            BriefcaseItemData data2 = BriefcaseItemData.createBriefCaseItemData(briefcaseId, itemId, "TEST2");
+            data2.setIntFlag1(1);
+            data2.setIntFlag2(2);
+            data2.setLongFlag1(1000L);
+            data2.setLongFlag2(1002L);
+            BriefcaseItemData data3 = BriefcaseItemData.createBriefCaseItemData(briefcaseId, itemId2, "TEST3");
+            data3.setIntFlag1(1);
+            data3.setIntFlag2(2);
+            data3.setLongFlag1(1000L);
+            data3.setLongFlag2(1002L);
+            List<BriefcaseItemData> datas = Lists.newArrayList(data1, data2, data3);
+            be.addItemData(briefcaseId, datas);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, null, null, null, null), 3);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, null, null, null, null, null, null), 2);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId2, null, null, null, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, 1, null, null, null, null), 3);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, 1, null, null, 1000L, null), 3);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, null, null, 1000L, null), 3);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, "TEST2", null, null, null, 1000L, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, 2, null, null, null), 2);
+            List<BriefcaseItemData> res = be.queryItemData(briefcaseId, null, "TEST2", null, null, null, null, null, BriefcaseItemData.SortField.INTFLAG1, BriefcaseItemData.SortOrder.ASC);
+            assertEquals(res.size(), 1);
+            BriefcaseItemData check = res.get(0);
+            assertEquals(check.getBriefcaseId(), briefcaseId);
+            assertEquals(check.getId(), itemId);
+            assertEquals((int)check.getIntFlag1(), 1);
+            assertEquals((int)check.getIntFlag2(), 2);
+            assertFalse(check.isIntFlagSet(3));
+            assertEquals((long)check.getLongFlag1(), 1000L);
+            assertEquals((long)check.getLongFlag2(), 1002L);
+            assertEquals(check.getName(), "TEST2");
+            check.setIntFlag1(11);
+            check.setIntFlag3(3);
+            be.updateItemData(briefcaseId, check);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, null, null, null, null), 3);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId, null, null, null, null, null, null), 2);
+            assertEquals(be.queryItemDataCount(briefcaseId, itemId2, null, null, null, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, 1, null, null, null, null), 2);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, 11, null, null, null, null), 1);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, null, 3, null, null), 1);
+
+
+            // clear briefcase
+            be.clear(briefcaseId);
+            assertEquals(be.queryItemDataCount(briefcaseId, null, null, null, null, null, null, null), 0);
+            assertEquals(new SqlQueryBuilder().filterBriefcase(briefcaseId).getResult().getRowCount(), 0);
+        } finally {
+            be.remove(briefcaseId);
+        }
+    }
+
+    @Test
     public void moveBriefcaseItems() throws FxApplicationException {
         final BriefcaseEngine be = getBriefcaseEngine();
         final long briefcase1 = be.create("move items briefcase 1", "test", null);
@@ -165,6 +250,7 @@ public class BriefcaseTest {
             final FxReferenceMetaData<FxPK> meta = FxReferenceMetaData.createNew(ids.get(0));
             meta.put("akey", "avalue");
             meta.put("bkey", "bvalue");
+            //noinspection unchecked
             getBriefcaseEngine().setMetaData(briefcaseId, asList(meta));
 
             final List<FxReferenceMetaData<FxPK>> newMeta = getBriefcaseEngine().getMetaData(briefcaseId);
@@ -183,6 +269,7 @@ public class BriefcaseTest {
             final FxReferenceMetaData<FxPK> update = FxReferenceMetaData.createNew(reference);
             update.put("akey", "newvalue");
             update.put("newkey", 123);
+            //noinspection unchecked
             getBriefcaseEngine().mergeMetaData(briefcaseId, asList(update));
             final List<FxReferenceMetaData<FxPK>> updatedMeta = getBriefcaseEngine().getMetaData(briefcaseId);
             assertEquals(updatedMeta.size(), ids.size());
@@ -194,6 +281,7 @@ public class BriefcaseTest {
             // try to remove a key
             final FxReferenceMetaData<FxPK> removeUpdate = FxReferenceMetaData.createNew(reference);
             removeUpdate.put("newkey", "");
+            //noinspection unchecked
             getBriefcaseEngine().mergeMetaData(briefcaseId, asList(removeUpdate));
             final List<FxReferenceMetaData<FxPK>> updatedMeta2 = getBriefcaseEngine().getMetaData(briefcaseId);
             assertEquals(updatedMeta2.size(), ids.size());

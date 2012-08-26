@@ -35,6 +35,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.search.BriefcaseItemData;
 import com.flexive.shared.security.LifeCycleInfo;
 
 import javax.ejb.Remote;
@@ -287,7 +288,7 @@ public interface BriefcaseEngine {
     long[] getItems(long id) throws FxApplicationException;
 
     /**
-     * Moves items from one briefcase to another.
+     * Moves items from one briefcase to another. Item data will not be moved!
      *
      * @param fromId    the source briefcase ID
      * @param toId      the target briefcase ID
@@ -295,4 +296,84 @@ public interface BriefcaseEngine {
      * @since 3.1
      */
     void moveItems(long fromId, long toId, Collection<FxPK> contents) throws FxApplicationException;
+
+    /**
+     * Add a single item data for a briefcase item
+     *
+     * @param briefcaseId id of the briefcase
+     * @param itemData    item data
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    void addItemData(long briefcaseId, BriefcaseItemData itemData) throws FxApplicationException;
+
+    /**
+     * Add multiple item datas for a briefcase
+     *
+     * @param briefcaseId id of the briefcase
+     * @param itemDatas   item datas
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    void addItemData(long briefcaseId, List<BriefcaseItemData> itemDatas) throws FxApplicationException;
+
+    /**
+     * Remove item datas
+     *
+     * @param briefcaseId id of the briefcase
+     * @param itemId      item id or if <code>null</code> for all items
+     * @throws FxApplicationException on errors
+     */
+    void removeItemData(long briefcaseId, Long itemId) throws FxApplicationException;
+
+    /**
+     * Load matching item datas (non-null flags are queried)
+     *
+     * @param briefcaseId id of the briefcase
+     * @param itemId      item id
+     * @param metaData    meta data
+     * @param intFlag1   integer flag 1
+     * @param intFlag2   integer flag 2
+     * @param intFlag3   integer flag 3
+     * @param longFlag1  long flag 1
+     * @param longFlag2  long flag 2
+     * @param sortField   sort field
+     * @param sortOrder   sort order
+     * @return list of matching item datas
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    List<BriefcaseItemData> queryItemData(long briefcaseId, Long itemId, String metaData,
+                                          Integer intFlag1, Integer intFlag2, Integer intFlag3,
+                                          Long longFlag1, Long longFlag2,
+                                          BriefcaseItemData.SortField sortField, BriefcaseItemData.SortOrder sortOrder) throws FxApplicationException;
+
+    /**
+     * Evaluate the count of matching item datas (non-null flags are queried)
+     *
+     * @param briefcaseId id of the briefcase
+     * @param itemId      item id
+     * @param metaData    meta data
+     * @param intFlag1   integer flag 1
+     * @param intFlag2   integer flag 2
+     * @param intFlag3   integer flag 3
+     * @param longFlag1  long flag 1
+     * @param longFlag2  long flag 2
+     * @return number of matching item datas
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    int queryItemDataCount(long briefcaseId, Long itemId, String metaData,
+                           Integer intFlag1, Integer intFlag2, Integer intFlag3,
+                           Long longFlag1, Long longFlag2) throws FxApplicationException;
+
+    /**
+     * Update a data item (except the position). The <code>updateItem</code> must contain a valid briefcase and object/item id
+     *
+     * @param briefcaseId id of the briefcase
+     * @param updateData  data to update
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    void updateItemData(long briefcaseId, BriefcaseItemData updateData) throws FxApplicationException;
 }

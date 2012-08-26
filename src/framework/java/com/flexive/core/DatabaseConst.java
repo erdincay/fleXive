@@ -63,6 +63,10 @@ public final class DatabaseConst {
      */
     public static final String TBL_BRIEFCASE_DATA = "FXS_BRIEFCASE_DATA";
     /**
+     * Briefcase item meta data table
+     */
+    public static final String TBL_BRIEFCASE_DATA_ITEM = "FXS_BRIEFCASE_DATA_ITEM";
+    /**
      * In-memory search cache
      */
     public static final String TBL_SEARCHCACHE_MEMORY = "FXS_SEARCHCACHE_MEMORY";

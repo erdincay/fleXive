@@ -207,6 +207,7 @@ try {
         dropTableData(stmt, DatabaseConst.TBL_BINARY_TRANSIT);
         dropTableData(stmt, DatabaseConst.TBL_SEARCHCACHE_PERM);
         dropTableData(stmt, DatabaseConst.TBL_SEARCHCACHE_MEMORY);
+        dropTableData(stmt, DatabaseConst.TBL_BRIEFCASE_DATA_ITEM);
         dropTableData(stmt, DatabaseConst.TBL_BRIEFCASE_DATA);
         dropTableData(stmt, DatabaseConst.TBL_BRIEFCASE);
         setFieldNull(stmt, DatabaseConst.TBL_TREE + "_LIVE", "PARENT");
@@ -224,6 +225,10 @@ try {
             dropTableData(stmt, DatabaseConst.TBL_STRUCT_FLATSTORE_MAPPING);
         }
         dropTableData(stmt, DatabaseConst.TBL_RESOURCES);
+        dropTableData(stmt, DatabaseConst.TBL_PHRASE_MAP);
+        dropTableData(stmt, DatabaseConst.TBL_PHRASE_TREE);
+        dropTableData(stmt, DatabaseConst.TBL_PHRASE_VALUES);
+        dropTableData(stmt, DatabaseConst.TBL_PHRASE);
         dropTableData(stmt, DatabaseConst.TBL_HISTORY);
         dropTableData(stmt, DatabaseConst.TBL_ACCOUNT_DETAILS);
         dropTableData(stmt, DatabaseConst.TBL_LOCKS);
@@ -1080,6 +1085,10 @@ try {
         Statement stmt = con.createStatement();
         try {
             importTable(stmt, zip, ze, "resources/entry", DatabaseConst.TBL_RESOURCES);
+            importTable(stmt, zip, ze, "resources/phrase", DatabaseConst.TBL_PHRASE);
+            importTable(stmt, zip, ze, "resources/phraseVal", DatabaseConst.TBL_PHRASE_VALUES);
+            importTable(stmt, zip, ze, "resources/phraseTree", DatabaseConst.TBL_PHRASE_TREE);
+            importTable(stmt, zip, ze, "resources/phraseMap", DatabaseConst.TBL_PHRASE_MAP);
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }
@@ -1098,6 +1107,7 @@ try {
         try {
             importTable(stmt, zip, ze, "briefcases/briefcase", DatabaseConst.TBL_BRIEFCASE);
             importTable(stmt, zip, ze, "briefcases/data", DatabaseConst.TBL_BRIEFCASE_DATA);
+            importTable(stmt, zip, ze, "briefcases/dataItem", DatabaseConst.TBL_BRIEFCASE_DATA_ITEM);
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }

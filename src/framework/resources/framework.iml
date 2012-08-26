@@ -22,17 +22,8 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../misc/sources/commons-logging-1.1.1-src.zip!/commons-logging-1.1.1-src/src/java" />
+          <root url="jar://$USER_HOME$/misc/sources/commons-logging-1.1.1-src.zip!/commons-logging-1.1.1-src/src/java" />
         </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/groovy/groovy-all-1.7.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -73,7 +64,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../../apps/selenium-remote-control-0.9.2-SNAPSHOT/selenium-java-client-driver-0.9.2-SNAPSHOT/selenium-java-client-driver-sources.jar!/" />
+          <root url="jar:///home/apps/selenium-remote-control-0.9.2-SNAPSHOT/selenium-java-client-driver-0.9.2-SNAPSHOT/selenium-java-client-driver-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -83,7 +74,7 @@
           <root url="jar://$MODULE_DIR$/../../../lib/mail/mail.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$MODULE_DIR$/../../../../../misc/sources/javamail-1_4.zip!/javamail-1.4/docs/javadocs" />
+          <root url="jar://$USER_HOME$/misc/sources/javamail-1_4.zip!/javamail-1.4/docs/javadocs" />
         </JAVADOC>
         <SOURCES />
       </library>
@@ -94,7 +85,7 @@
           <root url="jar://$MODULE_DIR$/../../../lib/mail/activation.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="jar://$MODULE_DIR$/../../../../../misc/sources/jaf-1_1-fr.zip!/jaf-1.1/docs/javadocs" />
+          <root url="jar://$USER_HOME$/misc/sources/jaf-1_1-fr.zip!/jaf-1.1/docs/javadocs" />
         </JAVADOC>
         <SOURCES />
       </library>
@@ -133,7 +124,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../misc/sources/jbosscache-core-2.1.0.CR2-all.zip!/jbosscache-core-2.1.0.CR2/src" />
+          <root url="jar://$USER_HOME$/misc/sources/jbosscache-core-2.1.0.CR2-all.zip!/jbosscache-core-2.1.0.CR2/src" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -144,28 +135,6 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/commons-lang-2.4.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../misc/sources/commons-lang-2.4-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/mysql-connector-java-5.0.8-bin.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../misc/sources/mysql-connector-java-5.0.8.zip!/mysql-connector-java-5.0.8/src" />
-        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -190,15 +159,6 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../lib/text_extraction/poi-scratchpad-3.2-FINAL-20081019.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/xstream/xstream-1.3.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -282,15 +242,6 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/google-collect-1.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../lib/icepdf-core.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -310,6 +261,51 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../lib/quartz-1.8.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/groovy/groovy-all-1.7.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/commons-lang-2.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/mysql-connector-java-5.1.13-bin.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/xstream/xstream-1.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/google-collections-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

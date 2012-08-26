@@ -45,6 +45,7 @@ import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.interfaces.BriefcaseEngineLocal;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.search.Briefcase;
+import com.flexive.shared.search.BriefcaseItemData;
 import com.flexive.shared.security.*;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
@@ -59,6 +60,7 @@ import java.util.*;
 
 import static com.flexive.core.Database.closeObjects;
 import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA;
+import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA_ITEM;
 
 /**
  * Bean handling Briefcases.
@@ -69,6 +71,7 @@ import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
+@SuppressWarnings("UnusedDeclaration")
 @Stateless(name = "BriefcaseEngine", mappedName="BriefcaseEngine")
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @TransactionManagement(TransactionManagementType.CONTAINER)
@@ -166,7 +169,8 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 EJBUtils.rollback(ctx);
             } else {
                 try {
-                    con.rollback();
+                    if (con != null)
+                        con.rollback();
                 } catch (SQLException e) {
                     LOG.warn(e.getMessage(), e);
                 }
@@ -268,11 +272,12 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             // Obtain a database connection
             con = Database.getDbConnection();
             stmt = con.createStatement();
+            stmt.addBatch("DELETE FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=" + id);
             stmt.addBatch("DELETE FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=" + id);
             stmt.addBatch("DELETE FROM " + DatabaseConst.TBL_BRIEFCASE + " WHERE id=" + id);
             stmt.executeBatch();
         } catch (SQLException exc) {
-            throw new FxLoadException(LOG, exc, "ex.briefcase.deleteFailed", br.getName());
+            throw new FxRemoveException(LOG, exc, "ex.briefcase.deleteFailed", br.getName());
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
@@ -310,6 +315,10 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         checkEditBriefcase(br);
         try {
             con = Database.getDbConnection();
+            stmt = con.prepareStatement("DELETE FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=?");
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+            stmt.close();
             stmt = con.prepareStatement("DELETE FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?");
             stmt.setLong(1, id);
             stmt.executeUpdate();
@@ -397,13 +406,18 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         checkEditBriefcase(br);
         try {
             con = Database.getDbConnection();
+            stmt = con.prepareStatement("DELETE FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=?" +
+                    " AND id IN (" + StringUtils.join(FxPK.getIds(contents), ',') + ")");
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+            stmt.close();
             stmt = con.prepareStatement("DELETE FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?" +
                     " AND id IN (" + StringUtils.join(FxPK.getIds(contents), ',') + ")");
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (Exception e) {
             EJBUtils.rollback(ctx);
-            throw new FxUpdateException(LOG, e, "ex.briefcase.removeItems", br.getName(), e);
+            throw new FxRemoveException(LOG, e, "ex.briefcase.removeItems", br.getName(), e);
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
@@ -593,6 +607,9 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public FxReferenceMetaData<FxPK> getMetaData(long briefcaseId, FxPK pk) throws FxApplicationException {
         load(briefcaseId);   // check read permissions
         Connection con = null;
@@ -605,6 +622,335 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             throw new FxLoadException(LOG, e);
         } finally {
             Database.closeObjects(BriefcaseEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void addItemData(long briefcaseId, BriefcaseItemData itemData) throws FxApplicationException {
+        if(itemData == null)
+            return;
+        Briefcase br = load(briefcaseId);   // check read permissions
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = Database.getDbConnection();
+            // check if the item actually exists
+            stmt = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=? AND id=?");
+            stmt.setLong(1, briefcaseId);
+            stmt.setLong(2, itemData.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs == null || !rs.next() || rs.getLong(1) != 1)
+                throw new FxNotFoundException(LOG, "ex.briefcase.notFound.item", itemData.getId(), br.getName());
+            stmt.close();
+            stmt = con.prepareStatement("SELECT MAX(pos) FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=? AND id=?");
+            stmt.setLong(1, briefcaseId);
+            stmt.setLong(2, itemData.getId());
+            rs = stmt.executeQuery();
+            int pos = rs.next() ? rs.getInt(1) : 0;
+            stmt.close();
+            stmt = con.prepareStatement("INSERT INTO " + TBL_BRIEFCASE_DATA_ITEM
+                    + "(briefcase_id, id, pos, intflag1, intflag2, intflag3, longflag1, longflag2, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt.setLong(1, briefcaseId);
+            stmt.setLong(2, itemData.getId());
+            stmt.setLong(3, ++pos);
+            if(itemData.isIntFlagSet(1))
+                stmt.setInt(4, itemData.getIntFlag1());
+            else
+                stmt.setNull(4, Types.INTEGER);
+            if (itemData.isIntFlagSet(2))
+                stmt.setInt(5, itemData.getIntFlag2());
+            else
+                stmt.setNull(5, Types.INTEGER);
+            if (itemData.isIntFlagSet(3))
+                stmt.setInt(6, itemData.getIntFlag3());
+            else
+                stmt.setNull(6, Types.INTEGER);
+            if (itemData.isLongFlagSet(1))
+                stmt.setLong(7, itemData.getLongFlag1());
+            else
+                stmt.setNull(7, Types.BIGINT);
+            if (itemData.isLongFlagSet(2))
+                stmt.setLong(8, itemData.getLongFlag2());
+            else
+                stmt.setNull(8, Types.BIGINT);
+            stmt.setString(9, itemData.getMetaData());
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            EJBUtils.rollback(ctx);
+            throw new FxUpdateException(LOG, e, "ex.briefcase.addItemData", br.getName(), itemData.getId(), e.getMessage());
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void addItemData(long briefcaseId, List<BriefcaseItemData> itemDatas) throws FxApplicationException {
+        if(itemDatas == null || itemDatas.size() == 0)
+            return;
+        Briefcase br = load(briefcaseId);   // check read permissions
+        Connection con = null;
+        PreparedStatement stmt = null;
+        long lastId = -1;
+        int pos = -1;
+        try {
+            con = Database.getDbConnection();
+
+            for (BriefcaseItemData itemData : itemDatas) {
+                if(lastId != itemData.getId()) {
+                    lastId = itemData.getId();
+                    if(stmt != null) {
+                        stmt.executeBatch();
+                        stmt.close();
+                    }
+                    //existance check and evaluate position
+                    stmt = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=? AND id=?");
+                    stmt.setLong(1, briefcaseId);
+                    stmt.setLong(2, itemData.getId());
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs == null || !rs.next() || rs.getLong(1) != 1)
+                        throw new FxNotFoundException(LOG, "ex.briefcase.notFound.item", itemData.getId(), br.getName());
+                    stmt.close();
+                    stmt = con.prepareStatement("SELECT MAX(pos) FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=? AND id=?");
+                    stmt.setLong(1, briefcaseId);
+                    stmt.setLong(2, itemData.getId());
+                    rs = stmt.executeQuery();
+                    pos = rs.next() ? rs.getInt(1) : 0;
+                    stmt.close();
+                    stmt = con.prepareStatement("INSERT INTO " + TBL_BRIEFCASE_DATA_ITEM
+                            + "(briefcase_id, id, pos, intflag1, intflag2, intflag3, longflag1, longflag2, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    stmt.setLong(1, briefcaseId);
+                    stmt.setLong(2, itemData.getId());
+                }
+                if(stmt == null ) {
+                    LOG.fatal("PreparedStatement was null trying to add briefcase item data!");
+                    continue;
+                }
+                stmt.setLong(3, ++pos);
+                if (itemData.isIntFlagSet(1))
+                    stmt.setInt(4, itemData.getIntFlag1());
+                else
+                    stmt.setNull(4, Types.INTEGER);
+                if (itemData.isIntFlagSet(2))
+                    stmt.setInt(5, itemData.getIntFlag2());
+                else
+                    stmt.setNull(5, Types.INTEGER);
+                if (itemData.isIntFlagSet(3))
+                    stmt.setInt(6, itemData.getIntFlag3());
+                else
+                    stmt.setNull(6, Types.INTEGER);
+                if (itemData.isLongFlagSet(1))
+                    stmt.setLong(7, itemData.getLongFlag1());
+                else
+                    stmt.setNull(7, Types.BIGINT);
+                if (itemData.isLongFlagSet(2))
+                    stmt.setLong(8, itemData.getLongFlag2());
+                else
+                    stmt.setNull(8, Types.BIGINT);
+                stmt.setString(9, itemData.getMetaData());
+                stmt.addBatch();
+            }
+            if (stmt != null)
+                stmt.executeBatch();
+        } catch (Exception e) {
+            EJBUtils.rollback(ctx);
+            throw new FxUpdateException(LOG, e, "ex.briefcase.addItemData", br.getName(), lastId, e.getMessage());
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeItemData(long briefcaseId, Long itemId) throws FxApplicationException {
+        Briefcase br = load(briefcaseId);   // check read permissions
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = Database.getDbConnection();
+            // check if the item actually exists
+            stmt = con.prepareStatement("DELETE FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=? " + (itemId != null ? " AND id=?" : ""));
+            stmt.setLong(1, briefcaseId);
+            if(itemId != null)
+                stmt.setLong(2, itemId);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            EJBUtils.rollback(ctx);
+            if(itemId != null)
+                throw new FxRemoveException(LOG, e, "ex.briefcase.removeItemData.id", br.getName(), itemId, e.getMessage());
+            else
+                throw new FxRemoveException(LOG, e, "ex.briefcase.removeItemData.all", br.getName(), e.getMessage());
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<BriefcaseItemData> queryItemData(long briefcaseId, Long itemId, String metaData,
+                                                 Integer intFlag1, Integer intFlag2, Integer intFlag3,
+                                                 Long longFlag1, Long longFlag2,
+                                                 BriefcaseItemData.SortField sortField, BriefcaseItemData.SortOrder sortOrder) throws FxApplicationException {
+        Briefcase br = load(briefcaseId);   // check read permissions
+        StringBuilder query = new StringBuilder(1000);
+        //                   1    2         3         4         5          6          7         8
+        query.append("SELECT pos, intflag1, intflag2, intflag3, longflag1, longflag2, metadata, id FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=").
+                append(briefcaseId);
+        if(itemId != null)
+                query.append(" AND id=").append(itemId);
+        if(metaData != null)
+            query.append(" AND metaData=?");
+        if(intFlag1 != null)
+            query.append(" AND intFlag1=").append(intFlag1);
+        if(intFlag2 != null)
+            query.append(" AND intFlag2=").append(intFlag2);
+        if (intFlag3 != null)
+            query.append(" AND intFlag3=").append(intFlag3);
+        if (longFlag1 != null)
+            query.append(" AND longFlag1=").append(longFlag1);
+        if (longFlag2 != null)
+            query.append(" AND longFlag2=").append(longFlag2);
+        query.append(" ORDER BY ").append(sortField.name()).append(' ').append(sortOrder.name());
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = Database.getDbConnection();
+            stmt = con.prepareStatement(query.toString());
+            if(metaData != null)
+                stmt.setString(1, metaData);
+            final ResultSet rs = stmt.executeQuery();
+            List<BriefcaseItemData> result = Lists.newArrayListWithCapacity(1000);
+            while(rs != null && rs.next()) {
+                BriefcaseItemData data = BriefcaseItemData.createBriefCaseItemData(briefcaseId, rs.getLong(8), rs.getString(7));
+                data.setPos(rs.getInt(1));
+                Integer intFlag = rs.getInt(2);
+                if (!rs.wasNull())
+                    data.setIntFlag1(intFlag);
+                intFlag = rs.getInt(3);
+                if (!rs.wasNull())
+                    data.setIntFlag2(intFlag);
+                intFlag = rs.getInt(4);
+                if (!rs.wasNull())
+                    data.setIntFlag3(intFlag);
+                Long longFlag = rs.getLong(5);
+                if (!rs.wasNull())
+                    data.setLongFlag1(longFlag);
+                longFlag = rs.getLong(6);
+                if (!rs.wasNull())
+                    data.setLongFlag2(longFlag);
+                result.add(data);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new FxUpdateException(LOG, e, "ex.briefcase.queryItemData", br.getName(), e.getMessage());
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int queryItemDataCount(long briefcaseId, Long itemId, String metaData,
+                                  Integer intFlag1, Integer intFlag2, Integer intFlag3,
+                                  Long longFlag1, Long longFlag2) throws FxApplicationException {
+        Briefcase br = load(briefcaseId);   // check read permissions
+        StringBuilder query = new StringBuilder(1000);
+        query.append("SELECT COUNT(*) FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=").append(briefcaseId);
+        if (itemId != null)
+            query.append(" AND id=").append(itemId);
+        if (metaData != null)
+            query.append(" AND metaData=?");
+        if (intFlag1 != null)
+            query.append(" AND intFlag1=").append(intFlag1);
+        if (intFlag2 != null)
+            query.append(" AND intFlag2=").append(intFlag2);
+        if (intFlag3 != null)
+            query.append(" AND intFlag3=").append(intFlag3);
+        if (longFlag1 != null)
+            query.append(" AND longFlag1=").append(longFlag1);
+        if (longFlag2 != null)
+            query.append(" AND longFlag2=").append(longFlag2);
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = Database.getDbConnection();
+            stmt = con.prepareStatement(query.toString());
+            if (metaData != null)
+                stmt.setString(1, metaData);
+            final ResultSet rs = stmt.executeQuery();
+            if (rs != null && rs.next())
+                return rs.getInt(1);
+            return 0;
+        } catch (Exception e) {
+            throw new FxUpdateException(LOG, e, "ex.briefcase.queryItemData", br.getName(), e.getMessage());
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateItemData(long briefcaseId, BriefcaseItemData updateData) throws FxApplicationException {
+        if (updateData == null)
+            return;
+        Briefcase br = load(briefcaseId);   // check read permissions
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = Database.getDbConnection();
+            // check if the item actually exists
+            stmt = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_BRIEFCASE_DATA_ITEM + " WHERE briefcase_id=? AND id=? AND pos=?");
+            stmt.setLong(1, briefcaseId);
+            stmt.setLong(2, updateData.getId());
+            stmt.setInt(3, updateData.getPos());
+            ResultSet rs = stmt.executeQuery();
+            if (rs == null || !rs.next() || rs.getLong(1) != 1)
+                throw new FxNotFoundException(LOG, "ex.briefcase.notFound.item", updateData.getId(), br.getName());
+            stmt.close();
+            stmt = con.prepareStatement("UPDATE " + TBL_BRIEFCASE_DATA_ITEM
+                    //               1           2           3            4            5           6                    7        8         9
+                    + " SET intflag1=?, intflag2=?, intflag3=?, longflag1=?, longflag2=?, metadata=? WHERE briefcase_id=? AND id=? AND pos=?");
+            stmt.setLong(7, briefcaseId);
+            stmt.setLong(8, updateData.getId());
+            stmt.setLong(9, updateData.getPos());
+            if (updateData.isIntFlagSet(1))
+                stmt.setInt(1, updateData.getIntFlag1());
+            else
+                stmt.setNull(1, Types.INTEGER);
+            if (updateData.isIntFlagSet(2))
+                stmt.setInt(2, updateData.getIntFlag2());
+            else
+                stmt.setNull(2, Types.INTEGER);
+            if (updateData.isIntFlagSet(3))
+                stmt.setInt(3, updateData.getIntFlag3());
+            else
+                stmt.setNull(3, Types.INTEGER);
+            if (updateData.isLongFlagSet(1))
+                stmt.setLong(4, updateData.getLongFlag1());
+            else
+                stmt.setNull(4, Types.BIGINT);
+            if (updateData.isLongFlagSet(2))
+                stmt.setLong(5, updateData.getLongFlag2());
+            else
+                stmt.setNull(5, Types.BIGINT);
+            stmt.setString(6, updateData.getMetaData());
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            EJBUtils.rollback(ctx);
+            throw new FxUpdateException(LOG, e, "ex.briefcase.updateItemData", br.getName(), updateData.getId(), e.getMessage());
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
     }
 
@@ -645,7 +991,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      */
     private String getSqlAccessFilter(String briefcaseTblAlias, boolean includeShared, ACLPermission... perms) {
         final UserTicket ticket = FxContext.getUserTicket();
-        StringBuffer filter = new StringBuffer(1024);
+        StringBuilder filter = new StringBuilder(1024);
         if (briefcaseTblAlias == null) {
             briefcaseTblAlias = "";
         }

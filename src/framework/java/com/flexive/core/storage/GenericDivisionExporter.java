@@ -658,6 +658,7 @@ con.close()
             write(out, sb);
             dumpTable(DatabaseConst.TBL_BRIEFCASE, stmt, out, sb, "briefcase", null);
             dumpTable(DatabaseConst.TBL_BRIEFCASE_DATA, stmt, out, sb, "data", null);
+            dumpTable(DatabaseConst.TBL_BRIEFCASE_DATA_ITEM, stmt, out, sb, "dataItem", null);
             sb.append("</briefcases>\n");
             write(out, sb);
             endEntry(out);
@@ -735,6 +736,10 @@ con.close()
             sb.append("<resources>\n");
             write(out, sb);
             dumpTable(DatabaseConst.TBL_RESOURCES, stmt, out, sb, "entry", null);
+            dumpTable(DatabaseConst.TBL_PHRASE, stmt, out, sb, "phrase", null);
+            dumpTable(DatabaseConst.TBL_PHRASE_VALUES, stmt, out, sb, "phraseVal", null);
+            dumpTable(DatabaseConst.TBL_PHRASE_TREE, stmt, out, sb, "phraseTree", null);
+            dumpTable(DatabaseConst.TBL_PHRASE_MAP, stmt, out, sb, "phraseMap", null);
             sb.append("</resources>\n");
             write(out, sb);
             endEntry(out);

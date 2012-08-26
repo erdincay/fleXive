@@ -49,8 +49,8 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../../misc/sources/jsf-1_2_04-p02-src.zip!/jsf1.2_04p02-src/jsf-api/src" />
-          <root url="jar://$MODULE_DIR$/../../../../../../misc/sources/jsf-1_2_04-p02-src.zip!/jsf1.2_04p02-src/jsf-ri/src" />
+          <root url="jar://$USER_HOME$/misc/sources/jsf-1_2_04-p02-src.zip!/jsf1.2_04p02-src/jsf-api/src" />
+          <root url="jar://$USER_HOME$/misc/sources/jsf-1_2_04-p02-src.zip!/jsf1.2_04p02-src/jsf-ri/src" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -62,8 +62,8 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../../../../misc/sources/weblets/0.4/weblets-impl/src/main/java" />
-          <root url="file://$MODULE_DIR$/../../../../../../misc/sources/weblets/0.4/weblets-api/src/main/java" />
+          <root url="file://$USER_HOME$/misc/sources/weblets/0.4/weblets-impl/src/main/java" />
+          <root url="file://$USER_HOME$/misc/sources/weblets/0.4/weblets-api/src/main/java" />
         </SOURCES>
       </library>
     </orderEntry>
