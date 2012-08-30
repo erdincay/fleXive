@@ -251,9 +251,32 @@ public class FxValueRendererFactory {
      */
     private static class FxFloatFormatter implements FxValueFormatter<Float, FxFloat> {
         public String format(FxFloat value, Float translation, FxLanguage outputLanguage) {
-            return translation != null
-                    ? getNumberFormatInstance(outputLanguage.getLocale()).format(translation)
-                    : getEmptyMessage(outputLanguage);
+            if (translation != null) {
+                final NumberFormat format = getNumberFormatInstance(outputLanguage.getLocale());
+
+                // as in FxDoubleFormatter, override the maximum digits setting based on the current value
+                final int oldMaxDigits = format.getMaximumFractionDigits();
+
+                final double absValue = Math.abs(translation);
+                final int digits = (int) Math.log10(absValue);
+                if (digits < -10) {
+                    format.setMaximumFractionDigits(0); // 0
+                } else if (digits < -6) {
+                    format.setMaximumFractionDigits(10);
+                } else if (digits <= 0) {
+                    format.setMaximumFractionDigits(5);
+                } else {
+                    format.setMaximumFractionDigits(3);
+                }
+
+                try {
+                    return format.format(translation);
+                } finally {
+                    format.setMaximumFractionDigits(oldMaxDigits);
+                }
+            } else {
+                return getEmptyMessage(outputLanguage);
+            }
         }
     }
 
