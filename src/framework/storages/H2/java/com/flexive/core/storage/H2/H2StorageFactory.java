@@ -171,6 +171,13 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean isDirectSearchSupported() {
+        return false;   // H2 chokes on the complex nested select statements
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getTimestampFunction() {
         return "TIMEMILLIS(NOW())";
     }

@@ -202,8 +202,13 @@ public class SqlSearch {
                     break;*/
                 case OFF:
                 case READ_ONLY:
-                    cacheTbl = DatabaseConst.TBL_SEARCHCACHE_MEMORY;
-                    searchId = seq.getId(FxSystemSequencer.SEARCHCACHE_MEMORY);
+                    if (params.isHintNoResultInfo() && storage.isDirectSearchSupported()) {
+                        cacheTbl = "";      // will be set to the SELECT statement later
+                        searchId = 1;       // not relevant, since no cache table is populated
+                    } else {
+                        cacheTbl = DatabaseConst.TBL_SEARCHCACHE_MEMORY;
+                        searchId = seq.getId(FxSystemSequencer.SEARCHCACHE_MEMORY);
+                    }
                     break;
                 default:
                     // Can never happen
@@ -273,7 +278,7 @@ public class SqlSearch {
                 }
             }
 
-            if (params.isHintNoResultInfo() && df.isDirectSelectSupported()) {
+            if (params.isHintNoResultInfo() && storage.isDirectSearchSupported()) {
                 // take the filter SQL and select directly
                 cacheTbl = "(" + df.getDataSelectSql() + ")";
             }

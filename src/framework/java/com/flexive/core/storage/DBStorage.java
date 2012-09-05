@@ -210,6 +210,13 @@ public interface DBStorage {
     boolean isDisableIntegrityTransactional();
 
     /**
+     * @return  true whether the database supports direct result retrieval (without intermediary cache tables)
+     *          for FxSQL (with reasonable performance)
+     * @since   3.1.7
+     */
+    boolean isDirectSearchSupported();
+
+    /**
      * Get the sql code of the statement to fix referential integrity when removing selectlist items
      *
      * @return sql code of the statement to fix referential integrity when removing selectlist items

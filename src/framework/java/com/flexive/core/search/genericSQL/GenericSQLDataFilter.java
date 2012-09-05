@@ -232,7 +232,7 @@ public class GenericSQLDataFilter extends DataFilter {
             }
             this.dataSelectSql = dataSelect;
 
-            if (!search.getParams().isHintNoResultInfo() || !isDirectSelectSupported()) {
+            if (!search.getParams().isHintNoResultInfo() || !search.getStorage().isDirectSearchSupported()) {
                 // Find all matching data entities and store them
                 sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
                 if (LOG.isDebugEnabled()) {
@@ -1225,14 +1225,6 @@ public class GenericSQLDataFilter extends DataFilter {
     @Override
     public String getDataSelectSql() {
         return dataSelectSql;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isDirectSelectSupported() {
-        return true;
     }
 
     /**

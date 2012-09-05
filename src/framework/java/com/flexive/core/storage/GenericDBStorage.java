@@ -99,6 +99,14 @@ public abstract class GenericDBStorage implements DBStorage {
         return query; //nothing to escape
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isDirectSearchSupported() {
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */

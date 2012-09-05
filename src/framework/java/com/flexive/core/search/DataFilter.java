@@ -146,11 +146,4 @@ public abstract class DataFilter {
      * @since   3.1.7
      */
     public abstract String getDataSelectSql();
-
-    /**
-     * @return  true whether the database supports direct result retrieval via {@link #getDataSelectSql()}
-     *          (with reasonable performance)
-     * @since   3.1.7
-     */
-    public abstract boolean isDirectSelectSupported();
 }
