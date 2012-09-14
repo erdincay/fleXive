@@ -1986,7 +1986,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
 
 
-            ReferencedContent ref = new ReferencedContent(pk, caption, env.getStep(stepId), acls);
+            // don't store explicit version in PK, otherwise clients will run into unexpected results when this
+            // content is cached (even by flexive)
+            ReferencedContent ref = new ReferencedContent(new FxPK(pk.getId(), FxPK.MAX), caption, env.getStep(stepId), acls);
             try {
                 ref.setAccessGranted(
                         FxPermissionUtils.checkPermission(
