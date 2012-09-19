@@ -1382,12 +1382,23 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         }
     }
 
-
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateUser(long accountId, String password, String name, String loginName, String email, Long lang) throws FxApplicationException {
+        _updateUser(accountId, password, true, name, loginName, email, lang);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateUser(long accountId, String password, boolean hashPassword, String name, String loginName, String email, Long lang) throws FxApplicationException {
+        _updateUser(accountId, password, hashPassword, name, loginName, email, lang);
+    }
+
+    private void _updateUser(long accountId, String password, boolean hashPassword, String name, String loginName, String email, Long lang) throws FxApplicationException {
         // Load the account to update
         Account account = load(accountId);
 
@@ -1401,7 +1412,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         // Parameter checks
         if (loginName != null) loginName = checkLoginName(loginName);
         if (email != null) email = FxFormatUtils.checkEmail(email);
-        if (password != null) {
+        if (password != null && hashPassword) {
             password = FxFormatUtils.encodePassword(accountId, account.getLoginName(), password.trim());
         }
 

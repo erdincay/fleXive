@@ -469,6 +469,22 @@ public interface AccountEngine {
      */
     void updateUser(long accountId, String password, String name, String loginName, String email, Long lang) throws FxApplicationException;
 
+    /**
+     * Updates some personal data of the specified user
+     *
+     * @param accountId    the user to update the data for
+     * @param password     the new password to assign
+     * @param hashPassword whether the password should be hashed (set to false for importing users, otherwise
+     *                     this should always be true)
+     * @param name         user name
+     * @param loginName    the new login name to assign
+     * @param email        the new e-mail address to assign
+     * @param lang         the new language to assign
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    void updateUser(long accountId, String password, boolean hashPassword, String name, String loginName, String email, Long lang) throws FxApplicationException;
+
 
     /**
      * Returns all users assigned to a group defined by its unique id.
