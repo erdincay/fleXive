@@ -675,6 +675,9 @@ public class XPathElement implements Serializable {
      * @since 3.1.7
      */
     public static String xpToUpperCase(String xpath) {
+        if (xpath == null) {
+            return null;
+        }
         StringBuilder out = null;
         final int len = xpath.length();
         for (int i = 0; i < len; i++) {

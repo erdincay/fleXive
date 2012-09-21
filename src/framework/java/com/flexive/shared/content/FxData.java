@@ -42,8 +42,10 @@ import com.flexive.shared.structure.FxType;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.WeakHashMap;
 
 /**
  * Abstract base class for property and group data
@@ -55,6 +57,13 @@ public abstract class FxData implements Serializable {
 
     public final static int POSITION_TOP = -1;
     public final static int POSITION_BOTTOM = -2;
+
+    /**
+     * XPath cache Workaround since Strings no longer share the backing array when created via String#substring since JDK 1.7_06+.
+     * We would end up with lots of duplicate Strings that previously used the same XPath String data
+     * (from the FxASssignment) unless we cache them manually.
+     */
+    private static final WeakHashMap<String, WeakReference<String>> XP_CACHE = new WeakHashMap<String, WeakReference<String>>();
 
     /**
      * XPath without indices
@@ -114,8 +123,8 @@ public abstract class FxData implements Serializable {
     protected FxData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices, long assignmentId,
                      FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent, boolean systemInternal) {
         this.xpPrefix = xpPrefix;
-        this.XPath = XPathElement.stripType(xPath);
-        this.XPathFull = XPathElement.stripType(xPathFull);
+        this.XPath = xpCached(XPathElement.stripType(xPath));
+        this.XPathFull = xpCached(XPathElement.stripType(xPathFull));
         this.indices = indices;
         this.assignmentId = assignmentId;
         this.assignmentMultiplicity = assignmentMultiplicity;
@@ -496,6 +505,23 @@ public abstract class FxData implements Serializable {
     }
 
     /**
+     * Ensure that only a single String is used for the given XPath (XPaths are expired automatically
+     * when they are no longer referenced).
+     *
+     * @param xpath     the XPath to be cached
+     * @return          the canonical String object for {@code xpath}
+     */
+    private static synchronized String xpCached(String xpath) {
+        final WeakReference<String> cached = XP_CACHE.get(xpath);
+        final String cachedValue = cached != null ? cached.get() : null;
+        if (cachedValue != null) {
+            return cachedValue;
+        }
+        XP_CACHE.put(xpath, new WeakReference<String>(xpath));
+        return xpath;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -536,4 +562,5 @@ public abstract class FxData implements Serializable {
      * @return independent copy
      */
     abstract FxData copy(FxGroupData parent);
+
 }

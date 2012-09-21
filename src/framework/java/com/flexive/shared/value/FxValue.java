@@ -40,6 +40,7 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -65,7 +66,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     protected long defaultLanguage = FxLanguage.SYSTEM_ID;
     private long selectedLanguage;
     private int maxInputLength;
-    private String XPath = "";
+    private String XPath = "", xpathPrefix = "";
     private Integer valueData = VALUE_NODATA;
     private FxValueChangeListener changeListener = null;
 
@@ -273,6 +274,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     protected FxValue(FxValue<T, TDerived> clone) {
         this(clone.isMultiLanguage(), clone.getDefaultLanguage(), new HashMap<Long, T>((clone.translations != null ? clone.translations.size() : 1)));
         this.XPath = clone.XPath;
+        this.xpathPrefix = clone.xpathPrefix;
         this.maxInputLength = clone.maxInputLength;
         this.valueData = clone.valueData;
         this.changeListener = clone.changeListener;
@@ -326,7 +328,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return XPath (optional! can be an empty String)
      */
     public String getXPath() {
-        return XPath;
+        return xpathPrefix.isEmpty() ? XPath : xpathPrefix + XPath;
     }
 
     /**
@@ -355,10 +357,27 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public TDerived setXPath(String XPath) {
         if (!this.readOnly) {
             this.XPath = XPath != null ? XPathElement.xpToUpperCase(XPath) : null;
+            this.xpathPrefix = "";
         }
         return (TDerived) this;
     }
 
+    /**
+     * Set the XPath (unless readonly)
+     *
+     * @param xpathPrefix   the xpath prefix (e.g. instance PK or type)
+     * @param xpath         the XPath
+     * @return  this
+     * @since 3.1.7
+     */
+    @SuppressWarnings("unchecked")
+    public TDerived setXPath(String xpathPrefix, String xpath) {
+        if (!this.readOnly) {
+            this.XPath = StringUtils.isBlank(xpath) ? "" : XPathElement.xpToUpperCase(xpath);
+            this.xpathPrefix = StringUtils.isBlank(xpathPrefix) ? "" : XPathElement.xpToUpperCase(xpathPrefix);
+        }
+        return (TDerived) this;
+    }
     /**
      * One-time operation to flag this FxValue as read only.
      * This is not reversible!
@@ -383,7 +402,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             this.singleValueEmpty = true;
         }
         if (this.changeListener != null) {
-            this.changeListener.onValueChanged(XPath, ChangeType.Remove);
+            this.changeListener.onValueChanged(getXPath(), ChangeType.Remove);
         }
         return (TDerived) this;
     }
@@ -405,7 +424,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         }
         if (this.changeListener != null) {
             if (isEmpty()) {
-                this.changeListener.onValueChanged(XPath, ChangeType.Remove);
+                this.changeListener.onValueChanged(getXPath(), ChangeType.Remove);
             }
         }
     }
@@ -814,11 +833,12 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             }
         }
         FxValueChangeListener.ChangeType change = null;
+        final String xpath = getXPath();
         if (!multiLanguage) {
             if (value == null && !isAcceptsEmptyDefaultTranslations()) {
                 throw new FxInvalidParameterException("value", "ex.content.invalid.default.empty", getClass().getSimpleName()).asRuntimeException();
             }
-            if (this.XPath != null && this.changeListener != null) {
+            if (StringUtils.isNotBlank(xpath) && this.changeListener != null) {
                 if (value != null) {
                     if (this.singleValueEmpty)
                         change = FxValueChangeListener.ChangeType.Add;
@@ -833,7 +853,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                 this.singleValue = value;
             this.singleValueEmpty = value == null;
             if (changeListener != null && change != null)
-                changeListener.onValueChanged(XPath, change);
+                changeListener.onValueChanged(xpath, change);
             //noinspection unchecked
             return (TDerived) this;
         }
@@ -844,7 +864,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         }
         if (language == FxLanguage.SYSTEM_ID)
             throw new FxInvalidParameterException("language", "ex.content.value.invalid.multilanguage.sys").asRuntimeException();
-        if (this.XPath != null && this.changeListener != null && value != null) {
+        if (StringUtils.isNotBlank(xpath) && this.changeListener != null && value != null) {
             if (this.isEmpty())
                 change = FxValueChangeListener.ChangeType.Add;
             else {
@@ -862,11 +882,11 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             }
             emptyTranslations.put(language, false);
         }
-        if (this.XPath != null && this.changeListener != null && value == null && !wasEmpty && isEmpty()) {
+        if (StringUtils.isNotBlank(xpath) && this.changeListener != null && value == null && !wasEmpty && isEmpty()) {
             change = FxValueChangeListener.ChangeType.Remove;
         }
         if (changeListener != null && change != null)
-            changeListener.onValueChanged(XPath, change);
+            changeListener.onValueChanged(xpath, change);
         //noinspection unchecked
         return (TDerived) this;
     }

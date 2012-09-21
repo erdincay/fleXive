@@ -340,11 +340,10 @@ public class FxPropertyData extends FxData {
     }
 
     private void setValueXPath() {
-        final String xPath = xpPrefix + this.getXPathFull();
-        this.value.setXPath(xPath);
-
-        // re-use the value's XPath string for the property data to save some memory
-        XPathFull = xPath.substring(xpPrefix.length());
+        if (XPathFull != null) {
+            XPathFull = XPathElement.xpToUpperCase(XPathFull);
+            this.value.setXPath(xpPrefix, XPathFull);
+        }
     }
 
     /**

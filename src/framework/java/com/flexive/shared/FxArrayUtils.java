@@ -422,20 +422,25 @@ public class FxArrayUtils {
      */
     public static int getIntElementAt(String array, char separator, int index) {
         try {
-            if (index == 0)
-                return Integer.valueOf(array.substring(0, array.indexOf(separator)));
+            if (index == 0) {
+                final int sep = array.indexOf(separator);
+                return sep == 0 ? Integer.MIN_VALUE : Integer.parseInt(array.substring(0, sep));
+            }
             int curr = 0;
             int start = 0;
-            for (char c : array.toCharArray()) {
+            for (int i = 0; i < array.length(); i++) {
+                final char c = array.charAt(i);
                 if (c == separator)
                     curr++;
                 if (curr == index) {
-                    int end = array.substring(start + 1).indexOf(',');
-                    if (end == -1)
-                        return Integer.valueOf(array.substring(start + 1));
-                    else if (end == 0)
+                    final int numStart = start + 1;
+                    int end = array.indexOf(',', numStart);
+                    if (end == -1) {
+                        return numStart == array.length() ? Integer.MIN_VALUE : Integer.parseInt(array.substring(numStart));
+                    } else if (end == numStart) {
                         return Integer.MIN_VALUE;       // no entry
-                    return Integer.valueOf(array.substring(start + 1, start + end + 1));
+                    }
+                    return Integer.parseInt(array.substring(numStart, end));
                 }
                 start++;
             }
