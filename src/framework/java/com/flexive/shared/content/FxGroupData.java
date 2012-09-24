@@ -181,6 +181,8 @@ public class FxGroupData extends FxData {
      * @throws FxInvalidParameterException on errors
      */
     public static FxGroupData createVirtualRootGroup(String xpPrefix) throws FxInvalidParameterException {
+        // note: multiplicity and other settings are no longer used by FxGroupData, they are supplied
+        // by the virtual root assignment created in FxData#getAssignment
         return new FxGroupData(xpPrefix, "", 1, "/", "/", new int[0], -1, new FxMultiplicity(1, 1), -1, null, new ArrayList<FxData>(), false);
     }
 
@@ -370,7 +372,7 @@ public class FxGroupData extends FxData {
      */
     @Override
     protected void setXPathFull(String xpathFull) {
-        this.XPathFull = xpathFull;
+        this.XPathFull = xpCached(xpathFull);
         this.indices = XPathElement.getIndices(this.XPathFull);
     }
 

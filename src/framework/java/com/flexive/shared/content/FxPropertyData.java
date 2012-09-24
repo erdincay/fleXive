@@ -54,24 +54,21 @@ import java.util.List;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxPropertyData extends FxData {
-    private static final long serialVersionUID = -8738710689160073148L;
-    private FxValue value;
-    private long propertyId;
-    private boolean containsDefaultValue;
-    private FxStructureOption maxLength;
     private static final Log LOG = LogFactory.getLog(FxPropertyData.class);
+    private static final long serialVersionUID = -8738710689160073148L;
+
+    private FxValue value;
+    private boolean containsDefaultValue;
 
     public FxPropertyData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
                           long assignmentId, long propertyId, FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent,
                           FxValue value, boolean systemInternal, FxStructureOption maxLength) {
         super(xpPrefix, alias, index, xPath, xPathFull, indices, assignmentId, assignmentMultiplicity, pos, parent, systemInternal);
         this.value = value;
-        this.propertyId = propertyId;
         this.containsDefaultValue = false;
         if (this.value != null) {
             setValueXPath();
         }
-        this.maxLength=maxLength;
     }
 
     /**
@@ -105,7 +102,7 @@ public class FxPropertyData extends FxData {
      * @return id of the property used by the assignment
      */
     public long getPropertyId() {
-        return propertyId;
+        return getPropertyAssignment().getProperty().getId();
     }
 
     /**
@@ -228,7 +225,7 @@ public class FxPropertyData extends FxData {
      */
     @Override
     protected void setXPathFull(String xpathFull) {
-        this.XPathFull = xpathFull;
+        this.XPathFull = xpCached(xpathFull);
         this.indices = XPathElement.getIndices(this.XPathFull);
         if (this.value != null) {
             // apply updated XPath to FxValue (FX-920)
@@ -272,6 +269,7 @@ public class FxPropertyData extends FxData {
             return;
         }
 
+        final FxStructureOption maxLength = getMaxLength();
         for (long lang : value.getTranslatedLanguages()) {
             if (value.getTranslation(lang).toString().length() > maxLength.getIntValue())
                 throw new FxInvalidParameterException(this.getAlias(), "ex.content.value.invalid.maxLength",
@@ -317,7 +315,7 @@ public class FxPropertyData extends FxData {
      * @return the value of the assignment's FxStructureOption.MAXLENGTH, or -1 of the option is not set
      */
     public FxStructureOption getMaxLength() {
-        return maxLength;
+        return getPropertyAssignment().getOption(FxStructureOption.OPTION_MAXLENGTH);
     }
 
     /**
@@ -341,7 +339,7 @@ public class FxPropertyData extends FxData {
 
     private void setValueXPath() {
         if (XPathFull != null) {
-            XPathFull = XPathElement.xpToUpperCase(XPathFull);
+            XPathFull = xpCached(XPathElement.xpToUpperCase(XPathFull));
             this.value.setXPath(xpPrefix, XPathFull);
         }
     }
@@ -357,7 +355,7 @@ public class FxPropertyData extends FxData {
         if (!super.equals(obj))
             return false;
         FxPropertyData comp = (FxPropertyData) obj;
-        return this.value.equals(comp.value) && this.propertyId == comp.propertyId;
+        return this.value.equals(comp.value);
     }
 
     /**
@@ -365,10 +363,7 @@ public class FxPropertyData extends FxData {
      */
     @Override
     public int hashCode() {
-        int result;
-        result = value.hashCode();
-        result = 31 * result + (int) (propertyId ^ (propertyId >>> 32));
-        return result;
+        return 31 * super.hashCode() + value.hashCode();
     }
 
     /**
@@ -378,6 +373,6 @@ public class FxPropertyData extends FxData {
     FxPropertyData copy(FxGroupData parent) {
         return new FxPropertyData(xpPrefix, getAlias(), getIndex(), getXPath(), getXPathFull(),
                 ArrayUtils.clone(getIndices()), getAssignmentId(), getPropertyId(), getAssignmentMultiplicity(),
-                getPos(), parent, value.copy(), isSystemInternal(), maxLength);
+                getPos(), parent, value.copy(), isSystemInternal(), getMaxLength());
     }
 }

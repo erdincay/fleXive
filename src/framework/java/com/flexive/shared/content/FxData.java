@@ -36,9 +36,7 @@ import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxMultiplicity;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.*;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
@@ -86,16 +84,6 @@ public abstract class FxData implements Serializable {
     private long assignmentId;
 
     /**
-     * Cached assignment
-     */
-    private transient FxAssignment assignment;
-
-    /**
-     * Multiplicity of the assignment
-     */
-    private FxMultiplicity assignmentMultiplicity;
-
-    /**
      * Position within same hierarchy level
      */
     private int pos;
@@ -104,11 +92,6 @@ public abstract class FxData implements Serializable {
      * Parent element (virtual root for the first)
      */
     private FxGroupData parent;
-
-    /**
-     * Is this a system internal entry?
-     */
-    private boolean systemInternal;
 
     /**
      * XPathElement of this entry
@@ -127,13 +110,11 @@ public abstract class FxData implements Serializable {
         this.XPathFull = xpCached(XPathElement.stripType(xPathFull));
         this.indices = indices;
         this.assignmentId = assignmentId;
-        this.assignmentMultiplicity = assignmentMultiplicity;
         this.pos = pos;
         this.parent = parent;
         this.xp = new XPathElement(alias, index, true);
         if (index != 1)
             applyIndices();
-        this.systemInternal = systemInternal;
     }
 
     /**
@@ -176,7 +157,7 @@ public abstract class FxData implements Serializable {
      * @return system internal
      */
     public boolean isSystemInternal() {
-        return systemInternal;
+        return getAssignment().isSystemInternal();
     }
 
     public int getIndex() {
@@ -266,9 +247,14 @@ public abstract class FxData implements Serializable {
      * @return FxAssignment
      */
     public synchronized FxAssignment getAssignment() {
-        if (assignment == null)
-            assignment = CacheAdmin.getEnvironment().getAssignment(this.getAssignmentId());
-        return assignment;
+        if (assignmentId == -1) {
+            // root group assignment
+            return new FxGroupAssignment(-1, true, CacheAdmin.getEnvironment().getType(FxType.ROOT_ID), "", "", 1, FxMultiplicity.MULT_1_1,
+                    1, null, -1, null, null,
+                    new FxGroup(-1, "", null, null, true, FxMultiplicity.MULT_1_1, null),
+                    GroupMode.AnyOf, null);
+        }
+        return CacheAdmin.getEnvironment().getAssignment(this.getAssignmentId());
     }
 
     /**
@@ -288,6 +274,7 @@ public abstract class FxData implements Serializable {
     public int getCreateableElements() {
         if (parent == null)
             return 0; //just one instance of the virtual root group
+        final FxMultiplicity assignmentMultiplicity = getAssignmentMultiplicity();
         if (assignmentMultiplicity.getMax() == 1)
             return 0; //we have to be the only instance
         if (assignmentMultiplicity.isUnlimited())
@@ -333,7 +320,7 @@ public abstract class FxData implements Serializable {
                     // don't remove system internal assignments, except superfluous /ACL entries  
                     && ("ACL".equals(curr.getAssignment().getAlias()) || !curr.isSystemInternal()))
                 count++;
-        count -= assignmentMultiplicity.getMin();
+        count -= getAssignmentMultiplicity().getMin();
         return count > 0 ? count : 0;
     }
 
@@ -384,7 +371,7 @@ public abstract class FxData implements Serializable {
         for (FxData curr : parent.getChildren()) {
             if (curr.getAssignmentId() == this.assignmentId && curr.getIndex() + 1 > newIndex)
                 newIndex = curr.getIndex() + 1;
-            if (curr.getPos() >= insertPosition && !curr.systemInternal)
+            if (curr.getPos() >= insertPosition && !curr.isSystemInternal())
                 curr.pos++;
         }
         FxAssignment fxa = type.getAssignment(this.getXPath());
@@ -404,7 +391,7 @@ public abstract class FxData implements Serializable {
      * @return multiplicity of the associated assignment
      */
     public FxMultiplicity getAssignmentMultiplicity() {
-        return assignmentMultiplicity;
+        return getAssignment().getMultiplicity();
     }
 
     /**
@@ -511,7 +498,7 @@ public abstract class FxData implements Serializable {
      * @param xpath     the XPath to be cached
      * @return          the canonical String object for {@code xpath}
      */
-    private static synchronized String xpCached(String xpath) {
+    static synchronized String xpCached(String xpath) {
         final WeakReference<String> cached = XP_CACHE.get(xpath);
         final String cachedValue = cached != null ? cached.get() : null;
         if (cachedValue != null) {
