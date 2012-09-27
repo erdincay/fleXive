@@ -41,7 +41,7 @@ import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import org.apache.commons.lang.ArrayUtils;
+import com.google.common.collect.Lists;
 
 import java.util.*;
 
@@ -61,6 +61,23 @@ public class FxGroupData extends FxData {
         super(xpPrefix, alias, index, xPath, xPathFull, indices, assignmentId, assignmentMultiplicity,
                 pos, parent, systemInternal);
         this.data = data;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other     the group data instance to copy
+     * @param parent    the new parent
+     * @since 3.1.7
+     */
+    public FxGroupData(FxGroupData other, FxGroupData parent) {
+        super(other, parent);
+        this.changeListener = other.changeListener;
+        this.data = Lists.newArrayListWithCapacity(other.data.size());
+        for (FxData org : other.data) {
+            data.add(org.copy(this));
+        }
+        this.changeListener = other.changeListener;
     }
 
     /**
@@ -372,6 +389,9 @@ public class FxGroupData extends FxData {
      */
     @Override
     protected void setXPathFull(String xpathFull) {
+        if (xpathFull.equals(this.XPathFull)) {
+            return;
+        }
         this.XPathFull = xpCached(xpathFull);
         this.indices = XPathElement.getIndices(this.XPathFull);
     }
@@ -941,20 +961,7 @@ public class FxGroupData extends FxData {
      */
     @Override
     protected FxGroupData copy(FxGroupData parent) {
-        FxGroupData clone;
-        try {
-            clone = new FxGroupData(xpPrefix, getAlias(), getIndex(), getXPath(), getXPathFull(),
-                    ArrayUtils.clone(getIndices()), getAssignmentId(), getAssignmentMultiplicity(), getPos(),
-                    parent, null, isSystemInternal());
-            List<FxData> cloneData = new ArrayList<FxData>(data.size());
-            for (FxData org : data)
-                cloneData.add(org.copy(clone));
-            clone.data = cloneData;
-            clone.changeListener = this.changeListener;
-        } catch (FxInvalidParameterException e) {
-            throw e.asRuntimeException();
-        }
-        return clone;
+        return new FxGroupData(this, parent);
     }
 
     /**

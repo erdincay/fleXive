@@ -41,7 +41,6 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.structure.GroupMode;
 import com.flexive.shared.value.*;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,6 +68,18 @@ public class FxPropertyData extends FxData {
         if (this.value != null) {
             setValueXPath();
         }
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other    the property data instance to copy
+     * @since 3.1.7
+     */
+    public FxPropertyData(FxPropertyData other, FxGroupData parent) {
+        super(other, parent);
+        this.value = other.value.copy();
+        this.containsDefaultValue = other.containsDefaultValue;
     }
 
     /**
@@ -225,6 +236,9 @@ public class FxPropertyData extends FxData {
      */
     @Override
     protected void setXPathFull(String xpathFull) {
+        if (xpathFull.equals(this.XPathFull)) {
+            return; // nop
+        }
         this.XPathFull = xpCached(xpathFull);
         this.indices = XPathElement.getIndices(this.XPathFull);
         if (this.value != null) {
@@ -371,8 +385,6 @@ public class FxPropertyData extends FxData {
      */
     @Override
     FxPropertyData copy(FxGroupData parent) {
-        return new FxPropertyData(xpPrefix, getAlias(), getIndex(), getXPath(), getXPathFull(),
-                ArrayUtils.clone(getIndices()), getAssignmentId(), getPropertyId(), getAssignmentMultiplicity(),
-                getPos(), parent, value.copy(), isSystemInternal(), getMaxLength());
+        return new FxPropertyData(this, parent);
     }
 }

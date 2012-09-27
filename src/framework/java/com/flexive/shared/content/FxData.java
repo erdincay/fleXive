@@ -118,6 +118,24 @@ public abstract class FxData implements Serializable {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param other    the FxData instance to be copied
+     * @param parent   the new group data parent
+     * @since 3.1.7
+     */
+    protected FxData(FxData other, FxGroupData parent) {
+        this.xpPrefix = other.xpPrefix;
+        this.XPath = other.XPath;
+        this.XPathFull = other.XPathFull;
+        this.indices = other.indices.clone();
+        this.assignmentId = other.assignmentId;
+        this.pos = other.pos;
+        this.parent = parent;
+        this.xp = new XPathElement(other.xp.getAlias(), other.xp.getIndex(), true);
+    }
+
+    /**
      * Is this FxData a property or group?
      *
      * @return if this FxData is a property or group
@@ -498,15 +516,22 @@ public abstract class FxData implements Serializable {
      * @param xpath     the XPath to be cached
      * @return          the canonical String object for {@code xpath}
      */
-    static synchronized String xpCached(String xpath) {
-        final WeakReference<String> cached = XP_CACHE.get(xpath);
+    static String xpCached(String xpath) {
+        final WeakReference<String> cached;
+        synchronized (XP_LOCK) {
+            cached = XP_CACHE.get(xpath);
+        }
         final String cachedValue = cached != null ? cached.get() : null;
         if (cachedValue != null) {
             return cachedValue;
         }
-        XP_CACHE.put(xpath, new WeakReference<String>(xpath));
+        synchronized (XP_LOCK) {
+            XP_CACHE.put(xpath, new WeakReference<String>(xpath));
+        }
         return xpath;
     }
+
+    private static final Object XP_LOCK = new Object();
 
     /**
      * {@inheritDoc}
