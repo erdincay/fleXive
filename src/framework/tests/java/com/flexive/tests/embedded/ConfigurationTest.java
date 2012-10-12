@@ -197,8 +197,9 @@ public class ConfigurationTest {
                     fail("Should not be permitted to set parameter " + parameter + " in " + configuration);
 
                 T dbValue = configuration.get(parameter);
-                assertTrue(!((dbValue == null && value != null) || (dbValue != null && value == null)));
-                assertTrue(dbValue == null || dbValue.equals(value), "Parameter value not stored correctly or incorrect implementation of \"Object#equals\"");
+                assertTrue(!((dbValue == null && value != null) || (dbValue != null && value == null && parameter.getDefaultValue() == null)));
+                assertTrue(dbValue == null || dbValue.equals(value != null ? value : parameter.getDefaultValue()),
+                        "Parameter value not stored correctly or incorrect implementation of \"Object#equals\"");
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig())
                     fail("Failed to put parameter although privileges exist for parameter " + parameter + " in " + configuration);
@@ -252,7 +253,9 @@ public class ConfigurationTest {
                 configuration.put(parameter, value);
                 if (!mayUpdateConfig())
                     fail("Should not be permitted to set parameter " + parameter + " in " + configuration);
-                assertTrue((configuration.get(parameter) == null && value == null) || configuration.get(parameter).equals(value), "Failed to load updated value.");
+                assertTrue((configuration.get(parameter) == null && value == null && parameter.getDefaultValue() == null)
+                        || (configuration.get(parameter) != null && value == null && parameter.getDefaultValue() != null)
+                        || configuration.get(parameter).equals(value), "Failed to load updated value.");
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig())
                     fail("Failed to update parameter although privileges exist "

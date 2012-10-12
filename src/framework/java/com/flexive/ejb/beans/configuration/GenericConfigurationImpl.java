@@ -408,7 +408,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             final T value = parameter.getValue(
                     getParameter(parameter, parameter.getPath().getValue(), key)
             );
-            return new Pair<Boolean, T>(true, value);
+            return new Pair<Boolean, T>(true, value != null ? value : parameter.getDefaultValue());
         } catch (FxNotFoundException e) {
             if (!ignoreDefault && parameter.getDefaultValue() != null) {
                 return new Pair<Boolean, T>(true, parameter.getDefaultValue());
