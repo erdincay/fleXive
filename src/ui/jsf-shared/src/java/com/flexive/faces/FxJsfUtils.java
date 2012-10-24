@@ -334,8 +334,10 @@ public class FxJsfUtils {
 
         if (value instanceof Integer) {
             return (Integer) value;
-        } else {
+        } else if (value != null) {
             return new Integer(value.toString());
+        } else {
+            return null;
         }
     }
 
@@ -351,11 +353,7 @@ public class FxJsfUtils {
         }
         Object value = evalObject(el);
 
-        if (value instanceof String) {
-            return (String) value;
-        } else {
-            return value.toString();
-        }
+        return value != null ? value.toString() : null;
     }
 
     public static Application getApplication() {
