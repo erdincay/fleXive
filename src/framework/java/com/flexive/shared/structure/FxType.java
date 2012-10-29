@@ -714,7 +714,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     public List<FxPropertyAssignment> getAllProperties() {
         final List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
         result.addAll(assignedProperties);
-        for (FxGroupAssignment groupAssignment : getAssignedGroups()) {
+        for (FxGroupAssignment groupAssignment : assignedGroups) {
             result.addAll(groupAssignment.getAllProperties());
         }
         return result;
@@ -1091,10 +1091,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             List<XPathElement> xpe = XPathElement.split(parentXPath.toUpperCase());
             if (xpe.size() == 0)
                 return null; //play safe, but should not happen
-            for (FxGroupAssignment rga : getAssignedGroups())
+            for (FxGroupAssignment rga : assignedGroups)
                 if (rga.getAlias().equals(xpe.get(0).getAlias()))
                     return rga.getAssignment(xpe, parentXPath);
-            for (FxPropertyAssignment rpa : getAssignedProperties())
+            for (FxPropertyAssignment rpa : assignedProperties)
                 if (rpa.getAlias().equals(xpe.get(0).getAlias()))
                     return rpa;
         } catch (FxNotFoundException e) {
@@ -1212,10 +1212,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public List<FxPropertyAssignment> getAssignmentsForProperty(long propertyId) {
         List<FxPropertyAssignment> ret = new ArrayList<FxPropertyAssignment>(10);
-        for (FxPropertyAssignment rpa : getAssignedProperties())
+        for (FxPropertyAssignment rpa : assignedProperties)
             if (rpa.getProperty().getId() == propertyId)
                 ret.add(rpa);
-        for (FxGroupAssignment rga : getAssignedGroups())
+        for (FxGroupAssignment rga : assignedGroups)
             for (FxAssignment a : rga.getAllChildAssignments())
                 if (a instanceof FxPropertyAssignment && ((FxPropertyAssignment) a).getProperty().getId() == propertyId) {
                     ret.add((FxPropertyAssignment) a);
@@ -1232,10 +1232,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public List<FxPropertyAssignment> getAssignmentsForDataType(FxDataType dataType) {
         List<FxPropertyAssignment> ret = new ArrayList<FxPropertyAssignment>(10);
-        for (FxPropertyAssignment rpa : getAssignedProperties())
+        for (FxPropertyAssignment rpa : assignedProperties)
             if (rpa.getProperty().getDataType().equals(dataType))
                 ret.add(rpa);
-        for (FxGroupAssignment rga : getAssignedGroups())
+        for (FxGroupAssignment rga : assignedGroups)
             for (FxAssignment a : rga.getAllChildAssignments())
                 if (a instanceof FxPropertyAssignment && ((FxPropertyAssignment) a).getProperty().getDataType().equals(dataType)) {
                     ret.add((FxPropertyAssignment) a);
@@ -1253,10 +1253,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     public List<FxAssignment> getConnectedAssignments(String parentXPath) {
         List<FxAssignment> assignments = new ArrayList<FxAssignment>(10);
         if (StringUtils.isEmpty(parentXPath) || "/".equals(parentXPath)) {
-            for (FxGroupAssignment rga : getAssignedGroups())
+            for (FxGroupAssignment rga : assignedGroups)
                 if (rga.getParentGroupAssignment() == null)
                     assignments.add(rga);
-            for (FxPropertyAssignment rpa : getAssignedProperties())
+            for (FxPropertyAssignment rpa : assignedProperties)
                 if (rpa.getParentGroupAssignment() == null)
                     assignments.add(rpa);
             return Collections.unmodifiableList(FxAssignment.sort(assignments));
@@ -1264,7 +1264,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         //check if the parentXPath is a group
         if (!(getAssignment(parentXPath) instanceof FxGroupAssignment))
             throw new FxInvalidParameterException("ex.structure.assignment.noGroup", parentXPath).asRuntimeException();
-        for (FxGroupAssignment rga : getAssignedGroups())
+        for (FxGroupAssignment rga : assignedGroups)
             if (rga.getXPath().equals(parentXPath))
                 return rga.getAssignments();
         throw new FxNotFoundException("ex.structure.assignments.notFound.xpath", parentXPath).asRuntimeException();
@@ -1298,7 +1298,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                 if (depth == 1) {
                     //check root assignments
                     boolean found = false;
-                    for (FxPropertyAssignment pa : getAssignedProperties()) {
+                    for (FxPropertyAssignment pa : assignedProperties) {
                         if (pa.getAlias().equals(xpe.getAlias())) {
                             last = pa;
                             // only check the max. multiplicity
@@ -1309,7 +1309,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                     }
                     if (found)
                         continue;
-                    for (FxGroupAssignment ga : getAssignedGroups()) {
+                    for (FxGroupAssignment ga : assignedGroups) {
                         if (ga.getAlias().equals(xpe.getAlias())) {
                             last = ga;
                             // only check the max. multiplicity

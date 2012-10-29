@@ -180,7 +180,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             if (as instanceof FxGroupAssignment)
                 addGroup(ret, (FxGroupAssignment) as);
         }
-        return Collections.unmodifiableList(ret);
+        return ret;
     }
 
     /**
