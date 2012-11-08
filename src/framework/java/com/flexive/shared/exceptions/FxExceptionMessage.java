@@ -182,6 +182,15 @@ public class FxExceptionMessage implements Serializable {
     }
 
     /**
+     * Getter for the message values (arguments)
+     *
+     * @return message key arguments
+     */
+    public Object[] getArguments() {
+        return values;
+    }
+
+    /**
      * Get the localized message for a given language code
      *
      * @param language  the language
