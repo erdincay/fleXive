@@ -21,6 +21,12 @@
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-shared</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-ejb-interfaces-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
