@@ -116,7 +116,7 @@ public final class FxSharedUtils {
      * Are JDK 6+ extensions allowed to be run on the current VM?
      */
     public static final boolean USE_JDK6_EXTENSION;
-    public static final boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
+    public static final boolean WINDOWS = System.getProperty("os.name").contains("Windows");
     public static final String FLEXIVE_DROP_PROPERTIES = "flexive-application.properties";
     public static final String FLEXIVE_STORAGE_PROPERTIES = "flexive-storage.properties";
     /**
@@ -125,6 +125,7 @@ public final class FxSharedUtils {
      * that can assume that the stock run-once scripts work.
      */
     public static final String PROP_RUNONCE_MINIMAL = "flexive.runonce.minimal";
+    private static String NODE_ID;
 
     static {
         int major = -1, minor = -1;
@@ -2159,5 +2160,22 @@ public final class FxSharedUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * @return  the name of the current network node (used by flexive for the {@link com.flexive.shared.interfaces.NodeConfigurationEngine}.
+     * @since   3.1.7
+     */
+    public static synchronized String getNodeId() {
+        if (NODE_ID == null) {
+            NODE_ID = System.getProperty("flexive.nodename");
+            if (StringUtils.isBlank(NODE_ID)) {
+                NODE_ID = getHostName();
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Determined nodename (override with system property flexive.nodename): " + NODE_ID);
+            }
+        }
+        return NODE_ID;
     }
 }

@@ -39,14 +39,11 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.interfaces.NodeConfigurationEngine;
 import com.flexive.shared.interfaces.NodeConfigurationEngineLocal;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * NodeConfigurationEngine implementation
@@ -59,14 +56,6 @@ import java.sql.ResultSet;
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class NodeConfigurationEngineBean extends CustomDomainConfigurationImpl<String> implements NodeConfigurationEngine, NodeConfigurationEngineLocal {
-    private static final Log LOG = LogFactory.getLog(NodeConfigurationEngineBean.class);
-    private static final String NODE_ID = StringUtils.defaultString(System.getProperty("flexive.nodename"), FxSharedUtils.getHostName());
-
-    static {
-        if (LOG.isInfoEnabled())
-            LOG.info("Determined nodename (override with system property flexive.nodename): " + NODE_ID);
-    }
-
     /**
      * Ctor
      */
@@ -82,7 +71,7 @@ public class NodeConfigurationEngineBean extends CustomDomainConfigurationImpl<S
 
     @Override
     public String getCurrentDomain() {
-        return NODE_ID;
+        return FxSharedUtils.getNodeId();
     }
 
     /**
