@@ -151,7 +151,16 @@ public class FxGroupData extends FxData {
     public void setEmpty() {
         if(this.isRootGroup())
             return; //not possible for the root group (yet)
+
+        // create an empty groups
         FxGroupData empty = (FxGroupData)this.getAssignment().createEmptyData(this.getParent(), this.getIndex(), this.getPos());
+
+        // fix child parents
+        for (FxData emptyData : empty.data) {
+            emptyData.parent = this;
+        }
+
+        // replace group children
         this.data = empty.data;
     }
 

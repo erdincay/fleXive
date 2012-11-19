@@ -91,7 +91,7 @@ public abstract class FxData implements Serializable {
     /**
      * Parent element (virtual root for the first)
      */
-    private FxGroupData parent;
+    FxGroupData parent;
 
     /**
      * XPathElement of this entry
