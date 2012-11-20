@@ -1423,9 +1423,18 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public FxLanguage getLanguage(String isoCode) {
         isoCode = isoCode.toLowerCase();
-        for (FxLanguage language : languages) {
-            if (language.getIso2digit().equals(isoCode)) {
-                return language;
+        if(isoCode.length() > 2) {
+            if("en_us".equals(isoCode))
+                return getLanguage(FxLanguage.ENGLISH_US);
+            else if("en_uk".equals(isoCode))
+                return getLanguage(FxLanguage.ENGLISH_UK);
+            if("de_ch".equals(isoCode))
+                return getLanguage(FxLanguage.GERMAN_CH);
+        } else {
+            for (FxLanguage language : languages) {
+                if (language.getIso2digit().equals(isoCode)) {
+                    return language;
+                }
             }
         }
         throw new FxNotFoundException("ex.language.notFound.iso", isoCode).asRuntimeException();
