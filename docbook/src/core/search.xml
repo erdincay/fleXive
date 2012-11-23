@@ -402,7 +402,7 @@ ORDER BY 2]]></programlisting>
             </para>
 
             <table xml:id="css_type_condition_table" class="flexive">
-                <caption>Date and Time functions provided in &fxsql;</caption>
+                <caption>Type conditions in FxSQL</caption>
                 <thead>
                     <tr>
                         <th>Condition</th>

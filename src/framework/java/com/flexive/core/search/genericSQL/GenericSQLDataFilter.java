@@ -403,7 +403,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 final Brace grouped = br.groupConditions(new Brace.GroupFunction() {
                     public Object apply(Condition cond) {
                         try {
-                            final Pair<String, ConditionTableInfo> pi = getPropertyInfo(cond.getProperty());
+                            final Pair<String, ConditionTableInfo> pi = getPropertyInfo(cond);
                             return pi.getSecond().isFlatStorage()
                                     // flat storage entries can be grouped as long as they're on the same table
                                     ? pi.getFirst()
@@ -479,7 +479,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 final Brace grouped = br.groupConditions(new Brace.GroupFunction() {
                     public Object apply(Condition cond) {
                         try {
-                            return getPropertyInfo(cond.getProperty());
+                            return getPropertyInfo(cond);
                         } catch (FxSqlSearchException e) {
                             throw e.asRuntimeException();
                         }
@@ -542,7 +542,7 @@ public class GenericSQLDataFilter extends DataFilter {
         for (BraceElement braceElement : br.getElements()) {
             if (braceElement instanceof Condition) {
                 final Condition condition = (Condition) braceElement;
-                if (condition.getComperator() == ValueComparator.IS && condition.getConstant().isNull()) {
+                if (condition.isNullCondition()) {
                     return true;
                 }
             } else if (braceElement instanceof Brace) {
@@ -648,7 +648,7 @@ public class GenericSQLDataFilter extends DataFilter {
         final Multimap<String, ConditionTableInfo> tables = HashMultimap.create();
         for (BraceElement be : br.getElements()) {
             if (be instanceof Condition) {
-                final Pair<String, ConditionTableInfo> cti = getPropertyInfo(((Condition) be).getProperty());
+                final Pair<String, ConditionTableInfo> cti = getPropertyInfo((Condition) be);
                 tables.put(cti.getFirst(), cti.getSecond());
             } else if (be instanceof Brace && recurse) {
                 tables.putAll(getUsedContentTables((Brace) be, true));
@@ -661,18 +661,23 @@ public class GenericSQLDataFilter extends DataFilter {
      * Return the storage table and the {@link com.flexive.core.search.genericSQL.GenericSQLDataFilter.ConditionTableInfo}
      * object for the given condition property.
      *
-     * @param prop the condition property
+     * @param cond the condition
      * @return the storage information
      * @throws FxSqlSearchException if the property could not be resolved
      */
-    private Pair<String, ConditionTableInfo> getPropertyInfo(Property prop) throws FxSqlSearchException {
+    private Pair<String, ConditionTableInfo> getPropertyInfo(Condition cond) throws FxSqlSearchException {
         final Pair<String, ConditionTableInfo> cti;
+        final Property prop = cond.getProperty();
         if (prop == null) {
             // insert dummy entry that will prevent any table-level optimizations
             // because this condition is not mapped to a content table (e.g. tree ops)
             cti = Pair.newPair("null table", new ConditionTableInfo(false, false, -1));
         } else if (prop.isWildcard() || prop.isUserPropsWildcard()) {
             cti = Pair.newPair("wildcard property", new ConditionTableInfo(false, false, -1));
+        } else if (cond.isNullCondition()) {
+            // "IS NULL" is a special case that cannot be optimized like other statements
+            // (since it checks for the absence of data and needs specialized queries)
+            cti = Pair.newPair("notNull condition", new ConditionTableInfo(false, false, -1));
         } else {
             final PropertyEntry entry = getPropertyResolver().get(getStatement(), prop);
             if (entry.getProperty() == null) {

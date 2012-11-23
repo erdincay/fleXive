@@ -206,4 +206,8 @@ public class Condition implements BraceElement {
     public void setProcessed(boolean processed) {
         this.processed = processed;
     }
+
+    public boolean isNullCondition() {
+        return comparator == ValueComparator.IS && getConstant().isNull();
+    }
 }
