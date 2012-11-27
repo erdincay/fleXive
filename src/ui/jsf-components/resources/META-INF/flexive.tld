@@ -1073,6 +1073,18 @@
             <rtexprvalue>true</rtexprvalue>
             <description>True if the owner of the lock should be shown (default: true).</description>
         </attribute>
+        <attribute>
+            <name>hiddenAssignments</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A collection of assignment IDs that will not be rendered in the editor (default: none).</description>
+        </attribute>
+        <attribute>
+            <name>hiddenProperties</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A collection of property IDs that will not be rendered in the editor (default: none).</description>
+        </attribute>
     </tag>
 
     <tag>

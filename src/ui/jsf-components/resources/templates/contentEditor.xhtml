@@ -5,13 +5,10 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
-      xmlns:rich="http://richfaces.org/rich"
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
-      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
-      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
+        >
 
 <ui:composition>
     <fx:wrappedContentProvider contentId="#{contentId}" editorId="#{editorId}"
@@ -28,7 +25,8 @@
         contentLocked="#{contentLocked}" looseLock="#{looseLock}" permLock="#{permLock}" takeOver="#{takeOver}"
         userMayTakeover="#{userMayTakeover}" userMayUnlock="#{userMayUnlock}" userMayLooseLock="#{userMayLooseLock}"
         userMayPermLock="#{userMayPermLock}" disableReferenceEditor="#{disableReferenceEditor}"
-        closePanelScript="#{closePanelScript}" showLockOwner="#{showLockOwner}">
+        closePanelScript="#{closePanelScript}" showLockOwner="#{showLockOwner}"
+        hiddenAssignments="#{hiddenAssignments}" hiddenProperties="#{hiddenProperties}">
 
         <c:if test="#{not _ceContent.guiSettings.disableMessages and __ceError}">
                 <!-- error messages outside of container output panel

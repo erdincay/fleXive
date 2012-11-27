@@ -623,7 +623,7 @@
             [disableDelete="true|false"] [disableVersion="true|false"] [disableCompact="true|false"] [disableSave="true|false"]
             [disableCancel="true|false"] [disableButtons="true|false"] [disableAddAssignment="true|false"]
             [disableRemoveAssignment="true|false"] [disablePositionAssignment="true|false"] [disableMessages="true|false"]
-            [showLockOwner="true|false"]>
+            [showLockOwner="true|false"] [hiddenAssignments="hiddenIds"] [hiddenProperties="hiddenProperties"]>
 ...
 </fx:contentEditor>
 ]]></programlisting>
@@ -972,6 +972,30 @@
                                 <listitem>
                                     <para>
                                         True if the the respective content's lock owner should be shown (default: true).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>hiddenAssignments</term>
+                                <listitem>
+                                    <para>
+                                        A collection of group or property assignment IDs that should be hidden in the editor (default: none).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>hiddenProperties</term>
+                                <listitem>
+                                    <para>
+                                        A collection of property IDs that should be hidden in the editor (default: none).
                                     </para>
                                 </listitem>
                             </varlistentry>

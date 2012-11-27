@@ -2,19 +2,15 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:fx="http://www.flexive.com/jsf/core"
-      xmlns:t="http://myfaces.apache.org/tomahawk"
-      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2"
-      xmlns:rich="http://richfaces.org/rich">
+        >
 
 <ui:composition>
     <c:forEach var="element" items="#{data}">
-        <c:if test="#{not element.systemInternal}">
+        <c:if test="#{not element.systemInternal and not _ceContent.dataHidden[element]}">
             <c:if test="#{element.group}">
                 <a4j:outputPanel id="#{_ceContent.idGenerator[element]}" layout="block">
                     <!-- register group -->

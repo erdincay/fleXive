@@ -40,12 +40,14 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxHistory;
-import static com.flexive.shared.configuration.SystemParameters.TREE_CAPTION_PROPERTY;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.structure.*;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxGroupAssignment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -58,6 +60,8 @@ import org.apache.commons.logging.LogFactory;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.*;
+
+import static com.flexive.shared.configuration.SystemParameters.TREE_CAPTION_PROPERTY;
 
 /**
  * Wrapper class for a content instance that provides convenient
@@ -104,6 +108,8 @@ public class FxWrappedContent implements Serializable {
      */
     private IsCaptionProperty isCaptionProperty;
 
+    private IsDataHidden isDataHidden;
+
     private String closePanelScript = "";
 
     private boolean reset = false;
@@ -125,6 +131,7 @@ public class FxWrappedContent implements Serializable {
         this.referenced = referenced;
         this.propertyHint = new PropertyHint();
         this.isCaptionProperty = new IsCaptionProperty();
+        this.isDataHidden = new IsDataHidden();
         if (content != null)
             this.loadedContent = content.copy();
     }
@@ -464,6 +471,10 @@ public class FxWrappedContent implements Serializable {
         return !content.equals(loadedContent);
     }
 
+    public IsDataHidden getDataHidden() {
+        return isDataHidden;
+    }
+
     /**
      * Map providing the {@link FxValue} for given xpath
      */
@@ -517,6 +528,7 @@ public class FxWrappedContent implements Serializable {
         private boolean disablePositionAssignment;
         // disable rendering of "h:messages" inside the template
         private boolean disableMessages;
+        private Collection<Long> hiddenAssignments, hiddenProperties;
         // id of jsf-component to re-render after ajax-requests
         private String reRender;
         // custom value formatter
@@ -548,7 +560,9 @@ public class FxWrappedContent implements Serializable {
                            boolean disableCompact, boolean disableSave, boolean disableCancel,
                            boolean disableButtons, boolean disableAddAssignment, boolean disableRemoveAssignment,
                            boolean disablePositionAssignment, boolean disableMessages, String formPrefix,
-                           String reRender, FxValueFormatter valueFormatter, boolean askLockedMode,
+                           String reRender, FxValueFormatter valueFormatter,
+                           Collection<Long> hiddenAssignments, Collection<Long> hiddenProperties,
+                           boolean askLockedMode,
                            boolean lockedContentOverride, boolean cannotTakeOverPermLock, boolean askCreateNewVersion,
                            String lockStatus, String lockStatusTooltip, boolean contentLocked, boolean looseLock,
                            boolean permLock, boolean takeOver, boolean userMayTakeover, boolean userMayUnlock,
@@ -588,6 +602,8 @@ public class FxWrappedContent implements Serializable {
             this.disableReferenceEditor = disableReferenceEditor;
             this.showLockOwner = showLockOwner;
             this.lockOwner = lockOwner;
+            this.hiddenAssignments = hiddenAssignments;
+            this.hiddenProperties = hiddenProperties;
         }
 
         public static GuiSettings createGuiSettingsForReference(GuiSettings guiSettings, boolean editMode) {
@@ -597,6 +613,7 @@ public class FxWrappedContent implements Serializable {
                     guiSettings.isDisableButtons(), guiSettings.isDisableAddAssignment(),
                     guiSettings.isDisableRemoveAssignment(), guiSettings.isDisablePositionAssignment(),
                     guiSettings.isDisableMessages(), guiSettings.formPrefix, guiSettings.reRender, guiSettings.valueFormatter,
+                    guiSettings.getHiddenAssignments(), guiSettings.getHiddenProperties(),
                     guiSettings.isAskLockedMode(), guiSettings.isLockedContentOverride(),
                     guiSettings.isCannotTakeOverPermLock(), guiSettings.isAskCreateNewVersion(), guiSettings.getLockStatus(),
                     guiSettings.getLockStatusTooltip(), guiSettings.isContentLocked(), guiSettings.isLooseLock(),
@@ -885,6 +902,22 @@ public class FxWrappedContent implements Serializable {
         public void setDisableReferenceEditor(boolean disableReferenceEditor) {
             this.disableReferenceEditor = disableReferenceEditor;
         }
+
+        public Collection<Long> getHiddenAssignments() {
+            return hiddenAssignments;
+        }
+
+        public void setHiddenAssignments(Collection<Long> hiddenAssignments) {
+            this.hiddenAssignments = hiddenAssignments;
+        }
+
+        public Collection<Long> getHiddenProperties() {
+            return hiddenProperties;
+        }
+
+        public void setHiddenProperties(Collection<Long> hiddenProperties) {
+            this.hiddenProperties = hiddenProperties;
+        }
     }
 
     /**
@@ -1138,4 +1171,22 @@ public class FxWrappedContent implements Serializable {
             }
         }
     }
+
+    private class IsDataHidden extends HashMap<FxData, Boolean> {
+        @Override
+        public Boolean get(Object key) {
+            if (!(key instanceof FxData)) {
+                return false;
+            }
+            final FxData data = (FxData) key;
+            if (data.isProperty()) {
+                final Collection<Long> hiddenProperties = guiSettings.getHiddenProperties();
+                if (hiddenProperties != null && hiddenProperties.contains(((FxPropertyData) data).getPropertyId())) {
+                    return true;
+                }
+            }
+            return guiSettings.getHiddenAssignments() != null && guiSettings.getHiddenAssignments().contains(data.getAssignmentId());
+        }
+    }
+
 }

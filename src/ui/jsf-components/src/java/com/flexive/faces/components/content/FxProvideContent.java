@@ -64,6 +64,7 @@ import javax.el.VariableMapper;
 import javax.faces.FacesException;
 import javax.faces.component.UIComponent;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -188,13 +189,20 @@ public class FxProvideContent extends TagHandler {
         final Boolean userMayPermLock = isAttributeSet(ctx, "userMayPermLock") && Boolean.valueOf(getAttribute("userMayPermLock").getValue(ctx));
         final String closePanelScript = isAttributeSet(ctx, "closePanelScript") ? getAttribute("closePanelScript").getValue(ctx) : "";
         final Boolean showLockOwner = isAttributeSet(ctx, "showLockOwner") ? Boolean.valueOf(getAttribute("showLockOwner").getValue(ctx)) : true;
+        @SuppressWarnings("unchecked")
+        final Collection<Long> hiddenAssignments = isAttributeSet(ctx, "hiddenAssignments") ? (Collection<Long>) getAttribute("hiddenAssignments").getObject(ctx) : null;
+        @SuppressWarnings("unchecked")
+        final Collection<Long> hiddenProperties = isAttributeSet(ctx, "hiddenProperties") ? (Collection<Long>) getAttribute("hiddenProperties").getObject(ctx) : null;
+
         String lockOwner = "";
 
         //encapsulate gui-relevant attributes in wrapper object
         FxWrappedContent.GuiSettings guiSettings = new FxWrappedContent.GuiSettings(editMode, disableAcl,
                 disableWorkflow, disableEdit, disableDelete, disableVersion, disableCompact, disableSave,
                 disableCancel, disableButtons, disableAddAssignment, disableRemoveAssignment,
-                disablePositionAssignment, disableMessages, formPrefix, reRender, valueFormatter, askLockedMode,
+                disablePositionAssignment, disableMessages, formPrefix, reRender, valueFormatter,
+                hiddenAssignments, hiddenProperties,
+                askLockedMode,
                 lockedContentOverride, cannotTakeOverPermLock, askCreateNewVersion, lockStatus, lockStatusTooltip,
                 contentLocked, looseLock, permLock, takeOver, userMayTakeover, userMayUnlock, userMayLooseLock, userMayPermLock,
                 disableReferenceEditor, showLockOwner, lockOwner);
