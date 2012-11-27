@@ -34,8 +34,16 @@
  * Miscellaneous classes and functions used by flexive JSF components.
  */
 
+fxExtend = function(dest, source) {
+       for (var p in source) {
+         dest[p] = source[p];
+       }
+       return dest;
+};
 
-var flexive = new function() {
+var flexive = flexive || {};
+
+fxExtend(flexive, new function() {
     /**
      * Enumeration of valid thumbnail preview sizes - see BinaryDescriptor#PreviewSizes
      */
@@ -53,10 +61,11 @@ var flexive = new function() {
     this.contextPath = null;
     /** Weblets resource provider root URL. */
     this.componentsWebletUrl = null;
-};
+});
 
 // miscellaneous utility functions
-flexive.util = new function() {
+flexive.util = flexive.util || {};
+fxExtend(flexive.util, new function() {
     
     /**
      * Initialize the resource URL mapping for JSF2 from a known resource path.
@@ -170,10 +179,11 @@ flexive.util = new function() {
         return string.replace("'", "\\'").replace('"', '\\"');
     };
     
-};
+});
 
 // Yahoo UI (YUI) helper methods and classes
-flexive.yui = new function() {
+flexive.yui = flexive.yui || {};
+fxExtend(flexive.yui, new function() {
     /** A list of all required components in the current page. Evaluated at the end of the page to initialize Yahoo.*/
     this.requiredComponents = [];
     /** A list of callback functions to be called when YUI has been fully loaded */
@@ -273,9 +283,10 @@ flexive.yui = new function() {
             this.setMenuItem(ids[i], property, value);
         }
     };
-};
+});
 
-flexive.yui.datatable = new function() {
+flexive.yui.datatable = flexive.yui.datatable || {};
+fxExtend(flexive.yui.datatable, new function() {
     /**
      * Return the datatable wrapper for the correct view (list or thumbnails).
      *
@@ -503,7 +514,7 @@ flexive.yui.datatable = new function() {
         }
     };
 
-};
+});
 
 /**
  * List result view - returns the linear result list of the search result
@@ -726,7 +737,8 @@ flexive.yui.AutoCompleteHandler.prototype = {
  * <p>To use them, you need to include the 'container' module of YUI:</p>
  * <code>flexive.yui.require("container");</code>
  */
-flexive.yui.dialogs = new function() {
+flexive.yui.dialogs = flexive.yui.dialogs || {};
+fxExtend(flexive.yui.dialogs, new function() {
 
     /**
      * DHTML replacement for Javascript's confirm() dialog. Note that this dialog returns immediately,
@@ -881,9 +893,10 @@ flexive.yui.dialogs = new function() {
         e.onCancel = onCancel;
         e.dialog.show();
     };
-};
+});
 
-flexive.input = new function() {
+flexive.input = flexive.input || {};
+fxExtend(flexive.input, new function() {
     this.fxValueInputList = [];   // a global list of all registered FxValueInput elements on the current page
 
     /**
@@ -917,7 +930,7 @@ flexive.input = new function() {
         }
     };
 
-    this.htmlEditorConfigs = {
+    this.htmlEditorConfigs = fxExtend(flexive.input.htmlEditorConfigs || {}, {
         "default-basic": {
             mode: "exact",
             dialog_type: "modal",
@@ -975,7 +988,7 @@ flexive.input = new function() {
             forced_root_block : false    /* Don't add surrounding p (FX-836) */
             /*width: "100%"*/
         }
-    };
+    });
     
     // initialize the TinyMCE HTML editor
     this.initHtmlEditor = function(autoPopulate, configName) {
@@ -1028,7 +1041,7 @@ flexive.input = new function() {
             checkbox.title=checkbox.checked ? tooltips[0] : tooltips[1];
         }
     };
-};
+});
 
 /**
  * JS object for fx:fxValueInput components.
@@ -1140,7 +1153,8 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
     }
 };
 
-flexive.dojo = new function() {
+flexive.dojo = flexive.dojo || {};
+fxExtend(flexive.dojo, new function() {
     /** Creates a DOJO menu from a JSON object. Based on Dojo example code. */
     this.makeMenu = function(id, menuClass, itemClass, items, isTop, contextMenuTarget) {
         var options = {
@@ -1166,9 +1180,10 @@ flexive.dojo = new function() {
         });
         return menu2;
     };
-};
+});
 
-flexive.contentEditor = new function() {
+flexive.contentEditor = flexive.contentEditor || {};
+fxExtend(flexive.contentEditor, new function() {
     var activeMenu = null;
     var activationTime = -1;
     var toggledGroups = null;
@@ -1484,4 +1499,4 @@ flexive.contentEditor = new function() {
             }
         }
     };
-};
+});
