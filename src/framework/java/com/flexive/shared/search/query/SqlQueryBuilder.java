@@ -892,6 +892,32 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     /**
+     * Remove row limitations on the search result and fetch all rows.
+     *
+     * @return this
+     * @since 3.1.7
+     */
+    public SqlQueryBuilder allRows() {
+        maxRows(Integer.MAX_VALUE);
+        fetchRows(Integer.MAX_VALUE);
+        return this;
+    }
+
+    /**
+     * Don't fetch result set metadata such as the total number of rows, found content types, or
+     * XPaths of the selected values. This speeds up queries considerably in cases where these informations
+     * are not required (usually for internal lookup queries).
+     *
+     * @return  this
+     * @since 3.1.7
+     */
+    public SqlQueryBuilder noResultInfo() {
+        getParams().setHintNoResultInfo(true);
+        getParams().setHintIgnoreXPath(true);
+        return this;
+    }
+
+    /**
      * Saves the result of this query in a briefcase (if the result is obtained via
      * #{@link #getResult()}).
      *

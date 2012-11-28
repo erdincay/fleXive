@@ -4,7 +4,6 @@
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:jsp="http://java.sun.com/JSP/Page"
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
 <t:document>
@@ -15,6 +14,8 @@
     <t:stylesheet path="#{adm:versionedUrl('/pub/css/content.css')}"/>
     <c:if test="#{fxSystemBean.browserAsString=='IE'}">
         <t:stylesheet path="#{adm:versionedUrl('/adm/css/contentIE.css')}"/>
+        <!-- Patched version of RichFaces's AJAX connectors for IE9 - see https://issues.jboss.org/browse/RF-9485 -->
+        <script type="text/javascript" src="#{request.contextPath}/#{adm:versionedUrl('adm/js/AJAX.js')}"> </script>
     </c:if>
 
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"/>

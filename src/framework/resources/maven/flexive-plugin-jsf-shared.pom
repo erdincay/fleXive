@@ -37,6 +37,14 @@
             <optional>false</optional>
         </dependency>
 
+        <!-- JSF 1.2 is the common base API for this module, which will also work with JSF 2 -->
+        <dependency>
+            <groupId>javax.faces</groupId>
+            <artifactId>jsf-api</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.tuckey</groupId>
             <artifactId>urlrewritefilter</artifactId>
