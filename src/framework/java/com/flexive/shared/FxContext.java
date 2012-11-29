@@ -41,6 +41,7 @@ import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.tree.FxTreeMode;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -306,7 +307,12 @@ public class FxContext implements Serializable {
             this.requestUriNoContext = this.requestUriNoContext.substring(request.getServletPath().length());
         }
         this.globalAuthenticated = request.getSession().getAttribute(ADMIN_AUTHENTICATED) != null;
-        this.remoteHost = request.getRemoteHost();
+        //get the real remote host incase a proxy server is used
+        Object tmp = request.getHeader("x-forwarded-for");
+        if (tmp != null && !StringUtils.isBlank(String.valueOf(tmp)))
+            this.remoteHost = String.valueOf(tmp).replace("[", "").replace("]", "");
+        else
+            this.remoteHost = request.getRemoteAddr();
         this.division = divisionId;
         initFormatters();
     }
