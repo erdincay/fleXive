@@ -41,7 +41,11 @@
     <target name="prepare" description="General setup for docbook processing">
         <!-- Init flexive groovy tasks -->
         <groovy src="../buildTasks.groovy"/>
-        
+
+        <taskdef name="svnVersion"
+                 classname="com.flexive.tools.ant.SubversionVersionTask"
+                 classpath="${build.dir}/framework/jar/flexive-ant.jar"/>
+
         <groovy>
             def file = properties.basedir+File.separatorChar+"build.properties"
             if( !new File(file).exists() ) {
