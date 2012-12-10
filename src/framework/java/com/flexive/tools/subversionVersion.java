@@ -31,10 +31,8 @@
  ***************************************************************/
 package com.flexive.tools;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.StringTokenizer;
+import java.io.InputStream;
 
 /**
  * Retrieve the current checked out subversion version for flexive
@@ -42,42 +40,43 @@ import java.util.StringTokenizer;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class subversionVersion {
+    private static final String REVISION = "Revision: ";
 
     public static void main(String[] args) {
         System.out.println(getVersion());
     }
 
     public static String getVersion() {
-        File f = new File(".svn/entries");
-        if (f.exists()) {
-            try {
-                StringBuffer sbInput = new StringBuffer(1000);
-                FileReader fr = new FileReader(f);
-                while (fr.ready()) sbInput.append((char) fr.read());
-                fr.close();
+        final ProcessBuilder pb = new ProcessBuilder();
 
-                StringTokenizer tok = new StringTokenizer(sbInput.toString(), "\n", false);
-                String currLine = null;
-                boolean isV4 = false;
-                int line=0;
-                while (tok.hasMoreTokens()) {
-                    line++;
-                    if( currLine == null ) {
-                        currLine = tok.nextToken().trim();
-                        isV4 = !currLine.startsWith("<?xml");
-                    } else
-                        currLine = tok.nextToken().trim();
-                    if( !isV4 && currLine.startsWith("revision")) {
-                        return currLine.substring(currLine.indexOf('"')+1, currLine.lastIndexOf('"'));
-                    } else if (isV4 && line == 3) {
-                        return currLine.trim();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        pb.redirectErrorStream(true);
+        pb.command("svn", "info");
+
+        try {
+            final Process process = pb.start();
+            final InputStream in = process.getInputStream();
+
+            final byte[] buf = new byte[1024];
+            final StringBuilder responseBuilder = new StringBuilder();
+            int read;
+            while ((read = in.read(buf)) != -1) {
+                responseBuilder.append(new String(buf, 0, read));
             }
+
+            final String[] response = responseBuilder.toString().split("\n");
+            for (String line : response) {
+                if (line.startsWith(REVISION)) {
+                    // parse numeric revision number
+                    return Integer.valueOf(line.substring(REVISION.length())).toString();
+                }
+            }
+
+            System.err.println("No revision number found in output of \"svn info\"");
+            return "unknown";
+        } catch (IOException e) {
+            System.err.println("Failed to determine working copy revision: " + e.getMessage());
+            return "unknown";
         }
-        return "unknown";
     }
 
 }

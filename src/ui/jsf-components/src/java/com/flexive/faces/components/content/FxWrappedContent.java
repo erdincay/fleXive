@@ -44,10 +44,7 @@ import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxGroupAssignment;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -918,6 +915,14 @@ public class FxWrappedContent implements Serializable {
         public void setHiddenProperties(Collection<Long> hiddenProperties) {
             this.hiddenProperties = hiddenProperties;
         }
+
+        public boolean isPropertyHidden(long propertyId) {
+            return hiddenProperties != null && hiddenProperties.contains(propertyId);
+        }
+
+        public boolean isAssignmentHidden(long assignmentId) {
+            return hiddenAssignments != null && hiddenAssignments.contains(assignmentId);
+        }
     }
 
     /**
@@ -938,10 +943,10 @@ public class FxWrappedContent implements Serializable {
             }
 
             try {
-                ArrayList<SelectItem> result = new ArrayList<SelectItem>(10);
+                final ArrayList<SelectItem> result = new ArrayList<SelectItem>(10);
 
                 // Get the group data to work on
-                FxGroupData gd;
+                final FxGroupData gd;
                 if (element instanceof FxPropertyData) {
                     gd = ((FxPropertyData) element).getParent();
                 } else {
@@ -950,24 +955,28 @@ public class FxWrappedContent implements Serializable {
 
                 // Determine the available options
                 if (gd != null) {
-                    List<String> createable = gd.getCreateableChildren(true);
+                    List<String> creatableXPaths = gd.getCreateableChildren(true);
+
                     final FxEnvironment environment = CacheAdmin.getFilteredEnvironment();
-                    for (String createable_xpath : createable) {
-                        String display = createable_xpath;
-                        try {
-                            FxAssignment ass = environment.getType(content.getContent().getTypeId()).getAssignment(createable_xpath);
-                            display = ass.getDisplayName();
-                        } catch (Throwable t) { /*ignore*/ }
-                        result.add(new SelectItem(createable_xpath, display));
+                    final GuiSettings guiSettings = content.getGuiSettings();
+                    final FxType type = environment.getType(content.getContent().getTypeId());
+
+                    for (String xpath : creatableXPaths) {
+                        final FxAssignment ass = type.getAssignment(xpath);
+                        final boolean isProperty = ass instanceof FxPropertyAssignment;
+                        if (!guiSettings.isAssignmentHidden(ass.getId())
+                                && (!isProperty || !guiSettings.isPropertyHidden(((FxPropertyAssignment) ass).getProperty().getId()))) {
+
+                            result.add(new SelectItem(xpath, ass.getDisplayName()));
+                        }
                     }
+
                     result.trimToSize();
                 }
 
                 return result;
-            }
-            catch (Throwable t) {
-                System.err.println(t.getMessage());
-                t.printStackTrace();
+            } catch (Exception e) {
+                LOG.error(e);
                 return new ArrayList<SelectItem>(0);
             }
         }
@@ -1181,11 +1190,11 @@ public class FxWrappedContent implements Serializable {
             final FxData data = (FxData) key;
             if (data.isProperty()) {
                 final Collection<Long> hiddenProperties = guiSettings.getHiddenProperties();
-                if (hiddenProperties != null && hiddenProperties.contains(((FxPropertyData) data).getPropertyId())) {
+                if (guiSettings.isPropertyHidden(((FxPropertyData) data).getPropertyId())) {
                     return true;
                 }
             }
-            return guiSettings.getHiddenAssignments() != null && guiSettings.getHiddenAssignments().contains(data.getAssignmentId());
+            return guiSettings.isAssignmentHidden(data.getAssignmentId());
         }
     }
 

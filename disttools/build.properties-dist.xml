@@ -51,6 +51,7 @@
     <taskdef name="makeMessages" classname="com.flexive.tools.ant.MakeMessagesTask" classpath="${flexive.ant.jar}"/>
     <taskdef name="scriptIndexBuilder" classname="com.flexive.tools.ant.ScriptIndexBuilderTask" classpath="${flexive.ant.jar}"/>
     <taskdef name="applicationDescriptorBuilder" classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask" classpath="${flexive.ant.jar}"/>
+    <taskdef name="svnVersion" classname="com.flexive.tools.ant.SubversionVersionTask" classpath="${flexive.ant.jar}"/>
 
     <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="dist.lib.path"/>
 

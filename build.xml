@@ -331,6 +331,7 @@
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ant.jar">
             <fileset dir="${build.framework.classes.dir}">
                 <include name="com/flexive/tools/ant/**/*"/>
+                <include name="com/flexive/tools/*"/>
             </fileset>
         </jar>
         <jar jarfile="${flexive.build.framework.jar.dir}/openUrl.jar">
@@ -350,6 +351,9 @@
                  classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
         <taskdef name="makeMessages"
                  classname="com.flexive.tools.ant.MakeMessagesTask"
+                 classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
+        <taskdef name="svnVersion"
+                 classname="com.flexive.tools.ant.SubversionVersionTask"
                  classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
     </target>
 

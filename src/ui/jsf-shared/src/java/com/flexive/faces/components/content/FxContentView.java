@@ -456,6 +456,8 @@ public class FxContentView extends UIOutput {
                     return getMayCreateMore(path);
                 } else if (isXPathValidRequest(path)) {
                     return getXPathValid(path);
+                } else if (isDataRequest(path)) {
+                    return getData();
                 } else {
                     return content.getValue(path);
                 }
@@ -507,6 +509,10 @@ public class FxContentView extends UIOutput {
 
         private boolean isXPathValidRequest(String path) {
             return path.endsWith("$valid");
+        }
+
+        private boolean isDataRequest(String path) {
+            return path.equals(prefix + "/$data");
         }
 
         private FxString getLabel(String path) throws FxNotFoundException, FxInvalidParameterException {
@@ -648,6 +654,10 @@ public class FxContentView extends UIOutput {
             } catch (FxRuntimeException e) {
                 return false;
             }
+        }
+
+        private FxGroupData getData() {
+            return content.getGroupData(prefix);
         }
 
         private boolean getXPathValid(String path) {

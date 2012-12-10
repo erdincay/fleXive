@@ -113,49 +113,6 @@ class buildBatchFile extends Task {
 }
 
 /**
- * Retrieve the current checked out subversion version
- */
-class svnVersion extends Task {
-    String property
-
-    public void execute() {
-        File f = new File(this.project.getProperty("basedir") + "/.svn/entries")
-        if (f.exists()) {
-            try {
-                StringBuffer sbInput = new StringBuffer(1000)
-                FileReader fr = new FileReader(f)
-                while (fr.ready()) sbInput.append((char) fr.read())
-                fr.close()
-
-                StringTokenizer tok = new StringTokenizer(sbInput.toString(), "\n", false)
-                String currLine = null
-                boolean isV4 = false
-                int line = 0
-                while (tok.hasMoreTokens()) {
-                    line++
-                    if (currLine == null) {
-                        currLine = tok.nextToken().trim()
-                        isV4 = !currLine.startsWith("<?xml")
-                    } else
-                        currLine = tok.nextToken().trim()
-                    if (!isV4 && currLine.startsWith("revision")) {
-                        String rev = currLine.substring(currLine.indexOf('"') + 1, currLine.lastIndexOf('"'))
-                        project.setProperty(property, rev)
-                        return
-                    } else if (isV4 && line == 3) {
-                        project.setProperty(property, currLine.trim())
-                        return
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace()
-            }
-        } else
-            project.setProperty(property, "-")
-    }
-}
-
-/**
  * Execute a shell/batch command depending on OS
  */
 class batchExec extends Task {
@@ -178,7 +135,6 @@ if (!project.getTaskDefinitions().containsKey("safeDelete")) {
     //add the tasks to ant
     project.addTaskDefinition('safeDelete', safeDelete)
     project.addTaskDefinition('buildBatchFile', buildBatchFile)
-    project.addTaskDefinition('svnVersion', svnVersion)
     project.addTaskDefinition('batchExec', batchExec)
 
     //set the isJDK6 property
