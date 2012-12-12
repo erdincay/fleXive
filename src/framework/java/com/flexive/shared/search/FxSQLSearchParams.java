@@ -216,6 +216,8 @@ public class FxSQLSearchParams implements Serializable {
     /**
      * Sets the languages that the resultset should contain.
      *
+     * <p><strong>Warning: </strong> selecting more than one language is not supported (as of flexive 3.1.6).</p>
+     *
      * @param languages the languages, if null or a empty array is specified the default language of the
      *                  calling user will be used.
      * @return this

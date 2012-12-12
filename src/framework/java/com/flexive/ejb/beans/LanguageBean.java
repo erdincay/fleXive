@@ -337,7 +337,9 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      * @throws SQLException           on errors
      */
     private boolean hasUsages(Connection con, FxLanguage language) throws FxApplicationException, SQLException {
-        System.out.println("checking removed language " + language.getLabel().getBestTranslation());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Checking for uses of language " + language.getIso2digit());
+        }
         PreparedStatement ps = null;
         try {
             ResultSet rs;

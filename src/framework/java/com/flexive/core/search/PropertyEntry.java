@@ -110,6 +110,8 @@ public class PropertyEntry {
 
         /**
          * A tree node path (@path) column.
+         *
+         * @see FxPaths
          */
         PATH("@path"),
 

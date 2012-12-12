@@ -136,7 +136,14 @@ public class SqlSearch {
         this.startIndex = startIndex;
         this.fetchRows = maxFetchRows == -1 ? Integer.MAX_VALUE : maxFetchRows;
         this.query = query;
-        this.language = FxContext.get().getTicket().getLanguage();
+        if (params != null && !params.getResultLanguages().isEmpty()) {
+            this.language = params.getResultLanguages().get(0);
+            if (params.getResultLanguages().size() > 1) {
+                LOG.warn("FxSQL: multiple result languages are not implemented yet");
+            }
+        } else {
+            this.language = FxContext.get().getTicket().getLanguage();
+        }
         this.location = location;
         this.viewType = viewType;
         this.storage = StorageManager.getStorageImpl();

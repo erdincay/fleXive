@@ -973,8 +973,16 @@ public class FxContentEditorBean implements Serializable {
         }
         try {
             setEditorId(storageKey);
-            final List<FxData> data = contentStorage.get(storageKey).getContent().getData(actionXpath);
-            setElement(data.get(0));
+            final FxContent content = contentStorage.get(storageKey).getContent();
+            if (content.isPropertyXPath(actionXpath)) {
+                final List<FxData> data = content.getData(actionXpath);
+                setElement(data.get(0));
+            } else if (content.isGroupXPath(actionXpath)) {
+                setElement(content.getGroupData(actionXpath));
+            } else {
+                LOG.error("Failed to execute content editor action because " + actionXpath + " is not a valid XPath");
+                return;
+            }
             if (nextA4jAction.equalsIgnoreCase("addElement")) {
                 addElement();
             } else if (nextA4jAction.equalsIgnoreCase("removeElement")) {
@@ -989,8 +997,7 @@ public class FxContentEditorBean implements Serializable {
         } catch (Exception e) {
             LOG.warn("Failed to execute content editor action " + nextA4jAction + " for XPath "
                     + actionXpath + ": " + e.getMessage(), e);
-        }
-        finally {
+        } finally {
             storageKey = null;
             nextA4jAction = null;
             actionXpath = null;
