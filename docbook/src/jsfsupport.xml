@@ -254,7 +254,18 @@
                                 <para>
                                     Return the given group property. Note that
                                     <code language="jsfel">#{content.group.text}</code>
-                                    currently does not work.
+                                    does not work before &flexive; 3.1.7.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.group}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Return a nested fx:content variable for the given group (since &flexive; 3.1.7).
                                 </para>
                             </listitem>
                         </varlistentry>

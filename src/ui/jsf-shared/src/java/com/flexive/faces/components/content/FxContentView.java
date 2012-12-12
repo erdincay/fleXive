@@ -458,6 +458,8 @@ public class FxContentView extends UIOutput {
                     return getXPathValid(path);
                 } else if (isDataRequest(path)) {
                     return getData();
+                } else if (content.isGroupXPath(path)) {
+                    return new ContentMap(content, path);
                 } else {
                     return content.getValue(path);
                 }
@@ -465,8 +467,6 @@ public class FxContentView extends UIOutput {
                 return null;
             } catch (FxInvalidParameterException e) {
                 return new FxString("?" + key + "?");
-            } catch (FxApplicationException e) {
-                throw e.asRuntimeException();
             }
         }
 
