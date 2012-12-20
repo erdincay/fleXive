@@ -32,8 +32,6 @@
 package com.flexive.core.security;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_ACCOUNTS;
-import static com.flexive.core.DatabaseConst.TBL_ACCOUNT_DETAILS;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
@@ -53,6 +51,9 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import static com.flexive.core.DatabaseConst.TBL_ACCOUNTS;
+import static com.flexive.core.DatabaseConst.TBL_ACCOUNT_DETAILS;
 
 /**
  * Authentication against the divisions database
@@ -89,8 +90,8 @@ public final class FxDBAuthentication {
         try {
             // Obtain a database connection
             con = callback.getDataSource().getConnection();
-            //               1-6 7      8           9              10                 11           12       13      14         15
-            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD,a.MANDATOR " +
+            //               1-6 7      8           9              10                 11           12       13      14         15       16
+            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD,a.MANDATOR,a.LOGIN_NAME " +
                     "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
                     " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
@@ -106,7 +107,13 @@ public final class FxDBAuthentication {
 
             // check if the hashed password matches the hash stored in the database
             final long id = rs.getLong(7);
-            final boolean passwordMatches = FxSharedUtils.hashPassword(id, loginname, password).equals(rs.getString(14));
+            final String dbLoginName = rs.getString(16);    // use DB login name for non-lowercase login names
+            final String dbPassword = rs.getString(14);
+            boolean passwordMatches = FxSharedUtils.hashPassword(id, dbLoginName, password).equals(dbPassword);
+            if (!passwordMatches && "supervisor".equalsIgnoreCase(loginname)) {
+                // before 3.1.7 the default supervisor password was incorrectly hashed against the lower-cased login name
+                passwordMatches = FxSharedUtils.hashPassword(id, "supervisor", password).equals(dbPassword);
+            }
             if (!passwordMatches && !callback.isCalledAsGlobalSupervisor()) {
                 increaseFailedLoginAttempts(con, id);
                 throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
@@ -304,8 +311,8 @@ public final class FxDBAuthentication {
         try {
             // Obtain a database connection
             con = ds.getConnection();
-            //               1-6 7      8           9              10                 11           12       13      14         15
-            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD,a.MANDATOR " +
+            //               1      2           3
+            curSql = "SELECT a.ID,a.USERNAME,a.PASSWORD " +
                     "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
                     " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
@@ -320,13 +327,17 @@ public final class FxDBAuthentication {
                 throw new FxLoginFailedException("Invalid user or password", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
 
             // check if the hashed password matches the hash stored in the database
-            final long id = rs.getLong(7);
+            final long id = rs.getLong(1);
+            final String dbUserName = rs.getString(2);
+            final String hashedPass = rs.getString(3);
 
             // current user authorised to perform the check (ticket user id matches db user id?)
-            if(id != currentTicket.getUserId())
+            if (id != currentTicket.getUserId())
                 throw new FxLoginFailedException("User not authorized to perform login check", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
 
-            return FxSharedUtils.hashPassword(id, username, password).equals(rs.getString(14));
+            return FxSharedUtils.hashPassword(id, dbUserName, password).equals(hashedPass)
+                    // before 3.1.7 the default supervisor password was incorrectly hashed against the lower-cased login name
+                    || ("SUPERVISOR".equals(username) && FxSharedUtils.hashPassword(id, "supervisor", password).equals(hashedPass));
 
         } catch (SQLException exc) {
             throw new FxDbException("Database error: " + exc.getMessage(), FxLoginFailedException.TYPE_SQL_ERROR);
