@@ -32,11 +32,10 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.security.UserTicketStore;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -56,6 +55,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.*;
 
 
 /**
@@ -301,7 +302,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                 if (uniqueCheck.put(ass.getGroupId(), Boolean.TRUE) != null) {
                     String groupName = "unknown";
                     try {
-                        groupName = group.load(ass.getGroupId()).getName();
+                        groupName = CacheAdmin.getEnvironment().getUserGroup(ass.getGroupId()).getName();
                     } catch (Throwable t) {
                         //ignore
                     }
@@ -670,13 +671,13 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             FxPermissionUtils.checkRole(ticket, Role.ACLManagement);
 
         if (groupId != null) {
-            UserGroup grp = group.load(groupId);
+            UserGroup grp = CacheAdmin.getEnvironment().getUserGroup(groupId);
             if (!grp.mayAccessGroup(ticket))
                 throw new FxNoAccessException("ex.acl.noAccess.foreignMandator");
         }
 
         if (aclId != null) {
-            ACL acl = load(aclId);
+            ACL acl = CacheAdmin.getEnvironment().getACL(aclId);
             if (!ticket.isGlobalSupervisor() && acl.getMandatorId() != ticket.getMandatorId()) {
                 // ACL belongs a foreign mandator
                 throw new FxNoAccessException(LOG, "ex.acl.noAccess.read", aclId);

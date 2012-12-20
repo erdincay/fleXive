@@ -289,12 +289,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         final UserTicket ticket = FxContext.getUserTicket();
 
         // Load the group
-        UserGroup aGroup;
-        try {
-            aGroup = load(groupId);
-        } catch (FxLoadException exc) {
-            throw new FxUpdateException(exc.getMessage(), exc);
-        }
+        UserGroup aGroup = CacheAdmin.getEnvironment().getUserGroup(groupId);
 
         // Permission checks
         checkPermission(aGroup, "ex.usergroup.noUpdatePerms");
@@ -359,11 +354,10 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         if (groupId == UserGroup.GROUP_UNDEFINED) return;
 
         // Load the group
-        UserGroup theGroup;
-        try {
-            theGroup = load(groupId);
-        } catch (FxLoadException le) {
-            throw new FxRemoveException(le.getMessage(), le);
+        final UserGroup theGroup = CacheAdmin.getEnvironment().getUserGroup(groupId);
+
+        if (theGroup == null) {
+            throw new FxNotFoundException("ex.usergroup.groupNotFound.id", groupId);
         }
 
         // Check special groups
@@ -467,15 +461,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         final UserTicket ticket = FxContext.getUserTicket();
 
-        // EJBLookup the group
-        UserGroup aGroup;
-        try {
-            aGroup = load(groupId);
-        } catch (FxLoadException exc) {
-            FxUpdateException ue = new FxUpdateException(exc.getMessage(), exc);
-            if (LOG.isInfoEnabled()) LOG.info(ue);
-            throw ue;
-        }
+        UserGroup aGroup = CacheAdmin.getEnvironment().getUserGroup(groupId);
 
         // Permission check
         if (!ticket.isGlobalSupervisor())
@@ -607,8 +593,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         Statement stmt = null;
         final String sql = "SELECT DISTINCT ROLE FROM " + TBL_ROLE_MAPPING + " WHERE USERGROUP=" + groupId;
 
-        // EJBLookup the group
-        final UserGroup aGroup = load(groupId);
+        final UserGroup aGroup = CacheAdmin.getEnvironment().getUserGroup(groupId);
 
         // Permission check
         if (!mayAccessGroup(aGroup)) {
@@ -688,6 +673,8 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                         " FROM " + TBL_ACCOUNTS + " a WHERE a.MANDATOR=" + m.getId() + " AND a.ID!=" + Account.NULL_ACCOUNT + ")";
                 stmt.executeUpdate(sql);
             }
+
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), loadAll(-1));
         } catch (SQLException exc) {
             FxLoadException le = new FxLoadException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
             LOG.error(le);

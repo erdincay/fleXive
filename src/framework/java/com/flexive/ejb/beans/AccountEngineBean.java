@@ -38,6 +38,7 @@ import com.flexive.core.security.LoginLogoutHandler;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -560,6 +561,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     append("</account>");
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.create", loginName);
 
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), group.loadAll(-1));
+
             // EVERY users is a member of group EVERYONE and his mandator
             final long[] groups = {UserGroup.GROUP_EVERYONE, group.loadMandatorGroup(mandatorId).getId()};
             ri.runAsSystem();
@@ -834,7 +837,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         sbHistory.append("</original>\n").append("<new>\n");
 
         for (long grp : groups) {
-            UserGroup g = group.load(grp);
+            UserGroup g = CacheAdmin.getEnvironment().getUserGroup(grp);
             sbHistory.append("  <group id=\"").append(g.getId()).append("\" mandator=\"").
                     append(g.getMandatorId()).append("\">").append(g.getName()).append("</group>\n");
             // Do not check the special gropups
@@ -1011,7 +1014,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     public void addGroup(long accountId, long groupId) throws FxApplicationException {
         final List<UserGroup> groups = new ArrayList<UserGroup>();
         groups.addAll(getGroups(accountId));
-        groups.add(group.load(groupId));
+        groups.add(CacheAdmin.getEnvironment().getUserGroup(groupId));
         setGroups(accountId, groups);
     }
 
@@ -1473,7 +1476,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         final UserTicket ticket = FxContext.getUserTicket();
 
         // Load the requested group
-        final UserGroup theGroup = group.load(groupId);
+        final UserGroup theGroup = CacheAdmin.getEnvironment().getUserGroup(groupId);
 
 
         long[] groups = {theGroup.getId()};

@@ -320,7 +320,7 @@ public final class StructureLoader {
      */
     public static void removeACL(int divisionId, long id) {
         try {
-            FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+            FxEnvironmentImpl structure = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
             structure.removeACL(id);
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
         } catch (FxCacheException e) {
@@ -337,7 +337,7 @@ public final class StructureLoader {
      */
     public static void updateType(int divisionId, FxType type) throws FxNotFoundException {
         try {
-            FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+            FxEnvironmentImpl structure = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
             structure.updateType(type);
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
         } catch (FxCacheException e) {
@@ -364,7 +364,7 @@ public final class StructureLoader {
      */
     public static void addMandator(int divisionId, Mandator mandator) {
         try {
-            FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+            FxEnvironmentImpl structure = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
             structure.addMandator(mandator);
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
         } catch (FxCacheException e) {
@@ -380,7 +380,7 @@ public final class StructureLoader {
      */
     public static void updateMandator(int divisionId, Mandator mandator) {
         try {
-            FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+            FxEnvironmentImpl structure = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
             structure.updateMandator(mandator);
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
         } catch (FxCacheException e) {
@@ -396,7 +396,7 @@ public final class StructureLoader {
      */
     public static void removeMandator(int divisionId, long mandatorId) {
         try {
-            FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+            FxEnvironmentImpl structure = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
             structure.removeMandator(mandatorId);
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
         } catch (FxCacheException e) {
@@ -415,7 +415,7 @@ public final class StructureLoader {
     public static void updateLanguages(int divisionId, List<FxLanguage> languages) throws FxCacheException {
         if (CacheAdmin.isNewInstallation() || !CacheAdmin.isEnvironmentLoaded())
             return;
-        FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+        FxEnvironmentImpl structure = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
         structure.setLanguages(languages);
         FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
     }
@@ -431,7 +431,7 @@ public final class StructureLoader {
         if (CacheAdmin.isNewInstallation() || !CacheAdmin.isEnvironmentLoaded())
             return;
         try {
-            FxEnvironmentImpl structure = ((FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME)).deepClone();
+            FxEnvironmentImpl structure = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
             structure.setUserGroups(userGroups);
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, structure);
         } catch (FxCacheException e) {

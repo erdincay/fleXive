@@ -33,29 +33,33 @@ package com.flexive.ejb.beans.workflow;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
-import static com.flexive.core.DatabaseConst.TBL_WORKFLOW_ROUTES;
-import static com.flexive.core.DatabaseConst.TBL_WORKFLOW_STEP;
 import com.flexive.core.structure.StructureLoader;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.*;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.interfaces.RouteEngine;
+import com.flexive.shared.interfaces.RouteEngineLocal;
+import com.flexive.shared.interfaces.SequencerEngineLocal;
+import com.flexive.shared.interfaces.UserGroupEngineLocal;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.workflow.Step;
-import com.flexive.ejb.beans.EJBUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.ArrayUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.TBL_WORKFLOW_ROUTES;
+import static com.flexive.core.DatabaseConst.TBL_WORKFLOW_STEP;
 
 
 /**
@@ -125,7 +129,10 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
         Step fromStep;
         Step toStep;
 
-        groupEngine.load(groupId);
+        if (CacheAdmin.getEnvironment().getUserGroup(groupId) == null) {
+            throw new FxNotFoundException("ex.usergroup.groupNotFound.id", groupId);
+        }
+
         fromStep = CacheAdmin.getEnvironment().getStep(fromStepId);
         toStep = CacheAdmin.getEnvironment().getStep(toStepId);
 

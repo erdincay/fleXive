@@ -32,16 +32,17 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_USERGROUPS;
-import static com.flexive.core.DatabaseConst.TBL_MANDATORS;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
-import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.*;
+import com.flexive.shared.interfaces.MandatorEngine;
+import com.flexive.shared.interfaces.MandatorEngineLocal;
+import com.flexive.shared.interfaces.SequencerEngineLocal;
+import com.flexive.shared.interfaces.UserGroupEngineLocal;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
@@ -54,6 +55,9 @@ import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import static com.flexive.core.DatabaseConst.TBL_MANDATORS;
+import static com.flexive.core.DatabaseConst.TBL_USERGROUPS;
 
 /**
  * Mandator Engine implementation
@@ -136,6 +140,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.executeUpdate();
             StructureLoader.addMandator(FxContext.get().getDivisionId(), new Mandator(newId, name.trim(), -1, active,
                     new LifeCycleInfoImpl(ticket.getUserId(), NOW, ticket.getUserId(), NOW)));
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), grp.loadAll(-1));
             return newId;
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
@@ -352,6 +357,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.setLong(1, mandatorId);
             ps.executeUpdate();
             StructureLoader.removeMandator(FxContext.get().getDivisionId(), mandatorId);
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), grp.loadAll(-1));
         } catch (SQLException exc) {
             final boolean keyViolation = StorageManager.isForeignKeyViolation(exc);
             EJBUtils.rollback(ctx);
@@ -401,6 +407,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), name,
                     mand.getMetadataId(), mand.isActive(), new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
                     mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
+            StructureLoader.updateUserGroups(FxContext.get().getDivisionId(), grp.loadAll(-1));
         } catch (SQLException exc) {
             // check before rollback, because it might need an active transaciton
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);

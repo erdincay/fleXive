@@ -32,8 +32,6 @@
 package com.flexive.core.conversion;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACLAssignment;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.LifeCycleInfo;
@@ -61,13 +59,7 @@ public class ACLAssignmentConverter implements Converter {
         writer.addAttribute("acl", CacheAdmin.getEnvironment().getACL(aa.getAclId()).getName());
         writer.addAttribute("category", aa.getACLCategory().name());
         writer.addAttribute("groupId", String.valueOf(aa.getGroupId()));
-        String groupName;
-        try {
-            groupName = EJBLookup.getUserGroupEngine().load(aa.getGroupId()).getName();
-        } catch (FxApplicationException e) {
-            groupName = "unknown";
-        }
-        writer.addAttribute("group", groupName);
+        writer.addAttribute("group", CacheAdmin.getEnvironment().getUserGroup(aa.getGroupId()).getName());
         writer.startNode("permissions");
         writer.addAttribute("create", String.valueOf(aa.getMayCreate()));
         writer.addAttribute("delete", String.valueOf(aa.getMayDelete()));
