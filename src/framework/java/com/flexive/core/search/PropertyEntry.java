@@ -1032,7 +1032,7 @@ public class PropertyEntry {
                 if ("STEP".equals(column)) {
                     // filter by workflow step definition, not internal step ID
                     column = "(SELECT sd.stepdef FROM " + DatabaseConst.TBL_WORKFLOW_STEP + " sd " +
-                            " WHERE sd.id=cd." + column + ")";
+                            " WHERE sd.id=" + column + ")";
                 }
                 if ("TDEF".equals(column) && FxSharedUtils.isQuoted(constantValue, '\'')) {
                     // optionally allow to select by type name (FX-613)

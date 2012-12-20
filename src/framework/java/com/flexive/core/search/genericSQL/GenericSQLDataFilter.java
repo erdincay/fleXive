@@ -209,22 +209,41 @@ public class GenericSQLDataFilter extends DataFilter {
                         + getDeactivatedTypesFilter("cd")
                         + getInactiveMandatorsFilter("cd")
                         + " AND ("
-                        + getOptimizedMainTableConditions(getStatement().getRootBrace())
+                        + getOptimizedMainTableConditions(getStatement().getRootBrace(), "cd")
                         + ")";
                 dataSelect = columnFilter + "(" + selectOnMainTable(filters, "cd") + ") r";
             } else {
                 // The statement filters the data
                 StringBuilder result = new StringBuilder(5000);
+
+                // extract top-level conditions on the main table
+                final Brace mainTableConditions = getStatement().getRootBrace().extractConditions(new Brace.ExtractFunction() {
+                    public boolean shouldExtract(Condition cond) {
+                        try {
+                            final Pair<String, ConditionTableInfo> pi = getPropertyInfo(cond);
+                            return getStatement().getRootBrace().isAnd() && DatabaseConst.TBL_CONTENT.equals(pi.getFirst());
+                        } catch (FxSqlSearchException e) {
+                            throw e.asRuntimeException();
+                        }
+                    }
+                });
+
+                // build main condition (without top-level main table conditions)
                 build(result, getStatement().getRootBrace());
+
                 // Remove leading and ending brace
                 result.deleteCharAt(0);
                 result.deleteCharAt(result.length() - 1);
                 // Finalize the select
                 final String securityFilter = getSecurityFilter("data2");
+                final String mainConditions = mainTableConditions.getSize() > 0 ? getOptimizedMainTableConditions(mainTableConditions, "main") : null;
+
                 dataSelect = columnFilter + "(SELECT DISTINCT " + search.getSearchId() +
                         " AS search_id,data.id,data.ver,main.tdef,main.created_by,main.step,main.acl,main.mandator \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
-                        "WHERE data.ver=main.ver AND data.id=main.id) data2\n"
+                        "WHERE data.ver=main.ver AND data.id=main.id"
+                        + (StringUtils.isNotBlank(mainConditions) ? " AND " + mainConditions : "")
+                        + ") data2\n"
                         + (StringUtils.isNotBlank(securityFilter)
                         // Limit by the specified max items
                         ? "WHERE " + securityFilter + search.getStorage().getLimit(true, maxRows)
@@ -394,7 +413,7 @@ public class GenericSQLDataFilter extends DataFilter {
             if (tables.size() == 1 && tables.keys().iterator().next().equals(DatabaseConst.TBL_CONTENT)) {
                 // combine main table selects into a single one
                 sb.append("(SELECT id,ver," + getEmptyLanguage() + " as lang FROM " + DatabaseConst.TBL_CONTENT + " cd"
-                        + " WHERE " + getOptimizedMainTableConditions(br) + ")");
+                        + " WHERE " + getOptimizedMainTableConditions(br, "cd") + ")");
                 return;
             }
 
@@ -471,7 +490,7 @@ public class GenericSQLDataFilter extends DataFilter {
             if (tables.size() == 1 && tables.keys().iterator().next().equals(DatabaseConst.TBL_CONTENT)) {
                 // combine main table selects into a single one
                 sb.append("(SELECT id,ver," + getEmptyLanguage() + " as lang FROM " + DatabaseConst.TBL_CONTENT + " cd"
-                        + " WHERE " + getOptimizedMainTableConditions(br) + ")");
+                        + " WHERE " + getOptimizedMainTableConditions(br, "cd") + ")");
                 return;
             }
             // check if there are two or more flat storage queries in the same level that can be grouped
@@ -554,7 +573,7 @@ public class GenericSQLDataFilter extends DataFilter {
         return false;
     }
 
-    private String getOptimizedMainTableConditions(Brace br) throws FxSqlSearchException {
+    private String getOptimizedMainTableConditions(Brace br, final String mainTableAlias) throws FxSqlSearchException {
         final ConditionBuilder conditionBuilder = new ConditionBuilder() {
             public String buildCondition(Brace br, Condition cond) throws FxSqlSearchException {
                 final PropertyResolver.Table tableType = getTableType(br.getStatement(), cond.getProperty());
@@ -563,7 +582,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     return null;
                 }
                 markProcessed(cond);
-                final Pair<String, String> select = getSqlColumnWithValue(br.getStatement(), cond);
+                final Pair<String, String> select = getSqlColumnWithValue(br.getStatement(), cond, mainTableAlias);
                 return select.getFirst()
                         + cond.getSqlComperator()
                         + select.getSecond();
@@ -911,7 +930,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
 
         // Apply all Functions
-        final Pair<String, String> select = getSqlColumnWithValue(stmt, cond);
+        final Pair<String, String> select = getSqlColumnWithValue(stmt, cond, "cd");
         final String column = select.getFirst();
         final String value = select.getSecond();
 
@@ -967,11 +986,11 @@ public class GenericSQLDataFilter extends DataFilter {
         }
     }
 
-    private Pair<String, String> getSqlColumnWithValue(FxStatement stmt, Condition cond) throws FxSqlSearchException {
+    private Pair<String, String> getSqlColumnWithValue(FxStatement stmt, Condition cond, String tableAlias) throws FxSqlSearchException {
         final Property prop = cond.getProperty();
         final Constant constant = cond.getConstant();
         final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
-        Pair<String, String> select = getValueCondition(prop, constant, entry, cond);
+        Pair<String, String> select = getValueCondition(prop, constant, entry, cond, tableAlias);
         if (select == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
                     entry.getProperty().getDataType(), prop.getPropertyName());
@@ -1029,9 +1048,10 @@ public class GenericSQLDataFilter extends DataFilter {
         }
     }
 
-    protected Pair<String, String> getValueCondition(Property prop, Constant constant, PropertyEntry entry, Condition cond) throws FxSqlSearchException {
+    protected Pair<String, String> getValueCondition(Property prop, Constant constant, PropertyEntry entry, Condition cond, String tableAlias) throws FxSqlSearchException {
         final ValueComparator comparator = cond.getComperator();
-        String column = entry.getFilterColumn();
+        final String alias = StringUtils.isNotBlank(tableAlias) ? tableAlias + "." : "";
+        String column = alias + entry.getFilterColumn();
         String value = null;
         switch (entry.getProperty().getDataType()) {
             case SelectMany:
@@ -1039,7 +1059,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     value = "NULL";
                 } else if (comparator == ValueComparator.EQUAL || comparator == ValueComparator.NOT_EQUAL) {
                     // exact match, so we use the text column that stores the comma-separated list of selected items
-                    column = "FTEXT1024";
+                    column = alias + "FTEXT1024";
                     final List<String> ids = Lists.newArrayList();
                     for (Constant c : constant) {
                         ids.add(PropertyEntry.mapSelectConstant(entry.getProperty(), c.toString()));
@@ -1066,7 +1086,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     value = constant.getValue();
                     if (PropertyEntry.isDateMillisColumn(entry.getFilterColumn())) {
                         // need to convert from milliseconds
-                        column = toDBTime(entry.getFilterColumn());
+                        column = toDBTime(alias + entry.getFilterColumn());
                     }
                 }
                 break;
@@ -1124,7 +1144,16 @@ public class GenericSQLDataFilter extends DataFilter {
                     );
                 }
         }
-        return value != null ? new Pair<String, String>(column, value) : entry.getComparisonCondition(search.getStorage(), constant.getValue());
+        if (value != null) {
+            return Pair.newPair(column, value);
+        } else {
+            final Pair<String, String> comp = entry.getComparisonCondition(search.getStorage(), constant.getValue());
+            if (StringUtils.isNotBlank(alias) && comp.getFirst().indexOf('(') == -1 && comp.getFirst().indexOf('.') == -1) {
+                return Pair.newPair(alias + comp.getFirst(), comp.getSecond());
+            } else {
+                return comp;
+            }
+        }
     }
 
     /**

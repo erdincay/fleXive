@@ -31,8 +31,8 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
-import com.google.common.collect.Multimap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +52,7 @@ public class Brace implements BraceElement{
     private int id;
 
 
-    protected Brace(FxStatement stmt) {
+    public Brace(FxStatement stmt) {
         this.conditions = new ArrayList<BraceElement>(25);
         this.parent=null;
         this.stmt=stmt;
@@ -290,7 +290,32 @@ public class Brace implements BraceElement{
         return insideforcedBrace;
     }
 
+    /**
+     * Extracts conditions that match a given predicate and remove them from the current brace.
+     *
+     * @param extractFunction   the predicate to match for the extracted conditions
+     * @return  the extracted conditions
+     */
+    public Brace extractConditions(ExtractFunction extractFunction) throws SqlParserException {
+        final Brace extracted = new Brace(this.stmt);
+        extracted.setType(this.type);
+        for (BraceElement element : this.conditions) {
+            if (element instanceof Condition && extractFunction.shouldExtract((Condition) element)) {
+                extracted.addElement(element);
+            }
+        }
+        this.conditions.removeAll(extracted.conditions);
+        if (this.conditions.size() == 1) {
+            this.type = null;   // collapse sub-condition
+        }
+        return extracted;
+    }
+
     public static interface GroupFunction {
         Object apply(Condition cond);
+    }
+
+    public static interface ExtractFunction {
+        boolean shouldExtract(Condition cond);
     }
 }
