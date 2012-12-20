@@ -402,7 +402,6 @@ public class FxGroupData extends FxData {
             return;
         }
         this.XPathFull = xpCached(xpathFull);
-        this.indices = XPathElement.getIndices(this.XPathFull);
     }
 
 

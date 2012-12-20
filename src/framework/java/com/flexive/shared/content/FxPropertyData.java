@@ -240,7 +240,6 @@ public class FxPropertyData extends FxData {
             return; // nop
         }
         this.XPathFull = xpCached(xpathFull);
-        this.indices = XPathElement.getIndices(this.XPathFull);
         if (this.value != null) {
             // apply updated XPath to FxValue (FX-920)
             setValueXPath();

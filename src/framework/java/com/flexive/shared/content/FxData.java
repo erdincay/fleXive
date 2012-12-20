@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.*;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
@@ -74,11 +75,6 @@ public abstract class FxData implements Serializable {
     protected String XPathFull;
 
     /**
-     * Indices for each element in the XPath
-     */
-    protected int[] indices;
-
-    /**
      * Id of the associated assignment
      */
     private long assignmentId;
@@ -108,7 +104,6 @@ public abstract class FxData implements Serializable {
         this.xpPrefix = xpPrefix;
         this.XPath = xpCached(XPathElement.stripType(xPath));
         this.XPathFull = xpCached(XPathElement.stripType(xPathFull));
-        this.indices = indices;
         this.assignmentId = assignmentId;
         this.pos = pos;
         this.parent = parent;
@@ -128,7 +123,6 @@ public abstract class FxData implements Serializable {
         this.xpPrefix = other.xpPrefix;
         this.XPath = other.XPath;
         this.XPathFull = other.XPathFull;
-        this.indices = other.indices.clone();
         this.assignmentId = other.assignmentId;
         this.pos = other.pos;
         this.parent = parent;
@@ -247,7 +241,13 @@ public abstract class FxData implements Serializable {
      * @return indices of this FxData (min, max)
      */
     public int[] getIndices() {
-        return ArrayUtils.clone(indices);
+        final List<Integer> indices = Lists.newArrayListWithCapacity(16);
+        FxData data = this;
+        while (data.getParent() != null) {
+            indices.add(data.getIndex());
+            data = data.getParent();
+        }
+        return ArrayUtils.toPrimitive(Lists.reverse(indices).toArray(new Integer[indices.size()]));
     }
 
     /**
