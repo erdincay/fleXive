@@ -2,25 +2,23 @@ package com.flexive.faces.components.tree;
 
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.javascript.FxJavascriptUtils;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import org.apache.commons.lang.StringUtils;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIOutput;
-import javax.faces.component.NamingContainer;
 import javax.faces.context.FacesContext;
-import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.context.ResponseWriter;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.FacesEvent;
@@ -28,6 +26,9 @@ import javax.faces.event.FacesListener;
 import javax.faces.event.PhaseId;
 import java.io.IOException;
 import java.util.*;
+
+import static javax.faces.context.FacesContext.getCurrentInstance;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * <p>The flexive tree navigation component. Renders part of the topic tree as
@@ -122,6 +123,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
     private Long baseTypeId;
     private Boolean includeRoot;
     private Boolean includeFolders;
+    private Map<FxTreeNode, Boolean> nodeRenderedMap;
 
     private transient String selectedPathCache;
     private transient FxTreeNode treeCache;
@@ -266,6 +268,18 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         }
     }
 
+    protected boolean isNodeRendered(FxTreeNode node) {
+        if (nodeRenderedMap == null) {
+            //noinspection unchecked
+            nodeRenderedMap = (Map<FxTreeNode, Boolean>) getAttributes().get("nodeRenderedMap");
+        }
+        if (nodeRenderedMap != null) {
+            return nodeRenderedMap.get(node);
+        } else {
+            return true;
+        }
+    }
+
     /**
      * Remove all child nodes of {@code node} whose type is not in {@code validTypeIds}.
      *
@@ -384,6 +398,10 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             out.writeAttribute("class", CSS_TREE, null);
 
             for (FxTreeNode child : nodes) {
+                if (!isNodeRendered(child)) {
+                    continue;
+                }
+
                 out.startElement("li", null);
                 out.writeAttribute("class", getElementClass(child), null);
 

@@ -899,6 +899,12 @@
             <rtexprvalue>true</rtexprvalue>
             <description>When set to true, the root node of the rendered (sub-)tree is  included in the output. (default: false)</description>
         </attribute>
+        <attribute>
+            <name>nodeRenderedMap</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional map from FxTreeNode to Boolean indicating whether a navigation node should be rendered. Use this for custom node rendering conditions, e.g. based on node contents or naming conventions.</description>
+        </attribute>
     </tag>
     <tag>
         <name>contentEditor</name>

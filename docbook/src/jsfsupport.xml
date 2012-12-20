@@ -2627,6 +2627,16 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+                        <varlistentry>
+                            <term>nodeRenderedMap</term>
+                            <listitem>
+                                <para>
+                                    An optional map from FxTreeNode to Boolean indicating whether a navigation node
+                                    should be rendered. Use this for custom node rendering conditions, e.g.
+                                    based on node contents or naming conventions.
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 
