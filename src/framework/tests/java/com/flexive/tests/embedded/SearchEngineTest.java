@@ -1906,15 +1906,20 @@ public class SearchEngineTest {
                 .select("#" + TEST_TYPE + "/multiSearchProp", "#" + TEST_TYPE + "/" + "stringSearchProp")
                 .type(TEST_TYPE);
 
-        for (boolean ignoreXPath: new boolean[] { false, true }) {
-            sqb.getParams().setHintIgnoreXPath(ignoreXPath);
-            final FxResultSet result = sqb.getResult();
-            assertTrue(result.getRowCount() > 0);
-            for (FxResultRow row : result.getResultRows()) {
-                for (int i = 1; i <= 2; i++) {
-                    assertEquals(StringUtils.isBlank(row.getFxValue(i).getXPath()), ignoreXPath,
-                            "Expected XPath to be " + (ignoreXPath ? "not " : "") + "set: " + row.getFxValue(i).getXPath());
-                }
+        sqb.getParams().setHintIgnoreXPath(false);
+        testResultXPath(sqb, false);
+
+        sqb.getParams().setHintIgnoreXPath(true);
+        testResultXPath(sqb, true);
+    }
+
+    private void testResultXPath(SqlQueryBuilder sqb, boolean expectedXPath) throws FxApplicationException {
+        final FxResultSet result = sqb.getResult();
+        assertTrue(result.getRowCount() > 0);
+        for (FxResultRow row : result.getResultRows()) {
+            for (int i = 1; i <= 2; i++) {
+                assertEquals(StringUtils.isBlank(row.getFxValue(i).getXPath()), expectedXPath,
+                        "Expected XPath to be " + (expectedXPath ? "not " : "") + "set: " + row.getFxValue(i).getXPath());
             }
         }
     }

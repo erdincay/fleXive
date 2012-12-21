@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.FxDataType;
@@ -116,7 +117,8 @@ public class PropertyResolver {
         this.resultSetColumns.add(e);
         // compute next position to use
         resultSetPos += e.getReadColumns().length;
-        if (e.getTableType() == Table.T_CONTENT_DATA && (e.isPropertyPermsEnabled() || !search.getParams().isHintIgnoreXPath())) {
+        if (e.getTableType() == Table.T_CONTENT_DATA && ((e.isPropertyPermsEnabled() && !FxContext.getUserTicket().isGlobalSupervisor())
+                || !search.getParams().isHintIgnoreXPath())) {
             // also select XPATH, unless 'ignore XPath' hint is set and property permission checks are not required
             resultSetPos += 1;
         }

@@ -32,24 +32,18 @@
 package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
-
-import static com.flexive.core.DatabaseConst.TBL_CONTENT;
-import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
-
 import com.flexive.core.search.*;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.Pair;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.SortDirection;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxFlatStorageMapping;
-import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.sqlParser.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -57,6 +51,9 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.util.*;
+
+import static com.flexive.core.DatabaseConst.TBL_CONTENT;
+import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
 
 /**
  * Generic SQL data selector
@@ -299,7 +296,7 @@ public class GenericSQLDataSelector extends DataSelector {
         final SubSelectValues result = new SubSelectValues(resultPos, sortInfo.getFirst(), sortInfo.getSecond());
 
         // disable XPath processing if corresponding hint is set
-        entry.setProcessXPath(!search.getParams().isHintIgnoreXPath());
+        entry.setProcessXPath(!FxContext.getUserTicket().isGlobalSupervisor() && !search.getParams().isHintIgnoreXPath());
 
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
@@ -384,7 +381,7 @@ public class GenericSQLDataSelector extends DataSelector {
                         result.addItem(val, resultPos, false);
                     }
 //                    String xpath = "concat(filter.xpathPref," + getContentDataSubselect("XPATHMULT", entry, true) + ")";
-                    if (!search.getParams().isHintIgnoreXPath() || entry.isPropertyPermsEnabled()) {
+                    if (!search.getParams().isHintIgnoreXPath() || (entry.isPropertyPermsEnabled() && !FxContext.getUserTicket().isGlobalSupervisor())) {
                         entry.setProcessXPath(true);    // re-enable flag if ignoreXPath hint was set
                         String xpath = search.getStorage().concat("filter.xpathPref", "\'-\'",
                                 entry.isAssignment() ? '\'' + entry.getAssignment().getXPath() + '\'' : getContentDataSubselect("ASSIGN", entry, true),
