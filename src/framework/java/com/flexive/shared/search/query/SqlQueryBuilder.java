@@ -354,7 +354,7 @@ public class SqlQueryBuilder implements Serializable {
         if (includeSubTypes) {
             condition(
                     "typedef",
-                    includeSubTypes ? PropertyValueComparator.GE : PropertyValueComparator.GT,
+                    PropertyValueComparator.GE,
                     typeName
             );
             return this;

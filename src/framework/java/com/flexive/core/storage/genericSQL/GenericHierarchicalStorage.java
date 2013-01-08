@@ -1427,7 +1427,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (rs == null || !rs.next())
                 throw new FxDbException("ex.content.reference.notFound", ref, xpath);
             long type = rs.getLong(1);
-            if (type != expectedType.getId())
+            if (!CacheAdmin.getEnvironment().getType(type).isDerivedFrom(expectedType.getId()))
                 throw new FxDbException("ex.content.value.invalid.reftype", expectedType, CacheAdmin.getEnvironment().getType(type));
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
