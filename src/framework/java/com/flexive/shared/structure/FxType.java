@@ -878,6 +878,14 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                 for (FxTypeRelation relation : relations)
                     relation.resolveReferences(fxStructure);
             }
+        } else {
+            // update type references
+            if (getParent() != null) {
+                this.parent = fxStructure.getType(getParent().getId());
+            }
+            for (int i = 0; i < derivedTypes.size(); i++) {
+                derivedTypes.set(i, fxStructure.getType(derivedTypes.get(i).getId()));
+            }
         }
         if (assignedProperties == null)
             assignedProperties = new ArrayList<FxPropertyAssignment>(10);
