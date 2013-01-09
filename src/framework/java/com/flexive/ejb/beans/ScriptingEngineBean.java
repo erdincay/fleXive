@@ -159,6 +159,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                             getMethod("runScript", new Class[]{String.class, FxScriptBinding.class, String.class}).
                             invoke(null, name, binding, code);
                 } catch (Throwable t) {
+                    if (name.endsWith(".class")) {
+                        // probable cause: compiled script files (or stubs) ended up in the scripts folder
+                        LOG.warn(".class file is not a script: " + name);
+                        return null;
+                    }
                     LOG.error("Exception running script [" + name + "]: " + t.getMessage(), t);
                     if (t instanceof FxApplicationException)
                         throw (FxApplicationException) t;

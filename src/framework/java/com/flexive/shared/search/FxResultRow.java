@@ -130,7 +130,7 @@ public class FxResultRow implements Serializable {
     }
 
     public FxPK getPk(String columnName) {
-        return (FxPK) getValue(columnName);
+        return getPk(getColumnIndex(columnName));
     }
 
     /**

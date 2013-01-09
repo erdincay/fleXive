@@ -293,11 +293,6 @@ public class SqlSearch {
             // Select all desired rows for the resultset
             selectSql = ds.build(con);
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Select SQL: " + selectSql);
-            }
-
-
             stmt = con.createStatement();
             if (df.isQueryTimeoutSupported())
                 stmt.setQueryTimeout(params.getQueryTimeout());
@@ -390,6 +385,9 @@ public class SqlSearch {
             if (fx_result != null) {
                 int timeSpent = (int) (java.lang.System.currentTimeMillis() - startTime);
                 fx_result.setTotalTime(timeSpent);
+            }
+            if (LOG.isTraceEnabled() && fx_result != null) {
+                LOG.trace(String.format("FxSQL query in [%5dms]: " + query.replace('\n', ' '), fx_result.getTotalTime()));
             }
         }
     }
