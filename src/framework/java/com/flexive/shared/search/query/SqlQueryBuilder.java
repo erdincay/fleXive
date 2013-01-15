@@ -309,6 +309,19 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder condition(String propertyName, PropertyValueComparator comparator, Object value) {
         checkParameterNull(comparator, "comparator");
+
+        if (comparator == PropertyValueComparator.IN && value instanceof Collection && ((Collection) value).isEmpty()) {
+            // rewrite IN () since it makes sense logically, but it's a syntax error in FxSQL
+            comparator = PropertyValueComparator.EMPTY;
+            value = null;
+        }
+
+        if (comparator == PropertyValueComparator.NOT_IN && value instanceof Collection && ((Collection) value).isEmpty()) {
+            // rewrite NOT IN () like above
+            comparator = PropertyValueComparator.NOT_EMPTY;
+            value = null;
+        }
+
         renderCondition(comparator.getSql(injectQuotes(propertyName), value));
         tables.add(Table.CONTENT);
         return this;
