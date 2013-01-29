@@ -31,9 +31,9 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
-import com.flexive.shared.FxFormatUtils;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -198,18 +198,20 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
         return new FxDateTime(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Date copyValue(Date value) {
+        return new Date(value.getTime());
+    }
+
     /** {@inheritDoc} */
     @Override
     public String getStringValue(Date value) {
         //TODO: use a better date parser
         return new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT).format(value);
 //        return DateFormat.getDateInstance().format(value);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isImmutableValueType() {
-        return true;
     }
 
     /** {@inheritDoc} */

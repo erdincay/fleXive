@@ -137,4 +137,12 @@ public class FxHTML extends FxString {
     public Class<String> getValueClass() {
         return String.class;
 	}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isImmutableValueType() {
+        return true;
+    }
 }

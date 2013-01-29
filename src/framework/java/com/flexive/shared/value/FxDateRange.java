@@ -156,17 +156,6 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
         super(clone);
     }
 
-    /**
-     * Return true if T is immutable (e.g. java.lang.String). This prevents cloning
-     * of the translations in copy constructors.
-     *
-     * @return true if T is immutable (e.g. java.lang.String)
-     */
-    @Override
-    public boolean isImmutableValueType() {
-        return true;
-    }
-
 
     /**
      * Evaluates the given string value to an object of type T.
@@ -196,13 +185,19 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
     }
 
     /**
-     * Creates a copy of the given object (useful if the actual type is unknown).
-     *
-     * @return a copy of the given object (useful if the actual type is unknown).
+     * {@inheritDoc}
      */
     @Override
     public FxDateRange copy() {
         return new FxDateRange(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected DateRange copyValue(DateRange value) {
+        return new DateRange(value.getLower(), value.getUpper());
     }
 
     /**

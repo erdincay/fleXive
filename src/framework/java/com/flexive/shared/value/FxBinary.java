@@ -153,17 +153,6 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
         super(clone);
     }
 
-    /**
-     * Return true if T is immutable (e.g. java.lang.String). This prevents cloning
-     * of the translations in copy constructors.
-     *
-     * @return true if T is immutable (e.g. java.lang.String)
-     */
-    @Override
-    public boolean isImmutableValueType() {
-        return true;
-    }
-
 
     /**
      * Evaluates the given string value to an object of type T.
@@ -192,6 +181,16 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
     @Override
     public FxBinary copy() {
         return new FxBinary(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isImmutableValueType() {
+        // for practical purposes the binary descriptor is not mutable, since it is not manipulated
+        // but only replaced as a whole when then value changes.
+        return true;
     }
 
     /**

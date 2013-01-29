@@ -34,9 +34,9 @@ package com.flexive.shared.value;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
-import com.flexive.shared.structure.FxEnvironment;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -232,15 +232,13 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
         return new FxSelectMany(this);
     }
 
-    /**
-     * Return true if T is immutable (e.g. java.lang.String). This prevents cloning
-     * of the translations in copy constructors.
-     *
-     * @return true if T is immutable (e.g. java.lang.String)
-     */
     @Override
-    public boolean isImmutableValueType() {
-        return true;
+    protected SelectMany copyValue(SelectMany value) {
+        final SelectMany copy = new SelectMany(value.getSelectList());
+        for (FxSelectListItem item : value.getSelected()) {
+            copy.selectItem(item);
+        }
+        return copy;
     }
 
     /**

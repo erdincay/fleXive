@@ -31,17 +31,16 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
-import com.flexive.shared.exceptions.FxInvalidStateException;
-import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 
 import java.io.Serializable;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 
 /**
  * A multilingual DateTime range, internally represented as java.util.Date; EMPTY is a Date range with a timestamp of <code>0</code> (usually 01/01/1970)
@@ -162,17 +161,6 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
         super(clone);
     }
 
-    /**
-     * Return true if T is immutable (e.g. java.lang.String). This prevents cloning
-     * of the translations in copy constructors.
-     *
-     * @return true if T is immutable (e.g. java.lang.String)
-     */
-    @Override
-    public boolean isImmutableValueType() {
-        return true;
-    }
-
 
     /**
      * Evaluates the given string value to an object of type T.
@@ -226,13 +214,20 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
     }
 
     /**
-     * Creates a copy of the given object (useful if the actual type is unknown).
-     *
-     * @return a copy of the given object (useful if the actual type is unknown).
+     * {@inheritDoc}
      */
     @Override
     public FxDateTimeRange copy() {
         return new FxDateTimeRange(this);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected DateRange copyValue(DateRange value) {
+        return new DateRange(value.getLower(), value.getUpper());
     }
 
     /**

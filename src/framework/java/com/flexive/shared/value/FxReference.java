@@ -238,6 +238,10 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
         return EMPTY.copy();
     }
 
+    @Override
+    public boolean isImmutableValueType() {
+        return true;
+    }
 
     @Override
     public int compareTo(FxValue o) {

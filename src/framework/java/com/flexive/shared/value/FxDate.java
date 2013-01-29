@@ -37,7 +37,6 @@ import com.flexive.shared.value.renderer.FxValueRendererFactory;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -162,17 +161,6 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
 
 
     /**
-     * Return true if T is immutable (e.g. java.lang.String). This prevents cloning
-     * of the translations in copy constructors.
-     *
-     * @return true if T is immutable (e.g. java.lang.String)
-     */
-    @Override
-    public boolean isImmutableValueType() {
-        return true;
-    }
-
-    /**
      * Evaluates the given string value to an object of type T.
      *
      * @param value string value to be evaluated
@@ -212,14 +200,22 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
         }
     }
 
+
     /**
-     * Creates a copy of the given object (useful if the actual type is unknown).
-     *
-     * @return a copy of the given object (useful if the actual type is unknown).
+     * {@inheritDoc}
      */
     @Override
     public FxDate copy() {
         return new FxDate(this);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Date copyValue(Date value) {
+        return new Date(value.getTime());
     }
 
     /**

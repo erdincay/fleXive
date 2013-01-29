@@ -32,14 +32,13 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.math.NumberUtils;
 
 import java.io.Serializable;
 import java.util.Map;
-
-import com.flexive.shared.FxFormatUtils;
 
 /**
  * A multilingual Float, internally represented as Float
@@ -234,5 +233,13 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
     @SuppressWarnings("unchecked")
     public String getStringValue(Float value) {
         return value == null ? "" : FxValueRendererFactory.getDefaultFormatter(getClass()).format(this, value, FxContext.getUserTicket().getLanguage());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isImmutableValueType() {
+        return true;
     }
 }

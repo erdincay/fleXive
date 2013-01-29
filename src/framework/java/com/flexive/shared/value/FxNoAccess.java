@@ -241,4 +241,12 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     public int hashCode() {
         return System.identityHashCode(this);   // see equals
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isImmutableValueType() {
+        return true;
+    }
 }

@@ -203,14 +203,14 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
     }
 
     /**
-     * Return true if T is immutable (e.g. java.lang.String). This prevents cloning
-     * of the translations in copy constructors.
-     *
-     * @return true if T is immutable (e.g. java.lang.String)
+     * {@inheritDoc}
      */
     @Override
-    public boolean isImmutableValueType() {
-        return true;
+    protected FxSelectListItem copyValue(FxSelectListItem value) {
+        return new FxSelectListItem(value.getId(), value.getName(), value.getAcl(), value.getList(),
+                value.getParentItem() != null ? value.getParentItem().getId() : -1,
+                new FxString(value.getLabel()), value.getData(), value.getColor(), value.getIconId(), value.getIconVer(),
+                value.getIconQuality(), value.getLifeCycleInfo(), value.getPosition());
     }
 
     /**

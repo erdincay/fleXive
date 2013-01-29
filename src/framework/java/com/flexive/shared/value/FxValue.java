@@ -43,7 +43,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -289,33 +288,17 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             }
         } else {
             if (multiLanguage) {
-                // clone hashmap values
-                Method meth = null;
                 for (long k : clone.translations.keySet()) {
                     T t = clone.translations.get(k);
-                    if (t == null)
+                    if (t == null) {
                         this.translations.put(k, null);
-                    else {
-                        try {
-                            if (meth != null) {
-                                this.translations.put(k, (T) meth.invoke(t));
-                            } else {
-                                Class<?> clzz = t.getClass();
-                                meth = clzz.getMethod("clone");
-                            }
-                        } catch (Exception e) {
-                            throw new IllegalArgumentException("clone not supported", e);
-                        }
+                    } else {
+                        this.translations.put(k, t == null ? null : copyValue(t));
                     }
                 }
                 this.emptyTranslations = new HashMap(clone.emptyTranslations);
             } else {
-                try {
-                    this.singleValue = (T) clone.singleValue.getClass().
-                            getMethod("clone").invoke(clone.singleValue);
-                } catch (Exception e) {
-                    throw new IllegalArgumentException("clone not supported", e);
-                }
+                this.singleValue = clone.singleValue == null ? null : copyValue(clone.singleValue);
                 this.singleValueEmpty = clone.singleValueEmpty;
             }
         }
@@ -488,13 +471,32 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public abstract TDerived copy();
 
     /**
+     * Implement this method for data types that return false from {@link #isImmutableValueType()}.
+     *
+     * <p>
+     *     The default implementation returns the argument as-is and throws an IllegalArgumentException
+     *     when the container class has mutable value types.
+     * </p>
+     *
+     * @param value    the value to be copied (not null)
+     * @return  an independent copy of {@code value}
+     * @since 3.1.7
+     */
+    protected T copyValue(T value) {
+        if (!isImmutableValueType()) {
+            throw new IllegalArgumentException("Mutable datatype, but no implementation of copyValue provided: " + getClass());
+        }
+        return value;
+    }
+
+    /**
      * Return true if T is immutable (e.g. java.lang.String). This prevents cloning
      * of the translations in copy constructors.
      *
      * @return true if T is immutable (e.g. java.lang.String)
      */
     public boolean isImmutableValueType() {
-        return true;
+        return false;
     }
 
     /**
