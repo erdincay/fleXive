@@ -64,6 +64,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.flexive.sqlParser.Condition.ValueComparator;
@@ -1060,10 +1061,11 @@ public class GenericSQLDataFilter extends DataFilter {
                 } else if (comparator == ValueComparator.EQUAL || comparator == ValueComparator.NOT_EQUAL) {
                     // exact match, so we use the text column that stores the comma-separated list of selected items
                     column = alias + "FTEXT1024";
-                    final List<String> ids = Lists.newArrayList();
+                    final List<Long> ids = Lists.newArrayList();
                     for (Constant c : constant) {
-                        ids.add(PropertyEntry.mapSelectConstant(entry.getProperty(), c.toString()));
+                        ids.add(Long.valueOf(PropertyEntry.mapSelectConstant(entry.getProperty(), c.toString())));
                     }
+                    Collections.sort(ids);  // sort numerically to match the database representation
                     value = "'" + StringUtils.join(ids, ',') + "'";
                 } else if (comparator != ValueComparator.IN && comparator != ValueComparator.NOT_IN) {
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",

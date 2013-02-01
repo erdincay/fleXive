@@ -928,8 +928,8 @@ public class SearchEngineTest {
      * @throws FxApplicationException on search engine errors
      */
     private FxValue getTestValue(String name, PropertyValueComparator comparator) throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select(TEST_TYPE + "/" + getTestPropertyName(name)).type(TEST_TYPE).getResult();
-        final List<FxValue> values = result.collectColumn(1);
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", '#' + TEST_TYPE + "/" + getTestPropertyName(name)).type(TEST_TYPE).getResult();
+        final List<FxValue> values = result.collectColumn(2);
         final int testInstanceCount = getTestInstanceCount();
         assertTrue(values.size() == testInstanceCount, "Expected " + testInstanceCount + " rows, got: " + values.size());
         for (FxValue value : values) {
