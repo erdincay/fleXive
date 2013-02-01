@@ -45,6 +45,7 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.CharStreams;
 import groovy.lang.GroovySystem;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1002,23 +1003,14 @@ public final class FxSharedUtils {
         if (in == null) {
             return "";
         }
-        StringBuilder sb = new StringBuilder(length > 0 ? length : 5000);
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         try {
-            int read;
-            byte[] buffer = new byte[1024];
-            while ((read = in.read(buffer)) != -1) {
-                sb.append(new String(buffer, 0, read, "UTF-8"));
-            }
+            return CharStreams.toString(reader);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            throw new IllegalStateException(e);
         } finally {
-            try {
-                in.close();
-            } catch (IOException e) {
-                // ignore
-            }
+            close(reader);
         }
-        return sb.toString();
     }
 
     /**
