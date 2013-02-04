@@ -43,6 +43,7 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
@@ -1003,7 +1004,7 @@ public final class FxSharedUtils {
         if (in == null) {
             return "";
         }
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charsets.UTF_8));
         try {
             return CharStreams.toString(reader);
         } catch (IOException e) {
