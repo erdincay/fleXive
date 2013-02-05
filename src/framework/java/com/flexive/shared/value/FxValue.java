@@ -1080,8 +1080,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (this.getClass() != other.getClass()) return false;
         FxValue<?, ?> otherValue = (FxValue<?, ?>) other;
         if (this.isEmpty() != otherValue.isEmpty()) return false;
-        if (this.hasValueData() != otherValue.hasValueData() ||
-                (this.hasValueData() && otherValue.hasValueData() && this.getValueDataRaw().intValue() != otherValue.getValueDataRaw().intValue()))
+        final int thisData = this.hasValueData() ? this.getValueDataRaw() : 0;
+        final int otherData = otherValue.hasValueData() ? otherValue.getValueDataRaw() : 0;
+        if (thisData != otherData)
             return false;
         if (this.isMultiLanguage() != otherValue.isMultiLanguage()) return false;
         if (multiLanguage) {
