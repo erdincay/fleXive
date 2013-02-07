@@ -210,19 +210,19 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     }
 
     public boolean isMultiLang() {
-        return getOption(FxStructureOption.OPTION_MULTILANG).isValueTrue();
+        return isBooleanOptionSet(FxStructureOption.OPTION_MULTILANG);
     }
 
     public boolean isSearchable() {
-        return getOption(FxStructureOption.OPTION_SEARCHABLE).isValueTrue();
+        return isBooleanOptionSet(FxStructureOption.OPTION_SEARCHABLE);
     }
 
     public boolean isInOverview() {
-        return getOption(FxStructureOption.OPTION_SHOW_OVERVIEW).isValueTrue();
+        return isBooleanOptionSet(FxStructureOption.OPTION_SHOW_OVERVIEW);
     }
 
     public boolean isUseHTMLEditor() {
-        return getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+        return isBooleanOptionSet(FxStructureOption.OPTION_HTML_EDITOR);
     }
 
     /**
@@ -231,8 +231,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return has a max. input length been set?
      */
     public boolean hasMaxLength() {
-        final FxStructureOption option = getOption(FxStructureOption.OPTION_MAXLENGTH);
-        return option.isSet() && option.getIntValue() > 0;
+        final FxStructureOption option = findOption(FxStructureOption.OPTION_MAXLENGTH);
+        return option != null && option.isSet() && option.getIntValue() > 0;
     }
 
     /**
@@ -250,8 +250,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return if this property appears in multiple lines
      */
     public boolean isMultiLine() {
-        final FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
-        return opt.isSet() && opt.getIntValue() > 0;
+        final FxStructureOption opt = findOption(FxStructureOption.OPTION_MULTILINE);
+        return opt != null && opt.isSet() && opt.getIntValue() > 0;
     }
 
     /**
@@ -436,6 +436,32 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     }
 
     public boolean isReferenceSelectOne() {
-        return getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
+        return isBooleanOptionSet(FxStructureOption.OPTION_REFERENCE_SELECTONE);
     }
+
+    // internal optimized version that avoids temporary option instances for querying boolean flags
+    private boolean isBooleanOptionSet(String key) {
+        final FxStructureOption option = findOption(key);
+        return option != null && option.isValueTrue();
+    }
+
+    private FxStructureOption findOption(String key) {
+        // check property options
+        final FxStructureOption propertyOpt = FxStructureOption.findOption(key, property.options);
+        if (propertyOpt != null && !propertyOpt.isOverridable()) {
+            return propertyOpt;
+        }
+
+        // check assignment option
+        final FxStructureOption opt = FxStructureOption.findOption(key, options);
+
+        if (opt != null) {
+            return opt;
+        } else if (propertyOpt != null) {
+            return propertyOpt;
+        } else {
+            return null;
+        }
+    }
+
 }

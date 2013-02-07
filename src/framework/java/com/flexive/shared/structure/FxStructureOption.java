@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 
@@ -97,7 +98,7 @@ public class FxStructureOption implements Serializable {
      * @param value        the options value
      */
     public FxStructureOption(String key, boolean overridable, boolean set, String value) {
-        this.key = key.toUpperCase();
+        this.key = XPathElement.xpToUpperCase(key);
         this.overridable = overridable;
         this.set = set;
         this.value = value;
@@ -116,7 +117,7 @@ public class FxStructureOption implements Serializable {
      * @since 3.1
      */
     public FxStructureOption(String key, boolean overridable, boolean set, boolean isInherited, String value) {
-        this.key = key.toUpperCase();
+        this.key = XPathElement.xpToUpperCase(key);
         this.overridable = overridable;
         this.set = set;
         this.value = value;
@@ -236,10 +237,12 @@ public class FxStructureOption implements Serializable {
      * @return if an option is set for the requested key
      */
     public static boolean hasOption(String key, List<FxStructureOption> options) {
-        if (key != null)
-            key = key.trim().toUpperCase();
-        if (key == null || key.length() == 0 || options == null || options.size() == 0)
+        if (options == null || options.isEmpty()) {
             return false;
+        }
+        if (key == null || key.length() == 0)
+            return false;
+        key = XPathElement.xpToUpperCase(key.trim());
         for (FxStructureOption option : options)
             if (key.equals(option.getKey()))
                 return true;
@@ -267,7 +270,7 @@ public class FxStructureOption implements Serializable {
      */
     public static FxStructureOption getOption(String key, List<FxStructureOption> options) {
         if (key != null)
-            key = key.trim().toUpperCase();
+            key = XPathElement.xpToUpperCase(key.trim());
         if (key == null || key.length() == 0 || options == null || options.size() == 0)
             return getUnknownOption(StringUtils.defaultString(key));
         for (FxStructureOption option : options)
@@ -413,6 +416,25 @@ public class FxStructureOption implements Serializable {
      */
     public static List<FxStructureOption> getUnmodifieableOptions(List<FxStructureOption> options) {
         return Collections.unmodifiableList(options);
+    }
+
+    /**
+     * Internal option lookup that doesn't create temporary option instance and works only with upper-case option names
+     *
+     * @param opt        the option key (in upper case)
+     * @param options    the options
+     * @return  the option instance, when it exists
+     */
+    static FxStructureOption findOption(String opt, List<FxStructureOption> options) {
+        if (options == null) {
+            return null;
+        }
+        for (FxStructureOption option : options) {
+            if (option.getKey().equals(opt)) {
+                return option;
+            }
+        }
+        return null;
     }
 
     /**

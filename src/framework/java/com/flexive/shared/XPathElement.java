@@ -401,26 +401,33 @@ public class XPathElement implements Serializable {
     public static String toXPathMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
-        XPath = xpToUpperCase(XPath);
-        String type = null;
-        if (XPath.charAt(0) != '/' && XPath.indexOf('/') > 0) {
+
+        int start = 0;
+        final int xpLength = XPath.length();
+        StringBuilder xpc = new StringBuilder(xpLength + 20);
+        final int typeSepIdx = XPath.indexOf('/');
+        if (typeSepIdx > 0) {
             //we have a full qualified XPath with type name that needs to be stripped temporarily
-            type = XPath.substring(0, XPath.indexOf('/'));
-            XPath = XPath.substring(XPath.indexOf('/'));
+            for (int i = 0; i < typeSepIdx; i++) {
+                xpc.append(xpCharToUpperCase(XPath.charAt(i)));
+            }
+            start = typeSepIdx;
         }
-        if (!isValidXPath(XPath))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
-        String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
-        StringBuilder xpc = new StringBuilder(XPath.length() + 10);
-        for (String xpcurr : xp) {
+        for (int i = start + 1; i < xpLength; i++) {   // skip first '/'
             xpc.append('/');
-            if (xpcurr.indexOf('[') > 0)
-                xpc.append(xpcurr);
-            else
-                xpc.append(xpcurr).append("[1]");
+            char ch;
+            boolean hasIndex = false;
+            while (i < xpLength && (ch = XPath.charAt(i)) != '/') {
+                xpc.append(xpCharToUpperCase(ch));
+                if (ch == '[') {
+                    hasIndex = true;
+                }
+                i++;
+            }
+            if (!hasIndex) {
+                xpc.append("[1]");
+            }
         }
-        if (type != null)
-            return type + xpc.toString();
         return xpc.toString();
     }
 
@@ -651,17 +658,24 @@ public class XPathElement implements Serializable {
     public static String changeIndex(String XPath, int pos, int index) {
         byte curr = 0;
         int lastOpen = -1;
-        StringBuilder res = new StringBuilder(XPath);
-        for (int i = 0; i < res.length(); i++) {
-            switch (res.charAt(i)) {
+        final int xpLength = XPath.length();
+        for (int i = 0; i < xpLength; i++) {
+            switch (XPath.charAt(i)) {
                 case '[':
                     lastOpen = i;
                     break;
                 case ']':
                     if (curr++ != pos)
                         break;
-                    res.replace(lastOpen + 1, i, String.valueOf(index));
-                    return res.toString();
+                    // very often the right index is already set, so we skip the new string in that case
+                    final String oldIndex = XPath.substring(lastOpen + 1, i);
+                    final String newIndex = String.valueOf(index);
+                    if (!oldIndex.equals(newIndex)) {
+                        return XPath.substring(0, lastOpen + 1) + newIndex + XPath.substring(i);
+                    } else {
+                        // index not changed
+                        return XPath;
+                    }
             }
         }
         return XPath; //not found, return original
@@ -693,5 +707,13 @@ public class XPathElement implements Serializable {
             }
         }
         return out != null ? out.toString() : xpath;
+    }
+
+    private static char xpCharToUpperCase(char ch) {
+        if (ch >= 'a' && ch <= 'z') {
+            return (char) (ch - 32);
+        } else {
+            return ch;
+        }
     }
 }

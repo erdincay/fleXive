@@ -412,8 +412,17 @@ public class FxGroupData extends FxData {
      */
     public void fixChildIndices() {
         try {
-            List<XPathElement> elements = XPathElement.split(this.getXPathFull());
-            int pos = elements.size() - 1;
+            // get position of last element
+            int pos = 0;
+            final String xpath = this.getXPathFull();
+            int start = xpath.indexOf('/') + 1;
+            final int xpLength = xpath.length();
+            for (int i = start; i < xpLength; i++) {
+                if (xpath.charAt(i) == '/') {
+                    pos++;
+                }
+            }
+
             if (this.getChildren() != null)
                 _changeIndex(this.getChildren(), pos, this.getIndex());
         } catch (FxInvalidParameterException e) {
@@ -430,7 +439,6 @@ public class FxGroupData extends FxData {
      * @throws FxInvalidParameterException on errors with XPath composition
      */
     private void _changeIndex(List<FxData> children, int pos, int index) throws FxInvalidParameterException {
-        List<XPathElement> elements;
         for (FxData curr : children) {
             // we need to get the XPathFull to have the indices
             curr.setXPathFull(XPathElement.changeIndex(curr.getXPathFull(), pos, index));

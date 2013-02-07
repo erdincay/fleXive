@@ -248,7 +248,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
     public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal) {
         FxGroupData thisGroup;
         try {
-            final UserTicket ticket = FxContext.getUserTicket();
+            final UserTicket ticket = FxContext.get().getRunAsSystem() ? null : FxContext.getUserTicket();
             final FxMultiplicity fxMultiplicity = this.getMultiplicity();
             // if we need to check minMulti then it has to be valid otherwise it has only valid maxMulti
             if (!fxMultiplicity.isValidMax(index))
@@ -257,13 +257,14 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             thisGroup = new FxGroupData(parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     xPathFull, XPathElement.getIndices(xPathFull),
                     this.getId(), this.getMultiplicity(), position, parent, new ArrayList<FxData>(), this.isSystemInternal());
+            final FxType type = getAssignedType();
             if (this.getMode() == GroupMode.OneOf) {
                 //if One-Of more find the first non-optional child and create it (should not happen if correctly setup
                 //but still possible, multiple non-optional childs will result in errors that are thrown in an exception
                 boolean hasRequired = false;
                 for (FxAssignment as : assignments) {
-                    if (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
-                            !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
+                    if (as instanceof FxPropertyAssignment && type.isUsePropertyPermissions() &&
+                            ticket != null && !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
                     if (onlySystemInternal && !as.isSystemInternal()) 
                         continue;
@@ -282,8 +283,8 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                 }
             } else { // 'regular' Any-Of group
                 for (FxAssignment as : assignments) {
-                    if (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
-                            !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
+                    if (as instanceof FxPropertyAssignment && type.isUsePropertyPermissions() &&
+                            ticket != null && !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
                     if (onlySystemInternal && !as.isSystemInternal()) 
                         continue;

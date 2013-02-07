@@ -146,7 +146,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return property is available in multiple languages
      */
     public boolean isMultiLang() {
-        return getOption(FxStructureOption.OPTION_MULTILANG).isValueTrue();
+        return getBooleanOptionValue(FxStructureOption.OPTION_MULTILANG, options);
     }
 
     /**
@@ -156,7 +156,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @since 3.1
      */
     public boolean isReferenceSelectOne() {
-        return getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
+        return getBooleanOptionValue(FxStructureOption.OPTION_REFERENCE_SELECTONE, options);
     }
 
     /**
@@ -166,7 +166,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @since 3.1
      */
     public boolean isAssignmentSelectOne() {
-        return getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
+        return getBooleanOptionValue(FxStructureOption.OPTION_REFERENCE_SELECTONE, options);
     }
 
     /**
@@ -184,7 +184,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if property can be used in the visual query editor
      */
     public boolean isSearchable() {
-        return getOption(FxStructureOption.OPTION_SEARCHABLE).isValueTrue();
+        return getBooleanOptionValue(FxStructureOption.OPTION_SEARCHABLE, options);
     }
 
     /**
@@ -211,7 +211,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if this property appears in overviews
      */
     public boolean isInOverview() {
-        return getOption(FxStructureOption.OPTION_SHOW_OVERVIEW).isValueTrue();
+        return getBooleanOptionValue(FxStructureOption.OPTION_SHOW_OVERVIEW, options);
     }
 
     /**
@@ -229,7 +229,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return use HTML editor
      */
     public boolean isUseHTMLEditor() {
-        return getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+        return getBooleanOptionValue(FxStructureOption.OPTION_HTML_EDITOR, options);
     }
 
     /**
@@ -309,7 +309,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      */
     public boolean isFulltextIndexed() {
         if (hasOption(FxStructureOption.OPTION_FULLTEXT)) {
-            return getOption(FxStructureOption.OPTION_FULLTEXT).isValueTrue() && getDataType().isTextType();
+            return getBooleanOptionValue(FxStructureOption.OPTION_FULLTEXT, options) && getDataType().isTextType();
         }
         return fulltextIndexed  && getDataType().isTextType();
     }
@@ -458,8 +458,9 @@ public class FxProperty extends FxStructureElement implements Serializable {
                 value = new FxReference(multiLang, lang, FxReference.EMPTY).setEmpty();
                 break;
             case SelectOne:
-                if (this.getReferencedList().getItems().size() > 0) {
-                    value = new FxSelectOne(multiLang, lang, this.getReferencedList().getItems().get(0)).setEmpty();
+                final List<FxSelectListItem> items = this.getReferencedList().getItems();
+                if (items.size() > 0) {
+                    value = new FxSelectOne(multiLang, lang, items.get(0)).setEmpty();
                 } else {
                     value = new FxSelectOne(lang, multiLang).setEmpty();
                 }
@@ -501,4 +502,10 @@ public class FxProperty extends FxStructureElement implements Serializable {
     public boolean isDefaultValueSet() {
         return this.defaultValue !=null;
     }
+
+    private boolean getBooleanOptionValue(String key, List<FxStructureOption> options) {
+        final FxStructureOption opt = FxStructureOption.findOption(key, options);
+        return opt != null && opt.isValueTrue();
+    }
+
 }
