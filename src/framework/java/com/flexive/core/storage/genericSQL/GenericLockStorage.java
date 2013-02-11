@@ -33,9 +33,6 @@ package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-
-import static com.flexive.core.DatabaseConst.TBL_LOCKS;
-
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.LockStorage;
 import com.flexive.core.storage.StorageManager;
@@ -58,6 +55,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.TBL_LOCKS;
 
 /**
  * Generic SQL based implementation of the lock storage
@@ -354,8 +353,8 @@ public class GenericLockStorage implements LockStorage {
         if (!currentLock.isLocked())
             return; //nothing locked, so unlock is successful
         final UserTicket ticket = FxContext.getUserTicket();
-        if( ticket.isGuest() || ticket.getUserId() == Account.USER_GUEST )
-            throw new FxLockException("ex.lock.content.guest");    
+        if (!ticket.isGlobalSupervisor() && (ticket.isGuest() || ticket.getUserId() == Account.USER_GUEST))
+            throw new FxLockException("ex.lock.content.guest");
         final boolean allowUnlock = currentLock.getLockType() == FxLockType.Loose ||
                 currentLock.isExpired() ||
                 (currentLock.getLockType() == FxLockType.Permanent &&
