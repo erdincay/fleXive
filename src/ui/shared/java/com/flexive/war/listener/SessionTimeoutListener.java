@@ -32,18 +32,17 @@
 package com.flexive.war.listener;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.security.UserTicket;
+import com.flexive.war.filter.FxSessionWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.servlet.http.HttpSessionListener;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSession;
 import javax.servlet.ServletContext;
-
-import com.flexive.shared.FxContext;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.war.filter.FxSessionWrapper;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
 /**
  * Session timeout listener. Performs a logout when a session is destroyed, e.g. through a timeout event.
@@ -97,6 +96,9 @@ public class SessionTimeoutListener implements HttpSessionListener {
                     LOG.debug("Performing logout for user of destroyed session (possible session timeout): "
                             + session.getId());
                 }
+
+                onLogout(ctx.getTicket());
+
                 ctx.logout();
             }
         } catch (FxLogoutFailedException e) {
@@ -104,5 +106,15 @@ public class SessionTimeoutListener implements HttpSessionListener {
         } finally {
             FxContext.cleanup();
         }
+    }
+
+    /**
+     * Override to add custom behaviour when a user is logged out due to a session timeout.
+     * Called before the user is actually logged out.
+     *
+     * @param ticket    the user whose session timed out
+     * @since 3.1.7
+     */
+    protected void onLogout(UserTicket ticket) {
     }
 }
