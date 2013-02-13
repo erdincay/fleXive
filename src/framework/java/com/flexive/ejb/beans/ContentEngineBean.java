@@ -266,7 +266,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         content.checkForceSystemPropertyPermissions();
         Connection con = null;
         PreparedStatement ps = null;
-        FxPK pk;
+        FxPK pk = null;
         FxScriptEvent beforeAssignmentScript, afterAssignmentScript;
         try {
             FxEnvironment env = CacheAdmin.getEnvironment();
@@ -409,8 +409,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 FxBinaryUtils.removeTXFiles();
             } else
                 FxBinaryUtils.resetTXFiles();
-            if (!ctx.getRollbackOnly())
-                CacheAdmin.expireCachedContent(content.getId());
+            if (!ctx.getRollbackOnly() && pk != null)
+                CacheAdmin.expireCachedContent(pk.getId());
         }
     }
 

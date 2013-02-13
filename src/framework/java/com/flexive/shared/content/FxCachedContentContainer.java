@@ -103,9 +103,9 @@ public class FxCachedContentContainer implements Serializable {
                 if (found.getContent().getVersion() == pk.getVersion())
                     return found;
             } else {
-                if (pk.getVersion() == FxPK.MAX && found.getContent().isMaxVersion())
+                if (pk.getVersion() == FxPK.MAX && found.getContent().getVersion() == maxVersion)
                     return found;
-                else if (pk.getVersion() == FxPK.LIVE && found.getContent().isLiveVersion())
+                else if (pk.getVersion() == FxPK.LIVE && found.getContent().getVersion() == liveVersion)
                     return found;
             }
         }
