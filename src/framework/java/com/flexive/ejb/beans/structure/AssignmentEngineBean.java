@@ -201,7 +201,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         final boolean differentProp = last.lastIndexOf('_') > 0 && !StringUtils.isNumeric(last.substring(last.lastIndexOf("_") + 1));
                         //since postgres handles underscores as wildcards, find the first relevant entry
                         if (differentProp || !(last.equals(property.getName()) || last.startsWith(property.getName() + "_"))) {
-                            found = false;
+                            found = last.equals(property.getName()) || (last.startsWith(property.getName() + "_") && StringUtils.isNumeric(last.substring(last.lastIndexOf("_") + 1)));
                             while (rs.next()) {
                                 last = rs.getString(1);
                                 if (last.equals(property.getName())) {
