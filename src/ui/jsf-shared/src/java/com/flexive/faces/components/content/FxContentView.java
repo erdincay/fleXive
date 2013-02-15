@@ -435,27 +435,32 @@ public class FxContentView extends UIOutput {
         public Object get(Object key) {
             try {
                 String path = getCanonicalPath((String) key);
-                if (isListRequest(path)) {
-                    return getList(path, false);
-                } else if (isListAllRequest(path)) {
-                    return getList(path, true);
-                } else if (isLabelRequest(path)) {
-                    return getLabel(path);
-                } else if (isHintRequest(path)) {
-                    return getHint(path);
-                } else if (isNewValueRequest(path)) {
-                    return getNewValue(path);
-                } else if (isResolveReferenceRequest(path)) {
-                    return getResolvedReference(path);
-                } else if (isXPathRequest(path)) {
-                    return getXPath(path);
-                } else if (isMayCreateMoreRequest(path)) {
-                    return getMayCreateMore(path);
-                } else if (isXPathValidRequest(path)) {
-                    return getXPathValid(path);
-                } else if (isDataRequest(path)) {
-                    return getData();
-                } else if (content.isGroupXPath(path)) {
+                if (path.indexOf('$') != -1) {
+                    if (isListRequest(path)) {
+                        return getList(path, false);
+                    } else if (isListAllRequest(path)) {
+                        return getList(path, true);
+                    } else if (isLabelRequest(path)) {
+                        return getLabel(path);
+                    } else if (isHintRequest(path)) {
+                        return getHint(path);
+                    } else if (isNewValueRequest(path)) {
+                        return getNewValue(path);
+                    } else if (isResolveReferenceRequest(path)) {
+                        return getResolvedReference(path);
+                    } else if (isXPathRequest(path)) {
+                        return getXPath(path);
+                    } else if (isMayCreateMoreRequest(path)) {
+                        return getMayCreateMore(path);
+                    } else if (isXPathValidRequest(path)) {
+                        return getXPathValid(path);
+                    } else if (isDataRequest(path)) {
+                        return getData();
+                    } else if (isMaxIndexRequest(path)) {
+                        return getMaxIndex(path);
+                    }
+                }
+                if (content.isGroupXPath(path)) {
                     return new ContentMap(content, path);
                 } else {
                     return content.getValue(path);
@@ -510,6 +515,10 @@ public class FxContentView extends UIOutput {
 
         private boolean isDataRequest(String path) {
             return path.equals(prefix + "/$data");
+        }
+
+        private boolean isMaxIndexRequest(String path) {
+            return path.endsWith("$maxIndex");
         }
 
         private FxString getLabel(String path) throws FxNotFoundException, FxInvalidParameterException {
@@ -655,6 +664,11 @@ public class FxContentView extends UIOutput {
         private boolean getXPathValid(String path) {
             path = StringUtils.replace(path, "$valid", "");
             return content.isPropertyXPath(path);
+        }
+
+        private int getMaxIndex(String path) {
+            path = StringUtils.replace(path, "$maxIndex", "");
+            return content.getMaxIndex(path);
         }
 
         public Map<String, Integer> getNewIndices() {

@@ -39,7 +39,9 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,7 +147,7 @@ public class FxBinaryUtils {
                 return name.startsWith(handle + "__");
             }
         });
-        if (result.length > 0)
+        if (result != null && result.length > 0)
             return result[0];
         return null;
     }

@@ -208,7 +208,7 @@
                                 <code language="jsfel">#{content['name']}</code>
                             </term>
                             <term>
-                                <code language="jsfel">#{content['/name']</code>
+                                <code language="jsfel">#{content['/name']}</code>
                             </term>
                             <listitem>
                                 <para>
@@ -346,6 +346,24 @@
                             <listitem>
                                 <para>
                                     Return true if the given XPath (name) is valid for the content instance.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.name$maxIndex}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Return the maximum index value of the given XPath, i.e. the number of occurrences
+                                    of the property or group in the XPath.
+                                </para>
+                                <para>
+                                    The Java equivalent of this expressions is
+                                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/content/FxContent.html#getMaxIndex(java.lang.String)">
+                                        FxContent#getMaxIndex(java.lang.String)
+                                    </link>.
                                 </para>
                             </listitem>
                         </varlistentry>

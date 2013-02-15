@@ -89,7 +89,6 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private long timeStamp = 0;
     //storage-type-level-mapping
     private Map<String, Map<Long, Map<Integer, List<FxFlatStorageMapping>>>> flatMappings;
-    private final static List<FxFlatStorageMapping> EMPTY_FLAT_MAPPINGS = Collections.unmodifiableList(new ArrayList<FxFlatStorageMapping>(0));
 
     public FxEnvironmentImpl() {
     }
@@ -1397,9 +1396,10 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level) {
         try {
-            return flatMappings.get(storage).get(typeId).get(level);
+            final List<FxFlatStorageMapping> mappings = flatMappings.get(storage).get(typeId).get(level);
+            return mappings != null ? mappings : Collections.<FxFlatStorageMapping>emptyList();
         } catch (Exception e) {
-            return EMPTY_FLAT_MAPPINGS;
+            return Collections.emptyList();
         }
     }
 
