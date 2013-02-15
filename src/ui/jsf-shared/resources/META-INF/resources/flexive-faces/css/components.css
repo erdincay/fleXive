@@ -82,6 +82,12 @@ textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
     filter: alpha(opacity = 30);
 }
 
+.fxValueInputMultiLang .fxValueHtmlEditorContainer,
+.fxValueInputMultiLang .fxValueTextAreaContainer {
+    display: block;
+    clear: both;
+}
+
 .fxValueTextAreaContainer {
     height: 150px;
 }

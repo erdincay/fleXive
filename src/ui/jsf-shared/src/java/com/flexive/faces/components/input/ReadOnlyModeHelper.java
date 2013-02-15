@@ -49,8 +49,8 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlGraphicImage;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
-import java.io.IOException;
 import javax.faces.component.html.HtmlSelectBooleanCheckbox;
+import java.io.IOException;
 
 /**
  * Renders a FxValue component in read-only mode.
@@ -169,6 +169,7 @@ public class ReadOnlyModeHelper implements RenderHelper {
             container.setDisplayLanguage(true);
             container.setLanguage(language);
             container.setInputClientId(clientId);
+            container.setMultiLanguage(true);
             parent.getChildren().add(container);
             // use container as parent for all subsequent operations
             parent = container;

@@ -32,16 +32,12 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.FxFormatUtils.toDate;
-import static com.flexive.shared.FxFormatUtils.toDateTime;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.*;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -55,6 +51,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static com.flexive.shared.FxFormatUtils.toDate;
+import static com.flexive.shared.FxFormatUtils.toDateTime;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * Base renderer class for the FxValueInput component.
@@ -71,6 +72,7 @@ public abstract class AbstractFxValueInputRenderer<T extends AbstractFxValueInpu
     protected static final String LANG_SELECT = "_languageSelect";
     protected static final String INPUT = "_input_";
     protected static final String CSS_CONTAINER = "fxValueInput";
+    protected static final String CSS_MULTILANG = "fxValueInputMultiLang";
     protected static final String CSS_READONLYCONTAINER = "fxValueInputReadOnly";
     protected static final String CSS_LANG_CONTAINER = "fxValueInputRow";
     protected static final String CSS_LANG_CONTAINER_FIRST = "firstRow";

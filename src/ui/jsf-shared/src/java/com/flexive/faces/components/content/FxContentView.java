@@ -64,10 +64,7 @@ import javax.faces.event.FacesEvent;
 import javax.faces.event.FacesListener;
 import javax.faces.event.PhaseId;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.flexive.faces.FxJsfComponentUtils.requireAttribute;
 
@@ -536,23 +533,18 @@ public class FxContentView extends UIOutput {
                 // use faster direct assignment lookup in the environment
                 final String typeName = env.getType(content.getTypeId()).getName();
                 final FxAssignment assignment = env.getAssignment(typeName + path);
-                if (assignment instanceof FxPropertyAssignment) {
+                if (!content.containsXPath(path)) {
+                    return Collections.emptyList();
+                } else if (assignment instanceof FxPropertyAssignment) {
                     // iterate over property values
                     return content.getPropertyData(path).getValues(includeEmpty);
                 } else {
                     // create a content map for each child
-                    List<ContentMap> rowMaps = new ArrayList<ContentMap>();
-                    List<FxData> elements = null;
-                    try {
-                        elements = content.getGroupData(path).getElements();
-                    } catch (FxRuntimeException e) {
-                        // group empty
-                    }
-                    if (elements != null) {
-                        for (FxData row : elements) {
-                            if (includeEmpty || !row.isEmpty()) {
-                                rowMaps.add(new ContentMap(content, path + "[" + row.getIndex() + "]"));
-                            }
+                    final List<ContentMap> rowMaps = new ArrayList<ContentMap>();
+                    final List<FxData> elements = content.getGroupData(path).getElements();
+                    for (FxData row : elements) {
+                        if (includeEmpty || !row.isEmpty()) {
+                            rowMaps.add(new ContentMap(content, path + "[" + row.getIndex() + "]"));
                         }
                     }
                     return rowMaps;
@@ -560,7 +552,7 @@ public class FxContentView extends UIOutput {
             } catch (FxRuntimeException e) {
                 if (e.getConverted() instanceof FxNotFoundException) {
                     // return null object
-                    return new ArrayList<Object>(0);
+                    return Collections.emptyList();
                 } else {
                     throw e;
                 }

@@ -34,10 +34,7 @@ package com.flexive.faces.components.input;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.beans.UserConfigurationBean;
-import static com.flexive.faces.components.input.AbstractFxValueInputRenderer.*;
-import static com.flexive.faces.components.input.RenderHelperUtils.*;
 import com.flexive.faces.javascript.FxJavascriptUtils;
-import static com.flexive.faces.javascript.FxJavascriptUtils.*;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.*;
@@ -60,6 +57,10 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.flexive.faces.components.input.AbstractFxValueInputRenderer.*;
+import static com.flexive.faces.components.input.RenderHelperUtils.*;
+import static com.flexive.faces.javascript.FxJavascriptUtils.*;
 
 /**
  * Renders an FxValueInput component in edit mode.
@@ -186,6 +187,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
         final ContainerWriter container = newContainerWriter();
         container.setId(stripForm(clientId) + "_container");
         container.setInputClientId(clientId);
+        container.setMultiLanguage(true);
         component.getChildren().add(container);
 
         final List<UIComponent> rows = new ArrayList<UIComponent>();

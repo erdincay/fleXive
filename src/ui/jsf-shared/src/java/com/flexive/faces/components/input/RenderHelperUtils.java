@@ -32,18 +32,19 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
-import com.flexive.war.servlet.DownloadServlet;
-import javax.faces.component.html.HtmlGraphicImage;
-import javax.faces.component.html.HtmlOutputLink;
-import com.flexive.shared.FxLanguage;
 import com.flexive.shared.value.FxValue;
-import java.io.IOException;
+import com.flexive.war.servlet.DownloadServlet;
+
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIOutput;
+import javax.faces.component.html.HtmlGraphicImage;
+import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
+import java.io.IOException;
 
 
 /**
@@ -152,8 +153,9 @@ public class RenderHelperUtils {
      */
     public static class ContainerWriter extends DeferredInputWriter {
 
-        boolean displayLanguage = false;
-        FxLanguage language = null;
+        private boolean displayLanguage;
+        private FxLanguage language;
+        private boolean multiLanguage;
 
         public void setDisplayLanguage(boolean displayLanguage) {
             this.displayLanguage = displayLanguage;
@@ -163,12 +165,19 @@ public class RenderHelperUtils {
             this.language = language;
         }
 
+        public void setMultiLanguage(boolean multiLanguage) {
+            this.multiLanguage = multiLanguage;
+        }
+
         @Override
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
             StringBuilder styleClass = new StringBuilder(300);
             styleClass.append(getInputValue().getClass().getSimpleName()).append("Input ")
                     .append(AbstractFxValueInputRenderer.CSS_CONTAINER);
+            if (multiLanguage) {
+                styleClass.append(' ').append(AbstractFxValueInputRenderer.CSS_MULTILANG);
+            }
             if( displayLanguage && language != null )  {
                 writer.writeText(language.getLabel().getBestTranslation()+":", null);
                 styleClass.insert(0, AbstractFxValueInputRenderer.CSS_READONLYCONTAINER+" ");
