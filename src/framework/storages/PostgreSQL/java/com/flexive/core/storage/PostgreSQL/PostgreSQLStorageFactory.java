@@ -389,4 +389,11 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected GenericDivisionImporter getDivisionImporter() {
+        return PostgreSQLDivisionImporter.getInstance();
+    }
 }

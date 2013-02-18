@@ -901,7 +901,7 @@
                 <fileset dir="${flexive.lib.dir}" includes="*.jar, groovy/*.jar"/>
             </classpath>
             <arg value="${database.vendor}"/>
-            <arg value="${database.database.division}"/>
+            <arg value="${db.division}"/>
             <arg value="${schema.division}"/>
             <arg value="division"/>
             <arg value="true"/>

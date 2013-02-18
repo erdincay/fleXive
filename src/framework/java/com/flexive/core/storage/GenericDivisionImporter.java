@@ -921,13 +921,7 @@ try {
             importTable(stmt, zip, ze, "structures/properties/property_t", DatabaseConst.TBL_STRUCT_PROPERTIES + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/groups/group", DatabaseConst.TBL_STRUCT_GROUPS);
             importTable(stmt, zip, ze, "structures/groups/group_t", DatabaseConst.TBL_STRUCT_GROUPS + DatabaseConst.ML);
-            DBStorage storage = StorageManager.getStorageImpl();
-            try {
-                stmt.execute(storage.getReferentialIntegrityChecksStatement(false));
-                importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS, true, true, "base:0", "parentgroup:%id", "pos:@", "KEY:id");
-            } finally {
-                stmt.execute(storage.getReferentialIntegrityChecksStatement(true));
-            }
+            importAssignments(con, zip, ze, stmt);
             importTable(stmt, zip, ze, "structures/assignments/assignment_t", DatabaseConst.TBL_STRUCT_ASSIGNMENTS + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/selectlists/item", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
             importTable(stmt, zip, ze, "structures/selectlists/item_t", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM + DatabaseConst.ML);
@@ -935,6 +929,16 @@ try {
             importTable(stmt, zip, ze, "structures/properties/poption", DatabaseConst.TBL_STRUCT_PROPERTY_OPTIONS);
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    protected void importAssignments(Connection con, ZipFile zip, ZipEntry ze, Statement stmt) throws Exception {
+        DBStorage storage = StorageManager.getStorageImpl();
+        try {
+            stmt.execute(storage.getReferentialIntegrityChecksStatement(false));
+            importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS, true, true, "base:0", "parentgroup:%id", "pos:@", "KEY:id");
+        } finally {
+            stmt.execute(storage.getReferentialIntegrityChecksStatement(true));
         }
     }
 
