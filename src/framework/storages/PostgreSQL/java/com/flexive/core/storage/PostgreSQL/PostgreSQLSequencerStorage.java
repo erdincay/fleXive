@@ -182,30 +182,34 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
      */
     public List<CustomSequencer> getCustomSequencers() throws FxApplicationException {
         List<CustomSequencer> res = new ArrayList<CustomSequencer>(20);
-        Connection con = null;
+        Connection con = null, nonTxCon = null;
         PreparedStatement ps = null;
         Statement s = null;
         try {
             con = Database.getDbConnection();
             ps = con.prepareStatement(SQL_GET_USER);
-            s = con.createStatement();
+
+            nonTxCon = Database.getNonTXDataSource().getConnection();
+            s = nonTxCon.createStatement();
+
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
-                ResultSet rsi = s.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX + rs.getString(1));
-                rsi.next();
-                res.add(new CustomSequencer(rs.getString(1), rsi.getBoolean(1), rsi.getLong(2)));
-                rsi.close();
+                try {
+                    // use non-transactional connection since the relation may have been deleted by another
+                    // thread, which would lead to a rollback on the main connection
+                    ResultSet rsi = s.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX + rs.getString(1));
+                    rsi.next();
+                    res.add(new CustomSequencer(rs.getString(1), rsi.getBoolean(1), rsi.getLong(2)));
+                    rsi.close();
+                } catch (SQLException e) {
+                    LOG.warn("Sequencer " + rs.getString(1) + " no longer exists");
+                }
             }
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
-            try {
-                if (s != null)
-                    s.close();
-            } catch (SQLException e) {
-                LOG.error(e);
-            }
             Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgreSQLSequencerStorage.class, nonTxCon, s);
         }
         return res;
     }
