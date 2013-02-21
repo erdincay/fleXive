@@ -745,6 +745,7 @@ public class ContentEngineTest {
         text.setTranslation(FxLanguage.GERMAN, "Text deutsch1");
         test.setValue("/MYTITLE", title);
         test.setValue("/TEXT", text);
+        test.setStepByDefinition(StepDefinition.LIVE_STEP_ID);
         int titlePos = test.getPropertyData("/MYTITLE").getPos();
         test.move("/MYTITLE", 1); //move title 1 position down
         FxPropertyData pText = test.getPropertyData("/TEXT");
@@ -754,7 +755,6 @@ public class ContentEngineTest {
             pText2.setValue(new FxString(FxLanguage.ENGLISH, "Text english2"));
             assertTrue("Text english2".equals(((FxString) test.getPropertyData("/TEXT[2]").getValue()).getTranslation(FxLanguage.ENGLISH)));
         }
-        //            for( int i=0; i<100;i++)
         FxPK pk = test.save().getPk();
         FxContent comp = ce.load(pk);
         assertTrue(comp != null);
@@ -766,7 +766,7 @@ public class ContentEngineTest {
         assertTrue(comp.getStepId() == test.getStepId(), "Step failed");
         assertEquals(comp.getAclIds(), test.getAclIds(), "ACL failed");
         assertTrue(comp.isMaxVersion(), "MaxVersion failed");
-        assertTrue(comp.isLiveVersion() == article.getWorkflow().getSteps().get(0).isLiveStep(), "LiveVersion failed. Expected:" + article.getWorkflow().getSteps().get(0).isLiveStep() + " Got:" + comp.isLiveVersion());
+        assertTrue(comp.isLiveVersion(), "LiveVersion failed. Expected:true Got:" + comp.isLiveVersion());
         assertTrue(comp.getMainLanguage() == FxLanguage.ENGLISH, "MainLang failed");
         assertTrue(comp.getLifeCycleInfo().getCreatorId() == getUserTicket().getUserId(), "CreatedBy failed");
         assertTrue("Text english1".equals(((FxString) comp.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH)), "Expected 'Text english1', got '" + ((FxString) comp.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH) + "'");

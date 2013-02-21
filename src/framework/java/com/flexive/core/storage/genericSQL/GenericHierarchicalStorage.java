@@ -40,6 +40,7 @@ import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
 import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
@@ -64,6 +65,7 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -577,7 +579,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             if (content.isForcePkOnCreate()) {
                 // we must fix the MAX_VER/LIVE_VER columns now, since they may not have been set correctly in the insert
-                fixContentVersionStats(con, type, pk.getId());
+                fixContentVersionStats(con, type, pk.getId(), true);
             }
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
@@ -607,20 +609,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param con  an open and valid connection
      * @param type the contents type
      * @param id   the id to fix the version statistics for
+     * @param createMode    whether a new instance (or version) is being created
      * @throws FxUpdateException if a sql error occurs
      */
-    protected void fixContentVersionStats(Connection con, FxType type, long id) throws FxUpdateException {
+    protected void fixContentVersionStats(Connection con, FxType type, long id, boolean createMode) throws FxUpdateException {
         PreparedStatement ps = null;
+        final DBStorage storage = StorageManager.getStorageImpl();
         try {
-            //lock needed columns
-            ps = con.prepareStatement("SELECT MAX_VER, LIVE_VER, ISMAX_VER, ISLIVE_VER FROM " + TBL_CONTENT + " WHERE ID=? FOR UPDATE");
-            ps.setLong(1, id);
-            ps.execute();
-            ps.close();
-            ps = con.prepareStatement("SELECT ISMAX_VER, ISLIVE_VER FROM " + TBL_CONTENT_DATA + " WHERE ID=? FOR UPDATE");
-            ps.setLong(1, id);
-            ps.execute();
-
+            // determine current max and live version
             ps = con.prepareStatement(CONTENT_VER_CALC);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
@@ -633,8 +629,53 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (rs.wasNull() || live_ver < 0)
                 live_ver = 0;
             ps.close();
+
+            // get currently flagged versions that also need to be updated
+            ps = con.prepareCall("SELECT VER, ISMAX_VER, ISLIVE_VER FROM " + TBL_CONTENT + " WHERE ID=? AND "
+                    + "(ISMAX_VER=" + storage.getBooleanExpression(true) + " OR ISLIVE_VER=" + storage.getBooleanExpression(true) + ")");
+            ps.setLong(1, id);
+            rs = ps.executeQuery();
+            final Set<Integer> versions = Sets.newHashSet(live_ver, max_ver);
+            int dbMaxVer = -1, dbLiveVer = -1;
+            while (rs.next()) {
+                final int ver = rs.getInt(1);
+                versions.add(ver);
+                if (rs.getBoolean(2)) {
+                    dbMaxVer = ver;
+                }
+                if (rs.getBoolean(3)) {
+                    dbLiveVer = ver;
+                }
+            }
+            ps.close();
+
+            // FX_CONTENT_DATA updates are only needed when the live and/or max version changes
+            // (FX_CONTENT needs to be updated regardless, since we need to set the current max/live version
+            // information for all versions). On updates of existing substances the data will always need to be
+            // updated, since the live version flag may have been switched on the existing substance.
+            final boolean dataUpdateNeeded = !createMode || (max_ver != dbMaxVer || live_ver != dbLiveVer);
+
+            // select the new max/live version(s), and the previous ones
+            final String limitVersions = "(VER IN (" + StringUtils.join(versions, ',') + "))";
+
+            //lock needed columns
+            ps = con.prepareStatement("SELECT MAX_VER, LIVE_VER, ISMAX_VER, ISLIVE_VER FROM " + TBL_CONTENT
+                    + " WHERE ID=? FOR UPDATE");
+            ps.setLong(1, id);
+            ps.execute();
+            ps.close();
+
+            if (dataUpdateNeeded) {
+                ps = con.prepareStatement("SELECT ISMAX_VER, ISLIVE_VER FROM " + TBL_CONTENT_DATA + " WHERE ID=? "
+                        + " AND " + limitVersions + " FOR UPDATE");
+                ps.setLong(1, id);
+                ps.execute();
+            }
+
             if (live_ver == 0) //deactivate in live tree
                 StorageManager.getTreeStorage().contentRemoved(con, id, true);
+
+            // update main content table (all versions need to be updated for the LIVE_VER and MAX_VER columns)
             ps = con.prepareStatement(CONTENT_VER_UPDATE_1);
             ps.setInt(1, max_ver);
             ps.setInt(2, live_ver);
@@ -643,15 +684,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(5, id);
             ps.executeUpdate();
             ps.close();
-            /*ps = con.prepareStatement(CONTENT_VER_UPDATE_2);
-            ps.setLong(1, id);
-            ps.executeUpdate();
-            ps.close();*/
-            ps = con.prepareStatement(CONTENT_VER_UPDATE_3);
-            ps.setInt(1, max_ver);
-            ps.setInt(2, live_ver);
-            ps.setLong(3, id);
-            ps.executeUpdate();
+
+            if (dataUpdateNeeded) {
+                ps = con.prepareStatement(CONTENT_VER_UPDATE_3 + " AND " + limitVersions);
+                ps.setInt(1, max_ver);
+                ps.setInt(2, live_ver);
+                ps.setLong(3, id);
+                ps.executeUpdate();
+            }
+
             if (type.isContainsFlatStorageAssignments())
                 syncContentStats(con, type.getId(), id, max_ver, live_ver);
         } catch (SQLException e) {
@@ -725,7 +766,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             ft.commitChanges();
 
-            fixContentVersionStats(con, type, content.getPk().getId());
+            fixContentVersionStats(con, type, content.getPk().getId(), true);
         } catch (FxApplicationException e) {
             if (e instanceof FxCreateException)
                 throw (FxCreateException) e;
@@ -2291,7 +2332,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             if (delta.isInternalPropertyChanged()) {
                 updateStepDependencies(con, content.getPk().getId(), content.getPk().getVersion(), env, type, content.getStepId());
-                fixContentVersionStats(con, type, content.getPk().getId());
+                fixContentVersionStats(con, type, content.getPk().getId(), false);
             }
             content.resolveBinaryPreview();
             if (original.getBinaryPreviewId() != content.getBinaryPreviewId() ||
@@ -2721,7 +2762,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             ps.setInt(2, ver);
             if (ps.executeUpdate() > 0)
-                fixContentVersionStats(con, type, pk.getId());
+                fixContentVersionStats(con, type, pk.getId(), false);
             StorageManager.getTreeStorage().afterContentVersionRemoved(nodes, con, pk.getId(), ver, cvi);
         } catch (SQLException e) {
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
