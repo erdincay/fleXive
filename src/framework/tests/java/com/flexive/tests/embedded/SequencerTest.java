@@ -95,6 +95,7 @@ public class SequencerTest {
         Assert.assertTrue(id.sequencerExists(seq2), "Expected sequencer " + seq2 + " to exist!");
         Assert.assertTrue(id.sequencerExists(seq3), "Expected sequencer " + seq3 + " to exist!");
         long i1 = id.getId(seq1);
+        Assert.assertEquals(i1, 1);
         long i2 = id.getId(seq1);
         Assert.assertTrue(i2 > i1, "Expected a higher id after 2nd getId()!");
         i1 = id.getId(seq2); //call should cause the sequencer to roll over
