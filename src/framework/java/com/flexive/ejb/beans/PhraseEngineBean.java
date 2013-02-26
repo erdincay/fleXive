@@ -1932,10 +1932,16 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     sql.append("POS DESC");
                     break;
                 case VALUE_ASC:
-                    sql.append("SVAL ASC");
+                    if(query.isLanguageFallback())
+                        sql.append("PVAL ASC");
+                    else
+                        sql.append("SVAL ASC");
                     break;
                 case VALUE_DESC:
-                    sql.append("SVAL DESC");
+                    if (query.isLanguageFallback())
+                        sql.append("PVAL DESC");
+                    else
+                        sql.append("SVAL DESC");
                     break;
                 case KEY_ASC:
                     sql.append("PKEY ASC");
