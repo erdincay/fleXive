@@ -640,12 +640,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             while (rs.next()) {
                 final int ver = rs.getInt(1);
                 versions.add(ver);
-                if (rs.getBoolean(2)) {
+                if (rs.getBoolean(2) && ver != max_ver) {
                     dbMaxVer = ver;
                 }
-                if (rs.getBoolean(3)) {
+                if (rs.getBoolean(3) && ver != live_ver) {
                     dbLiveVer = ver;
                 }
+            }
+            if (dbMaxVer == -1) {
+                dbMaxVer = max_ver;
+            }
+            if (dbLiveVer == -1) {
+                dbLiveVer = live_ver;
             }
             ps.close();
 
