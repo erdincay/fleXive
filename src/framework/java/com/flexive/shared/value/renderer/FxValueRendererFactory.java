@@ -69,7 +69,7 @@ public class FxValueRendererFactory {
     private static class FxDateFormatter implements FxValueFormatter<Date, FxDate> {
         public String format(FxDate value, Date translation, FxLanguage outputLanguage) {
             return translation != null
-                    ? DateFormat.getDateInstance(DateFormat.MEDIUM, outputLanguage.getLocale()).format(translation)
+                    ? getDateFormat(outputLanguage.getLocale()).format(translation)
                     : getEmptyMessage(outputLanguage);
         }
     }
@@ -85,7 +85,7 @@ public class FxValueRendererFactory {
         }
 
         private String formatDate(FxLanguage outputLanguage, Date date) {
-            return DateFormat.getDateInstance(DateFormat.MEDIUM, outputLanguage.getLocale()).format(date);
+            return getDateFormat(outputLanguage.getLocale()).format(date);
         }
     }
 
@@ -95,7 +95,7 @@ public class FxValueRendererFactory {
     private static class FxDateTimeFormatter implements FxValueFormatter<Date, FxDateTime> {
         public String format(FxDateTime container, Date value, FxLanguage outputLanguage) {
             return value != null
-                    ? DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, outputLanguage.getLocale()).format(value)
+                    ? getDateTimeFormat(outputLanguage.getLocale()).format(value)
                     : getEmptyMessage(outputLanguage);
         }
     }
@@ -111,7 +111,7 @@ public class FxValueRendererFactory {
         }
 
         private String formatDateTime(FxLanguage outputLanguage, Date dateTime) {
-            return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, outputLanguage.getLocale()).format(dateTime);
+            return getDateTimeFormat(outputLanguage.getLocale()).format(dateTime);
         }
     }
 
