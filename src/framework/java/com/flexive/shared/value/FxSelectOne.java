@@ -207,10 +207,13 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      */
     @Override
     protected FxSelectListItem copyValue(FxSelectListItem value) {
-        return new FxSelectListItem(value.getId(), value.getName(), value.getAcl(), value.getList(),
+        final FxSelectListItem copy = new FxSelectListItem(value.getId(), value.getName(), value.getAcl(), null,
                 value.getParentItem() != null ? value.getParentItem().getId() : -1,
                 new FxString(value.getLabel()), value.getData(), value.getColor(), value.getIconId(), value.getIconVer(),
                 value.getIconQuality(), value.getLifeCycleInfo(), value.getPosition());
+        // do not add the new item to the select list via the internal constructor, but set the list manually.
+        copy.setList(value.getList());
+        return copy;
     }
 
     /**

@@ -63,10 +63,11 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param item the item to make editable
      */
     public FxSelectListItemEdit(FxSelectListItem item) {
-        super(item.id, item.name, item.acl, item.list, item.parentItemId, item.label.copy(), item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
+        super(item.id, item.name, item.acl, null, item.parentItemId, item.label.copy(), item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
         this.isNew = false;
         this.original = item;
         this.parentItem = item.parentItem;
+        this.list = item.list;
     }
 
     /**
