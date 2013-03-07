@@ -291,7 +291,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         Connection con = null;
         Statement stmt = null;
         String curSql;
-        final UserTicket ticket = UserTicketStore.getTicket(false);
+        final UserTicket ticket = getRequestTicket();
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -365,7 +365,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         Connection con = null;
         Statement stmt = null;
         String curSql;
-        final UserTicket ticket = UserTicketStore.getTicket(false);
+        final UserTicket ticket = getRequestTicket();
 
         try {
             // Obtain a database connection
@@ -1545,7 +1545,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         Connection con = null;
         Statement stmt = null;
         String curSql;
-        UserTicket ticket = UserTicketStore.getTicket(false);
+        UserTicket ticket = getRequestTicket();
 
         // Security checks
         if (!ticket.isGlobalSupervisor() && (!(accountId == ticket.getUserId() || accountId == Account.USER_GUEST))) {
@@ -1627,4 +1627,10 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             FxContext.get().stopRunAsSystem();
         }
     }
+
+    private UserTicket getRequestTicket() {
+        final UserTicket requestTicket = FxContext.getUserTicket();
+        return requestTicket != null ? requestTicket : UserTicketStore.getTicket(false);
+    }
+
 }
