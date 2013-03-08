@@ -10,7 +10,13 @@
 
     <properties>
         <spi.version>3.1-SNAPSHOT</spi.version>
-        <chemistry.version>0.5-SNAPSHOT</chemistry.version>
+
+        <!--
+            Use the last version of the old (2010) chemistry library. This dependency has to be built manually,
+            the old library is available at https://svn.apache.org/repos/asf/chemistry/old/chemistry/trunk
+        -->
+        <chemistry.version>0.5-r936396</chemistry.version>
+
         <openejb.version>3.1</openejb.version>
         <gmaven.version>1.0-rc-5</gmaven.version>
         <jetty.version>6.1.12</jetty.version>
@@ -286,7 +292,7 @@
         </repository>
         <repository>
             <id>milton</id>
-            <url>http://www.ettrema.com/maven2/</url>
+            <url>http://milton.io/maven/</url>
             <snapshots>
                 <updatePolicy>never</updatePolicy>
             </snapshots>

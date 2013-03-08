@@ -37,6 +37,7 @@ import com.bradmcevoy.http.ResourceFactory;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
+import com.bradmcevoy.http.exceptions.NotFoundException;
 import junit.framework.TestCase;
 import org.apache.chemistry.Repository;
 import com.flexive.chemistry.webdav.DocumentResource;
@@ -118,7 +119,7 @@ public abstract class WebdavTestCase extends TestCase {
         assertEquals(0, sub.getChildren().size());
     }
 
-    public void testCreateContent() throws IOException, NotAuthorizedException, BadRequestException {
+    public void testCreateContent() throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         final int oldSize = getFolder("/").getChildren().size();
         final Resource doc = getFolder("/").createNew(
                 "test document.txt",
@@ -155,7 +156,7 @@ public abstract class WebdavTestCase extends TestCase {
         }
     }
 
-    public void testReplaceTextContent() throws IOException, NotAuthorizedException, BadRequestException {
+    public void testReplaceTextContent() throws IOException, NotAuthorizedException, BadRequestException, ConflictException, NotFoundException {
         final DocumentResource doc = getDocument("/folder 1/doc 1");
         assertTrue("Text document not Replaceable", doc instanceof ReplaceableResource);
 
@@ -193,7 +194,7 @@ public abstract class WebdavTestCase extends TestCase {
         getDocument("/folder 1/doc 1");
     }
 
-    protected String getTextDocument(String path) throws IOException, NotAuthorizedException, BadRequestException {
+    protected String getTextDocument(String path) throws IOException, NotAuthorizedException, BadRequestException, NotFoundException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         getDocument(path).sendContent(bos, null, null, null);
         return bos.toString("UTF-8");

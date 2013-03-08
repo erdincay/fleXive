@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.cmis.webdav;
 
+import com.bradmcevoy.http.exceptions.LockedException;
+import com.bradmcevoy.http.exceptions.PreConditionFailedException;
 import com.flexive.chemistry.webdav.FolderResource;
 import com.flexive.chemistry.webdav.ChemistryResourceFactory;
 import com.bradmcevoy.http.*;
@@ -82,6 +84,10 @@ public class LockableFolder extends FolderResource implements LockableResource, 
         } catch (IOException e) {
             throw new IllegalArgumentException(e);
         } catch (NotAuthorizedException e) {
+            throw new IllegalArgumentException(e);
+        } catch (PreConditionFailedException e) {
+            throw new IllegalArgumentException(e);
+        } catch (LockedException e) {
             throw new IllegalArgumentException(e);
         }
     }

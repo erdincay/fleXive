@@ -536,7 +536,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
 
     @Override
     public String getName() {
-        return isRootNode() ? ROOT_FOLDER_NAME : getNode().getLabel().toString();
+        return isRootNode() ? ROOT_FOLDER_NAME : getNode().getLabel().toString().trim();
     }
 
     public ContentStream getContentStream(String contentStreamId) throws IOException {

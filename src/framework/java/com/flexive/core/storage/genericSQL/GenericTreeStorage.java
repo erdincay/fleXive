@@ -62,12 +62,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.math.BigDecimal;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
@@ -549,7 +549,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             ps.setLong(1, startNode);
             ps.setString(2, path);
             ps.setLong(3, EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY));
-            ps.setInt(4, 1);
+            ps.setLong(4, FxContext.getUserTicket().getLanguage().getId());
             ps.setBoolean(5, mode == FxTreeMode.Live);
 
             final ResultSet rs = ps.executeQuery();

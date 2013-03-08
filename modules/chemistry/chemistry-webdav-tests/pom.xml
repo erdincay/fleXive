@@ -3,11 +3,11 @@
     <parent>
         <groupId>org.apache.chemistry</groupId>
         <artifactId>chemistry-parent</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5-r936396</version>
     </parent>
 
     <properties>
-        <chemistry.version>0.5-SNAPSHOT</chemistry.version>
+        <chemistry.version>0.5-r936396</chemistry.version>
         <spi.version>3.1-SNAPSHOT</spi.version>
     </properties>
 

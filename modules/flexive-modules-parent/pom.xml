@@ -298,6 +298,28 @@
         </repository>
     </repositories>
 
+    <!-- Required for plugins to be able to download artifacts that are not in Maven main -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven.flexive.org</id>
+            <name>Flexive repo</name>
+            <url>http://repo.flexive.org/maven2</url>
+            <layout>default</layout>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>maven2-jboss-nexus</id>
+            <name>JBoss Maven Repository</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
+            <layout>default</layout>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+
+    </pluginRepositories>
+
+
     <distributionManagement>
         <repository>
             <id>local</id>

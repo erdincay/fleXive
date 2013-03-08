@@ -3,12 +3,12 @@
     <parent>
         <groupId>org.apache.chemistry</groupId>
         <artifactId>chemistry-parent</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5-r936396</version>
     </parent>
 
     <properties>
-        <chemistry.version>0.5-SNAPSHOT</chemistry.version>
-        <milton.version>1.5.3</milton.version>
+        <chemistry.version>0.5-r936396</chemistry.version>
+        <milton.version>1.8.1.4</milton.version>
         <flexive.version>3.1-SNAPSHOT</flexive.version>
     </properties>
 
@@ -126,7 +126,7 @@
     <repositories>
         <repository>
             <id>milton</id>
-            <url>http://www.ettrema.com/maven2/</url>
+            <url>http://milton.io/maven/</url>
             <snapshots>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
