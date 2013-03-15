@@ -105,6 +105,8 @@ public class FxContext implements Serializable {
     private int runAsSystem;
     private boolean executingRunOnceScripts;
     private UserTicket ticket;
+    private FxLanguage language;
+    private Locale locale;
     private long nodeId = -1;
     private FxTreeMode treeMode;
     private DivisionData divisionData;
@@ -135,6 +137,8 @@ public class FxContext implements Serializable {
         if (ticket != null) {
             this.ticket.initUserSpecificSettings();
         }
+        this.locale = null;
+        this.language = null;
     }
 
     /**
@@ -229,7 +233,14 @@ public class FxContext implements Serializable {
      * @return the current users preferred locale (based on his preferred language)
      */
     public Locale getLocale() {
-        return ticket == null ? Locale.ENGLISH : ticket.getLanguage().getLocale();
+        if (ticket == null) {
+            return Locale.ENGLISH;
+        }
+        if (locale == null || (language != null && language.getId() != ticket.getLanguage().getId())) {
+            locale = ticket.getLanguage().getLocale();
+            language = ticket.getLanguage();
+        }
+        return locale;
     }
 
     /**
@@ -238,7 +249,13 @@ public class FxContext implements Serializable {
      * @return the current users preferred language
      */
     public FxLanguage getLanguage() {
-        return ticket.getLanguage();
+        if (ticket == null) {
+            return FxLanguage.DEFAULT;
+        }
+        if (language == null || language.getId() != ticket.getLanguage().getId()) {
+            language = ticket.getLanguage();
+        }
+        return language;
     }
 
     /**
