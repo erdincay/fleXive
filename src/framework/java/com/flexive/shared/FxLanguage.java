@@ -71,6 +71,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
     private String iso2digit;
     private FxString name;
     private boolean licensed;
+    private final Locale locale;
 
     /**
      * pre defined language english
@@ -130,6 +131,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
         this.iso2digit = iso2digit;
         this.licensed = licensed;
         this.name = name;
+        this.locale = getLocaleFromFxIsoCode(iso2digit);
     }
 
     public FxLanguage(String localeIso) {
@@ -147,6 +149,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
             this.name = new FxString("Italian");
         }
         this.iso2digit = localeIso.substring(0, 2);
+        this.locale = getLocaleFromFxIsoCode(iso2digit);
     }
 
     public long getId() {
@@ -158,14 +161,17 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
     }
 
     public Locale getLocale() {
-        String iso = getIso2digit();
-        if("e1".equals(iso))
+        return locale;
+    }
+
+    private Locale getLocaleFromFxIsoCode(String iso2digit) {
+        if("e1".equals(iso2digit))
             return Locale.US;
-        else if("e2".equals(iso))
+        else if("e2".equals(iso2digit))
             return Locale.UK;
-        else if("d1".equals(iso))
+        else if("d1".equals(iso2digit))
             return new Locale("de", "ch");
-        return new Locale(iso);
+        return new Locale(iso2digit);
     }
 
     /**
