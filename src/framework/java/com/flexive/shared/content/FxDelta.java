@@ -92,7 +92,13 @@ public class FxDelta implements Serializable {
                 this.dataChange = true;
             } else {
                 positionChange = newData.getPos() != originalData.getPos();
-                this.dataChange = property && !((FxPropertyData) originalData).getValue().equals(((FxPropertyData) newData).getValue());
+                if (property) {
+                    final FxValue origValue = ((FxPropertyData) originalData).getValue();
+                    final FxValue newValue = ((FxPropertyData) newData).getValue();
+                    this.dataChange = !origValue.equals(newValue) && (!origValue.isEmpty() || !newValue.isEmpty());
+                } else {
+                    this.dataChange = false;
+                }
             }
             this.languageSettingChanged = this.dataChange && this.property;
             if (this.languageSettingChanged && this.originalData != null && this.newData != null) {
@@ -101,7 +107,7 @@ public class FxDelta implements Serializable {
                 this.languageSettingChanged = !ArrayUtils.isEquals(ov.getTranslatedLanguages(), nv.getTranslatedLanguages());
             }
             if (this.property && this.newData != null) {
-                switch (((FxPropertyAssignment) ((FxPropertyData) newData).getAssignment()).getProperty().getDataType()) {
+                switch (((FxPropertyAssignment) newData.getAssignment()).getProperty().getDataType()) {
                     case SelectMany:
                         this.multiColumn = true;
                         break;
@@ -211,7 +217,7 @@ public class FxDelta implements Serializable {
         }
 
         /**
-         * Have language settings changed? (New or removed translationtions,etc)
+         * Have language settings changed? (New or removed translations,etc)
          *
          * @return language settings changed
          */
