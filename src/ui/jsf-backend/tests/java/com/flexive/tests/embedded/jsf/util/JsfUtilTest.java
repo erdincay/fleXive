@@ -34,11 +34,14 @@
 package com.flexive.tests.embedded.jsf.util;
 
 import com.flexive.faces.FxJsfUtils;
+import com.google.common.collect.Lists;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.faces.model.SelectItem;
+import javax.faces.model.SelectItemGroup;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests for the FxJsfUtils utility class.
@@ -65,5 +68,25 @@ public class JsfUtilTest {
         Assert.assertNull(items[1].getLabel());
         Assert.assertEquals("a", items[2].getLabel());
         Assert.assertEquals("b", items[3].getLabel());
+    }
+
+    @Test
+    public void testGroupsSelectItemSort() {
+        final List<SelectItem> items = Lists.newArrayList(
+                new SelectItem(2, "Item 2"),
+                new SelectItem(1, "Item 1"),
+                new SelectItemGroup("Group 1", null, false, new SelectItem[] {
+                        new SelectItem(3, "Item 1.2"),
+                        new SelectItem(4, "Item 1.1")
+                })
+        );
+        FxJsfUtils.sortSelectItems(items);
+        Assert.assertEquals(items.get(0).getLabel(), "Group 1");
+        Assert.assertEquals(items.get(1).getLabel(), "Item 1");
+        Assert.assertEquals(items.get(2).getLabel(), "Item 2");
+
+        final SelectItem[] groupItems = ((SelectItemGroup) items.get(0)).getSelectItems();
+        Assert.assertEquals(groupItems[0].getLabel(), "Item 1.1");
+        Assert.assertEquals(groupItems[1].getLabel(), "Item 1.2");
     }
 }

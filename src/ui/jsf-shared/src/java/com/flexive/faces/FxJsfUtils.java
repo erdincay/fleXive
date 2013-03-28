@@ -64,6 +64,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
+import javax.faces.model.SelectItemGroup;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -884,7 +885,40 @@ public class FxJsfUtils {
     }
 
     /**
+     * Sort a list of select items, including items of nested select item groups.
+     *
+     * @param items    the list of items to be sorted
+     * @param comparator    the comparator to be used
+     * @see SelectItemSorter
+     * @since 3.1.7
+     */
+    public static void sortSelectItems(List<SelectItem> items, Comparator<SelectItem> comparator) {
+        Collections.sort(items, comparator);
+        for (SelectItem item : items) {
+            if (item instanceof SelectItemGroup) {
+                final SelectItem[] groupItems = ((SelectItemGroup) item).getSelectItems();
+                if (groupItems != null) {
+                    Collections.sort(Arrays.asList(groupItems), comparator);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sort a list of select items, including items of nested select item groups.
+     *
+     * @param items    the list of items to be sorted
+     * @see SelectItemSorter
+     * @since 3.1.7
+     */
+    public static void sortSelectItems(List<SelectItem> items) {
+        sortSelectItems(items, new SelectItemSorter());
+    }
+
+    /**
      * Comparator for sorting select items by their display label.
+     *
+     * @see #sortSelectItems(java.util.List)
      */
     public static class SelectItemSorter implements Comparator<SelectItem> {
         private final Collator collator;
