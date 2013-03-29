@@ -227,6 +227,7 @@ con.close()
                         break;
                     case java.sql.Types.DOUBLE:
                     case java.sql.Types.FLOAT:
+                    case java.sql.Types.REAL:
                         if (!onlyBinaries) {
                             value = String.valueOf(rs.getDouble(i));
                             if (rs.wasNull())

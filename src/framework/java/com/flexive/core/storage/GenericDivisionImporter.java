@@ -708,6 +708,7 @@ try {
                                     ps.setDouble(ci.index, Double.parseDouble(value));
                                     break;
                                 case java.sql.Types.FLOAT:
+                                case java.sql.Types.REAL:
                                     if (DBG) LOG.info("Float " + ci.index + "->" + Float.parseFloat(value));
                                     ps.setFloat(ci.index, Float.parseFloat(value));
                                     break;
