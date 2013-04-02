@@ -615,9 +615,15 @@ public final class FxSharedUtils {
                     continue;
                 }
                 final String name = line.substring(0, splitPos);
-                final URL resourceURL = new URL(basePath + name);
-                final String code = loadFromInputStream(resourceURL.openStream());
-                result.put(name, code);
+                if (name.endsWith(".sql")) {
+                    try {
+                        final URL resourceURL = new URL(basePath + name);
+                        final String code = loadFromInputStream(resourceURL.openStream());
+                        result.put(name, code);
+                    } catch (FileNotFoundException e) {
+                        LOG.warn(e);
+                    }
+                }
             }
         } catch (IOException e) {
             LOG.error(e);
