@@ -33,6 +33,7 @@ package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxLookupException;
 import com.flexive.shared.interfaces.*;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +42,7 @@ import javax.ejb.SessionContext;
 import javax.naming.*;
 import javax.transaction.TransactionManager;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -84,6 +86,17 @@ public class EJBLookup {
 
     private static STRATEGY used_strategy = null;
     private static final ConcurrentMap<String, Object> ejbCache = new ConcurrentHashMap<String, Object>(100);
+
+    /**
+     * Possible JNDI paths for the transaction manager
+     */
+    private static final List<String> TM_JNDI_PATHS = ImmutableList.of(
+            "java:TransactionManager",
+            "java:comp/TransactionManager",
+            "java:appserver/TransactionManager",
+            "java:jboss/TransactionManager" // JBoss 7
+    );
+
 
     /**
      * Protected default constructor to avoid instantiation.
@@ -382,20 +395,17 @@ public class EJBLookup {
      * @return TransactionManager
      */
     public static TransactionManager getTransactionManager() {
-        try {
-            InitialContext ctx = new InitialContext();
+        for (String path : TM_JNDI_PATHS) {
             try {
-                return (TransactionManager) ctx.lookup("java:TransactionManager");
+                InitialContext ctx = new InitialContext();
+                return (TransactionManager) ctx.lookup(path);
             } catch (NamingException e) {
-                try {
-                    return (TransactionManager) ctx.lookup("java:comp/TransactionManager");
-                } catch (NamingException e2) {
-                    return (TransactionManager) ctx.lookup("java:appserver/TransactionManager");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No transaction manager found under JNDI path " + path);
                 }
             }
-        } catch (Exception e) {
-            throw new FxLookupException("Failed to lookup transaction manager: " + e.getMessage(), e).asRuntimeException();
         }
+        throw new FxLookupException("Failed to lookup transaction manager").asRuntimeException();
     }
 
     /**

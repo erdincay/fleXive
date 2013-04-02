@@ -34,12 +34,14 @@ package com.flexive.tools.ant;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Arrays;
 
 /**
  * ANT task to build an index file (line seperated) for a script directory to be used by
@@ -52,6 +54,7 @@ public class ScriptIndexBuilderTask extends Task {
     private String scriptDir = null;
     private String indexFile = null;
     private boolean copyFiles = false;
+    private boolean recursive = false;
 
     public void setScriptDir(String scriptDir) {
         this.scriptDir = scriptDir;
@@ -63,6 +66,10 @@ public class ScriptIndexBuilderTask extends Task {
 
     public void setCopyFiles(boolean copyFiles) {
         this.copyFiles = copyFiles;
+    }
+
+    public void setRecursive(boolean recursive) {
+        this.recursive = recursive;
     }
 
     public String getTaskName() {
@@ -131,12 +138,39 @@ public class ScriptIndexBuilderTask extends Task {
         File scripts = new File(scriptDir);
         if (!scripts.exists() || !scripts.isDirectory())
             usage();
+
+        if (copyFiles && recursive) {
+            throw new BuildException(getTaskName() + ": cannot combine copyFiles and recursive attributes");
+        }
+
+        List<String> scriptlist = new ArrayList<String>();
+        addDirectory(scriptlist, index, idxDir, scripts, "");
+
+        Collections.sort(scriptlist);
+        StringBuilder sb = new StringBuilder(5000);
+        for (String s : scriptlist) {
+            sb.append(s).append("\n");
+        }
+        storeFile(sb.toString(), index);
+//        System.out.println("Processed [" + scripts.getAbsolutePath() + "] --> [" + index.getAbsolutePath() + "]");
+    }
+
+    private void addDirectory(List<String> scriptList, File index, File idxDir, File scripts, String prefix) {
         File[] files = scripts.listFiles();
-        List<String> scriptlist = new ArrayList<String>(files.length);
+        if (files == null) {
+            return;
+        }
+        final String filePrefix = prefix == null || prefix.length() == 0 ? "" : prefix + File.separator;
         for (File f : files) {
-            if (!f.isFile() || ".".equals(f.getName()) || "..".equals(f.getName()) || index.getName().equals(f.getName()))
+            if (".".equals(f.getName()) || "..".equals(f.getName()) || index.getName().equals(f.getName()))
                 continue;
-            scriptlist.add(f.getName() + "|" + f.length());
+            if (f.isDirectory()) {
+                if (recursive) {
+                    addDirectory(scriptList, index, idxDir, f, filePrefix + f.getName());
+                }
+                continue;
+            }
+            scriptList.add(filePrefix + f.getName() + "|" + f.length());
             if (copyFiles) {
                 try {
                     final File dest = new File(idxDir.getAbsolutePath() + File.separator + f.getName());
@@ -153,13 +187,6 @@ public class ScriptIndexBuilderTask extends Task {
                 }
             }
         }
-        Collections.sort(scriptlist);
-        StringBuilder sb = new StringBuilder(5000);
-        for (String s : scriptlist) {
-            sb.append(s).append("\n");
-        }
-        storeFile(sb.toString(), index);
-//        System.out.println("Processed [" + scripts.getAbsolutePath() + "] --> [" + index.getAbsolutePath() + "]");
     }
 
     private void usage() {

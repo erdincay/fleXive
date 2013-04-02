@@ -644,6 +644,9 @@
                         includes="**/*">
             </zipfileset>
 
+            <!-- include beans.xml -->
+            <zipfileset prefix="WEB-INF" dir="${flexive.resources.framework.dir}" includes="beans.xml"/>
+
             <lib dir="${build.ui.jar.libs.dir}" includes="**/*"/>
         </war>
 	</target>
@@ -820,6 +823,8 @@
         <jar jarfile="${flexive.base.build.dir}/flexive.ear" keepcompression="true">
             <manifest >
                 <attribute name="Class-Path" value="${ear.classpath}"/>
+                <!-- JBoss 7 module dependencies -->
+                <attribute name="Dependencies" value="javax.faces.api, com.h2database.h2, org.jboss.common-core"/>
             </manifest>
 			<metainf dir="${flexive.base.build.dir}">
 				<include name="application.xml"/>
@@ -925,6 +930,7 @@
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar, groovy/*.jar"/>
             </classpath>
+            <!--jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/-->
             <arg value="${database.vendor}"/>
             <arg value="${database.database.test}"/>
             <arg value="${database.schema.test}"/>

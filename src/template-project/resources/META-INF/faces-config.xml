@@ -6,11 +6,10 @@
 
     <!-- Add your JSF beans and components to this file -->
 
-    <!-- Facelets View Handler Definition. Never remove this one. -->
+    <!-- Register RichFaces viewhandler manually to make it work on JSF 2.1 -->
     <application>
-        <view-handler>
-            com.sun.facelets.FaceletViewHandler
-        </view-handler>
+        <view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
+        <view-handler>org.ajax4jsf.application.AjaxViewHandler</view-handler>
     </application>
 
     <!-- Our demo managed bean -->

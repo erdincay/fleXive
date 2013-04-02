@@ -57,7 +57,10 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
@@ -65,7 +68,6 @@ import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 
 import static org.apache.commons.lang.StringUtils.defaultString;
@@ -588,21 +590,34 @@ public final class FxSharedUtils {
     public static Map<String, String> getStorageScriptResources(String storageVendor) {
         Map<String, String> result = new HashMap<String, String>(100);
         try {
-            Enumeration<URL> u = Thread.currentThread().getContextClassLoader().getResources("resources/patch-" + storageVendor);
-            while (u.hasMoreElements()) {
-                URL url = u.nextElement();
-                JarURLConnection juc = (JarURLConnection) url.openConnection();
-                JarFile jarFile = juc.getJarFile();
-                Enumeration<JarEntry> je = jarFile.entries();
-                while (je.hasMoreElements()) {
-                    JarEntry curr = je.nextElement();
-                    if (!curr.getName().startsWith("resource") || curr.getName().endsWith("/"))
-                        continue;
-                    final String name = curr.getName().substring(curr.getName().indexOf('/') + 1);
-                    String code = loadFromInputStream(jarFile.getInputStream(curr), (int) curr.getSize());
-                    result.put(name, code);
-                }
+            final String indexFileName = "storageindex-" + storageVendor + ".flexive";
+            final String indexPath = "resources/" + indexFileName;
 
+            // open the storage index file
+            final URL url = Thread.currentThread().getContextClassLoader().getResource(indexPath);
+            if (url == null) {
+                LOG.error("No storage index found for vendor " + storageVendor);
+                return Maps.newHashMap();
+            }
+
+            // get a base URL (JAR or VFS-based) for the storage JAR entry
+            final int indexFilePos = url.getPath().indexOf(indexFileName);
+            if (indexFilePos == -1) {
+                LOG.warn("Failed to build base URL for storage based on URL: " + url.getPath());
+            }
+            final String basePath = url.getProtocol() + ":" + url.getPath().substring(0, indexFilePos);
+
+            final String[] resources = loadFromInputStream(url.openStream()).split("\n");
+            for (String line : resources) {
+                final int splitPos = line.indexOf('|');
+                if (splitPos == -1) {
+                    LOG.warn("Failed to parse storage index line: " + line);
+                    continue;
+                }
+                final String name = line.substring(0, splitPos);
+                final URL resourceURL = new URL(basePath + name);
+                final String code = loadFromInputStream(resourceURL.openStream());
+                result.put(name, code);
             }
         } catch (IOException e) {
             LOG.error(e);

@@ -21,4 +21,5 @@
     <!--DROP_IN_PLACEHOLDER-->
     <!-- drop in modules end   -->
 
+    <library-directory>lib</library-directory>
 </application>

@@ -110,11 +110,14 @@
             <scriptIndexBuilder indexFile="@{builddir}/resources/patch-@{vendor}/resourceindex.flexive"
                             scriptDir="@{srcdir}/resources/patch"
                             copyFiles="true"/>
+            <scriptIndexBuilder indexFile="@{builddir}/resources/storageindex-@{vendor}.flexive"
+                            scriptDir="@{srcdir}/resources"
+                            recursive="true" copyFiles="false"/>
             <jar jarfile="@{jarfile}">
                 <fileset dir="@{builddir}/classes"/>
                 <zipfileset dir="@{srcdir}/resources" prefix="resources" includes="**/*sql" excludes="**/patch/*"/>
                 <zipfileset dir="@{srcdir}/resources" includes="**/*properties"/>
-                <zipfileset dir="@{builddir}/resources/patch-@{vendor}" prefix="resources/patch-@{vendor}" includes="**/*"/>
+                <zipfileset dir="@{builddir}/resources" prefix="resources" includes="**/*"/>
             </jar>
         </sequential>
     </macrodef>

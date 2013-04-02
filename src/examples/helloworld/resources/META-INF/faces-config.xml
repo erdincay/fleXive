@@ -4,11 +4,10 @@
               xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
               version="1.2">
 
-    <!-- Facelets View Handler Definition -->
+    <!-- Register RichFaces viewhandler manually to make it work on JSF 2.1 -->
     <application>
-        <view-handler>
-            com.sun.facelets.FaceletViewHandler
-        </view-handler>
+        <view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
+        <view-handler>org.ajax4jsf.application.AjaxViewHandler</view-handler>
     </application>
 
     <!-- Definition of the managed bean which retrieves the data from database -->

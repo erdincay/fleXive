@@ -134,6 +134,9 @@ db.config.create
             <fileset dir="${web.dir}" includes="**/*"/>
             <zipfileset dir="${build.dir}/war" includes="**/*" prefix="WEB-INF/classes"/>
             <zipfileset dir="${templates.dir}" includes="**/*" prefix="templates"/>
+
+            <!-- include beans.xml -->
+            <zipfileset prefix="WEB-INF" dir="${dist.basedir}/META-INF" includes="beans.xml"/>
         </war>
     </target>
 
