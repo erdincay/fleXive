@@ -53,7 +53,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.management.ObjectName;
 import java.io.*;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -230,6 +232,19 @@ public final class FxSharedUtils {
                 //ignore
             } catch (InvocationTargetException e) {
                 //ignore
+            }
+            if (!found) {
+                // try JBoss 7 MBean lookup
+                try {
+                    final ObjectName name = new ObjectName("jboss.as:management-root=server");
+                    final Object version = ManagementFactory.getPlatformMBeanServer().getAttribute(name, "releaseVersion");
+                    if (version != null) {
+                        appserver = "JBoss (" + version + ")";
+                        found = true;
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
             }
             if (!found) {
                 //try again with a JBoss 6.x specific locations

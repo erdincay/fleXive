@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -220,7 +221,10 @@ public class FxDropApplication implements Serializable {
             } catch (MalformedURLException e2) {
                 //try again using JBoss v6 M3+ vfs ...
                 try {
-                    return new JarInputStream(new URL("vfs:" + resourceURL).openStream());
+                    final InputStream in = new URL("vfs:" + resourceURL).openStream();
+                    return in instanceof JarInputStream
+                            ? (JarInputStream) in       // JBoss 7 already returns a virtual JAR stream
+                            : new JarInputStream(in);   // otherwise wrap returned connection
                 } catch (MalformedURLException e3) {
                     throw new IllegalArgumentException("Cannot create JAR stream for URL " + resourceURL);
                 }
