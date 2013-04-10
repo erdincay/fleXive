@@ -35,6 +35,7 @@ import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.Pair;
+import com.thoughtworks.xstream.XStream;
 
 import java.util.Collection;
 import java.util.Map;
@@ -149,6 +150,15 @@ public abstract interface GenericConfigurationEngine {
      * @return  all parameters that are visible to the current user.
      */
     Map<ParameterData, Serializable> getAll() throws FxApplicationException;
+
+    /**
+     * Return all parameters that are visible to the current user using the provided XStream instance for conversions.
+     *
+     * @param instance XStream instance to use for conversions
+     * @return all parameters that are visible to the current user.
+     * @since 3.1.7
+     */
+    Map<ParameterData, Serializable> getAllWithXStream(XStream instance) throws FxApplicationException;
 
 	/**
 	 * Retrieves all key/value pairs stored under the path of the given parameter.

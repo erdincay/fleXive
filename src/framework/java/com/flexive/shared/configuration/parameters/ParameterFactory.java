@@ -195,6 +195,29 @@ public final class ParameterFactory {
     }
 
     /**
+     * Return a generic parameter using a fully qualified class name.
+     *
+     * @param className the class name for the value type of the parameter
+     * @param data      the parameter data bean
+     * @param instance  XStream instance to use for object parameters
+     * @return Parameter
+     */
+    @SuppressWarnings({"unchecked"})
+    public static Parameter newXStreamInstance(String className, ParameterData data, XStream instance) {
+        Class cls;
+        try {
+            cls = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            cls = Object.class; // ignore, use object converter
+        }
+        final Parameter impl = getImpl(cls);
+        impl.setData(data);
+        if(impl instanceof ObjectParameter)
+            ((ObjectParameter)impl).setXStream(instance);
+        return impl;
+    }
+
+    /**
      * Create a new parameter that uses a custom XStream instance for serialization.
      *
      * @param cls   the parameter type class

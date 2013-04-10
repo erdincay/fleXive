@@ -44,6 +44,7 @@ import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
 import com.google.common.primitives.Primitives;
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
@@ -455,6 +456,54 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                     parameter = ParameterFactory.newInstance(Object.class, path, key, null);
                 } else {
                     parameter = ParameterFactory.newInstance(String.class, path, key, null);
+                }
+                result.put(
+                        parameter.getData(),
+                        (Serializable) parameter.getValue(dbValue)
+                );
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(GenericConfigurationImpl.class, conn, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Map<ParameterData, Serializable> getAllWithXStream(XStream instance) throws FxApplicationException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            conn = getConnection();
+            stmt = getSelectStatement(conn);
+            final ResultSet rs = stmt.executeQuery();
+            final Map<ParameterData, Serializable> result = new HashMap<ParameterData, Serializable>();
+            while (rs.next()) {
+                final String key = rs.getString(2);
+                final String dbValue = rs.getString(3);
+                final String className = rs.getString(4);
+                final ParameterPathBean path = new ParameterPathBean(rs.getString(1), getDefaultScope());
+
+                final Parameter parameter;
+                if (className != null) {
+                    parameter = ParameterFactory.newXStreamInstance(className, new ParameterDataBean<Serializable>(
+                            path,
+                            key,
+                            null
+                    ), instance);
+                } else if ("true".equals(dbValue) || "false".equals(dbValue)) { // fallback for old configurations: try to determine the data type
+                    parameter = ParameterFactory.newXStreamInstance(Boolean.class, path, key, true, null, instance);
+                } else if (StringUtils.isNumeric(dbValue)) {
+                    parameter = ParameterFactory.newXStreamInstance(Integer.class, path, key, true, null, instance);
+                } else if (dbValue != null && dbValue.startsWith("<") && dbValue.endsWith(">")) {
+                    // assume that it's an objects serialized to XML
+                    parameter = ParameterFactory.newXStreamInstance(Object.class, path, key, true, null, instance);
+                } else {
+                    parameter = ParameterFactory.newXStreamInstance(String.class, path, key, true, null, instance);
                 }
                 result.put(
                         parameter.getData(),

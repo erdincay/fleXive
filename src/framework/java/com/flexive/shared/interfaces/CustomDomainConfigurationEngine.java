@@ -34,6 +34,7 @@ package com.flexive.shared.interfaces;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.thoughtworks.xstream.XStream;
 
 import java.util.List;
 import java.io.Serializable;
@@ -116,6 +117,16 @@ public interface CustomDomainConfigurationEngine<T extends Serializable> extends
      * @since           3.1.6
      */
     Map<ParameterData, Serializable> getAll(T domain) throws FxApplicationException;
+
+    /**
+     * Return all configuration properties for a specific domain using the provided XStream instance for conversions..
+     *
+     * @param domain the requested domain
+     * @param instance XStream instance to use for conversions
+     * @return all parameters for the given domain
+     * @since 3.1.7
+     */
+    Map<ParameterData, Serializable> getAllWithXStream(T domain, XStream instance) throws FxApplicationException;
 
 	/**
 	 * Set a parameter containing a value of type <code>T</code> using

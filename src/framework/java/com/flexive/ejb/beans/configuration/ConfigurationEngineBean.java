@@ -37,6 +37,7 @@ import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.Pair;
+import com.thoughtworks.xstream.XStream;
 
 import javax.ejb.*;
 import java.util.*;
@@ -164,6 +165,18 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
         final Map<ParameterData, Serializable> results = new HashMap<ParameterData, Serializable>();
         for (GenericConfigurationEngine config : getAllConfigurations()) {
             results.putAll(config.getAll());
+        }
+        return results;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Map<ParameterData, Serializable> getAllWithXStream(XStream instance) throws FxApplicationException {
+        final Map<ParameterData, Serializable> results = new HashMap<ParameterData, Serializable>();
+        for (GenericConfigurationEngine config : getAllConfigurations()) {
+            results.putAll(config.getAllWithXStream(instance));
         }
         return results;
     }

@@ -40,6 +40,7 @@ import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.CustomDomainConfigurationEngine;
 import com.flexive.shared.FxContext;
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -263,6 +264,18 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
             @Override
             protected Map<ParameterData, Serializable> performAction() throws FxApplicationException {
                 return getAll();
+            }
+        }.invoke();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<ParameterData, Serializable> getAllWithXStream(T domain, final XStream instance) throws FxApplicationException {
+        return new DomainOverride<Map<ParameterData, Serializable>>(domain) {
+            @Override
+            protected Map<ParameterData, Serializable> performAction() throws FxApplicationException {
+                return getAllWithXStream(instance);
             }
         }.invoke();
     }
