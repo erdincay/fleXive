@@ -32,8 +32,8 @@
 package com.flexive.shared.configuration.parameters;
 
 import com.flexive.shared.FxXMLUtils;
-import com.flexive.shared.configuration.*;
-import com.flexive.shared.content.FxPK;
+import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.AssignmentValueNode;
 import com.flexive.shared.search.query.QueryOperatorNode;
@@ -150,5 +150,9 @@ class ObjectParameter<T> extends ParameterImpl<T> {
 
     public static XStream getDefaultXStream() {
     	return xStream;
+    }
+
+    void setXStream(XStream instance) {
+        this.instanceStream = instance;
     }
 }

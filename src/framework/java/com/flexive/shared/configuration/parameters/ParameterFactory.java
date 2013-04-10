@@ -31,13 +31,13 @@
  ***************************************************************/
 package com.flexive.shared.configuration.parameters;
 
-import com.flexive.shared.configuration.parameters.*;
 import com.flexive.shared.configuration.*;
 import com.flexive.shared.exceptions.FxCreateException;
+import com.thoughtworks.xstream.XStream;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collections;
 
 /**
  * <p>
@@ -185,13 +185,48 @@ public final class ParameterFactory {
      */
     @SuppressWarnings({"unchecked"})
     public static Parameter newInstance(String className, ParameterData data) {
-        Class cls = null;
+        Class cls;
         try {
             cls = Class.forName(className);
         } catch (ClassNotFoundException e) {
             cls = Object.class; // ignore, use object converter
         }
         return getImpl(cls).setData(data);
+    }
+
+    /**
+     * Create a new parameter that uses a custom XStream instance for serialization.
+     *
+     * @param cls   the parameter type class
+     * @param path  the path description
+     * @param key   the parameter key
+     * @param cached if the value should be cached once it has been retrieved (default: true)
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return      a new parameter instance
+     * @param <T>   the parameter type (must not be a boxed primitive type, e.g. Integer, which is never handled with XStream)
+     * @since       3.1.7
+     */
+    public static <T> Parameter<T> newXStreamInstance(Class<T> cls, ParameterPath path, String key, boolean cached, T defaultValue, XStream instance) {
+        final ObjectParameter<T> param = (ObjectParameter<T>) newInstance(cls, new ParameterDataBean<T>(path, key, cached, defaultValue));
+        param.setXStream(instance);
+        return param;
+    }
+
+    /**
+     * Create a new parameter that uses a custom XStream instance for serialization.
+     *
+     * @param cls   the parameter type class
+     * @param path  the path
+     * @param scope the scope
+     * @param key   the parameter key
+     * @param cached if the value should be cached once it has been retrieved (default: true)
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return      a new parameter instance
+     * @param <T>   the parameter type (must not be a boxed primitive type, e.g. Integer, which is never handled with XStream)
+     * @since       3.1.7
+     */
+    public static <T> Parameter<T> newXStreamInstance(Class<T> cls, String path, ParameterScope scope, String key, boolean cached, T defaultValue, XStream instance) {
+        return newXStreamInstance(cls, new ParameterPathBean(path, scope), key, cached, defaultValue, instance);
     }
 
     private static <T> Parameter<T> getImpl(Class<T> cls) {
