@@ -33,26 +33,26 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.CustomDomainConfigurationEngine;
-import com.flexive.shared.FxContext;
 import com.thoughtworks.xstream.XStream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Extension of {@link GenericConfigurationImpl} configurations with an arbitrary domain field
@@ -271,11 +271,11 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
-    public Map<ParameterData, Serializable> getAllWithXStream(T domain, final XStream instance) throws FxApplicationException {
+    public Map<ParameterData, Serializable> getAllWithXStream(T domain, final Map<String, XStream> instances) throws FxApplicationException {
         return new DomainOverride<Map<ParameterData, Serializable>>(domain) {
             @Override
             protected Map<ParameterData, Serializable> performAction() throws FxApplicationException {
-                return getAllWithXStream(instance);
+                return getAllWithXStream(instances);
             }
         }.invoke();
     }

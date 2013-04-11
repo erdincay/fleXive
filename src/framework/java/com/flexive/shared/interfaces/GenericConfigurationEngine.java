@@ -31,15 +31,15 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
+import com.flexive.shared.Pair;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.Pair;
 import com.thoughtworks.xstream.XStream;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
-import java.io.Serializable;
 
 /**
  * Generic configuration interface. Provides a generic interface for
@@ -154,11 +154,12 @@ public abstract interface GenericConfigurationEngine {
     /**
      * Return all parameters that are visible to the current user using the provided XStream instance for conversions.
      *
-     * @param instance XStream instance to use for conversions
+     * @param instances XStream instances per class name to use for conversions (when none is defined, the default XStream instance is used).
+     *                  A wildcard parameter can be used for prefix matches (e.g. "my.config.*")
      * @return all parameters that are visible to the current user.
      * @since 3.1.7
      */
-    Map<ParameterData, Serializable> getAllWithXStream(XStream instance) throws FxApplicationException;
+    Map<ParameterData, Serializable> getAllWithXStream(Map<String, XStream> instances) throws FxApplicationException;
 
 	/**
 	 * Retrieves all key/value pairs stored under the path of the given parameter.

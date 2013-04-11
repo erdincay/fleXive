@@ -43,6 +43,7 @@ import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.ObjectUtils;
@@ -427,54 +428,14 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Map<ParameterData, Serializable> getAll() throws FxApplicationException {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = getConnection();
-            stmt = getSelectStatement(conn);
-            final ResultSet rs = stmt.executeQuery();
-            final Map<ParameterData, Serializable> result = new HashMap<ParameterData, Serializable>();
-            while (rs.next()) {
-                final String key = rs.getString(2);
-                final String dbValue = rs.getString(3);
-                final String className = rs.getString(4);
-                final ParameterPathBean path = new ParameterPathBean(rs.getString(1), getDefaultScope());
-
-                final Parameter parameter;
-                if (className != null) {
-                    parameter = ParameterFactory.newInstance(className, new ParameterDataBean<Serializable>(
-                            path,
-                            key,
-                            null
-                    ));
-                } else if ("true".equals(dbValue) || "false".equals(dbValue)) { // fallback for old configurations: try to determine the data type
-                    parameter = ParameterFactory.newInstance(Boolean.class, path, key, null);
-                } else if (StringUtils.isNumeric(dbValue)) {
-                    parameter = ParameterFactory.newInstance(Integer.class, path, key, null);
-                } else if (dbValue != null && dbValue.startsWith("<") && dbValue.endsWith(">")) {
-                    // assume that it's an objects serialized to XML
-                    parameter = ParameterFactory.newInstance(Object.class, path, key, null);
-                } else {
-                    parameter = ParameterFactory.newInstance(String.class, path, key, null);
-                }
-                result.put(
-                        parameter.getData(),
-                        (Serializable) parameter.getValue(dbValue)
-                );
-            }
-            return result;
-        } catch (SQLException e) {
-            throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
-        } finally {
-            Database.closeObjects(GenericConfigurationImpl.class, conn, stmt);
-        }
+        return getAllWithXStream(ImmutableMap.<String, XStream>of());
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Map<ParameterData, Serializable> getAllWithXStream(XStream instance) throws FxApplicationException {
+    public Map<ParameterData, Serializable> getAllWithXStream(Map<String, XStream> instances) throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -490,20 +451,41 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
 
                 final Parameter parameter;
                 if (className != null) {
-                    parameter = ParameterFactory.newXStreamInstance(className, new ParameterDataBean<Serializable>(
-                            path,
-                            key,
-                            null
-                    ), instance);
+                    XStream customInstance = instances.get(className);
+                    if (customInstance == null) {
+                        // check prefix matches
+                        for (String name : instances.keySet()) {
+                            if (name.endsWith("*") && className.startsWith(name.substring(0, name.length() - 1))) {
+                                customInstance = instances.get(name);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (customInstance != null) {
+                        // use custom XStream instance
+                        parameter = ParameterFactory.newXStreamInstance(className, new ParameterDataBean<Serializable>(
+                                path,
+                                key,
+                                null
+                        ), customInstance);
+                    } else {
+                        // common case - use the parameter factory to get the matching parameter instance for the given class name
+                        parameter = ParameterFactory.newInstance(className, new ParameterDataBean<Serializable>(
+                                path,
+                                key,
+                                null
+                        ));
+                    }
                 } else if ("true".equals(dbValue) || "false".equals(dbValue)) { // fallback for old configurations: try to determine the data type
-                    parameter = ParameterFactory.newXStreamInstance(Boolean.class, path, key, true, null, instance);
+                    parameter = ParameterFactory.newInstance(Boolean.class, path, key, true, null);
                 } else if (StringUtils.isNumeric(dbValue)) {
-                    parameter = ParameterFactory.newXStreamInstance(Integer.class, path, key, true, null, instance);
+                    parameter = ParameterFactory.newInstance(Integer.class, path, key, true, null);
                 } else if (dbValue != null && dbValue.startsWith("<") && dbValue.endsWith(">")) {
                     // assume that it's an objects serialized to XML
-                    parameter = ParameterFactory.newXStreamInstance(Object.class, path, key, true, null, instance);
+                    parameter = ParameterFactory.newInstance(Object.class, path, key, true, null);
                 } else {
-                    parameter = ParameterFactory.newXStreamInstance(String.class, path, key, true, null, instance);
+                    parameter = ParameterFactory.newInstance(String.class, path, key, true, null);
                 }
                 result.put(
                         parameter.getData(),

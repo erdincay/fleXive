@@ -31,17 +31,17 @@
  ***************************************************************/
 package com.flexive.ejb.beans.configuration;
 
+import com.flexive.shared.Pair;
 import com.flexive.shared.configuration.Parameter;
-import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.configuration.ParameterData;
+import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
-import com.flexive.shared.Pair;
 import com.thoughtworks.xstream.XStream;
 
 import javax.ejb.*;
-import java.util.*;
 import java.io.Serializable;
+import java.util.*;
 
 /**
  * Configuration wrapper implementation.
@@ -173,10 +173,10 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Map<ParameterData, Serializable> getAllWithXStream(XStream instance) throws FxApplicationException {
+    public Map<ParameterData, Serializable> getAllWithXStream(Map<String, XStream> instances) throws FxApplicationException {
         final Map<ParameterData, Serializable> results = new HashMap<ParameterData, Serializable>();
         for (GenericConfigurationEngine config : getAllConfigurations()) {
-            results.putAll(config.getAllWithXStream(instance));
+            results.putAll(config.getAllWithXStream(instances));
         }
         return results;
     }
