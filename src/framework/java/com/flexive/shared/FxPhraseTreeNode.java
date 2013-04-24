@@ -50,6 +50,7 @@ public class FxPhraseTreeNode implements Serializable {
     public final static long NOT_SET = -1L;
     private long id;
     private long mandatorId;
+    private int category;
     private long parentNodeId;
     private long parentNodeMandatorId;
     private FxPhrase phrase;
@@ -60,20 +61,64 @@ public class FxPhraseTreeNode implements Serializable {
                             FxPhrase phrase, List<FxPhraseTreeNode> children) {
         this.id = id;
         this.mandatorId = mandatorId;
+        this.category = FxPhraseCategorySelection.CATEGORY_DEFAULT;
         this.parentNodeId = parentNodeId;
         this.parentNodeMandatorId = parentNodeMandatorId;
         this.phrase = phrase;
         this.children = children;
+        checkChildrenCategory();
+    }
+
+    public FxPhraseTreeNode(long id, long mandatorId, int category, long parentNodeId, long parentNodeMandatorId,
+                            FxPhrase phrase, List<FxPhraseTreeNode> children) {
+        this.id = id;
+        this.mandatorId = mandatorId;
+        this.category = category;
+        this.parentNodeId = parentNodeId;
+        this.parentNodeMandatorId = parentNodeMandatorId;
+        this.phrase = phrase;
+        this.children = children;
+        checkChildrenCategory();
+    }
+
+    /**
+     * Check if the category of the children matches this nodes category
+     *
+     * @throws IllegalArgumentException on category mismatch
+     */
+    private void checkChildrenCategory() throws IllegalArgumentException {
+        if (this.children == null || this.children.size() == 0)
+            return;
+        for (FxPhraseTreeNode child : this.children) {
+            if (child.getCategory() != this.getCategory())
+                throw new IllegalArgumentException("Invalid category: " + child.getCategory() + " for child node " + child + ", expected: " + this.getCategory());
+            if (child.hasChildren())
+                child.checkChildrenCategory();
+        }
     }
 
     public FxPhraseTreeNode(long id, long mandatorId, long parentNodeId, long parentNodeMandatorId,
                             String phraseKey, long phraseMandator, List<FxPhraseTreeNode> children) throws FxNotFoundException {
         this.id = id;
         this.mandatorId = mandatorId;
+        this.category = FxPhraseCategorySelection.CATEGORY_DEFAULT;
         this.parentNodeId = parentNodeId;
         this.parentNodeMandatorId = parentNodeMandatorId;
-        this.phrase = EJBLookup.getPhraseEngine().loadPhrase(phraseKey, phraseMandator);
+        this.phrase = EJBLookup.getPhraseEngine().loadPhrase(this.category, phraseKey, phraseMandator);
         this.children = children;
+        checkChildrenCategory();
+    }
+
+    public FxPhraseTreeNode(long id, long mandatorId, int category, long parentNodeId, long parentNodeMandatorId,
+                            String phraseKey, long phraseMandator, List<FxPhraseTreeNode> children) throws FxNotFoundException {
+        this.id = id;
+        this.mandatorId = mandatorId;
+        this.category = category;
+        this.parentNodeId = parentNodeId;
+        this.parentNodeMandatorId = parentNodeMandatorId;
+        this.phrase = EJBLookup.getPhraseEngine().loadPhrase(category, phraseKey, phraseMandator);
+        this.children = children;
+        checkChildrenCategory();
     }
 
     /**
@@ -89,7 +134,20 @@ public class FxPhraseTreeNode implements Serializable {
     }
 
     /**
-     * Create a new root node
+     * Create a root node for the callers mandator (not persisted!)
+     *
+     * @param category  phrase category
+     * @param phraseKey phrase key (referencing the callers mandator)
+     * @return FxPhraseTreeNode
+     * @throws FxNotFoundException if the phrase does not exist
+     */
+    public static FxPhraseTreeNode createRootNode(int category, String phraseKey) throws FxNotFoundException {
+        final long mandator = FxContext.getUserTicket().getMandatorId();
+        return createRootNode(mandator, phraseKey, mandator);
+    }
+
+    /**
+     * Create a new root node (not persisted!)
      *
      * @param nodeMandator   node mandator
      * @param phraseKey      phrase key
@@ -98,11 +156,25 @@ public class FxPhraseTreeNode implements Serializable {
      * @throws FxNotFoundException if the phrase does not exist
      */
     public static FxPhraseTreeNode createRootNode(long nodeMandator, String phraseKey, long phraseMandator) throws FxNotFoundException {
-        return new FxPhraseTreeNode(NOT_SET, nodeMandator, NOT_SET, NOT_SET, phraseKey, phraseMandator, null);
+        return new FxPhraseTreeNode(NOT_SET, nodeMandator, FxPhraseCategorySelection.CATEGORY_DEFAULT, NOT_SET, NOT_SET, phraseKey, phraseMandator, null);
     }
 
     /**
-     * Create a child node for the callers mandator
+     * Create a new root node (not persisted!)
+     *
+     * @param nodeMandator   node mandator
+     * @param category       phrase category
+     * @param phraseKey      phrase key
+     * @param phraseMandator mandator of the phrase
+     * @return FxPhraseTreeNode
+     * @throws FxNotFoundException if the phrase does not exist
+     */
+    public static FxPhraseTreeNode createRootNode(long nodeMandator, int category, String phraseKey, long phraseMandator) throws FxNotFoundException {
+        return new FxPhraseTreeNode(NOT_SET, nodeMandator, category, NOT_SET, NOT_SET, phraseKey, phraseMandator, null);
+    }
+
+    /**
+     * Create a child node for the callers mandator (not persisted!)
      *
      * @param parent    parent node
      * @param phraseKey phrase key (referencing the callers mandator)
@@ -125,7 +197,7 @@ public class FxPhraseTreeNode implements Serializable {
     }
 
     public static FxPhraseTreeNode createChildNode(FxPhraseTreeNode parent, long nodeMandator, FxPhrase phrase) {
-        return new FxPhraseTreeNode(NOT_SET, nodeMandator, parent.id, parent.mandatorId, phrase, null);
+        return new FxPhraseTreeNode(NOT_SET, nodeMandator, parent.getCategory(), parent.id, parent.mandatorId, phrase, null);
     }
 
     /**
@@ -139,7 +211,7 @@ public class FxPhraseTreeNode implements Serializable {
      * @throws FxNotFoundException if the phrase does not exist
      */
     public static FxPhraseTreeNode createChildNode(FxPhraseTreeNode parent, long nodeMandator, String phraseKey, long phraseMandator) throws FxNotFoundException {
-        return new FxPhraseTreeNode(NOT_SET, nodeMandator, parent.id, parent.mandatorId, phraseKey, phraseMandator, null);
+        return new FxPhraseTreeNode(NOT_SET, nodeMandator, parent.getCategory(), parent.id, parent.mandatorId, phraseKey, phraseMandator, null);
     }
 
 
@@ -168,6 +240,13 @@ public class FxPhraseTreeNode implements Serializable {
      */
     public long getMandatorId() {
         return mandatorId;
+    }
+
+    /**
+     * @return category id
+     */
+    public int getCategory() {
+        return category;
     }
 
     /**
@@ -257,7 +336,7 @@ public class FxPhraseTreeNode implements Serializable {
     }
 
     public void setChildren(List<FxPhraseTreeNode> children) {
-        if(this.children != null)
+        if (this.children != null)
             this.children.addAll(children);
         else
             this.children = children;
@@ -349,6 +428,6 @@ public class FxPhraseTreeNode implements Serializable {
 
     @Override
     public String toString() {
-        return "{Node " + getPhrase() + " (id:" + getId() + ",mandator:" + getMandatorId() + ",pid:" + getParentNodeId() + ",pman:" + getParentNodeMandatorId() + ")}";
+        return "{Node " + getPhrase() + " (id:" + getId() + ",mandator:" + getMandatorId() + ",category:" + getCategory() + ",pid:" + getParentNodeId() + ",pman:" + getParentNodeMandatorId() + ")}";
     }
 }

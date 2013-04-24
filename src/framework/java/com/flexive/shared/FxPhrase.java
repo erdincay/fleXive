@@ -47,6 +47,7 @@ import java.io.Serializable;
 public class FxPhrase implements Serializable {
     private long id = -1L;
     private long mandator;
+    private int category = 0;
     private long assignmentMandator = -1L;
     private int position = -1;
     private String key;
@@ -215,6 +216,23 @@ public class FxPhrase implements Serializable {
     public FxPhrase flagHidden(boolean hidden) {
         this.hidden = hidden;
         return this;
+    }
+
+    public void setCategory(int category) {
+        this.category = category;
+    }
+
+    public FxPhrase flagCategory(int category) {
+        this.category = category;
+        return this;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+
+    public boolean isDefaultCategory() {
+        return category == FxPhraseCategorySelection.CATEGORY_DEFAULT;
     }
 
     /**

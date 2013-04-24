@@ -86,6 +86,8 @@ public class FxPhraseQuery implements Serializable {
     private boolean languageFallback;
     //include hidden phrases in search results?
     private boolean includeHidden;
+    //categories to search in
+    private FxPhraseCategorySelection categories;
 
     public FxPhraseQuery() {
         reset();
@@ -112,6 +114,7 @@ public class FxPhraseQuery implements Serializable {
         this.mixMandators = true;
         this.languageFallback = false;
         this.includeHidden = true;
+        this.categories = FxPhraseCategorySelection.SELECTION_DEFAULT;
         return this;
     }
 
@@ -337,6 +340,14 @@ public class FxPhraseQuery implements Serializable {
 
     public void setIncludeHidden(boolean includeHidden) {
         this.includeHidden = includeHidden;
+    }
+
+    public FxPhraseCategorySelection getCategories() {
+        return categories;
+    }
+
+    public void setCategories(FxPhraseCategorySelection categories) {
+        this.categories = categories;
     }
 
     /**

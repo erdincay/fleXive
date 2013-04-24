@@ -67,6 +67,18 @@ public interface PhraseEngine {
     /**
      * Save or create a phrase (tag will be removed existing phrases!)
      *
+     * @param category  phrase category
+     * @param phraseKey phrase key
+     * @param value     phrase value
+     * @param mandator  phrase mandator
+     * @return phrase id (for the mandator)
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public long savePhrase(int category, String phraseKey, FxString value, long mandator) throws FxNoAccessException;
+
+    /**
+     * Save or create a phrase (tag will be removed existing phrases!)
+     *
      * @param phraseKey phrase key
      * @param value     phrase value
      * @param converter converter for value used for search operations
@@ -91,6 +103,19 @@ public interface PhraseEngine {
     /**
      * Save or create a phrase
      *
+     * @param category  phrase category
+     * @param phraseKey phrase key
+     * @param value     phrase value
+     * @param tag       String if single language or FxString if multilanguage
+     * @param mandator  phrase mandator
+     * @return phrase id (for the mandator)
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public long savePhrase(int category, String phraseKey, FxString value, Object tag, long mandator) throws FxNoAccessException;
+
+    /**
+     * Save or create a phrase
+     *
      * @param phraseKey phrase key
      * @param value     phrase value
      * @param converter converter for value used for search operations
@@ -102,14 +127,39 @@ public interface PhraseEngine {
     public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, Object tag, long mandator) throws FxNoAccessException;
 
     /**
+     * Save or create a phrase
+     *
+     * @param category  phrase category
+     * @param phraseKey phrase key
+     * @param value     phrase value
+     * @param converter converter for value used for search operations
+     * @param tag       String if single language or FxString if multilanguage
+     * @param mandator  phrase mandator
+     * @return phrase id (for the mandator)
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public long savePhrase(int category, String phraseKey, FxString value, FxPhraseSearchValueConverter converter, Object tag, long mandator) throws FxNoAccessException;
+
+    /**
      * Set a phrases hidden flag
      *
      * @param phraseKey phrase key
-     * @param mandator phrase mandator
-     * @param hidden hidden flag
+     * @param mandator  phrase mandator
+     * @param hidden    hidden flag
      * @throws FxNoAccessException if the requested mandator is not the callers mandator
      */
     public void setPhraseHidden(String phraseKey, long mandator, boolean hidden) throws FxNoAccessException;
+
+    /**
+     * Set a phrases hidden flag
+     *
+     * @param category  phrase category
+     * @param phraseKey phrase key
+     * @param mandator  phrase mandator
+     * @param hidden    hidden flag
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public void setPhraseHidden(int category, String phraseKey, long mandator, boolean hidden) throws FxNoAccessException;
 
     /**
      * Remove the phrase identified by its key and mandator and all its mappings
@@ -123,6 +173,18 @@ public interface PhraseEngine {
     public boolean removePhrase(String phraseKey, long mandator) throws FxNoAccessException, FxEntryInUseException;
 
     /**
+     * Remove the phrase identified by its key and mandator and all its mappings
+     *
+     * @param category  phrase category
+     * @param phraseKey phrase key
+     * @param mandator  phrase mandator
+     * @return if the phrase to be removed was found and successfully removed
+     * @throws FxNoAccessException   if the requested mandator is not the callers mandator
+     * @throws FxEntryInUseException if the phrase is in use by the tree
+     */
+    public boolean removePhrase(int category, String phraseKey, long mandator) throws FxNoAccessException, FxEntryInUseException;
+
+    /**
      * Remove all phrases with a key starting with phraseKeyPrefix and mandator
      *
      * @param phraseKeyPrefix phrase key prefix
@@ -134,6 +196,18 @@ public interface PhraseEngine {
     public int removePhrases(String phraseKeyPrefix, long mandator) throws FxNoAccessException, FxEntryInUseException;
 
     /**
+     * Remove all phrases with a key starting with phraseKeyPrefix and mandator
+     *
+     * @param category        phrase category
+     * @param phraseKeyPrefix phrase key prefix
+     * @param mandator        phrase mandator
+     * @return count of removed phrases
+     * @throws FxNoAccessException   if the requested mandator is not the callers mandator
+     * @throws FxEntryInUseException if the phrase is in use by the tree
+     */
+    public int removePhrases(int category, String phraseKeyPrefix, long mandator) throws FxNoAccessException, FxEntryInUseException;
+
+    /**
      * Removes all phrases of the requested mandator and all its mappings (but not if used in tree nodes!)
      *
      * @param mandator requested mandator
@@ -142,6 +216,17 @@ public interface PhraseEngine {
      * @throws FxEntryInUseException if phrases are in use by the tree
      */
     public int removeMandatorPhrases(long mandator) throws FxNoAccessException, FxEntryInUseException;
+
+    /**
+     * Removes all phrases of the requested mandator and all its mappings (but not if used in tree nodes!)
+     *
+     * @param categories phrase categories
+     * @param mandator   requested mandator
+     * @return count of removed phrases
+     * @throws FxNoAccessException   if the requested mandator is not the callers mandator
+     * @throws FxEntryInUseException if phrases are in use by the tree
+     */
+    public int removeMandatorPhrases(FxPhraseCategorySelection categories, long mandator) throws FxNoAccessException, FxEntryInUseException;
 
     /**
      * Load a phrase value in the requested language
@@ -175,6 +260,17 @@ public interface PhraseEngine {
     public FxPhrase loadPhrase(String phraseKey, long... mandators) throws FxNotFoundException;
 
     /**
+     * Load first available FxPhrase instances of a phrase
+     *
+     * @param category  phrase category
+     * @param phraseKey phrase key
+     * @param mandators list of mandators to try loading the key from (in the requested order)
+     * @return FxPhrase
+     * @throws FxNotFoundException if the phrase key does not exist
+     */
+    public FxPhrase loadPhrase(int category, String phraseKey, long... mandators) throws FxNotFoundException;
+
+    /**
      * Load all FxPhrase instances of a phrase with the requested key prefix
      *
      * @param phraseKeyPrefix phrase key prefix
@@ -184,6 +280,16 @@ public interface PhraseEngine {
     public List<FxPhrase> loadPhrases(String phraseKeyPrefix, long... mandators);
 
     /**
+     * Load all FxPhrase instances of a phrase with the requested key prefix
+     *
+     * @param category        phrase category
+     * @param phraseKeyPrefix phrase key prefix
+     * @param mandators       list of mandators to try loading the key from (in the requested order)
+     * @return found FxPhrases ordered by phraseKey
+     */
+    public List<FxPhrase> loadPhrases(int category, String phraseKeyPrefix, long... mandators);
+
+    /**
      * Remove all phrases that belong to the requested mandator
      *
      * @param mandatorId requested mandator
@@ -191,6 +297,16 @@ public interface PhraseEngine {
      * @throws FxEntryInUseException if phrases are in use by the phrase tree
      */
     public void clearPhrases(long mandatorId) throws FxNoAccessException, FxEntryInUseException;
+
+    /**
+     * Remove all phrases that belong to the requested mandator
+     *
+     * @param categories categories to remove
+     * @param mandatorId requested mandator
+     * @throws FxNoAccessException   if the requested mandator is not the callers mandator
+     * @throws FxEntryInUseException if phrases are in use by the phrase tree
+     */
+    public void clearPhrases(FxPhraseCategorySelection categories, long mandatorId) throws FxNoAccessException, FxEntryInUseException;
 
     /**
      * Synchronize the phrase sequencer to match the current max id + 1
@@ -213,7 +329,8 @@ public interface PhraseEngine {
     public FxPhraseTreeNode saveTreeNode(FxPhraseTreeNode node) throws FxNoAccessException, FxNotFoundException;
 
     /**
-     * Set the parent of a phrase tree node
+     * Set the parent of a phrase tree node.
+     * Parent node category must match the nodes!
      *
      * @param nodeId         node id
      * @param nodeMandator   node mandator
@@ -239,6 +356,16 @@ public interface PhraseEngine {
      * @return phrase tree
      */
     public List<FxPhraseTreeNode> loadPhraseTree(boolean mandator2top, long... mandators);
+
+    /**
+     * Load all root nodes and child nodes for up to 2 mandators
+     *
+     * @param category     phrase category
+     * @param mandator2top insert nodes of mandator 2 at the top or bottom?
+     * @param mandators    mandators
+     * @return phrase tree
+     */
+    public List<FxPhraseTreeNode> loadPhraseTree(int category, boolean mandator2top, long... mandators);
 
     /**
      * Load a tree nodes and its child nodes for up to 2 mandators
@@ -373,6 +500,17 @@ public interface PhraseEngine {
      * @return assigned node (without children!) and the position of the phrase
      */
     public List<FxPhraseTreeNodePosition> getAssignedNodes(String phraseKey, long... mandator);
+
+    /**
+     * Get all assignments for a phrase.
+     * Returned FxPhraseTreeNode's will not be populated with children!
+     *
+     * @param category  phrase category
+     * @param phraseKey phrase key
+     * @param mandator  assignment owner mandators
+     * @return assigned node (without children!) and the position of the phrase
+     */
+    public List<FxPhraseTreeNodePosition> getAssignedNodes(int category, String phraseKey, long... mandator);
 
     /**
      * Get all assignments for a phrase.

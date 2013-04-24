@@ -134,6 +134,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
     }
 
     /**
+     * @param categories FxPhraseCategorySelection
+     * @return categories as comma separated String list
+     */
+    private String categoriesList(FxPhraseCategorySelection categories) {
+        return FxArrayUtils.toStringArray(categories.getCategories(), ',');
+    }
+
+    /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -247,7 +255,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long savePhrase(String phraseKey, FxString value, long mandator) throws FxNoAccessException {
-        return savePhrase(phraseKey, value, null, null, mandator);
+        return savePhrase(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, value, null, null, mandator);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long savePhrase(int category, String phraseKey, FxString value, long mandator) throws FxNoAccessException {
+        return savePhrase(category, phraseKey, value, null, null, mandator);
     }
 
     /**
@@ -255,7 +271,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, long mandator) throws FxNoAccessException {
-        return savePhrase(phraseKey, value, converter, null, mandator);
+        return savePhrase(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, value, converter, null, mandator);
     }
 
     /**
@@ -263,7 +279,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long savePhrase(String phraseKey, FxString value, Object tag, long mandator) throws FxNoAccessException {
-        return savePhrase(phraseKey, value, null, tag, mandator);
+        return savePhrase(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, value, null, tag, mandator);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long savePhrase(int category, String phraseKey, FxString value, Object tag, long mandator) throws FxNoAccessException {
+        return savePhrase(category, phraseKey, value, null, tag, mandator);
     }
 
     /**
@@ -271,6 +295,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long savePhrase(String phraseKey, FxString value, FxPhraseSearchValueConverter converter, Object tag, long mandator) throws FxNoAccessException {
+        return savePhrase(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, value, converter, tag, mandator);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long savePhrase(int category, String phraseKey, FxString value, FxPhraseSearchValueConverter converter, Object tag, long mandator) throws FxNoAccessException {
         Connection con = null;
         PreparedStatement ps = null;
         final UserTicket userTicket = FxContext.getUserTicket();
@@ -281,9 +314,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             con = Database.getDbConnection();
 
             long phraseId;
-            ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE + " WHERE PKEY=? AND MANDATOR=?");
+            ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE + " WHERE PKEY=? AND MANDATOR=? AND CAT=?");
             ps.setString(1, phraseKey);
             ps.setLong(2, mandator);
+            ps.setInt(3, category);
             ResultSet rs = ps.executeQuery();
             if (rs != null && rs.next()) {
                 phraseId = rs.getLong(1);
@@ -301,11 +335,12 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     throw e.asRuntimeException();
                 }
                 ps.close();
-                ps = con.prepareStatement("INSERT INTO " + TBL_PHRASE + "(ID,PKEY,MANDATOR,HID)VALUES(?,?,?,?)");
+                ps = con.prepareStatement("INSERT INTO " + TBL_PHRASE + "(ID,PKEY,MANDATOR,HID,CAT)VALUES(?,?,?,?,?)");
                 ps.setLong(1, phraseId);
                 ps.setString(2, phraseKey);
                 ps.setLong(3, mandator);
                 ps.setBoolean(4, false);
+                ps.setInt(5, category);
                 ps.executeUpdate();
             }
             if (!value.isEmpty()) {
@@ -353,6 +388,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setPhraseHidden(String phraseKey, long mandator, boolean hidden) throws FxNoAccessException {
+        setPhraseHidden(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, mandator, hidden);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void setPhraseHidden(int category, String phraseKey, long mandator, boolean hidden) throws FxNoAccessException {
         Connection con = null;
         PreparedStatement ps = null;
         final UserTicket userTicket = FxContext.getUserTicket();
@@ -361,10 +404,11 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            ps = con.prepareStatement("UPDATE " + TBL_PHRASE + " SET HID=? WHERE PKEY=? AND MANDATOR=?");
+            ps = con.prepareStatement("UPDATE " + TBL_PHRASE + " SET HID=? WHERE PKEY=? AND MANDATOR=? AND CAT=?");
             ps.setBoolean(1, hidden);
             ps.setString(2, phraseKey);
             ps.setLong(3, mandator);
+            ps.setInt(4, category);
             ps.executeUpdate();
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
@@ -379,6 +423,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public boolean removePhrase(String phraseKey, long mandator) throws FxNoAccessException, FxEntryInUseException {
+        return removePhrase(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, mandator);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public boolean removePhrase(int category, String phraseKey, long mandator) throws FxNoAccessException, FxEntryInUseException {
         Connection con = null;
         PreparedStatement ps = null;
         final UserTicket userTicket = FxContext.getUserTicket();
@@ -387,17 +439,19 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE + " WHERE PKEY=? AND MANDATOR=?");
+            ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE + " WHERE PKEY=? AND MANDATOR=? AND CAT=?");
             ps.setString(1, phraseKey);
             ps.setLong(2, mandator);
+            ps.setInt(3, category);
             ResultSet rs = ps.executeQuery();
             if (rs != null && rs.next()) {
                 long id = rs.getLong(1);
                 rs.close();
                 ps.close();
-                ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE_TREE + " WHERE PHRASEID=? AND PMANDATOR=?");
+                ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE_TREE + " WHERE PHRASEID=? AND PMANDATOR=? AND CAT=?");
                 ps.setLong(1, id);
                 ps.setLong(2, mandator);
+                ps.setInt(3, category);
                 ResultSet rsCheck = ps.executeQuery();
                 if (rsCheck != null && rsCheck.next())
                     throw new FxEntryInUseException("ex.phrase.inUse.tree", phraseKey);
@@ -414,9 +468,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ps.setLong(2, mandator);
                 ps.execute();
                 ps.close();
-                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE ID=? AND MANDATOR=?");
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE ID=? AND MANDATOR=? AND CAT=?");
                 ps.setLong(1, id);
                 ps.setLong(2, mandator);
+                ps.setInt(3, category);
                 ps.execute();
                 return true;
             }
@@ -434,6 +489,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int removePhrases(String phraseKeyPrefix, long mandator) throws FxNoAccessException, FxEntryInUseException {
+        return removePhrases(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKeyPrefix, mandator);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int removePhrases(int category, String phraseKeyPrefix, long mandator) throws FxNoAccessException, FxEntryInUseException {
         Connection con = null;
         PreparedStatement psResolve = null, ps = null;
         final UserTicket userTicket = FxContext.getUserTicket();
@@ -443,18 +506,20 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            psResolve = con.prepareStatement("SELECT ID,PKEY FROM " + TBL_PHRASE + " WHERE PKEY LIKE ? AND MANDATOR=?");
+            psResolve = con.prepareStatement("SELECT ID,PKEY FROM " + TBL_PHRASE + " WHERE PKEY LIKE ? AND MANDATOR=? AND CAT=?");
             psResolve.setString(1, phraseKeyPrefix + "%");
             psResolve.setLong(2, mandator);
+            psResolve.setInt(3, category);
             ResultSet rsResolve = psResolve.executeQuery();
             while (rsResolve != null && rsResolve.next()) {
                 long id = rsResolve.getLong(1);
                 String key = rsResolve.getString(2);
                 if (ps != null)
                     ps.close();
-                ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE_TREE + " WHERE PHRASEID=? AND PMANDATOR=?");
+                ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE_TREE + " WHERE PHRASEID=? AND PMANDATOR=? AND CAT=?");
                 ps.setLong(1, id);
                 ps.setLong(2, mandator);
+                ps.setInt(3, category);
                 ResultSet rsCheck = ps.executeQuery();
                 if (rsCheck != null && rsCheck.next())
                     throw new FxEntryInUseException("ex.phrase.inUse.tree", key);
@@ -471,9 +536,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ps.setLong(2, mandator);
                 ps.execute();
                 ps.close();
-                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE ID=? AND MANDATOR=?");
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE ID=? AND MANDATOR=? AND CAT=?");
                 ps.setLong(1, id);
                 ps.setLong(2, mandator);
+                ps.setInt(3, category);
                 count += ps.executeUpdate();
             }
             if (rsResolve != null)
@@ -493,6 +559,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int removeMandatorPhrases(long mandator) throws FxNoAccessException, FxEntryInUseException {
+        return removeMandatorPhrases(FxPhraseCategorySelection.SELECTION_ANY, mandator);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int removeMandatorPhrases(FxPhraseCategorySelection categories, long mandator) throws FxNoAccessException, FxEntryInUseException {
         Connection con = null;
         PreparedStatement ps = null;
         final UserTicket userTicket = FxContext.getUserTicket();
@@ -501,9 +575,13 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-
-            ps = con.prepareStatement("SELECT COUNT(ID) FROM " + TBL_PHRASE_TREE + " WHERE PMANDATOR=?");
-            ps.setLong(1, mandator);
+            if (categories.isAny()) {
+                ps = con.prepareStatement("SELECT COUNT(ID) FROM " + TBL_PHRASE_TREE + " WHERE PMANDATOR=?");
+                ps.setLong(1, mandator);
+            } else {
+                ps = con.prepareStatement("SELECT COUNT(ID) FROM " + TBL_PHRASE_TREE + " WHERE PMANDATOR=? AND CAT IN(" + categoriesList(categories) + ")");
+                ps.setLong(1, mandator);
+            }
             ResultSet rsCheck = ps.executeQuery();
             if (rsCheck != null && rsCheck.next()) {
                 long used = rsCheck.getLong(1);
@@ -513,18 +591,33 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             if (rsCheck != null)
                 rsCheck.close();
             ps.close();
-            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_VALUES + " WHERE MANDATOR=?");
-            ps.setLong(1, mandator);
-            ps.execute();
-            ps.close();
-            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE PMANDATOR=?");
-            ps.setLong(1, mandator);
-            ps.execute();
-            ps.close();
-            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE MANDATOR=?");
-            ps.setLong(1, mandator);
-            count = ps.executeUpdate();
-            removePhraseSequencer(mandator);
+            if (categories.isAny()) {
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_VALUES + " WHERE MANDATOR=?");
+                ps.setLong(1, mandator);
+                ps.execute();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE PMANDATOR=?");
+                ps.setLong(1, mandator);
+                ps.execute();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE MANDATOR=?");
+                ps.setLong(1, mandator);
+                count = ps.executeUpdate();
+            } else {
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_VALUES + " WHERE MANDATOR=? AND ID IN(SELECT DISTINCT ID FROM " + TBL_PHRASE + " WHERE MANDATOR=? AND CAT IN(" + categoriesList(categories) + "))");
+                ps.setLong(1, mandator);
+                ps.setLong(2, mandator);
+                ps.execute();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE PMANDATOR=? AND PHRASEID IN(SELECT DISTINCT ID FROM " + TBL_PHRASE + " WHERE MANDATOR=? AND CAT IN(" + categoriesList(categories) + "))");
+                ps.setLong(1, mandator);
+                ps.execute();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE MANDATOR=? AND CAT IN(" + categoriesList(categories) + ")");
+                ps.setLong(1, mandator);
+                count = ps.executeUpdate();
+            }
+            removePhraseSequencer(mandator); //force a re-initialization on next use/call
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
@@ -607,11 +700,20 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         throw new FxNotFoundException("ex.phrase.key.notFound", phraseKey);
     }
 
+
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxPhrase loadPhrase(String phraseKey, long... mandators) throws FxNotFoundException {
+        return loadPhrase(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, mandators);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public FxPhrase loadPhrase(int category, String phraseKey, long... mandators) throws FxNotFoundException {
         Connection con = null;
         PreparedStatement ps = null;
         checkPhraseKey(phraseKey);
@@ -620,9 +722,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            ps = con.prepareStatement("SELECT v.LANG, v.PVAL, v.TAG, p.ID, p.HID FROM " + TBL_PHRASE_VALUES + " v, " + TBL_PHRASE +
-                    " p WHERE p.PKEY=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
+            ps = con.prepareStatement("SELECT v.LANG,v.PVAL,v.TAG,p.ID,p.HID FROM " + TBL_PHRASE_VALUES + " v, " + TBL_PHRASE +
+                    " p WHERE p.PKEY=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR AND p.CAT=?");
             ps.setString(1, phraseKey);
+            ps.setInt(3, category);
             for (long mandator : mandators) {
                 ps.setLong(2, mandator);
                 ResultSet rs = ps.executeQuery();
@@ -645,7 +748,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                         if (hasTag)
                             fxTag.setTranslation(rs.getLong(1), rs.getString(3));
                     }
-                    return new FxPhrase(mandator, phraseKey, val, fxTag).setId(id).flagHidden(hidden);
+                    return new FxPhrase(mandator, phraseKey, val, fxTag).setId(id).flagHidden(hidden).flagCategory(category);
                 }
                 if (rs != null)
                     rs.close();
@@ -669,6 +772,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * 5 .. mandator
      * 6 .. key
      * 7 .. hidden
+     * 8 .. category
      *
      * @param rs ResultSet
      * @return FxPhrase
@@ -690,12 +794,13 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         final long mandator = rs.getLong(5);
         final String key = rs.getString(6);
         final boolean hidden = rs.getBoolean(7);
+        final int category = rs.getInt(8);
         while (rs.next()) {
             val.setTranslation(rs.getLong(2), rs.getString(3));
             if (hasTag)
                 fxTag.setTranslation(rs.getLong(2), rs.getString(4));
         }
-        return new FxPhrase(mandator, key, val, fxTag).setId(id).flagHidden(hidden);
+        return new FxPhrase(mandator, key, val, fxTag).setId(id).flagHidden(hidden).flagCategory(category);
     }
 
     /**
@@ -703,6 +808,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxPhrase> loadPhrases(String phraseKeyPrefix, long... _mandators) {
+        return loadPhrases(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKeyPrefix, _mandators);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<FxPhrase> loadPhrases(int category, String phraseKeyPrefix, long... _mandators) {
         Connection con = null;
         PreparedStatement ps = null;
         checkPhraseKey(phraseKeyPrefix);
@@ -713,20 +826,25 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
             if (mandators.length == 1) {
-                //                                  1     2       3           4       5       6
-                ps = con.prepareStatement("SELECT r.ID, r.PKEY, r.MANDATOR, v.LANG, v.PVAL, v.TAG FROM " + TBL_PHRASE_VALUES + " v, " + TBL_PHRASE +
-                        " r WHERE r.PKEY LIKE ? AND r.MANDATOR=? AND v.ID=r.ID AND v.MANDATOR=r.MANDATOR ORDER BY r.PKEY");
+                //                                  1     2       3           4       5       6      7
+                ps = con.prepareStatement("SELECT r.ID, r.PKEY, r.MANDATOR, v.LANG, v.PVAL, v.TAG, r.HID FROM " + TBL_PHRASE_VALUES + " v, " + TBL_PHRASE +
+                        " r WHERE r.PKEY LIKE ? AND r.MANDATOR=? AND r.CAT=? AND v.ID=r.ID AND v.MANDATOR=r.MANDATOR ORDER BY r.PKEY");
                 ps.setString(1, phraseKeyPrefix + "%");
                 ps.setLong(2, mandators[0]);
+                ps.setInt(3, category);
             } else {
-                ps = con.prepareStatement("SELECT r.ID, r.PKEY, r.MANDATOR, v.LANG, v.PVAL, v.TAG FROM " + TBL_PHRASE_VALUES + " v, " + TBL_PHRASE +
-                        //                    1                 2               3                                                                                    4
-                        " r WHERE r.PKEY LIKE ? AND (r.MANDATOR=? OR(r.MANDATOR=? AND NOT EXISTS(SELECT r2.ID FROM FX_PHRASE r2 WHERE r2.PKEY=r.PKEY AND r2.MANDATOR=?)))" +
-                        "AND v.ID=r.ID AND v.MANDATOR=r.MANDATOR ORDER BY r.PKEY");
+                //                                  1     2       3           4       5       6      7
+                ps = con.prepareStatement("SELECT r.ID, r.PKEY, r.MANDATOR, v.LANG, v.PVAL, v.TAG, r.HID FROM " + TBL_PHRASE_VALUES + " v, " + TBL_PHRASE +
+                        //                    1                 2               3                                                                                    4            5
+                        " r WHERE r.PKEY LIKE ? AND (r.MANDATOR=? OR(r.MANDATOR=? AND NOT EXISTS(SELECT r2.ID FROM FX_PHRASE r2 WHERE r2.PKEY=r.PKEY AND r2.MANDATOR=? AND r2.CAT=?)))" +
+                        //         6
+                        "AND r.CAT=? AND v.ID=r.ID AND v.MANDATOR=r.MANDATOR ORDER BY r.PKEY");
                 ps.setString(1, phraseKeyPrefix + "%");
                 ps.setLong(2, mandators[0]);
                 ps.setLong(3, mandators[1]);
                 ps.setLong(4, mandators[0]);
+                ps.setInt(5, category);
+                ps.setInt(6, category);
             }
 
             ResultSet rs = ps.executeQuery();
@@ -754,7 +872,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     hasTag = rs.wasNull();
                     fxTag = hasTag ? new FxString(ml, lang, tag) : new FxString(FxString.EMPTY).setEmpty();
                     val = new FxString(ml, lang, rs.getString(5));
-                    currPhrase = new FxPhrase(currMandator, currKey, val, fxTag);
+                    currPhrase = new FxPhrase(currMandator, currKey, val, fxTag).flagCategory(category).flagHidden(rs.getBoolean(7));
                 } else {
                     val.setTranslation(lang, rs.getString(5));
                     if (hasTag)
@@ -803,19 +921,51 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void clearPhrases(FxPhraseCategorySelection categories, long mandatorId) throws FxNoAccessException, FxEntryInUseException {
+        if (categories.isAny()) {
+            clearPhrases(mandatorId);
+            return;
+        }
+        checkMandatorAccess(mandatorId, FxContext.getUserTicket());
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            // Obtain a database connection
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_VALUES + " WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_PHRASE + " WHERE MANDATOR=? AND CAT IN (" + categoriesList(categories) + "))");
+            ps.setLong(1, mandatorId);
+            ps.executeUpdate();
+            ps.close();
+            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE MANDATOR=? AND CAT IN (" + categoriesList(categories) + ")");
+            ps.setLong(1, mandatorId);
+            ps.executeUpdate();
+            removePhraseSequencer(mandatorId);
+        } catch (SQLException exc) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(PhraseEngineBean.class, con, ps);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxPhraseTreeNode saveTreeNode(FxPhraseTreeNode node) throws FxNoAccessException, FxNotFoundException {
         Connection con = null;
         PreparedStatement ps = null;
 
         checkMandatorAccess(node.getMandatorId(), FxContext.getUserTicket());
         //load the node's phrase to check if it exists
-        FxPhrase checkPhrase = loadPhrase(node.getPhrase().getKey(), node.getPhrase().getMandator());
+        FxPhrase checkPhrase = loadPhrase(node.getCategory(), node.getPhrase().getKey(), node.getPhrase().getMandator());
         if (!checkPhrase.hasId())
             throw new FxNotFoundException("ex.phrases.noId");
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            ps = con.prepareStatement("SELECT ID, MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=?");
+            ps = con.prepareStatement("SELECT ID, MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=? AND CAT=?");
+            ps.setInt(3, node.getCategory());
             boolean newNode = node.isNew();
             if (!node.isNew()) {
                 //check if the node has an id set but does not exist yet
@@ -835,7 +985,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             }
             ps.close();
             if (!newNode) {
-                ps = con.prepareStatement("UPDATE " + TBL_PHRASE_TREE + " SET PARENTID=?,PARENTMANDATOR=?,PHRASEID=?,PMANDATOR=?,POS=? WHERE ID=? AND MANDATOR=?");
+                ps = con.prepareStatement("UPDATE " + TBL_PHRASE_TREE + " SET PARENTID=?,PARENTMANDATOR=?,PHRASEID=?,PMANDATOR=?,POS=? WHERE ID=? AND MANDATOR=? AND CAT=?");
                 if (node.hasParent()) {
                     ps.setLong(1, node.getParentNodeId());
                     ps.setLong(2, node.getParentNodeMandatorId());
@@ -850,11 +1000,12 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ps.setLong(5, node.getPos());
                 ps.setLong(6, node.getId());
                 ps.setLong(7, node.getMandatorId());
+                ps.setInt(8, node.getCategory());
                 ps.executeUpdate();
                 node.getPhrase().setId(checkPhrase.getId());
                 return node;
             } else {
-                ps = con.prepareStatement("INSERT INTO " + TBL_PHRASE_TREE + " (ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS)VALUES(?,?,?,?,?,?,?)");
+                ps = con.prepareStatement("INSERT INTO " + TBL_PHRASE_TREE + " (ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS,CAT)VALUES(?,?,?,?,?,?,?,?)");
                 final long nodeId = node.isNew() ? fetchNextNodeId(node.getMandatorId()) : node.getId();
                 ps.setLong(1, nodeId);
                 ps.setLong(2, node.getMandatorId());
@@ -870,6 +1021,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 if (!node.hasPos())
                     node.setPos(getNextNodePos(con, node.getParentNodeId(), node.getParentNodeMandatorId(), node.getMandatorId()));
                 ps.setLong(7, node.getPos());
+                ps.setInt(8, node.getCategory());
                 ps.executeUpdate();
                 node.setId(nodeId);
                 node.getPhrase().setId(checkPhrase.getId());
@@ -929,19 +1081,25 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
             //check if the node and the parent node exists
-            ps = con.prepareStatement("SELECT ID, MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=?");
+            ps = con.prepareStatement("SELECT ID, MANDATOR, CAT FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=?");
             ps.setLong(1, nodeId);
             ps.setLong(2, nodeMandator);
             ResultSet rs = ps.executeQuery();
             if (!(rs != null && rs.next()))
                 throw new FxNotFoundException("ex.phrases.node.notFound.id", nodeId, nodeMandator);
+            final int nodeCategory = rs.getInt(3);
+            final int parentCategory;
             if (parentId != FxPhraseTreeNode.NOT_SET) {
                 ps.setLong(1, parentId);
                 ps.setLong(2, parentMandator);
                 rs = ps.executeQuery();
                 if (!(rs != null && rs.next()))
                     throw new FxNotFoundException("ex.phrase.tree.parent.notFound", parentId, parentMandator);
-            }
+                parentCategory = rs.getInt(3);
+            } else
+                parentCategory = nodeCategory;
+            if (nodeCategory != parentCategory)
+                throw new FxInvalidParameterException("parent", "ex.phrase.tree.category.mismatch").asRuntimeException();
             ps.close();
             ps = con.prepareStatement("UPDATE " + TBL_PHRASE_TREE + " SET PARENTID=?,PARENTMANDATOR=? WHERE ID=? AND MANDATOR=?");
             if (parentId != FxPhraseTreeNode.NOT_SET) {
@@ -967,6 +1125,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxPhraseTreeNode> loadPhraseTree(boolean mandator2top, long... _mandators) {
+        return loadPhraseTree(FxPhraseCategorySelection.CATEGORY_DEFAULT, mandator2top, _mandators);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<FxPhraseTreeNode> loadPhraseTree(int category, boolean mandator2top, long... _mandators) {
         Connection con = null;
         PreparedStatement ps = null;
         PreparedStatement psPhrase = null;
@@ -981,12 +1147,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
             List<FxPhraseTreeNode> nodes = Lists.newArrayListWithExpectedSize(5);
-            //                                1  2        3        4              5        6         7
-            ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS FROM " + TBL_PHRASE_TREE +
-                    " WHERE MANDATOR=? AND PARENTID IS NULL AND PARENTMANDATOR IS NULL ORDER BY POS");
-            /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden*/
-            psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID FROM " + TBL_PHRASE + " p, " +
-                    TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
+            //                                1  2        3        4              5        6         7   8
+            ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS,CAT FROM " + TBL_PHRASE_TREE +
+                    " WHERE MANDATOR=? AND CAT=? AND PARENTID IS NULL AND PARENTMANDATOR IS NULL ORDER BY POS");
+            /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden 8 .. category*/
+            psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID,p.CAT FROM " + TBL_PHRASE + " p, " +
+                    TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND p.CAT=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
+            ps.setInt(2, category);
+            psPhrase.setInt(3, category);
             for (long mandator : mandators) {
                 ps.setLong(1, mandator);
                 ResultSet rs = ps.executeQuery();
@@ -1004,7 +1172,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             }
             if (nodes.size() > 0) {
                 ps.close();
-                ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS FROM " + TBL_PHRASE_TREE +
+                ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS,CAT FROM " + TBL_PHRASE_TREE +
                         " WHERE MANDATOR=? AND PARENTID=? AND PARENTMANDATOR=? ORDER BY POS");
                 for (FxPhraseTreeNode node : nodes)
                     loadChildren(node, mandators, ps, psPhrase);
@@ -1052,11 +1220,11 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = _con == null ? Database.getDbConnection() : _con;
-            //                                1  2        3        4              5        6         7
-            ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS FROM " + TBL_PHRASE_TREE +
+            //                                1  2        3        4              5        6         7   8
+            ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS,CAT FROM " + TBL_PHRASE_TREE +
                     " WHERE ID=? AND MANDATOR=?");
-            /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden */
-            psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID FROM " + TBL_PHRASE + " p, " +
+            /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden 8 .. category*/
+            psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID,p.CAT FROM " + TBL_PHRASE + " p, " +
                     TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
             ps.setLong(1, nodeId);
             ps.setLong(2, mandatorId);
@@ -1073,7 +1241,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 long parentMandatorId = rs.getLong(4);
                 if (rs.wasNull())
                     parentMandatorId = FxPhraseTreeNode.NOT_SET;
-                node = new FxPhraseTreeNode(rs.getLong(1), rs.getLong(2), parentId, parentMandatorId, loadPhrase(rsPhrase), null).setPos(rs.getLong(7));
+                node = new FxPhraseTreeNode(rs.getLong(1), rs.getLong(2), rs.getInt(8), parentId, parentMandatorId, loadPhrase(rsPhrase), null).setPos(rs.getLong(7));
                 rsPhrase.close();
             }
             if (rs != null)
@@ -1082,7 +1250,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 throw new FxNotFoundException("ex.phrases.node.notFound.id", nodeId, mandatorId);
             if (loadChildren) {
                 ps.close();
-                ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS FROM " + TBL_PHRASE_TREE +
+                ps = con.prepareStatement("SELECT ID,MANDATOR,PARENTID,PARENTMANDATOR,PHRASEID,PMANDATOR,POS,CAT FROM " + TBL_PHRASE_TREE +
                         " WHERE MANDATOR=? AND PARENTID=? AND PARENTMANDATOR=? ORDER BY POS");
                 loadChildren(node, mandators, ps, psPhrase);
             }
@@ -1110,7 +1278,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ResultSet rsPhrase = psPhrase.executeQuery();
                 if (rsPhrase == null || !rsPhrase.next())
                     throw new FxNotFoundException("ex.phrases.notFound.id", rsNodes.getLong(5), rsNodes.getLong(6)).asRuntimeException();
-                children.add(new FxPhraseTreeNode(rsNodes.getLong(1), rsNodes.getLong(2), node.getId(), node.getMandatorId(), loadPhrase(rsPhrase), null).setPos(rsNodes.getLong(7)));
+                children.add(new FxPhraseTreeNode(rsNodes.getLong(1), rsNodes.getLong(2), rsNodes.getInt(8), node.getId(), node.getMandatorId(), loadPhrase(rsPhrase), null).setPos(rsNodes.getLong(7)));
                 rsPhrase.close();
             }
             if (rsNodes != null)
@@ -1272,27 +1440,49 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void clearTree(long mandatorId) throws FxNoAccessException {
+        clearTree(FxPhraseCategorySelection.SELECTION_ANY, mandatorId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void clearTree(FxPhraseCategorySelection categories, long mandatorId) throws FxNoAccessException {
         checkMandatorAccess(mandatorId, FxContext.getUserTicket());
         Connection con = null;
         PreparedStatement ps = null;
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=?");
-            ps.setLong(1, mandatorId);
-            ps.executeUpdate();
-            ps.close();
-            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE NODEMANDATOR=?");
-            ps.setLong(1, mandatorId);
-            ps.executeUpdate();
-            ps.close();
-            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE PMANDATOR=?");
-            ps.setLong(1, mandatorId);
-            ps.executeUpdate();
-            ps.close();
-            ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=?");
-            ps.setLong(1, mandatorId);
-            ps.executeUpdate();
+            if (categories.isAny()) {
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=?");
+                ps.setLong(1, mandatorId);
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE NODEMANDATOR=?");
+                ps.setLong(1, mandatorId);
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE PMANDATOR=?");
+                ps.setLong(1, mandatorId);
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=?");
+                ps.setLong(1, mandatorId);
+                ps.executeUpdate();
+            } else {
+                final String cat = categoriesList(categories);
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE (MANDATOR=? OR NODEMANDATOR=? OR PMANDATOR=?) AND NODEID IN(SELECT DISTINCT ID FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=? AND CAT IN(" + cat + "))");
+                ps.setLong(1, mandatorId);
+                ps.setLong(2, mandatorId);
+                ps.setLong(3, mandatorId);
+                ps.setLong(4, mandatorId);
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=? AND CAT IN(" + cat + ")");
+                ps.setLong(1, mandatorId);
+                ps.executeUpdate();
+            }
             removeNodeSequencer(mandatorId);
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
@@ -1313,13 +1503,32 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
+            //check if category for the phrase and node matches
+            ps = con.prepareStatement("SELECT CAT FROM " + TBL_PHRASE + " WHERE ID=? AND MANDATOR=?");
+            ps.setLong(1, phraseId);
+            ps.setLong(2, phraseMandator);
+            ResultSet rs = ps.executeQuery();
+            if (rs == null || !(rs.next()))
+                throw new FxNotFoundException("ex.phrases.notFound.id", phraseId, phraseMandator);
+            final int phraseCat = rs.getInt(1);
+            ps.close();
+            ps = con.prepareStatement("SELECT CAT FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=?");
+            ps.setLong(1, nodeId);
+            ps.setLong(2, nodeMandator);
+            rs = ps.executeQuery();
+            if (rs == null || !(rs.next()))
+                throw new FxNotFoundException("ex.phrases.node.notFound.id", nodeId, nodeMandator);
+            final int nodeCat = rs.getInt(1);
+            if (nodeCat != phraseCat)
+                throw new FxInvalidParameterException("phrase", "ex.phrase.tree.category.mismatch").asRuntimeException();
+            ps.close();
             ps = con.prepareStatement("SELECT POS FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND PHRASEID=? AND PMANDATOR=?");
             ps.setLong(1, assignmentOwner);
             ps.setLong(2, nodeId);
             ps.setLong(3, nodeMandator);
             ps.setLong(4, phraseId);
             ps.setLong(5, phraseMandator);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if (rs != null && rs.next()) {
                 long orgPos = rs.getLong(1);
                 if (!rs.wasNull()) {
@@ -1414,13 +1623,25 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
+            //check categories
+            ps = con.prepareStatement("SELECT CAT FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=?");
+            ps.setLong(1, nodeId);
+            ps.setLong(2, nodeMandator);
+            ResultSet rs = ps.executeQuery();
+            if (rs == null || !(rs.next()))
+                throw new FxNotFoundException("ex.phrases.node.notFound.id", nodeId, nodeMandator);
+            final int nodeCat = rs.getInt(1);
+            for (FxPhrase phrase : phrases)
+                if (nodeCat != phrase.getCategory())
+                    throw new FxInvalidParameterException("phrase", "ex.phrase.tree.category.mismatch").asRuntimeException();
+            ps.close();
             long startPhraseId = -1, startPhraseMandator = -1;
             ps = con.prepareStatement("SELECT PHRASEID,PMANDATOR FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND POS>=? ORDER BY POS ASC");
             ps.setLong(1, assignmentOwner);
             ps.setLong(2, nodeId);
             ps.setLong(3, nodeMandator);
             ps.setLong(4, position);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 long pid = rs.getLong(1);
                 long mid = rs.getLong(2);
@@ -1646,6 +1867,14 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<FxPhraseTreeNodePosition> getAssignedNodes(String phraseKey, long... _mandators) {
+        return getAssignedNodes(FxPhraseCategorySelection.CATEGORY_DEFAULT, phraseKey, _mandators);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<FxPhraseTreeNodePosition> getAssignedNodes(int category, String phraseKey, long... _mandators) {
         final long ownMandator = FxContext.getUserTicket().getMandatorId();
         Connection con = null;
         PreparedStatement ps = null;
@@ -1657,8 +1886,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
             ps = con.prepareStatement("SELECT m.NODEID,m.NODEMANDATOR,m.POS FROM " + TBL_PHRASE_MAP +
                     " m," + TBL_PHRASE + " p WHERE p.PKEY=? AND p.MANDATOR" + mandatorQuery +
-                    " AND m.PHRASEID=p.ID AND m.MANDATOR" + mandatorQuery + " ORDER BY m.NODEMANDATOR,m.NODEID,m.POS");
+                    " AND p.CAT=? AND m.PHRASEID=p.ID AND m.MANDATOR" + mandatorQuery + " ORDER BY m.NODEMANDATOR,m.NODEID,m.POS");
             ps.setString(1, phraseKey);
+            ps.setInt(2, category);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 try {
@@ -1852,11 +2082,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             if (treeNodeRestricted)
                 sql.append(", " + TBL_PHRASE_MAP + " m");
             sql.append(" WHERE ");
-
-            if (query.isIncludeHidden())
-                sql.append("1=1");
+            final String categoryRestriction;
+            if (query.getCategories().isSingleCategory())
+                categoryRestriction = "p.CAT=" + query.getCategories().getSingleCategory();
             else
-                sql.append("p.HID=FALSE");
+                categoryRestriction = "p.CAT IN(" + categoriesList(query.getCategories()) + ")";
+            if (query.isIncludeHidden())
+                sql.append(categoryRestriction);
+            else
+                sql.append(categoryRestriction).append(" AND p.HID=FALSE");
 
             if (query.isKeyMatchRestricted()) {
                 sql.append(" AND UPPER(p.PKEY)");
@@ -2011,8 +2245,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             int endRow = pageSize * page;
             int currRow = 0;
             if (query.isFetchFullPhraseInfo()) {
-                /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden */
-                psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID FROM " + TBL_PHRASE + " p, " +
+                /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden 8 .. category*/
+                psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID,p.CAT FROM " + TBL_PHRASE + " p, " +
                         TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
             }
             //                    1  2        3    4    5    6    7    8
@@ -2110,10 +2344,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 sql.append(", " + TBL_PHRASE_MAP + " m");
             sql.append(" WHERE ");
 
-            if (query.isIncludeHidden())
-                sql.append("1=1");
+            final String categoryRestriction;
+            if (query.getCategories().isSingleCategory())
+                categoryRestriction = "p.CAT=" + query.getCategories().getSingleCategory();
             else
-                sql.append("p.HID=FALSE");
+                categoryRestriction = "p.CAT IN(" + categoriesList(query.getCategories()) + ")";
+            if (query.isIncludeHidden())
+                sql.append(categoryRestriction);
+            else
+                sql.append(categoryRestriction).append(" AND p.HID=FALSE");
 
             if (needValueTable)
                 sql.append(" AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
@@ -2278,8 +2517,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             int endRow = pageSize * page;
             int currRow = 0;
             if (query.isFetchFullPhraseInfo()) {
-                /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden */
-                psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID FROM " + TBL_PHRASE + " p, " +
+                /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden 8 .. category*/
+                psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID,p.CAT FROM " + TBL_PHRASE + " p, " +
                         TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
             }
             while (rs != null && rs.next()) {
