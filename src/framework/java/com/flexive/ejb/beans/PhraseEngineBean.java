@@ -1164,7 +1164,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     ResultSet rsPhrase = psPhrase.executeQuery();
                     if (rsPhrase == null || !rsPhrase.next())
                         throw new FxNotFoundException("ex.phrases.notFound.id", rs.getLong(5), rs.getLong(6)).asRuntimeException();
-                    nodes.add(new FxPhraseTreeNode(rs.getLong(1), rs.getLong(2), FxPhraseTreeNode.NOT_SET, FxPhraseTreeNode.NOT_SET, loadPhrase(rsPhrase), null).setPos(rs.getLong(7)));
+                    nodes.add(new FxPhraseTreeNode(rs.getLong(1), rs.getLong(2), rs.getInt(8), FxPhraseTreeNode.NOT_SET, FxPhraseTreeNode.NOT_SET, loadPhrase(rsPhrase), null).setPos(rs.getLong(7)));
                     rsPhrase.close();
                 }
                 if (rs != null)
@@ -2057,8 +2057,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                         ")) AS STAG";
             else
                 searchTagSubQuery = "(SELECT s.TAG FROM " + TBL_PHRASE_VALUES + " s WHERE s.ID=p.ID AND s.MANDATOR=p.MANDATOR " + sub_restriction + " LIMIT 1) AS STAG ";
-            //                 1  2        3    4    5    6    7    8
-            sql.append("SELECT ID,MANDATOR,PKEY,PVAL,LANG,RTAG,SVAL,STAG");
+            //                 1  2        3    4    5    6    7    8    9
+            sql.append("SELECT ID,MANDATOR,PKEY,PVAL,LANG,RTAG,SVAL,STAG,CAT");
             if (treeNodeRestricted) {
                 //9
                 sql.append(",MMANDATOR");
@@ -2071,7 +2071,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             sql.append(" FROM(");
             sql.append("SELECT DISTINCT p.ID AS ID,p.MANDATOR AS MANDATOR,p.PKEY AS PKEY,").append(resultValueSubQuery).
                     append(",").append(langSubQuery).append(",").append(resultTagSubQuery).
-                    append(",").append(searchValueSubQuery).append(",").append(searchTagSubQuery);
+                    append(",").append(searchValueSubQuery).append(",").append(searchTagSubQuery).append(",p.CAT AS CAT");
             if (treeNodeRestricted) {
                 sql.append(",m.MANDATOR AS MMANDATOR");
                 if (isSortPos)
@@ -2249,18 +2249,19 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID,p.CAT FROM " + TBL_PHRASE + " p, " +
                         TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
             }
-            //                    1  2        3    4    5    6    7    8
-//            sql.append("SELECT ID,MANDATOR,PKEY,PVAL,LANG,RTAG,SVAL,STAG FROM(");
+            //                    1  2        3    4    5    6    7    8   9
+//            sql.append("SELECT ID,MANDATOR,PKEY,PVAL,LANG,RTAG,SVAL,STAG,CAT FROM(");
             while (rs != null && rs.next()) {
                 if (currRow >= startRow && currRow < endRow) {
                     if (!query.isFetchFullPhraseInfo()) {
                         FxString val = new FxString(rs.getLong(5), rs.getString(4));
                         String tag = rs.getString(6);
                         final FxPhrase phrase = new FxPhrase(rs.getLong(2), rs.getString(3), val, tag).setId(rs.getLong(1));
+                        phrase.setCategory(rs.getInt(9));
                         if (treeNodeRestricted)
-                            phrase.setAssignmentMandator(rs.getLong(9));
+                            phrase.setAssignmentMandator(rs.getLong(10));
                         if (isSortPos)
-                            phrase.setPosition(rs.getInt(10));
+                            phrase.setPosition(rs.getInt(11));
                         phrases.add(phrase);
                     } else {
                         psPhrase.setLong(1, rs.getLong(1));
@@ -2269,9 +2270,9 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                         if (rsPhrase != null && rsPhrase.next()) {
                             final FxPhrase phrase = loadPhrase(rsPhrase);
                             if (treeNodeRestricted)
-                                phrase.setAssignmentMandator(rs.getLong(9));
+                                phrase.setAssignmentMandator(rs.getLong(10));
                             if (isSortPos)
-                                phrase.setPosition(rs.getInt(10));
+                                phrase.setPosition(rs.getInt(11));
                             phrases.add(phrase);
                         }
                         if (rsPhrase != null)
