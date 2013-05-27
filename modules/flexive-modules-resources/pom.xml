@@ -12,4 +12,12 @@
     <description>Classpath resources attached to the shared parent POM</description>
     <packaging>jar</packaging>
 
+    <distributionManagement>
+        <repository>
+            <id>local-custom</id>
+            <name>Local repository</name>
+            <url>file://${local-repo}</url>
+            <uniqueVersion>false</uniqueVersion>
+        </repository>
+    </distributionManagement>
 </project>
