@@ -521,7 +521,7 @@ public interface AccountEngine {
     long getAssignedUsersCount(long groupId, boolean includeInvisible) throws FxApplicationException;
 
     /**
-     * Retrives all ACLs assigned to a given account.
+     * Retrieves all ACLs assigned to a given account.
      * <p/>
      * A empty resultset is returned if the account does not exist.<br>
      * A user may only see his own ACLAssignment.<br>
@@ -542,4 +542,26 @@ public interface AccountEngine {
      * @throws FxApplicationException on errors
      */
     void fixContactData() throws FxApplicationException;
+
+    /**
+     * Generate a new REST API token, overwriting the previous one if it existed.
+     *
+     * @return  the API token
+     * @throws FxApplicationException   on errors
+     * @since 3.1.7
+     */
+    String generateRestToken() throws FxApplicationException;
+
+    /**
+     * Login using a REST API token. Currently this is implemented as a "light" login, i.e. the request ticket
+     * will be set appropriately, but no "real" login is performed as the REST API calls don't have an associated
+     * session.
+     *
+     * @param token    the REST API token
+     * @throws FxApplicationException on errors
+     * @throws FxRestApiTokenExpiredException when the token is expired or invalid (was replaced by a newer one)
+     *
+     * @since 3.1.7
+     */
+    void loginByRestToken(String token) throws FxApplicationException;
 }

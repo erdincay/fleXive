@@ -10,9 +10,13 @@
 
     <modules>
         <module>flexive-modules-parent</module>
+        <module>flexive-modules-resources</module>
         <module>chemistry</module>
         <module>standalone</module>
         <module>installer</module>
+        <module>rest-shared</module>
+        <module>rest-api</module>
+        <module>rest-client</module>
   </modules>
 
 </project>

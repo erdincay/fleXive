@@ -305,17 +305,17 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         PreviewSizes result = requestedSize;
         if (result == PreviewSizes.SCREENVIEW && prev4size == 0) {
             result = PreviewSizes.PREVIEW3;
-            if (width < BinaryDescriptor.SCREENVIEW_WIDTH && height < BinaryDescriptor.SCREENVIEW_HEIGHT)
+            if (width <= BinaryDescriptor.SCREENVIEW_WIDTH && height <= BinaryDescriptor.SCREENVIEW_HEIGHT)
                 result = PreviewSizes.ORIGINAL;
         }
         if (result == PreviewSizes.PREVIEW3 && prev3size == 0) {
             result = PreviewSizes.PREVIEW2;
-            if (width < result.getSize() || height < result.getSize())
+            if (width <= result.getSize() || height <= result.getSize())
                 result = PreviewSizes.ORIGINAL;
         }
         if (result == PreviewSizes.PREVIEW2 && prev2size == 0) {
             result = PreviewSizes.PREVIEW1;
-            if (width < result.getSize() || height < result.getSize())
+            if (width <= result.getSize() || height <= result.getSize())
                 result = PreviewSizes.ORIGINAL;
         }
         if (result == PreviewSizes.PREVIEW1 && prev1size == 0)

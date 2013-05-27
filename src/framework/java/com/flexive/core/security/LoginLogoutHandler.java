@@ -82,7 +82,7 @@ public final class LoginLogoutHandler {
         boolean success = false;
         try {
             // Actually logged in?
-            UserTicket ticket = UserTicketStore.getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             final boolean calledAsSupervisor = ticket.isGlobalSupervisor();
             if (!ticket.isGuest()) {
                 doLogout();

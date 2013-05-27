@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.flexive</groupId>
+        <artifactId>flexive-modules-parent</artifactId>
+        <version>3.1-SNAPSHOT</version>
+        <relativePath>../../flexive-modules-parent</relativePath>
+    </parent>
+
+    <groupId>com.flexive.standalone</groupId>
+    <artifactId>flexive-rest-api-standalone</artifactId>
+    <packaging>war</packaging>
+    <name>[fleXive] REST API Standalone WAR</name>
+
+    <properties>
+        <jackson.version>2.1.4</jackson.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-shared</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-ejb-interfaces-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb</artifactId>
+            <type>ejb</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-ejb-interfaces-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-rest-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb-interfaces-local</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-web-shared</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-rest-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>6.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <finalName>flexive-api-v1</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

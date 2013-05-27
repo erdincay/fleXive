@@ -36,6 +36,7 @@ import com.flexive.shared.FxLock;
 import com.flexive.shared.FxLockType;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
+import com.flexive.shared.value.BinaryDescriptor;
 
 import javax.ejb.Remote;
 import java.util.List;
@@ -258,6 +259,17 @@ public interface ContentEngine {
      * @return metadata
      */
     String getBinaryMetaData(long id);
+
+    /**
+     * Load a binary descriptor (only allowed for global supervisor!).
+     *
+     *
+     * @param id         the binary ID
+     * @return  the binary descriptor
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    BinaryDescriptor getBinaryDescriptor(long id) throws FxApplicationException;
 
     /**
      * Import a content from XML

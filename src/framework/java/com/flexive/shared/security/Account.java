@@ -86,6 +86,8 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
     protected boolean allowMultiLogin = false;
     protected String updateToken;
     protected LifeCycleInfo lifeCycleInfo = null;
+    protected String restToken;
+    protected long restTokenExpires;
 
     public Account() {
         /* empty constructor */
@@ -95,7 +97,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
                    String email, FxLanguage language, boolean active,
                    boolean validated, Date validFrom, Date validTo, long defaultNode,
                    String description, long contactDataId, boolean allowMultiLogin,
-                   String updateToken, LifeCycleInfo lifeCycleInfo) {
+                   String updateToken, String restToken, long restTokenExpires, LifeCycleInfo lifeCycleInfo) {
         this.name = name;
         this.loginName = loginName;
         this.id = id;
@@ -112,12 +114,15 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
         this.allowMultiLogin = allowMultiLogin;
         this.updateToken = updateToken;
         this.lifeCycleInfo = lifeCycleInfo;
+        this.restToken = restToken;
+        this.restTokenExpires = restTokenExpires;
     }
 
     public Account(Account other) {
         this(other.id, other.name, other.loginName, other.mandatorId, other.email, other.language,
                 other.active, other.validated, other.validFrom, other.validTo, other.defaultNodeId,
-                other.description, other.contactDataId, other.allowMultiLogin, other.updateToken, other.lifeCycleInfo);
+                other.description, other.contactDataId, other.allowMultiLogin, other.updateToken,
+                other.restToken, other.restTokenExpires, other.lifeCycleInfo);
     }
 
     /**
@@ -327,6 +332,30 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      */
     public LifeCycleInfo getLifeCycleInfo() {
         return lifeCycleInfo;
+    }
+
+    /**
+     * @return the REST API token
+     * @since 3.1.7
+     */
+    public String getRestToken() {
+        return restToken;
+    }
+
+    /**
+     * @return the REST API token expiry timestamp
+     * @since 3.1.7
+     */
+    public long getRestTokenExpires() {
+        return restTokenExpires;
+    }
+
+    /**
+     * @return  true when the REST API token expired
+     * @since 3.1.7
+     */
+    public boolean isRestTokenExpired() {
+        return restTokenExpires < System.currentTimeMillis();
     }
 
     public AccountEdit asEditable() {

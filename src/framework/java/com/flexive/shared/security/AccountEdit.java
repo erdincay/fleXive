@@ -2,8 +2,8 @@ package com.flexive.shared.security;
 
 import com.flexive.shared.FxLanguage;
 
-import java.util.Date;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * An editable account wrapper implementation. Use this class for creating new accounts
@@ -117,6 +117,16 @@ public class AccountEdit extends Account {
 
     public AccountEdit setAllowMultiLogin(boolean bAllowMultiLogin) {
         this.allowMultiLogin = bAllowMultiLogin;
+        return this;
+    }
+
+    public AccountEdit setRestToken(String token) {
+        this.restToken = token;
+        return this;
+    }
+
+    public AccountEdit setRestTokenExpires(long timestamp) {
+        this.restTokenExpires = timestamp;
         return this;
     }
 }

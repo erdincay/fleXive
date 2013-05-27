@@ -418,6 +418,17 @@ public interface ContentStorage {
     String getBinaryMetaData(Connection con, long binaryId);
 
     /**
+     * Load a binary descriptor
+     *
+     * @param con      an open and valid connection
+     * @param binaryId id of the binary
+     * @return         the binary descriptor
+     * @throws FxDbException on database errors
+     * @since 3.1.7
+     */
+    BinaryDescriptor getBinaryDescriptor(Connection con, long binaryId) throws FxDbException;
+
+    /**
      * Convert all versions of the content type. If the source is in the flatstorage, the converted destination assignments
      * will also be automatically commited to the flatstorage
      *

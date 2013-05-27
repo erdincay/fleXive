@@ -10,6 +10,7 @@
 
     <modules>
         <module>flexive-backend-standalone</module>
-  </modules>
+        <module>flexive-rest-api-standalone</module>
+    </modules>
 
 </project>

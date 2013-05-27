@@ -99,7 +99,12 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
     /**
      * may login to the backend (does not imply any rights)
      */
-    BackendAccess((byte) 10, "Backend Access", "#00AA00"),;
+    BackendAccess((byte) 10, "Backend Access", "#00AA00"),
+
+    /**
+     * may access the REST-API via tokens
+     */
+    RestApiAccess((byte) 11, "REST-API Access", "#00AA00");
 
     private static final long serialVersionUID = -8561324370315868526L;
 

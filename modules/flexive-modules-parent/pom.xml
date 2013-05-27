@@ -6,6 +6,9 @@
         <flexive.version>3.1-SNAPSHOT</flexive.version>
         <slf4j.version>1.5.6</slf4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Jackson version for JSON processing -->
+        <jackson.version>2.1.4</jackson.version>
     </properties>
 
     <groupId>com.flexive</groupId>
@@ -93,6 +96,23 @@
                 <version>${flexive.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-rest-api</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-rest-shared</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-rest-client</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
@@ -103,13 +123,20 @@
             <dependency>
                 <groupId>org.apache.maven.surefire</groupId>
                 <artifactId>surefire</artifactId>
-                <version>2.13</version>
+                <version>2.14</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.maven.surefire</groupId>
                 <artifactId>surefire-junit4</artifactId>
-                <version>2.13</version>
+                <version>2.14</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>6.8</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -147,6 +174,11 @@
                 <version>${slf4j.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-modules-resources</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -155,13 +187,60 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
+                <version>3.1</version>
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
+
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+
+                    <compilerArgs>
+                        <arg>-Xlint</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+                License plugin to set the headers for .java source files.
 
+                To check for valid license headers:
+                mvn license:check
+
+                To update the licenses in all source files:
+                mvn license:format
+            -->
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+               	<artifactId>maven-license-plugin</artifactId>
+               	<version>1.9.0</version>
+                <configuration>
+                    <header>fxModules-license.txt</header>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <strictCheck>true</strictCheck>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.flexive</groupId>
+                        <artifactId>flexive-modules-resources</artifactId>
+                        <version>${flexive.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -170,6 +249,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.14</version>
                     <configuration>
                         <systemProperties>
                             <property>
@@ -222,6 +302,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-modules-resources</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -291,8 +376,7 @@
         <repository>
             <id>maven-dev-repository.dev.java.net</id>
             <name>Java.net Dev Repository for Maven</name>
-            <url>http://download.java.net/maven/1/</url>
-            <layout>legacy</layout>
+            <url>http://maven.java.net/content/groups/public</url>
             <snapshots>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
@@ -323,7 +407,7 @@
 
     <distributionManagement>
         <repository>
-            <id>local</id>
+            <id>local-custom</id>
             <name>Local repository</name>
             <url>file://${local-repo}</url>
             <uniqueVersion>false</uniqueVersion>

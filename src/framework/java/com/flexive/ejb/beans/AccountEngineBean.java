@@ -32,11 +32,13 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.security.FxDBAuthentication;
 import com.flexive.core.security.LoginLogoutHandler;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.security.UserTicketStore;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
@@ -78,6 +80,16 @@ import static com.flexive.core.DatabaseConst.*;
 public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
     private static final Log LOG = LogFactory.getLog(AccountEngineBean.class);
+
+    /**
+     * REST token expiry time
+     */
+    private static final int REST_TOKEN_EXPIRY = 60 * 60 * 1000;    // 60 minutes
+    /**
+     * REST API token length
+     */
+    private static final int REST_TOKEN_LENGTH = 64;
+
     @Resource
     javax.ejb.SessionContext ctx;
 
@@ -168,8 +180,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     "ID,EMAIL,CONTACT_ID,MANDATOR,VALID_FROM,VALID_TO,DESCRIPTION,USERNAME,LOGIN_NAME," +
                     //10     ,  11        ,   12       ,    13    14          15         16
                     "IS_ACTIVE,IS_VALIDATED,LANG,ALLOW_MULTILOGIN,UPDATETOKEN,CREATED_BY,CREATED_AT," +
-                    //17         18
-                    "MODIFIED_BY,MODIFIED_AT FROM " + TBL_ACCOUNTS +
+                    //17         18          19         20
+                    "MODIFIED_BY,MODIFIED_AT,REST_TOKEN,REST_EXPIRES FROM " + TBL_ACCOUNTS +
                     " WHERE " +
                     (loginName != null
                             ? "UPPER(LOGIN_NAME)='" + loginName.toUpperCase() + "'"
@@ -198,9 +210,12 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             FxLanguage lang = language.load(rs.getInt(12));
             boolean bAllowMultiLogin = rs.getBoolean(13);
             String updateToken = rs.getString(14);
+            String restToken = rs.getString(19);
+            long restExpires = rs.getLong(20);
             Account ad = new Account(id, name, _loginName, mandator, email,
                     lang, active, validated, validFrom, validTo, -1,
                     description, contactDataId, bAllowMultiLogin, updateToken,
+                    restToken, restExpires,
                     LifeCycleInfoImpl.load(rs, 15, 16, 17, 18));
             if (LOG.isDebugEnabled()) LOG.debug(ad.toString());
             return ad;
@@ -1091,10 +1106,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     boolean validated = rs.getBoolean(12);
                     boolean multiLogin = rs.getBoolean(13);
                     String updateToken = rs.getString(14);
+                    String restToken = rs.getString(19);
+                    long restTokenExpires = rs.getLong(20);
 
                     alResult.add(new Account(id, _name, _loginName, mandator, _email,
                             lang, active, validated, validFrom, validTo, -1,
                             description, contactDataId, multiLogin, updateToken,
+                            restToken, restTokenExpires,
                             LifeCycleInfoImpl.load(rs, 15, 16, 17, 18)));
                 }
             }
@@ -1177,7 +1195,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                                 //   12               13                   14
                                 "usr.IS_VALIDATED,usr.ALLOW_MULTILOGIN,usr.UPDATETOKEN," +
                                 //   15             16             17              18
-                                "usr.CREATED_BY,usr.CREATED_AT,usr.MODIFIED_BY,usr.MODIFIED_AT") +
+                                "usr.CREATED_BY,usr.CREATED_AT,usr.MODIFIED_BY,usr.MODIFIED_AT," +
+                                // 19           20
+                                "usr.REST_TOKEN,usr.REST_EXPIRES") +
                 " FROM " + TBL_ACCOUNTS + " usr WHERE ID!=" + Account.NULL_ACCOUNT + " " +
                 ((_mandatorId == -1) ? "" : " AND (usr.MANDATOR=" + _mandatorId + " OR usr.ID<=" + Account.USER_GLOBAL_SUPERVISOR + ")") +
                 ((name != null && name.length() > 0) ? " AND UPPER(usr.USERNAME) LIKE '%" + name + "%'" : "") +
@@ -1625,6 +1645,94 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
         } finally {
             FxContext.get().stopRunAsSystem();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String generateRestToken() throws FxApplicationException {
+        final UserTicket ticket = FxContext.getUserTicket();
+
+        if (ticket.isGuest()) {
+            throw new FxUpdateException("ex.account.rest.generate.guest");
+        }
+
+        if (!ticket.isInRole(Role.RestApiAccess)) {
+            throw new FxNoAccessException("ex.account.rest.generate.role", ticket.getLoginName(), Role.RestApiAccess.getName());
+        }
+
+        Connection con = null;
+        PreparedStatement stmt = null;
+        final DBStorage storage = StorageManager.getStorageImpl();
+        try {
+            con = Database.getDbConnection();
+            stmt = con.prepareStatement("UPDATE " + DatabaseConst.TBL_ACCOUNTS + " SET REST_TOKEN=?, REST_EXPIRES=? WHERE ID=?");
+
+            final String token = RandomStringUtils.randomAlphanumeric(REST_TOKEN_LENGTH);
+            stmt.setString(1, token);
+            stmt.setLong(2, System.currentTimeMillis() + REST_TOKEN_EXPIRY);
+            stmt.setLong(3, ticket.getUserId());
+
+            stmt.executeUpdate();
+
+            return token;
+        } catch (SQLException e) {
+            if (storage.isUniqueConstraintViolation(e)) {
+                // try again
+                Database.closeObjects(AccountEngineBean.class, con, stmt);
+                generateRestToken();
+            }
+            throw new FxDbException(e);
+        } finally {
+            Database.closeObjects(AccountEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void loginByRestToken(String token) throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+
+        if (token == null || token.length() != REST_TOKEN_LENGTH) {
+            throw new FxInvalidParameterException("token", "ex.account.rest.token.invalid", token);
+        }
+
+        try {
+            con = Database.getDbConnection();
+            stmt = con.prepareStatement("SELECT LOGIN_NAME, REST_EXPIRES FROM " + DatabaseConst.TBL_ACCOUNTS + " WHERE REST_TOKEN=?");
+            stmt.setString(1, token);
+
+            final ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                final String loginName = rs.getString(1);
+                final long expires = rs.getLong(2);
+                if (expires < System.currentTimeMillis()) {
+                    throw new FxRestApiTokenExpiredException(token);
+                }
+
+                // request-only "login" (not tracked, just replace the user ticket)
+                FxContext.startRunningAsSystem();
+                try {
+                    FxContext.get().overrideTicket(
+                            UserTicketStore.getUserTicket(loginName)
+                    );
+                } finally {
+                    FxContext.stopRunningAsSystem();
+                }
+            } else {
+                // token invalid (or overwritten by a new token)
+                throw new FxRestApiTokenExpiredException(token);
+            }
+        } catch (SQLException e) {
+            throw new FxDbException(e);
+        } finally {
+            Database.closeObjects(AccountEngineBean.class, con, stmt);
         }
     }
 

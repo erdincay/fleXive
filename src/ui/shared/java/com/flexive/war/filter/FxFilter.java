@@ -43,23 +43,36 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxExceptionMessage;
 import com.flexive.shared.mbeans.MBeanHelper;
 import com.flexive.shared.media.impl.FxMimeType;
+import com.google.common.collect.Sets;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.quartz.SchedulerException;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.quartz.SchedulerException;
 
 /**
  * The main [fleXive] servlet filter. Its main responsibility is to provide the
  * {@link FxContext} instance for the current request, which can be retrieved with
  * {@link com.flexive.shared.FxContext#get()} any time during a request made through FxFilter.
+ *
+ * <p>
+ *     Init parameters:
+ * </p>
+ *
+ * <ul>
+ *     <li><strong>excludedPaths</strong>: a list of path prefixes separated by semicolons that will completely bypass the filter (useful
+ *     since FxFilter is often mapped with wide "catch-all" patterns, e.g. "/*")</li>
+ * </ul>
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -76,9 +89,11 @@ public class FxFilter implements Filter {
     private static final Object JSON_RPC_LOCK = new Object();
 
     private static final ConcurrentMap<Integer, Boolean> DIVISION_SERVICES = new ConcurrentHashMap<Integer, Boolean>();
+    private static final String PARAM_EXCLUDED_PATHS = "excludedPaths";
 
-    private String FILESYSTEM_WAR_ROOT = null;
-    private FilterConfig config = null;
+    private String FILESYSTEM_WAR_ROOT;
+    private FilterConfig config;
+    private Set<String> excludedPaths;
 
     /**
      * Returns the root of the war directory on the filesystem.
@@ -94,6 +109,14 @@ public class FxFilter implements Filter {
         // Get the war deployment directory root on the server file system
         // Eg. "/opt/jboss-4.0.3RC1/server/default/./tmp/deploy/tmp52986Demo.ear-contents/web.war/"
         this.FILESYSTEM_WAR_ROOT = filterConfig.getServletContext().getRealPath("/");
+
+        final String excluded = config.getInitParameter(PARAM_EXCLUDED_PATHS);
+        if (StringUtils.isNotBlank(excluded)) {
+            this.excludedPaths = Sets.newHashSet(StringUtils.split(excluded, ";'"));
+            LOG.info("Excluded paths from FxFilter: " + this.excludedPaths);
+        } else {
+            this.excludedPaths = Collections.emptySet();
+        }
     }
 
     public void destroy() {
@@ -165,6 +188,20 @@ public class FxFilter implements Filter {
         if (divisionId == FxContext.DIV_UNDEFINED) {
             return;
         }
+
+        // check excluded paths
+        if (!excludedPaths.isEmpty()) {
+            final HttpServletRequest outerRequest = (HttpServletRequest) servletRequest;
+            final String path = outerRequest.getRequestURI().substring(outerRequest.getContextPath().length());
+            for (String excluded : excludedPaths) {
+                if (path.startsWith(excluded)) {
+                    // skip FxFilter processing, proceed in filter chain
+                    filterChain.doFilter(servletRequest, servletResponse);
+                    return;
+                }
+            }
+        }
+
         try {
             // Generate a FlexRequestWrapper which stores additional informations
             final FxRequestWrapper request = servletRequest instanceof FxRequestWrapper
@@ -368,7 +405,7 @@ public class FxFilter implements Filter {
         // use global JSON/RPC bridge
     }
 
-    private int getDivisionId(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
+    static int getDivisionId(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
         int divisionId = FxRequestUtils.getDivision((HttpServletRequest) servletRequest);
         if (FxRequestUtils.getCookie((HttpServletRequest) servletRequest, FxSharedUtils.COOKIE_FORCE_TEST_DIVISION) != null) {
             if (LOG.isDebugEnabled()) {

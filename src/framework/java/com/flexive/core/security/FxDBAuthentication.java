@@ -332,7 +332,7 @@ public final class FxDBAuthentication {
             final String hashedPass = rs.getString(3);
 
             // current user authorised to perform the check (ticket user id matches db user id?)
-            if (id != currentTicket.getUserId())
+            if (id != currentTicket.getUserId() && !currentTicket.isGlobalSupervisor())
                 throw new FxLoginFailedException("User not authorized to perform login check", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
 
             return FxSharedUtils.hashPassword(id, dbUserName, password).equals(hashedPass)

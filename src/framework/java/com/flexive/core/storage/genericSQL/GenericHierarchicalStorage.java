@@ -2090,6 +2090,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public BinaryDescriptor getBinaryDescriptor(Connection con, long binaryId) throws FxDbException {
+        return binaryStorage.loadBinaryDescriptor(null, con, binaryId);
+    }
+
+    /**
      * Helper method to add a value of a detail entry with a given XPath to the instance being loaded
      *
      * @param root       the root group

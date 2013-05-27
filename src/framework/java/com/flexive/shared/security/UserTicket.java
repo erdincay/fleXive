@@ -165,6 +165,7 @@ public interface UserTicket extends Serializable {
     /**
      * Returns the application id the ticket belongs to.
      *
+     *
      * @return the application id the ticket belongs to
      */
     String getApplicationId();

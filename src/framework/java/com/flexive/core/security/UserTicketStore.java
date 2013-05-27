@@ -31,7 +31,11 @@
  ***************************************************************/
 package com.flexive.core.security;
 
-import com.flexive.shared.*;
+import com.flexive.core.structure.StructureLoader;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
@@ -40,10 +44,9 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import com.flexive.shared.security.*;
-import com.flexive.core.structure.StructureLoader;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.ArrayUtils;
 
 import javax.security.auth.Subject;
 import java.util.ArrayList;
@@ -221,10 +224,6 @@ public class UserTicketStore {
                     FxDefaultLogin.updateUserTicket(sub, ticket);
                     storeSubject(sub);
                 }
-            }
-            // Return ticket with system permissions if a runAsSystem flag is set
-            if (si.getRunAsSystem() && !ticket.isGlobalSupervisor()) {
-                ticket = ticket.cloneAsGlobalSupervisor();
             }
             return ticket;
         } catch (Exception exc) {

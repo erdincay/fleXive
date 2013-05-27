@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         version="3.0">
+
+    <servlet>
+        <servlet-name>com.flexive.rest.FxRestApiApplication</servlet-name>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>com.flexive.rest.FxRestApiApplication</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>flexive-rest</filter-name>
+        <filter-class>com.flexive.war.filter.FxBasicFilter</filter-class>
+
+        <!--
+            allowGuestAccess: to disable guest access (access without token) set this parameter to false
+        -->
+        <init-param>
+            <param-name>allowGuestAccess</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>flexive-rest</filter-name>
+        <servlet-name>com.flexive.rest.FxRestApiApplication</servlet-name>
+    </filter-mapping>
+
+</web-app>

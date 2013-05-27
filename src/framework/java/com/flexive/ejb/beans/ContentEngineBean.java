@@ -977,6 +977,26 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public BinaryDescriptor getBinaryDescriptor(long id) throws FxApplicationException {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
+            throw new FxNoAccessException("ex.content.type.getAll.noPermission");
+        }
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            return StorageManager.getContentStorage(TypeStorageMode.Hierarchical).getBinaryDescriptor(con, id);
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxContent importContent(String xml, boolean newInstance) throws FxApplicationException {
         FxContent co;
         try {

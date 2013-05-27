@@ -31,27 +31,25 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
-import static com.flexive.tests.embedded.FxTestUtils.*;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
-import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Date;
 import java.util.List;
+
+import static com.flexive.tests.embedded.FxTestUtils.*;
+import static org.testng.Assert.*;
 
 /**
  * Account test cases.
@@ -114,7 +112,7 @@ public class AccountTest {
     /**
      * Try to create an account with an activation date set in the past.
      *
-     * @throws Exception if an error occured
+     * @throws Exception if an error occurred
      */
     @Test
     public void createPastAccount() throws Exception {
@@ -468,6 +466,75 @@ public class AccountTest {
             final String dbHash = accountEngine.getPasswordHash(user.getUserId());
             assertEquals(dbHash, FxSharedUtils.hashPassword(COUNT, user.getUserName(), user.getPassword()),
                     "DB hash does not match computed hash");
+        } finally {
+            login(TestUsers.SUPERVISOR);
+        }
+    }
+
+    @Test
+    public void restApiAccountTest() throws FxLogoutFailedException, FxLoginFailedException, FxAccountInUseException, FxApplicationException {
+        try {
+            login(TestUsers.SUPERVISOR);
+            final long accountId = createAccount(0, 1, true, true);
+            Account account = accountEngine.load(accountId);
+
+            FxContext.startRunningAsSystem();
+            try {
+                logout();
+                FxContext.get().login(account.getLoginName(), "unknown", true);
+                accountEngine.addRole(accountId, Role.AccountManagement.getId());
+            } finally {
+                FxContext.stopRunningAsSystem();
+            }
+
+            assertEquals(account.getRestToken(), null);
+            assertEquals(account.getRestTokenExpires(), 0);
+
+            try {
+                accountEngine.generateRestToken();
+                fail("User without REST-API role should not be allowed to create tokens");
+            } catch (FxNoAccessException e) {
+                // pass
+            }
+
+            FxContext.startRunningAsSystem();
+            try {
+                accountEngine.addRole(accountId, Role.RestApiAccess.getId());
+            } finally {
+                FxContext.stopRunningAsSystem();
+            }
+
+            final String token = accountEngine.generateRestToken();
+            assertEquals(token.length(), 64);
+
+            account = accountEngine.load(accountId);
+            assertTrue(account.getRestTokenExpires() > 0);
+            assertFalse(account.isRestTokenExpired());
+
+            logout();
+
+            // try to login via the REST-API login call
+            assertTrue(FxContext.getUserTicket().isGuest());
+
+            try {
+                accountEngine.loginByRestToken("123");
+                fail("Invalid token format not recognized");
+            } catch (FxInvalidParameterException e) {
+                // pass
+            }
+
+            try {
+                accountEngine.loginByRestToken(RandomStringUtils.randomAlphanumeric(64));
+                fail("Invalid/expired token should have been rejected");
+            } catch (FxRestApiTokenExpiredException e) {
+                // pass
+            }
+
+            assertTrue(FxContext.getUserTicket().isGuest());
+            accountEngine.loginByRestToken(token);
+            assertEquals(FxContext.getUserTicket().getLoginName(), account.getLoginName());
+
+            accountEngine.remove(accountId);
         } finally {
             login(TestUsers.SUPERVISOR);
         }

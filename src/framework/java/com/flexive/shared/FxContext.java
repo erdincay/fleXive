@@ -293,9 +293,11 @@ public class FxContext implements Serializable {
      * @param request    the request
      * @param divisionId the division
      * @param isWebdav   true if this is an webdav request
+     * @param forceSession
      */
-    private FxContext(HttpServletRequest request, int divisionId, boolean isWebdav) {
-        this.sessionID = request.getSession().getId();
+    private FxContext(HttpServletRequest request, int divisionId, boolean isWebdav, boolean forceSession) {
+        final HttpSession session = request.getSession(forceSession);
+        this.sessionID = session != null ? session.getId() : null;
         this.requestURI = request.getRequestURI();
         this.contextPath = request.getContextPath();
         this.serverName = request.getServerName();
@@ -306,7 +308,7 @@ public class FxContext implements Serializable {
             // Cut away servlet path, eg. "/webdav/"
             this.requestUriNoContext = this.requestUriNoContext.substring(request.getServletPath().length());
         }
-        this.globalAuthenticated = request.getSession().getAttribute(ADMIN_AUTHENTICATED) != null;
+        this.globalAuthenticated = session != null && session.getAttribute(ADMIN_AUTHENTICATED) != null;
         //get the real remote host incase a proxy server is used
         Object tmp = request.getHeader("x-forwarded-for");
         if (tmp != null && !StringUtils.isBlank(String.valueOf(tmp)))
@@ -725,8 +727,7 @@ public class FxContext implements Serializable {
      * @return FxContext
      */
     public static FxContext storeInfos(HttpServletRequest request, boolean dynamicContent, int divisionId, boolean isWebdav) {
-        FxContext si = new FxContext(request, divisionId, isWebdav);
-        setThreadLocal(si);
+        FxContext si = storeEmptyContext(request, divisionId, isWebdav, true);
         // Do user ticket retrieval and store it in the threadlocal
         final HttpSession session = request.getSession();
         if (session.getAttribute(SESSION_DIVISIONID) == null) {
@@ -774,6 +775,23 @@ public class FxContext implements Serializable {
                 si.setTicket(getTicketFromEJB(session));
             }
         }
+        setThreadLocal(si);
+        return si;
+    }
+
+    /**
+     * Set an empty FxContext instance for the current request.
+     *
+     *
+     * @param request       the servlet request
+     * @param divisionId    the division ID
+     * @param isWebdav      true for WebDAV requests (currently not used)
+     * @param forceSession  whether a HTTP session should be created when none exists
+     * @return the context
+     * @since 3.1.7
+     */
+    public static FxContext storeEmptyContext(HttpServletRequest request, int divisionId, boolean isWebdav, boolean forceSession) {
+        FxContext si = new FxContext(request, divisionId, isWebdav, forceSession);
         setThreadLocal(si);
         return si;
     }
