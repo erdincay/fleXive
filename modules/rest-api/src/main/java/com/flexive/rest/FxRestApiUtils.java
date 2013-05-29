@@ -109,7 +109,11 @@ public class FxRestApiUtils {
     public static void applyRequestParameters(HttpHeaders headers, UriInfo uriInfo) throws FxApplicationException {
         final MultivaluedMap<String,String> queryParameters = uriInfo.getQueryParameters(true);
 
-        FxContext.get().setAttribute(CTX_REQUEST, new RequestContext(headers, uriInfo));
+        if (FxContext.get().getAttribute(CTX_REQUEST) == null) {
+            // set context for the first request only, subsequent JAX-RS handler invocations in this request
+            // should reuse the existing context
+            FxContext.get().setAttribute(CTX_REQUEST, new RequestContext(headers, uriInfo));
+        }
 
         // get access token
         String token = queryParameters.getFirst(FxRestApiConst.HEADER_TOKEN);
@@ -179,7 +183,9 @@ public class FxRestApiUtils {
     public static class ResponseMapBuilder extends ConditionalMapBuilder<String, Object, ResponseMapBuilder> {
 
         public ResponseMapBuilder put(String key, FxValue value) {
-            put(key, ContentService.serializeValue(value, value.getBestTranslation()));
+            if (value != null) {
+                put(key, ContentService.serializeValue(value, value.getBestTranslation()));
+            }
             return this;
         }
 

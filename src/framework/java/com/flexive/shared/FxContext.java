@@ -310,11 +310,14 @@ public class FxContext implements Serializable {
         }
         this.globalAuthenticated = session != null && session.getAttribute(ADMIN_AUTHENTICATED) != null;
         //get the real remote host incase a proxy server is used
-        Object tmp = request.getHeader("x-forwarded-for");
-        if (tmp != null && !StringUtils.isBlank(String.valueOf(tmp)))
-            this.remoteHost = String.valueOf(tmp).replace("[", "").replace("]", "");
-        else
+        String forwardedFor = request.getHeader("x-forwarded-for");
+        if (forwardedFor != null && !StringUtils.isBlank(String.valueOf(forwardedFor))) {
+            final int clientSplit = forwardedFor.indexOf(',');
+            final String clientIp = clientSplit == -1 ? forwardedFor : forwardedFor.substring(0, clientSplit);
+            this.remoteHost = clientIp.replace("[", "").replace("]", "");
+        } else {
             this.remoteHost = request.getRemoteAddr();
+        }
         this.division = divisionId;
         initFormatters();
     }

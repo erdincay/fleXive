@@ -34,18 +34,15 @@ package com.flexive.war.filter;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.GlobalConfigurationEngine;
-
-import javax.ejb.EJBException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.ejb.EJBException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 public class FxRequestUtils {
@@ -152,9 +149,11 @@ public class FxRequestUtils {
      * @since           3.1
      */
     public static String getRemoteAddress(HttpServletRequest request) {
-        if (request.getHeader("x-forwarded-for") != null) {
-            // return forwarded client IP
-            return request.getHeader("x-forwarded-for");
+        final String forwardedFor = request.getHeader("x-forwarded-for");
+        if (forwardedFor != null) {
+            // return forwarded client IP (= first IP if multiple IPs are submitted)
+            final int clientSplit = forwardedFor.indexOf(',');
+            return clientSplit == -1 ? forwardedFor : forwardedFor.substring(0, clientSplit);
         } else {
             return request.getRemoteAddr();
         }
