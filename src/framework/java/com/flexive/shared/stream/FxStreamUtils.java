@@ -65,9 +65,9 @@ public class FxStreamUtils {
     private static final Log LOG = LogFactory.getLog(FxStreamUtils.class);
 
     /**
-     * 5 minutes default time to live
+     * 2 hours default time to live
      */
-    public final static long DEFAULT_TTL = 5 * 60 * 1000;
+    public final static long DEFAULT_TTL = 120 * 60 * 1000;
 
     /**
      * List of local servers
