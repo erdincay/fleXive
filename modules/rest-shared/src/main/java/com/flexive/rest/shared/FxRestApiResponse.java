@@ -44,8 +44,8 @@ import java.util.Map;
  */
 public class FxRestApiResponse {
 
-    private ResponseStatus status;
-    private Map<String, Object> body;
+    protected ResponseStatus status;
+    protected Map<String, Object> body;
 
     /**
      * No-arg constructor for deserialization only
@@ -53,7 +53,7 @@ public class FxRestApiResponse {
     public FxRestApiResponse() {
     }
 
-    private FxRestApiResponse(ResponseStatus status, Map<String, Object> body) {
+    protected FxRestApiResponse(ResponseStatus status, Map<String, Object> body) {
         this.body = body;
         this.status = status;
     }

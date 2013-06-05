@@ -78,6 +78,13 @@ public class FxRestApiUtils {
     private FxRestApiUtils() {
     }
 
+    /**
+     * @return  the response format as selected by the format query parameter.
+     */
+    public static ResponseFormat getResponseFormat() {
+        return getResponseFormat(getRequestContext().getUriInfo());
+    }
+
     public static ResponseFormat getResponseFormat(UriInfo uriInfo) {
         final String format = uriInfo.getQueryParameters(true).getFirst("format");
         return StringUtils.isBlank(format)
