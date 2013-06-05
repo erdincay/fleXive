@@ -43,13 +43,13 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.war.filter.FxBasicFilter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ws.rs.core.*;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -195,6 +195,71 @@ public class FxRestApiUtils {
             }
             return this;
         }
+
+
+        /**
+         * Put a collection value into the response. For XML formats an element name is supplied, to render
+         * something like "&lt;rows>&lt;row>...&lt;/row>&lt;row>...&lt;/row>...&lt;/rows>". In JSON this information
+         * is not used and the collection is written to the response directly.
+         *
+         * @param key         the collection name
+         * @param values      all values
+         * @param elemName    the name of an element for XML
+         * @return
+         */
+        public ResponseMapBuilder put(String key, Collection<?> values, String elemName) {
+            putAll(processCollection(values, key, elemName));
+            return this;
+        }
+
+        /**
+         * @see #put(String, java.util.Collection, String)
+         */
+        public <T> ResponseMapBuilder put(String key, T[] values, String elemName) {
+            putAll(processCollection(Arrays.asList(values), key, elemName));
+            return this;
+        }
+
+        public ResponseMapBuilder putTable(String key, Object[][] data, String rowElemName, String colElemName) {
+            if (FxRestApiUtils.getResponseFormat() == ResponseFormat.JSON) {
+                return put(key, data);
+            } else {
+                return put(key, processResultRows(data, rowElemName, colElemName));
+            }
+        }
+
+
+        private static Map<String, ?> processResultRows(Object[][] rows, String rowElemName, String colElemName) {
+            final List<Object> result = Lists.newArrayListWithCapacity(rows.length);
+            for (Object[] row : rows) {
+                result.add(ImmutableMap.of(colElemName, row));
+            }
+            return ImmutableMap.of(rowElemName, result);
+        }
+
+        private static <T> Map<String, ?> processCollection(T[] values, String name, String elemName) {
+            return processCollection(Arrays.asList(values), name, elemName);
+        }
+
+        private static Map<String, ?> processCollection(Collection<?> values, String name, String elemName) {
+            switch (FxRestApiUtils.getResponseFormat()) {
+                case XML:
+                    // wrap dynamic entries in new elements for a cleaner XML representations
+                    final List<Object> rows = Lists.newArrayListWithCapacity(values.size());
+                    for (Object value : values) {
+                        if (value == null) {
+                            rows.add(null);
+                        } else {
+                            rows.add(ImmutableMap.of(elemName, value));
+                        }
+                    }
+                    return ImmutableMap.of(name, ImmutableMap.of(elemName, values));
+                default:
+                    // JSON and other formats - no further processing
+                    return ImmutableMap.of(name, values);
+            }
+        }
+
 
     }
 
