@@ -78,7 +78,7 @@ abstract class TreeService implements FxRestApiService {
         final FxTreeNode tree = EJBLookup.getTreeEngine().getTree(mode, id, Integer.MAX_VALUE);
 
         return FxRestApiResponse.ok(
-                ImmutableMap.of("root", serializeTreeNode(tree))
+                ImmutableMap.of("node", serializeTreeNode(tree))
         );
     }
 
@@ -93,7 +93,7 @@ abstract class TreeService implements FxRestApiService {
                 ))
                 .put("path", node.getPath())
                 .put("parentId", node.getParentNodeId())
-                .put("children", Lists.transform(node.getChildren(), FN_SERIALIZE))
+                .put("children", Lists.transform(node.getChildren(), FN_SERIALIZE), "node")
                 .build();
     }
 

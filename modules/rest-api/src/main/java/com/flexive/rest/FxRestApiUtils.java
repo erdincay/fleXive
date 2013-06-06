@@ -49,7 +49,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ws.rs.core.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -116,7 +119,7 @@ public class FxRestApiUtils {
     public static void applyRequestParameters(HttpHeaders headers, UriInfo uriInfo) throws FxApplicationException {
         final MultivaluedMap<String,String> queryParameters = uriInfo.getQueryParameters(true);
 
-        if (FxContext.get().getAttribute(CTX_REQUEST) == null) {
+        if (!isRequestContextAvailable()) {
             // set context for the first request only, subsequent JAX-RS handler invocations in this request
             // should reuse the existing context
             FxContext.get().setAttribute(CTX_REQUEST, new RequestContext(headers, uriInfo));
@@ -163,6 +166,10 @@ public class FxRestApiUtils {
         return requestContext;
     }
 
+    static boolean isRequestContextAvailable() {
+        return FxContext.get().getAttribute(CTX_REQUEST) != null;
+    }
+
     private static class RequestContext {
         private final UriInfo uriInfo;
         private final HttpHeaders httpHeaders;
@@ -207,16 +214,16 @@ public class FxRestApiUtils {
          * @param elemName    the name of an element for XML
          * @return
          */
-        public ResponseMapBuilder put(String key, Collection<?> values, String elemName) {
-            putAll(processCollection(values, key, elemName));
+        public ResponseMapBuilder put(String key, Iterable<?> values, String elemName) {
+            putAll(processIterable(values, key, elemName));
             return this;
         }
 
         /**
-         * @see #put(String, java.util.Collection, String)
+         * @see #put(String, Iterable, String)
          */
         public <T> ResponseMapBuilder put(String key, T[] values, String elemName) {
-            putAll(processCollection(Arrays.asList(values), key, elemName));
+            putAll(processIterable(Arrays.asList(values), key, elemName));
             return this;
         }
 
@@ -237,15 +244,17 @@ public class FxRestApiUtils {
             return ImmutableMap.of(rowElemName, result);
         }
 
-        private static <T> Map<String, ?> processCollection(T[] values, String name, String elemName) {
-            return processCollection(Arrays.asList(values), name, elemName);
+        private static <T> Map<String, ?> processArray(T[] values, String name, String elemName) {
+            return processIterable(Arrays.asList(values), name, elemName);
         }
 
-        private static Map<String, ?> processCollection(Collection<?> values, String name, String elemName) {
+        private static Map<String, ?> processIterable(Iterable<?> values, String name, String elemName) {
             switch (FxRestApiUtils.getResponseFormat()) {
                 case XML:
                     // wrap dynamic entries in new elements for a cleaner XML representations
-                    final List<Object> rows = Lists.newArrayListWithCapacity(values.size());
+                    final List<Object> rows = Lists.newArrayListWithCapacity(
+                            values instanceof List ? ((List) values).size() : 64
+                    );
                     for (Object value : values) {
                         if (value == null) {
                             rows.add(null);

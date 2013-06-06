@@ -36,15 +36,10 @@ import com.flexive.rest.shared.FxRestApiResponse;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.value.FxValue;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -74,12 +69,11 @@ public class FxSqlService implements FxRestApiService {
 
         final FxResultSet result = EJBLookup.getSearchEngine().search(query, 0, Integer.MAX_VALUE, null);
 
-        return FxRestApiResponse.ok(
-                ImmutableMap.of(
-                        "columns", result.getColumnNames(),
-                        "columnLabels", result.getColumnLabels(),
-                        "rows", Iterables.transform(result.getResultRows(), new ResultRowTransformer(result))
-                )
+        return FxRestApiResponse.ok(FxRestApiUtils.responseMapBuilder()
+                .put("columns", result.getColumnNames(), "column")
+                .put("columnLabels", result.getColumnLabels(), "columnLabel")
+                .putTable("rows", unwrapResult(result), "row", "col")
+                .build()
         );
     }
 
@@ -93,20 +87,13 @@ public class FxSqlService implements FxRestApiService {
         return uriInfo;
     }
 
-    private static class ResultRowTransformer implements Function<FxResultRow, Object> {
-        private final int columnCount;
-
-        private ResultRowTransformer(FxResultSet result) {
-            this.columnCount = result.getColumnCount();
-        }
-
-        public Object apply(@Nullable FxResultRow row) {
-            if (row == null) {
-                return null;
-            }
-            final Object[] rowResult = new Object[columnCount];
-            for (int i = 0; i < columnCount; i++) {
-                final Object rowValue = row.getValue(i + 1);
+    private static Object[][] unwrapResult(FxResultSet result) {
+        final Object[][] unwrapped = new Object[result.getRowCount()][];
+        int index = 0;
+        for (Object[] row : result.getRows()) {
+            final Object[] rowResult = new Object[row.length];
+            for (int i = 0; i < row.length; i++) {
+                final Object rowValue = row[i];
                 final Object serializedValue;
                 if (rowValue instanceof FxValue) {
                     final FxValue fxValue = (FxValue) rowValue;
@@ -119,7 +106,8 @@ public class FxSqlService implements FxRestApiService {
                 }
                 rowResult[i] = serializedValue;
             }
-            return rowResult;
+            unwrapped[index++] = rowResult;
         }
+        return unwrapped;
     }
 }

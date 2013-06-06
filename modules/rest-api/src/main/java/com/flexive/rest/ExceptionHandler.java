@@ -35,9 +35,12 @@ import com.flexive.rest.exceptions.GuestAccessDisabledException;
 import com.flexive.rest.shared.FxRestApiConst;
 import com.flexive.rest.shared.FxRestApiResponse;
 import com.flexive.shared.exceptions.FxRestApiTokenExpiredException;
+import com.flexive.war.filter.FxBasicFilter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -67,6 +70,22 @@ public class ExceptionHandler implements ExceptionMapper<Throwable> {
             response = FxRestApiResponse.error(throwable.getMessage());
         }
 
-        return FxRestApiUtils.buildResponse(response);
+        if (FxRestApiUtils.isRequestContextAvailable()) {
+            return FxRestApiUtils.buildResponse(response);
+        } else {
+            // no context available, so not a flexive API request or a missing/invalid path
+
+            // if a response format was explicitly requested via the format query parameter, use it
+            final String queryString = StringUtils.defaultString(FxBasicFilter.getRequestQueryString());
+            final Response.ResponseBuilder builder = Response.ok(response).status(Response.Status.INTERNAL_SERVER_ERROR);
+            if (queryString.contains("format=json")) {
+                builder.type(MediaType.APPLICATION_JSON_TYPE);
+            } else if (queryString.contains("format=xml")) {
+                builder.type(MediaType.APPLICATION_XML);
+            }
+
+            return builder.build();
+        }
+
     }
 }

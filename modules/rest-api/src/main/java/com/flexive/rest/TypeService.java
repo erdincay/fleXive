@@ -83,8 +83,8 @@ public class TypeService implements FxRestApiService {
         return FxRestApiResponse.ok(FxRestApiUtils.responseMapBuilder()
                 .put("name", type.getName())
                 .put("id", type.getId())
-                .put("assignments", buildAssignments(env, type))
-                .put("properties", buildProperties(env, type))
+                .put("assignments", buildAssignments(env, type), "assignment")
+                .put("properties", buildProperties(env, type), "property")
                 .build()
         );
     }
@@ -99,7 +99,7 @@ public class TypeService implements FxRestApiService {
         return uriInfo;
     }
 
-    private Object buildAssignments(FxEnvironment env, FxType type) {
+    private List<?> buildAssignments(FxEnvironment env, FxType type) {
         final List<FxAssignment> assignments = type.getAllAssignments();
         final List<Map<String, Object>> result = Lists.newArrayListWithCapacity(assignments.size());
         for (FxAssignment assignment : assignments) {
@@ -139,7 +139,7 @@ public class TypeService implements FxRestApiService {
         }
     }
 
-    private Object buildProperties(FxEnvironment env, FxType type) {
+    private List<?> buildProperties(FxEnvironment env, FxType type) {
         final Set<FxProperty> properties = Sets.newHashSet(Lists.transform(type.getAllProperties(), new Function<FxPropertyAssignment, FxProperty>() {
             @Override
             public FxProperty apply(@Nullable FxPropertyAssignment input) {
