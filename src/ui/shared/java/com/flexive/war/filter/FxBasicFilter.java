@@ -25,6 +25,8 @@ import java.io.IOException;
  */
 public class FxBasicFilter implements Filter {
     private static final String CTX_GUEST_ACCESS_ALLOWED = "FxBasicFilter.guestAllowed";
+    private static final String CTX_REQUEST_URI = "FxBasicFilter.uri";
+    private static final String CTX_REQUEST_QUERYSTRING = "FxBasicFilter.queryString";
 
     private volatile boolean guestAccessAllowed;
 
@@ -44,6 +46,8 @@ public class FxBasicFilter implements Filter {
 
         try {
             ctx.setAttribute(CTX_GUEST_ACCESS_ALLOWED, guestAccessAllowed);
+            ctx.setAttribute(CTX_REQUEST_URI, httpRequest.getRequestURI().substring(httpRequest.getContextPath().length()));
+            ctx.setAttribute(CTX_REQUEST_QUERYSTRING, httpRequest.getQueryString());
             filterChain.doFilter(request, servletResponse);
         } finally {
             FxContext.cleanup();
@@ -61,6 +65,20 @@ public class FxBasicFilter implements Filter {
      */
     public static boolean isGuestAccessAllowed() {
         return Boolean.TRUE == FxContext.get().getAttribute(CTX_GUEST_ACCESS_ALLOWED);
+    }
+
+    /**
+     * @return  the request URI (without context)
+     */
+    public static String getRequestUri() {
+        return (String) FxContext.get().getAttribute(CTX_REQUEST_URI);
+    }
+
+    /**
+     * @return  the query string
+     */
+    public static String getRequestQueryString() {
+        return (String) FxContext.get().getAttribute(CTX_REQUEST_QUERYSTRING);
     }
 
     public void destroy() {
