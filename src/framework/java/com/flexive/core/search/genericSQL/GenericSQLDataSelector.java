@@ -188,7 +188,10 @@ public class GenericSQLDataSelector extends DataSelector {
         }
         select.append("FROM (");
         select.append(buildSourceTable(values));
-        select.append(") ").append(FILTER_ALIAS).append(" ORDER BY 1");
+        select.append(") ").append(FILTER_ALIAS);
+        if (supportsRowNr()) {
+            select.append(" ORDER BY 1");
+        }
     }
 
     /**
@@ -204,11 +207,12 @@ public class GenericSQLDataSelector extends DataSelector {
 
         final Map<Integer, String> orderByNumbers = new HashMap<Integer, String>(); // order by index --> column select
         final List<String> columns = new ArrayList<String>();
+        final boolean noSort = orderByNumbers.isEmpty() && search.getParams().isNoInternalSort();
 
         // create select columns
         for (String column : INTERNAL_RESULTCOLS) {
             if ("rownr".equals(column)) {
-                if (supportsCounterAfterOrderBy()) {
+                if (supportsCounterAfterOrderBy() || noSort) {
                     columns.add(getCounterStatement(column));
                 }
             } else {
@@ -245,29 +249,38 @@ public class GenericSQLDataSelector extends DataSelector {
                 "WHERE search_id=" + search.getSearchId() + " AND " + FILTER_ALIAS + ".tdef=t.id " +
                 typeFilter + " "));
 
-        if (orderByNumbers.size() == 0) {
-            // No order by specified = order by id and version
-            int idCol = supportsCounterAfterOrderBy() ? 2 : 1;
-            orderByNumbers.put(1, idCol + " asc");
-            orderByNumbers.put(2, (idCol + 1) + " asc");
-        }
-        sql.append("ORDER BY ");
-        // insert order by columns in the order they were defined in the FxSQL query
-        for (Integer index : new TreeSet<Integer>(orderByNumbers.keySet())) {
-            sql.append(orderByNumbers.get(index)).append(',');
-        }
-        sql.setCharAt(sql.length() - 1, ' ');   // replace last separator
+        final boolean usePaging = search.getStartIndex() > 0 || search.getFetchRows() < Integer.MAX_VALUE;
 
-        if (!supportsCounterAfterOrderBy()) {
-            // insert outer SELECT
-            sql.insert(0, "SELECT " + getCounterStatement("rownr") + ", x.* FROM (");
-            sql.append(") x ");
+        if (noSort) {
+            if (usePaging) {
+                LOG.warn("Paging is disabled because noInternalSort was specified");
+            }
+        } else {
+            if (orderByNumbers.size() == 0) {
+                // No order by specified = order by id and version
+                int idCol = supportsCounterAfterOrderBy() ? 2 : 1;
+                orderByNumbers.put(1, idCol + " asc");
+                orderByNumbers.put(2, (idCol + 1) + " asc");
+            }
+            sql.append("ORDER BY ");
+            // insert order by columns in the order they were defined in the FxSQL query
+            for (Integer index : new TreeSet<Integer>(orderByNumbers.keySet())) {
+                sql.append(orderByNumbers.get(index)).append(',');
+            }
+            sql.setCharAt(sql.length() - 1, ' ');   // replace last separator
+
+            if (!supportsCounterAfterOrderBy()) {
+                // insert outer SELECT
+                sql.insert(0, "SELECT " + getCounterStatement("rownr") + ", x.* FROM (");
+                sql.append(") x ");
+            }
+
+            // Evaluate the order by, then limit the result by the desired range if needed
+            if (usePaging) {
+                return "SELECT * FROM (" + sql + ") tmp " + search.getStorage().getLimitOffsetVar("rownr", false, search.getFetchRows(), search.getStartIndex());
+            }
         }
 
-        // Evaluate the order by, then limit the result by the desired range if needed
-        if (search.getStartIndex() > 0 || search.getFetchRows() < Integer.MAX_VALUE) {
-            return "SELECT * FROM (" + sql + ") tmp " + search.getStorage().getLimitOffsetVar("rownr", false, search.getFetchRows(), search.getStartIndex());
-        }
         return sql.toString();
 
     }
@@ -507,4 +520,11 @@ public class GenericSQLDataSelector extends DataSelector {
         return true;
     }
 
+    /**
+     * @return  true when the database supports rownr variables to preserve the ordering
+     * @since 3.1.7
+     */
+    protected boolean supportsRowNr() {
+        return true;
+    }
 }

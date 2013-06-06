@@ -158,6 +158,7 @@ public class FxSQLSearchParams implements Serializable {
     private List<Long> hintTypes = null;
     private boolean hintIgnoreXPath = false;
     private boolean hintNoResultInfo = false;
+    private boolean noInternalSort = false;
 
     /**
      * Constructor.
@@ -366,5 +367,25 @@ public class FxSQLSearchParams implements Serializable {
      */
     public void setHintNoResultInfo(boolean hintNoResultInfo) {
         this.hintNoResultInfo = hintNoResultInfo;
+    }
+
+    /**
+     * @return  when true and no "order by" clause was specified, disable the internal default sort by content ID and version.
+     * @since 3.1.7
+     */
+    public boolean isNoInternalSort() {
+        return noInternalSort;
+    }
+
+    /**
+     * Disable the default internal sort order when no "order by" clause was specified. Note that when no order by clause
+     * was specified in the query and this setting is true, paging will be disabled as the sort order would be
+     * undefined (and, depending on the DB, not repeatable across multiple queries).
+     *
+     * @param noInternalSort    to disable the internal default sorting
+     * @since 3.1.7
+     */
+    public void setNoInternalSort(boolean noInternalSort) {
+        this.noInternalSort = noInternalSort;
     }
 }

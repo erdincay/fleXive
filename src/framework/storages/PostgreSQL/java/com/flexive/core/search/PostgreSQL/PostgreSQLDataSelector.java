@@ -55,4 +55,9 @@ public class PostgreSQLDataSelector extends GenericSQLDataSelector {
     public String getCounterStatement(String counter) {
         return "1 as " + counter;
     }
+
+    @Override
+    protected boolean supportsRowNr() {
+        return false;
+    }
 }

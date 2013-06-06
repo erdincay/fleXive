@@ -1966,7 +1966,15 @@ public class SearchEngineTest {
             assertTrue(ref.getRowCount() >= result.getRowCount(), "Subquery returned more results than base query");
         }
     }
-    
+
+    @Test
+    public void noInternalSortTest() throws FxApplicationException {
+        final SqlQueryBuilder sqb = new SqlQueryBuilder().select("@pk");
+        sqb.getParams().setNoInternalSort(true);
+        final FxResultSet result = sqb.getResult();
+        assertTrue(result.getRowCount() > 0);
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());

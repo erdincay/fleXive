@@ -447,7 +447,7 @@ public class GenericSQLDataFilter extends DataFilter {
             }
         }
 
-        sb.append("(SELECT * FROM (\n");
+        sb.append("(");
         int pos = 0;
         for (BraceElement be : br.getElements()) {
             if (pos > 0) {
@@ -462,10 +462,6 @@ public class GenericSQLDataFilter extends DataFilter {
             }
             pos++;
         }
-        sb.append(")");
-        // Add virtual table name (need by mysql)
-        sb.append((" unInner" + br.getId()));
-        // Close OR
         sb.append(")");
     }
 
