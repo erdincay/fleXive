@@ -136,4 +136,15 @@ public interface SequencerEngine {
      */
     List<CustomSequencer> getCustomSequencers() throws FxApplicationException;
 
+    /**
+     * Get the names of all known user-created sequencers. Use this over {@link #getCustomSequencers()}
+     * when you only need the sequencer IDs, which is considerably faster on some DBs.
+     *
+     * @return  all sequencer names
+     * @throws FxApplicationException    on errors
+     * @since 3.1.7
+     */
+    List<String> getCustomSequencerNames() throws FxApplicationException;
+
+
 }

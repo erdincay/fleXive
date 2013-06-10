@@ -40,6 +40,8 @@ import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxDbException;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -223,6 +225,18 @@ public class H2SequencerStorage extends GenericSequencerStorage {
             Database.closeObjects(H2SequencerStorage.class, con, ps);
         }
         return res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getCustomSequencerNames() throws FxApplicationException {
+        // not performance critical on H2
+        return Lists.transform(getCustomSequencers(), new Function<CustomSequencer, String>() {
+            public String apply(com.flexive.shared.CustomSequencer customSequencer) {
+                return customSequencer.getName();
+            }
+        });
     }
 
     /**

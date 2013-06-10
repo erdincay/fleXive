@@ -40,6 +40,7 @@ import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxDbException;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -212,6 +213,30 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             Database.closeObjects(PostgreSQLSequencerStorage.class, nonTxCon, s);
         }
         return res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getCustomSequencerNames() throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement(SQL_GET_USER);
+
+            ResultSet rs = ps.executeQuery();
+
+            final List<String> res = Lists.newArrayList();
+            while (rs != null && rs.next()) {
+                res.add(rs.getString(1));
+            }
+            return res;
+        } catch (SQLException exc) {
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
+        } finally {
+            Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
+        }
     }
 
     /**

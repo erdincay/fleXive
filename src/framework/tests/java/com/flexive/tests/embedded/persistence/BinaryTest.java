@@ -169,6 +169,11 @@ public class BinaryTest {
         binaryTest(true, true, 0L, 1000L);
     }
 
+    @Test
+    public void binaryMaintenanceTest() {
+        EJBLookup.getTimerService().maintenance();
+    }
+
     private void binaryTest(boolean sendLength, boolean transitFS, long binThreshold, long prevThreshold) throws Exception {
         File testFile = new File(TEST_BINARY);
         if (!testFile.exists())

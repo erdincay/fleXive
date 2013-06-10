@@ -59,6 +59,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.stream.ServerLocation;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -113,6 +114,13 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     //                                                                                                   1              2               3        4              5               6        7              8               9        10             11              12           13           14           15           16           17
     protected static final String BINARY_TRANSIT_PREVIEWS = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREV1=?, PREV1_WIDTH=?, PREV1_HEIGHT=?, PREV2=?, PREV2_WIDTH=?, PREV2_HEIGHT=?, PREV3=?, PREV3_WIDTH=?, PREV3_HEIGHT=?, PREV4=?, PREV4_WIDTH=?, PREV4_HEIGHT=?, PREV1SIZE=?, PREV2SIZE=?, PREV3SIZE=?, PREV4SIZE=? WHERE BKEY=?";
     protected static final String BINARY_TRANSIT_PREVIEWS_REF = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREVIEW_REF=? WHERE BKEY=?";
+
+    protected static final String BINARY_STALE_ENTRIES = "SELECT DISTINCT b1.id FROM " + TBL_CONTENT_BINARY + " b1"
+            + " LEFT JOIN " + TBL_CONTENT_DATA + " cdata ON b1.id = cdata.fblob"
+            + " LEFT JOIN " + TBL_CONTENT + " content ON b1.id = content.dbin_id"
+            + " LEFT JOIN " + TBL_STRUCT_SELECTLIST_ITEM + " selitem ON b1.id = selitem.dbin_id"
+            + " LEFT JOIN " + TBL_CONTENT_BINARY + " b2 ON b1.id = b2.preview_ref"
+            + " WHERE b1.id > 0 AND cdata.fblob IS NULL AND content.dbin_id IS NULL AND selitem.dbin_id IS NULL AND b2.preview_ref IS NULL";
 
     protected static final String CONTENT_BINARY_TRANSIT_CLEANUP = "DELETE FROM " + TBL_BINARY_TRANSIT + " WHERE EXPIRE<?";
     protected static final String CONTENT_BINARY_REMOVE_ID = "DELETE FROM " + TBL_CONTENT_BINARY + " WHERE ID=?";
@@ -1102,6 +1110,29 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             LOG.error(e, e);
         } catch (FxApplicationException e) {
             LOG.error(e, e);
+        } finally {
+            Database.closeObjects(GenericBinarySQLStorage.class, ps);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removeStaleBinaries(Connection con) {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(BINARY_STALE_ENTRIES);
+            final ResultSet rs = ps.executeQuery();
+            final List<Long> binaryIds = Lists.newArrayList();
+            while (rs.next()) {
+                binaryIds.add(rs.getLong(1));
+            }
+            if (!binaryIds.isEmpty()) {
+                LOG.info("Removing " + binaryIds.size() + " stale binary entries");
+                removeBinaries(con, binaryIds);
+            }
+        } catch (SQLException e) {
+            LOG.error("Failed to clean up stale binary entries", e);
         } finally {
             Database.closeObjects(GenericBinarySQLStorage.class, ps);
         }

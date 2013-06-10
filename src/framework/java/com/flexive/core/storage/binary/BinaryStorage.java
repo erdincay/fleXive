@@ -202,4 +202,12 @@ public interface BinaryStorage {
      * @param con an open and valid connection
      */
     void removeExpiredTransitEntries(Connection con);
+
+    /**
+     * Remove all binaries that are no longer referenced.
+     *
+     * @param con an open and valid connection
+     * @since 3.1.7
+     */
+    void removeStaleBinaries(Connection con);
 }

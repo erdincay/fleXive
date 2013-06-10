@@ -168,4 +168,17 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
             throw e;
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<String> getCustomSequencerNames() throws FxApplicationException {
+        try {
+            return StorageManager.getSequencerStorage().getCustomSequencerNames();
+        } catch (FxApplicationException e) {
+            EJBUtils.rollback(ctx);
+            throw e;
+        }
+    }
 }

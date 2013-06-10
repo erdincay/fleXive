@@ -94,6 +94,9 @@ public class SequencerTest {
         Assert.assertTrue(id.sequencerExists(seq1), "Expected sequencer " + seq1 + " to exist!");
         Assert.assertTrue(id.sequencerExists(seq2), "Expected sequencer " + seq2 + " to exist!");
         Assert.assertTrue(id.sequencerExists(seq3), "Expected sequencer " + seq3 + " to exist!");
+        Assert.assertTrue(id.getCustomSequencerNames().contains(seq1));
+        Assert.assertTrue(id.getCustomSequencerNames().contains(seq2));
+        Assert.assertTrue(id.getCustomSequencerNames().contains(seq3));
         long i1 = id.getId(seq1);
         Assert.assertEquals(i1, 1);
         long i2 = id.getId(seq1);
@@ -123,5 +126,8 @@ public class SequencerTest {
         id.removeSequencer(seq2);
         id.removeSequencer(seq3);
         Assert.assertTrue(id.getCustomSequencers().size() == startList.size());
+        Assert.assertFalse(id.getCustomSequencerNames().contains(seq1));
+        Assert.assertFalse(id.getCustomSequencerNames().contains(seq2));
+        Assert.assertFalse(id.getCustomSequencerNames().contains(seq3));
     }
 }
