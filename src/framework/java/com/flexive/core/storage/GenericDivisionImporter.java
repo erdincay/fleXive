@@ -1200,9 +1200,9 @@ try {
         final PreparedStatement psGetAssInfo = con.prepareStatement("SELECT DISTINCT a.APROPERTY,a.XALIAS,p.DATATYPE FROM " + DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " a, " + DatabaseConst.TBL_STRUCT_PROPERTIES + " p WHERE a.ID=? AND p.ID=a.APROPERTY");
         final Map<Long, Object[]> assignmentPropAlias = new HashMap<Long, Object[]>(assignmentPositions.size());
         final String insert1 = "INSERT INTO " + DatabaseConst.TBL_CONTENT_DATA +
-                //1  2   3   4    5     6      =1     =1    =1     =1          7         8          =FALSE  9       
-                "(ID,VER,POS,LANG,TPROP,ASSIGN,XDEPTH,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,";
-        final String insert2 = "(?,?,?,?,1,?,?,1,1,1,?,?," + StorageManager.getBooleanFalseExpression() + ",?,";
+                //1  2   3   4    5     6      =1     =1    =1     7         8          =FALSE  9
+                "(ID,VER,POS,LANG,TPROP,ASSIGN,XDEPTH,XMULT,XINDEX,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,";
+        final String insert2 = "(?,?,?,?,?,?,1,1,1,?,?," + StorageManager.getBooleanFalseExpression() + ",?,";
         final PreparedStatement psString = con.prepareStatement(insert1 + "FTEXT1024,UFTEXT1024,FSELECT,FINT)VALUES" +
                 insert2 + "?,?,0,?)");
         final PreparedStatement psText = con.prepareStatement(insert1 + "FCLOB,UFCLOB,FSELECT,FINT)VALUES" +

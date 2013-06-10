@@ -931,7 +931,6 @@ CREATE TABLE FX_CONTENT_DATA (
 --  XPATHMULT TEXT NOT NULL,
   XMULT VARCHAR(255) NOT NULL,
   XINDEX INTEGER NOT NULL,
-  PARENTXMULT VARCHAR(255) NOT NULL,
 --  PARENTXPATH TEXT NOT NULL,
   ISMAX_VER BOOLEAN NOT NULL,
   ISLIVE_VER BOOLEAN NOT NULL,
@@ -972,7 +971,6 @@ COMMENT ON COLUMN FX_CONTENT_DATA.ASSIGN IS 'Id of the assignment';
 COMMENT ON COLUMN FX_CONTENT_DATA.XDEPTH IS 'XPath hierarchy depth';
 COMMENT ON COLUMN FX_CONTENT_DATA.XMULT IS 'Multiplicities for each element like 1,1,2,5,etc. preceeded by 1 for the root group';
 COMMENT ON COLUMN FX_CONTENT_DATA.XINDEX IS 'Multiplicity of this element';
-COMMENT ON COLUMN FX_CONTENT_DATA.PARENTXMULT IS 'XMULT of the parent group (needed for unique positioning), always 1 for entries in the root group';
 COMMENT ON COLUMN FX_CONTENT_DATA.ISMLDEF IS 'Is this field the multilanguage default?';
 COMMENT ON COLUMN FX_CONTENT_DATA.FREF IS 'Reference to other content instances';
 COMMENT ON COLUMN FX_CONTENT_DATA.UFCLOB IS 'Clob with uppercase values';
