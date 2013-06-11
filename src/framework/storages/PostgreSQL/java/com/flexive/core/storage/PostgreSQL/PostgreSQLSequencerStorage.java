@@ -196,12 +196,8 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 try {
-                    // use non-transactional connection since the relation may have been deleted by another
-                    // thread, which would lead to a rollback on the main connection
-                    ResultSet rsi = s.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX + rs.getString(1));
-                    rsi.next();
-                    res.add(new CustomSequencer(rs.getString(1), rsi.getBoolean(1), rsi.getLong(2)));
-                    rsi.close();
+                    final CustomSequencer result = loadCustomSequencer(s, rs.getString(1));
+                    res.add(result);
                 } catch (SQLException e) {
                     LOG.warn("Sequencer " + rs.getString(1) + " no longer exists");
                 }
@@ -213,6 +209,18 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             Database.closeObjects(PostgreSQLSequencerStorage.class, nonTxCon, s);
         }
         return res;
+    }
+
+    private CustomSequencer loadCustomSequencer(Statement nonTxStatement, String name) throws SQLException {
+        // use non-transactional connection since the relation may have been deleted by another
+        // thread, which would lead to a rollback on the main connection
+        ResultSet rsi = nonTxStatement.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX + name);
+        try {
+            rsi.next();     // this will throw SQLException if the sequencer no longer exists
+            return new CustomSequencer(name, rsi.getBoolean(1), rsi.getLong(2));
+        } finally {
+            rsi.close();
+        }
     }
 
     /**
@@ -257,6 +265,24 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
         }
         throw new FxCreateException(LOG, "ex.sequencer.notFound", sequencer.getSequencerName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getCurrentId(String sequencer) throws FxApplicationException {
+        Connection nonTxCon = null;
+        Statement s = null;
+        try {
+            nonTxCon = Database.getNonTXDataSource().getConnection();
+            s = nonTxCon.createStatement();
+            return loadCustomSequencer(s, sequencer).getCurrentNumber();
+        } catch (SQLException e) {
+            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(PostgreSQLSequencerStorage.class, nonTxCon, s);
+        }
     }
 
     /**
