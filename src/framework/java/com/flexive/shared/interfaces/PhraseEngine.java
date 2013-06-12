@@ -408,6 +408,16 @@ public interface PhraseEngine {
      */
     public void clearTree(long mandatorId) throws FxNoAccessException;
 
+    /**
+     * Remove all tree nodes that belong to the requested mandator and match selected categories
+     *
+     * @param categories categories to remove
+     * @param mandatorId requested mandator
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     */
+    public void clearTree(FxPhraseCategorySelection categories, long mandatorId) throws FxNoAccessException;
+
+
     //phrase->tree mapping
 
     /**
