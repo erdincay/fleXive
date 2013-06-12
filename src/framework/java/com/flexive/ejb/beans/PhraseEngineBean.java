@@ -939,7 +939,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE + " WHERE MANDATOR=? AND CAT IN (" + categoriesList(categories) + ")");
             ps.setLong(1, mandatorId);
             ps.executeUpdate();
-            removePhraseSequencer(mandatorId);
+            //sequencer can not be removed if categories is not any
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
@@ -1470,6 +1470,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=?");
                 ps.setLong(1, mandatorId);
                 ps.executeUpdate();
+                removeNodeSequencer(mandatorId);
             } else {
                 final String cat = categoriesList(categories);
                 ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE (MANDATOR=? OR NODEMANDATOR=? OR PMANDATOR=?) AND NODEID IN(SELECT DISTINCT ID FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=? AND CAT IN(" + cat + "))");
@@ -1482,8 +1483,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=? AND CAT IN(" + cat + ")");
                 ps.setLong(1, mandatorId);
                 ps.executeUpdate();
+                //sequencer can not be removed if categories is not any
             }
-            removeNodeSequencer(mandatorId);
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
