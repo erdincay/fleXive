@@ -511,7 +511,7 @@ public class FxContent implements Serializable {
      * @return if this content is locked
      */
     public boolean isLocked() {
-        return lock.getLockType() != FxLockType.None;
+        return getLock().getLockType() != FxLockType.None;
     }
 
     /**
@@ -519,7 +519,13 @@ public class FxContent implements Serializable {
      *
      * @return lock of this content
      */
-    public FxLock getLock() {
+    public synchronized FxLock getLock() {
+        if (lock == null) {
+            lock = EJBLookup.getContentEngine().getLock(getPk());
+            if (lock == null) {
+                lock = FxLock.noLockPK();
+            }
+        }
         return lock;
     }
 
@@ -1977,7 +1983,7 @@ public class FxContent implements Serializable {
      *
      * @param lock the new lock to apply
      */
-    public void updateLock(FxLock lock) {
+    public synchronized void updateLock(FxLock lock) {
         this.lock = lock;
     }
 

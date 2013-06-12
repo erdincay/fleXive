@@ -1649,8 +1649,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 srcPos = rs.getInt(16);
                 dstPos = rs.getInt(17);
             }
-            FxLock lock = StorageManager.getLockStorage().getLock(con, contentPK);
-            FxContent content = new FxContent(contentPK, lock, type.getId(), type.isRelation(), mand.getId(),
+            FxContent content = new FxContent(contentPK, null /* use lazy loading for lock */,
+                    type.getId(), type.isRelation(), mand.getId(),
                     aclId != ACL.NULL_ACL_ID ? aclId : -1,
                     step.getId(), rs.getInt(6),
                     rs.getInt(7), rs.getBoolean(10), rs.getInt(11), sourcePK, destinationPK, srcPos, dstPos,
@@ -1664,8 +1664,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxDbException e) {
-            throw new FxLoadException(e);
-        } catch (FxLockException e) {
             throw new FxLoadException(e);
         } finally {
             Database.closeObjects(GenericHierarchicalStorage.class, conNoTX, ps);

@@ -202,7 +202,11 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 StringBuilder sql = new StringBuilder(2000);
                 con = Database.getDbConnection();
                 FxContent rawContent = storage.contentLoad(con, pk, env, sql).copy();
-                cachedContent = new FxCachedContent(rawContent, storage.getContentSecurityInfo(con, pk, rawContent));
+
+                final FxContentSecurityInfo securityInfo = storage.getContentSecurityInfo(con, pk, rawContent);
+                rawContent.updateLock(securityInfo.getLock());
+
+                cachedContent = new FxCachedContent(rawContent, securityInfo);
                 CacheAdmin.cacheContent(cachedContent);
 //                System.out.println("=> Cached " + pk);
             } else {
