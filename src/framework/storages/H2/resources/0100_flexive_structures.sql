@@ -860,6 +860,7 @@ CREATE TABLE FX_CONTENT_DATA (
 --  XPATHMULT TEXT NOT NULL,
   XMULT VARCHAR(255) NOT NULL COMMENT 'Multiplicities for each element like 1,1,2,5,etc. preceeded by 1 for the root group',
   XINDEX INTEGER NOT NULL COMMENT 'Multiplicity of this element',
+  PARENTXMULT VARCHAR(255) NOT NULL COMMENT 'XMULT of the parent group (needed for unique positioning), always 1 for entries in the root group',
 --  PARENTXPATH TEXT NOT NULL,
   ISMAX_VER BOOLEAN NOT NULL,
   ISLIVE_VER BOOLEAN NOT NULL,
