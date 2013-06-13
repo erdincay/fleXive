@@ -1,4 +1,4 @@
--- Patch from v2823 -> v22824
+-- Patch from v2823 -> v2824
 -- Change: Added REST-API token columns to accounts
 -- Author: Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
 

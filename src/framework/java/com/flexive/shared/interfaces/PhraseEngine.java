@@ -349,6 +349,14 @@ public interface PhraseEngine {
     public void syncPhraseNodeSequencer(long mandatorId);
 
     /**
+     * Synchronize the phrase node sequencer to match the current max id + 1
+     *
+     * @param category   phrase category
+     * @param mandatorId mandator
+     */
+    public void syncPhraseNodeSequencer(int category, long mandatorId);
+
+    /**
      * Load all root nodes and child nodes for up to 2 mandators
      *
      * @param mandator2top insert nodes of mandator 2 at the top or bottom?
@@ -380,6 +388,19 @@ public interface PhraseEngine {
     public FxPhraseTreeNode loadPhraseTreeNode(long nodeId, long mandatorId, boolean mandator2top, long... mandators) throws FxNotFoundException;
 
     /**
+     * Load a tree nodes and its child nodes for up to 2 mandators
+     *
+     * @param category     phrase category
+     * @param nodeId       node id
+     * @param mandatorId   mandator id
+     * @param mandator2top insert nodes of mandator 2 at the top or bottom?
+     * @param mandators    mandators
+     * @return phrase node and its children
+     * @throws FxNotFoundException if no node with the requested id/mandator exists
+     */
+    public FxPhraseTreeNode loadPhraseTreeNode(int category, long nodeId, long mandatorId, boolean mandator2top, long... mandators) throws FxNotFoundException;
+
+    /**
      * Move a tree node delta positions (within its own mandator)
      *
      * @param nodeId     node id
@@ -391,6 +412,18 @@ public interface PhraseEngine {
     public void moveTreeNode(long nodeId, long mandatorId, int delta) throws FxNoAccessException, FxNotFoundException;
 
     /**
+     * Move a tree node delta positions (within its own mandator)
+     *
+     * @param category   phrase category
+     * @param nodeId     node id
+     * @param mandatorId mandator id of the node
+     * @param delta      delat to move
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     * @throws FxNotFoundException if no node with the requested id/mandator exists
+     */
+    public void moveTreeNode(int category, long nodeId, long mandatorId, int delta) throws FxNoAccessException, FxNotFoundException;
+
+    /**
      * Remove a tree node, moving its children up one level and removing all assignments to this node
      *
      * @param nodeId     node id
@@ -399,6 +432,17 @@ public interface PhraseEngine {
      * @throws FxNotFoundException if no node with the requested id/mandator exists
      */
     public void removeTreeNode(long nodeId, long mandatorId) throws FxNoAccessException, FxNotFoundException;
+
+    /**
+     * Remove a tree node, moving its children up one level and removing all assignments to this node
+     *
+     * @param category   phrase category
+     * @param nodeId     node id
+     * @param mandatorId mandator of the node
+     * @throws FxNoAccessException if the requested mandator is not the callers mandator
+     * @throws FxNotFoundException if no node with the requested id/mandator exists
+     */
+    public void removeTreeNode(int category, long nodeId, long mandatorId) throws FxNoAccessException, FxNotFoundException;
 
     /**
      * Remove all tree nodes that belong to the requested mandator
@@ -479,6 +523,21 @@ public interface PhraseEngine {
     void moveTreeNodeAssignment(long assignmentOwner, long nodeId, long nodeMandatorId, long phraseId, long phraseMandator, int delta) throws FxNotFoundException, FxNoAccessException;
 
     /**
+     * "Move" the position of an assignment
+     *
+     * @param category        phrase category
+     * @param assignmentOwner mandator which is the "owner" of this assignment
+     * @param nodeId          node id
+     * @param nodeMandatorId  node mandator
+     * @param phraseId        phrase id
+     * @param phraseMandator  phrase mandator
+     * @param delta           delta to move
+     * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
+     * @throws FxNotFoundException if either the node or phrase were not found
+     */
+    void moveTreeNodeAssignment(int category, long assignmentOwner, long nodeId, long nodeMandatorId, long phraseId, long phraseMandator, int delta) throws FxNotFoundException, FxNoAccessException;
+
+    /**
      * Remove an assign of a phrase from a node.
      *
      * @param assignmentOwner mandator which is the "owner" of this assignment
@@ -493,6 +552,21 @@ public interface PhraseEngine {
     public boolean removePhraseAssignment(long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator) throws FxNotFoundException, FxNoAccessException;
 
     /**
+     * Remove an assign of a phrase from a node.
+     *
+     * @param category        phrase category
+     * @param assignmentOwner mandator which is the "owner" of this assignment
+     * @param nodeId          node id
+     * @param nodeMandator    node mandator
+     * @param phraseId        phrase id
+     * @param phraseMandator  phrase mandator
+     * @return if an assignment was found that could be removed
+     * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
+     * @throws FxNotFoundException if either the node or phrase were not found
+     */
+    public boolean removePhraseAssignment(int category, long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator) throws FxNotFoundException, FxNoAccessException;
+
+    /**
      * Remove all phrase assignments from a node.
      * If the calling user is the owner of the node, all assignments will be removed, if not only the phrases assigned by the calling users mandator
      *
@@ -500,6 +574,16 @@ public interface PhraseEngine {
      * @param nodeMandator node mandator id
      */
     public void removeAssignmentsFromNode(long nodeId, long nodeMandator);
+
+    /**
+     * Remove all phrase assignments from a node.
+     * If the calling user is the owner of the node, all assignments will be removed, if not only the phrases assigned by the calling users mandator
+     *
+     * @param category     phrase category
+     * @param nodeId       node id
+     * @param nodeMandator node mandator id
+     */
+    public void removeAssignmentsFromNode(int category, long nodeId, long nodeMandator);
 
     /**
      * Get all assignments for a phrase.
