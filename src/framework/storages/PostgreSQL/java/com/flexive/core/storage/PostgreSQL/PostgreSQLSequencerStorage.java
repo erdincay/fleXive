@@ -211,13 +211,16 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         return res;
     }
 
-    private CustomSequencer loadCustomSequencer(Statement nonTxStatement, String name) throws SQLException {
+    private CustomSequencer loadCustomSequencer(Statement nonTxStatement, String name) throws SQLException, FxCreateException {
         // use non-transactional connection since the relation may have been deleted by another
         // thread, which would lead to a rollback on the main connection
         ResultSet rsi = nonTxStatement.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX + name);
         try {
-            rsi.next();     // this will throw SQLException if the sequencer no longer exists
-            return new CustomSequencer(name, rsi.getBoolean(1), rsi.getLong(2));
+            if (rsi.next()) {
+                return new CustomSequencer(name, rsi.getBoolean(1), rsi.getLong(2));
+            } else {
+                throw new FxCreateException(LOG, "ex.sequencer.notFound", name);
+            }
         } finally {
             rsi.close();
         }
