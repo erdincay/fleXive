@@ -66,6 +66,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static com.flexive.sqlParser.Condition.ValueComparator;
 
@@ -145,15 +146,15 @@ public class GenericSQLDataFilter extends DataFilter {
 
     /**
      * Return the filtered table for reading from the given flat storage table (adds briefcase filters).
-     * 
+     *
      * @param table the flat storage table
      * @return      the filtered table for reading from the given flat storage table (adds briefcase filters).
      */
     protected final String flatContentDataTable(String table) {
         if (hasBriefcaseFilter()) {
             return "(SELECT * FROM " + table + " WHERE id IN (" + getBriefcaseIdSelect() + ")"
-                    + getVersionFilter(null) 
-                    + getDeactivatedTypesFilter(null) 
+                    + getVersionFilter(null)
+                    + getDeactivatedTypesFilter(null)
                     + getInactiveMandatorsFilter(null)
                     + ")";
         } else {
@@ -345,7 +346,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 //
                 // Removing the "marker row" from the temporary table seems to be another solution,
                 // but it's also a hack with performance implications (one more write on a busy table).
-                
+
                 foundEntryCount = search.getFxStatement().getMaxResultRows();
                 truncated = true;
             } else {
@@ -396,13 +397,16 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     private void buildOr(StringBuilder sb, Brace br) throws FxSqlSearchException {
         // Start OR
-        if (br.getElements().length > 1) {
-            final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
+        boolean conditionStarted = false;
+        final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
+        if (br.getElements().size() > 1) {
+            final Map.Entry<String, ConditionTableInfo> singleTable = tables.keySet().size() == 1 ? tables.entries().iterator().next() : null;
+
             // for "OR" we can always optimize flat storage queries,
             // as long as only one flat storage table is used and we don't have a nested 'and',
             // and the brace does not contain an IS NULL condition
-            if (tables.keySet().size() == 1
-                    && tables.values().iterator().next().isFlatStorage()
+            if (singleTable != null
+                    && singleTable.getValue().isFlatStorage()
                     && !br.containsAnd()
                     && !containsIsNullCondition(br)) {
                 sb.append(
@@ -411,7 +415,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 return;
             }
 
-            if (tables.size() == 1 && tables.keys().iterator().next().equals(DatabaseConst.TBL_CONTENT)) {
+            if (singleTable != null && singleTable.getKey().equals(DatabaseConst.TBL_CONTENT)) {
                 // combine main table selects into a single one
                 sb.append("(SELECT id,ver," + getEmptyLanguage() + " as lang FROM " + DatabaseConst.TBL_CONTENT + " cd"
                         + " WHERE " + getOptimizedMainTableConditions(br, "cd") + ")");
@@ -447,7 +451,34 @@ public class GenericSQLDataFilter extends DataFilter {
             }
         }
 
-        sb.append("(");
+        if (tables.containsKey(DatabaseConst.TBL_CONTENT_DATA)) {
+            // combine content data "OR" queries into a single select
+            final List<Condition> simpleConditions = getSimpleContentDataSelects(br);
+            if (simpleConditions.size() > 1) {
+                // avoid UNION of identically structured subqueries,
+                // use "SELECT id, ver, ... FROM FX_CONTENT_DATA WHERE (cond1 or cond2 or ...) AND (filters)" instead
+
+                final String cdSelect = simpleContentDataUnion(simpleConditions);
+
+                // don't process conditions any further
+                br.getElements().removeAll(simpleConditions);
+
+                if (br.size() == 0) {
+                    // no more conditions
+                    sb.append(cdSelect);
+                    return;
+                }
+
+                // more conditions follow
+                conditionStarted = true;
+                sb.append('(').append(cdSelect).append("\nUNION\n");
+            }
+        }
+
+        if (!conditionStarted) {
+            sb.append("(");
+        }
+
         int pos = 0;
         for (BraceElement be : br.getElements()) {
             if (pos > 0) {
@@ -466,6 +497,69 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     /**
+     * Build a select on FX_CONTENT_DATA of multiple 'OR' conditions. In general this is faster than the generic
+     * condition builder that works with UNION.
+     *
+     * @param simpleConditions    the conditions to be rendered (the conditions must be selected via {@link #getSimpleContentDataSelects})
+     * @return  the subselect
+     * @throws FxSqlSearchException on SQL condition errors
+     * @since 3.1.7
+     */
+    private String simpleContentDataUnion(List<Condition> simpleConditions) throws FxSqlSearchException {
+        final StringBuilder combined = new StringBuilder();
+        combined.append("(SELECT DISTINCT cd.id,cd.ver,cd.lang FROM ").append(tableContentData).append(" cd WHERE ");
+
+        // add conditions
+        final List<String> conditions = Lists.newArrayList();
+        for (Condition cond : simpleConditions) {
+            final Pair<String, String> select = getSqlColumnWithValue(getStatement(), cond, "cd");
+            final String column = select.getFirst();
+            final String value = select.getSecond();
+            final Property prop = cond.getProperty();
+            conditions.add("(" + column + cond.getSqlComperator() + value
+                    + " AND " + getPropertyFilter(prop, getPropertyResolver().get(getStatement(), prop))
+                    + ")"
+            );
+            cond.setProcessed(true);
+        }
+        combined.append('(').append(StringUtils.join(conditions, " OR ")).append(')');
+
+        return combined.append(getVersionFilter("cd"))
+                .append(getLanguageFilter())
+                .append(getSubQueryLimit())
+                .append(") ")
+                .toString();
+    }
+
+    /**
+     * Extract conditions from a brace that are considered "simple" conditions (that don't rely on grouping).
+     *
+     * @param br    the conditions
+     * @return      the "simple" conditions
+     * @throws FxSqlSearchException on SQL processing errors
+     * @since 3.1.7
+     */
+    private List<Condition> getSimpleContentDataSelects(Brace br) throws FxSqlSearchException {
+        final List<Condition> simpleConditions = Lists.newArrayList();
+        for (BraceElement element : br.getElements()) {
+            if (element instanceof Condition) {
+                final Condition cond = (Condition) element;
+                final Property prop = cond.getProperty();
+                final PropertyEntry entry = getPropertyResolver().get(getStatement(), prop);
+                if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
+                    final boolean specialSelect = entry.getProperty().getDataType() == FxDataType.SelectMany &&
+                            (cond.getComperator() == ValueComparator.IN || cond.getComperator() == ValueComparator.NOT_IN);
+                    if (!specialSelect) {
+                        // selectmany IN/NOT IN conditions cannot be optimized this way
+                        simpleConditions.add(cond);
+                    }
+                }
+            }
+        }
+        return simpleConditions;
+    }
+
+    /**
      * Builds an 'AND' condition.
      *
      * @param sb the StringBuilder to use
@@ -474,7 +568,7 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     private void buildAnd(StringBuilder sb, Brace br) throws FxSqlSearchException {
         // Start AND
-        if (br.getElements().length > 1) {
+        if (br.size() > 1) {
             final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
             // for "AND" we can only optimize when ALL flatstorage conditions are not multi-lang and on the same level,
             // i.e. that table must have exactly one flat-storage entry, and we cannot optimize if an IS NULL is present
@@ -897,16 +991,7 @@ public class GenericSQLDataFilter extends DataFilter {
     private String buildPropertyCondition(FxStatement stmt, Condition cond, Property prop, boolean optimizedFlatStorage)
             throws FxSqlSearchException {
         final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
-        final String filter;
-        if (prop.isAssignment()) {
-            filter = "ASSIGN IN ("
-                    + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
-                    + ")";
-        } else if (entry.getProperty() != null) {
-            filter = "TPROP=" + entry.getProperty().getId();
-        } else {
-            throw new FxSqlSearchException("ex.sqlSearch.filter.condition.structure", prop.getPropertyName());
-        }
+        final String filter = getPropertyFilter(prop, entry);
 
         if (cond.getComperator() == Condition.ValueComparator.IS && cond.getConstant().isNull()) {
             // IS NULL is a special case for the content data/flat storage table:
@@ -945,7 +1030,7 @@ public class GenericSQLDataFilter extends DataFilter {
                         ") ");
             case T_CONTENT_DATA:
                 // the FInt column is required for "NOT IN" matches of SelectMany
-                final boolean usesFInt = entry.getProperty().getDataType() == FxDataType.SelectMany && cond.getComperator() == ValueComparator.NOT_IN;
+                final boolean usesFInt = selectFInt(cond, entry);
                 return " (SELECT DISTINCT cd.id,cd.ver,cd.lang" +
                         (usesFInt ? ",cd.fint" : "") +
                         " FROM " + tableContentData + " cd WHERE " +
@@ -981,6 +1066,22 @@ public class GenericSQLDataFilter extends DataFilter {
             default:
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", entry.getProperty().getName(), entry.getTableName());
         }
+    }
+
+    private String getPropertyFilter(Property prop, PropertyEntry entry) throws FxSqlSearchException {
+        if (prop.isAssignment()) {
+            return"ASSIGN IN ("
+                    + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
+                    + ")";
+        } else if (entry.getProperty() != null) {
+            return "TPROP=" + entry.getProperty().getId();
+        } else {
+            throw new FxSqlSearchException("ex.sqlSearch.filter.condition.structure", prop.getPropertyName());
+        }
+    }
+
+    private boolean selectFInt(Condition cond, PropertyEntry entry) {
+        return entry.getProperty().getDataType() == FxDataType.SelectMany && cond.getComperator() == ValueComparator.NOT_IN;
     }
 
     private Pair<String, String> getSqlColumnWithValue(FxStatement stmt, Condition cond, String tableAlias) throws FxSqlSearchException {

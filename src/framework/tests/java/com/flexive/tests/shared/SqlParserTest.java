@@ -40,7 +40,6 @@ import com.flexive.shared.structure.FxSelectListEdit;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
 import com.flexive.sqlParser.*;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -197,20 +196,20 @@ public class SqlParserTest {
                 // check root expression
                 final Brace root = stmt.getRootBrace();
                 assertTrue(root.isAnd(), "Root expression should be AND");
-                assertTrue(root.getElements().length == 2, "Root should have two children, has: " + Arrays.asList(root.getElements()));
+                assertTrue(root.getElements().size() == 2, "Root should have two children, has: " + Arrays.asList(root.getElements()));
                 final boolean inComp = comp == PropertyValueComparator.IN || comp == PropertyValueComparator.NOT_IN;
                 checkStatementCondition(root.getElementAt(0), comp, "p1", makeTuple("1", inComp));
 
                 // check first nested level
                 final Brace level1 = (Brace) root.getElementAt(1);
                 assertTrue(level1.isOr(), "Level 1 expression should be 'or'");
-                assertTrue(level1.getElements().length == 2, "Level1 should have two children, has: " + Arrays.asList(level1.getElements()));
+                assertTrue(level1.getElements().size() == 2, "Level1 should have two children, has: " + Arrays.asList(level1.getElements()));
                 checkStatementCondition(level1.getElementAt(0), comp, "p2", makeTuple(FxFormatUtils.escapeForSql("stringval"), inComp));
 
                 // check innermost level
                 final Brace level2 = (Brace) level1.getElementAt(1);
                 assertTrue(level2.isAnd(), "Level 2 expression should be 'and'");
-                assertTrue(level2.getElements().length == 2, "Level2 should have two children, has: " + Arrays.asList(level2.getElements()));
+                assertTrue(level2.getElements().size() == 2, "Level2 should have two children, has: " + Arrays.asList(level2.getElements()));
                 checkStatementCondition(level2.getElementAt(0), comp, "p3", makeTuple("2", inComp));
                 checkStatementCondition(level2.getElementAt(1), comp, "p4", makeTuple(FxFormatUtils.escapeForSql(date), inComp));
             } catch (Exception e) {
@@ -342,9 +341,9 @@ public class SqlParserTest {
     @Test(groups = {"shared", "search"})
     public void groupBraceSimple() throws SqlParserException {
         final FxStatement stmt = parse("SELECT id WHERE id > 0 and s01 = 'abc' AND s02 = 'def'");
-        assertEquals(stmt.getRootBrace().getElements().length, 3);
-        final Condition s01 = (Condition) stmt.getRootBrace().getElements()[1];
-        final Condition s02 = (Condition) stmt.getRootBrace().getElements()[2];
+        assertEquals(stmt.getRootBrace().getElements().size(), 3);
+        final Condition s01 = (Condition) stmt.getRootBrace().getElements().get(1);
+        final Condition s02 = (Condition) stmt.getRootBrace().getElements().get(2);
         assertEquals(s01.getLValueInfo().getValue().toString(), "s01");
         assertEquals(s02.getLValueInfo().getValue().toString(), "s02");
 
@@ -355,14 +354,14 @@ public class SqlParserTest {
             }
         });
         assertNotSame(reorg, stmt.getRootBrace());
-        assertEquals(reorg.getElements().length, 2);
+        assertEquals(reorg.getElements().size(), 2);
         assertTrue("and".equalsIgnoreCase(reorg.getType()), "New condition type should be 'and':" + reorg.getType());
 
-        final Brace sub = (Brace) reorg.getElements()[reorg.getElements()[0] instanceof Condition ? 1 : 0];
-        assertEquals(sub.getElements().length, 2);
+        final Brace sub = (Brace) reorg.getElements().get(reorg.getElements().get(0) instanceof Condition ? 1 : 0);
+        assertEquals(sub.getElements().size(), 2);
         assertTrue("and".equalsIgnoreCase(sub.getType()), "Subcondition type should be 'and' too:" + sub.getType());
-        assertTrue(ArrayUtils.indexOf(sub.getElements(), s01) != -1, "s01 not found in subquery");
-        assertTrue(ArrayUtils.indexOf(sub.getElements(), s02) != -1, "s02 not found in subquery");
+        assertTrue(sub.getElements().indexOf(s01) != -1, "s01 not found in subquery");
+        assertTrue(sub.getElements().indexOf(s02) != -1, "s02 not found in subquery");
     }
 
     private void checkNoReorg(String conditions, Brace.GroupFunction fun) throws SqlParserException {

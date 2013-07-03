@@ -36,6 +36,7 @@ import com.google.common.collect.Multimap;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -201,8 +202,8 @@ public class Brace implements BraceElement{
         return conditions.size();
     }
     
-    public BraceElement[] getElements() {
-        return conditions.toArray(new BraceElement[conditions.size()]);
+    public List<BraceElement> getElements() {
+        return conditions;
     }
 
     public BraceElement getElementAt(int pos) {

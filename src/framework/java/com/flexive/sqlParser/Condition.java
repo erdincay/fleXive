@@ -31,6 +31,9 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Condition
  * 
@@ -116,8 +119,8 @@ public class Condition implements BraceElement {
         return this.id;
     }
 
-    public BraceElement[] getElements() {
-        return new BraceElement[0];
+    public List<BraceElement> getElements() {
+        return Collections.emptyList();
     }
 
     public String toString() {

@@ -32,6 +32,8 @@
 package com.flexive.sqlParser;
 
 
+import java.util.List;
+
 /**
  * Brace element
  *
@@ -39,6 +41,7 @@ package com.flexive.sqlParser;
  */
 public interface BraceElement {
     
-    BraceElement[] getElements();
+    List<BraceElement> getElements();
+
     int getId();
 }
