@@ -527,7 +527,7 @@ public class GenericSQLDataFilter extends DataFilter {
         return combined.append(getVersionFilter("cd"))
                 .append(getLanguageFilter())
                 .append(getSubQueryLimit())
-                .append(") ")
+                .append(')')
                 .toString();
     }
 
