@@ -31,14 +31,12 @@
  ***************************************************************/
 package com.flexive.core.search;
 
-import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
-import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.sqlParser.FxStatement;
 import com.flexive.sqlParser.Property;
@@ -46,10 +44,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A resolver for properties
@@ -91,7 +89,6 @@ public class PropertyResolver {
     }
 
     private static final Log LOG = LogFactory.getLog(PropertyResolver.class);
-    private static Map<String, FxDataType> CONTENT_PROPS = null; //TODO: static?!?
 
     private ContentStorage hierarchicalStorage;
     private Map<String, PropertyEntry> cache = new HashMap<String, PropertyEntry>(50);
@@ -108,7 +105,6 @@ public class PropertyResolver {
         } catch (Exception e) {
             throw new FxSqlSearchException(LOG, "Init error:" + e.getMessage());
         }
-        initColumnInformations(con);
     }
 
     public void addResultSetColumn(SqlSearch search, PropertyEntry e) {
@@ -162,21 +158,18 @@ public class PropertyResolver {
     }
 
     /**
-     * Initializes the column informations.
+     * Initializes the column informations of FX_CONTENT_DATA (no longer used).
      *
      * @param con an existing connection
      * @throws FxSqlSearchException if the init fails
      */
-    private synchronized void initColumnInformations(Connection con) throws FxSqlSearchException {
-        if (CONTENT_PROPS != null) {
-            return;
-        }
+/*    private synchronized void initColumnInformations(Connection con) throws FxSqlSearchException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
             final ResultSet rs = stmt.executeQuery("select * from " + DatabaseConst.TBL_CONTENT + " where 1=2");
             final ResultSetMetaData rsmd = rs.getMetaData();
-            CONTENT_PROPS = new Hashtable<String, FxDataType>(10);
+            final Hashtable<String, FxDataType> props = new Hashtable<String, FxDataType>(10);
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
                 final String columnName = rsmd.getColumnName(i + 1).trim().toUpperCase();
                 final int type = rsmd.getColumnType(i + 1);
@@ -213,7 +206,7 @@ public class PropertyResolver {
                         throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.unknowColumnType", columnName,
                                 DatabaseConst.TBL_CONTENT, type);
                 }
-                CONTENT_PROPS.put(columnName, dt);
+                props.put(columnName, dt);
             }
         } catch (FxSqlSearchException exc) {
             throw exc;
@@ -222,5 +215,5 @@ public class PropertyResolver {
         } finally {
             Database.closeObjects(PropertyResolver.class, null, stmt);
         }
-    }
+    }*/
 }
