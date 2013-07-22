@@ -192,7 +192,7 @@
         <mkdir dir="${tests.jar.dir}"/>
     </target>
 
-    <target name="tests.compile.shared" depends="tests.prepare, jar.framework.shared, compile.ui.shared">
+    <target name="tests.compile.shared" depends="tests.prepare, jar.framework.shared, jar.storages, compile.ui.shared">
         <javac-call srcdir="${tests.framework.dir}/"
                destdir="${tests.classes.dir}"
 	       	   includes="com/flexive/tests/shared/*.java">
