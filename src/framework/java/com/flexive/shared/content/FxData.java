@@ -37,8 +37,6 @@ import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.*;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
@@ -241,13 +239,21 @@ public abstract class FxData implements Serializable {
      * @return indices of this FxData (min, max)
      */
     public int[] getIndices() {
-        final List<Integer> indices = Lists.newArrayListWithCapacity(16);
+        int count = 0;
         FxData data = this;
         while (data.getParent() != null) {
-            indices.add(data.getIndex());
+            count++;
             data = data.getParent();
         }
-        return ArrayUtils.toPrimitive(Lists.reverse(indices).toArray(new Integer[indices.size()]));
+
+        final int[] indices = new int[count];
+        data = this;
+        while (data.getParent() != null) {
+            indices[--count] = data.getIndex();
+            data = data.getParent();
+        }
+
+        return indices;
     }
 
     /**

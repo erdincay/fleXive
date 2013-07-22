@@ -206,6 +206,9 @@ public class PropertyResolver {
                     case java.sql.Types.CHAR: //oracle    
                         dt = FxDataType.Boolean;
                         break;
+                    case java.sql.Types.CLOB:
+                        dt = FxDataType.Text;
+                        break;
                     default:
                         throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.unknowColumnType", columnName,
                                 DatabaseConst.TBL_CONTENT, type);

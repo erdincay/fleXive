@@ -39,10 +39,7 @@ import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
 import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
-import com.flexive.core.storage.ContentStorage;
-import com.flexive.core.storage.DBStorage;
-import com.flexive.core.storage.FulltextIndexer;
-import com.flexive.core.storage.StorageManager;
+import com.flexive.core.storage.*;
 import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.extractor.htmlExtractor.HtmlExtractor;
@@ -64,7 +61,9 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.ArrayUtils;
@@ -96,26 +95,26 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             " (ID,VER,TDEF,ACL,STEP,MAX_VER,LIVE_VER,ISMAX_VER," +
             //9         10       11       12        13         14        15         16         17         18
             "ISLIVE_VER,ISACTIVE,MAINLANG,RELSRC_ID,RELSRC_VER,RELDST_ID,RELDST_VER,RELSRC_POS,RELDST_POS,CREATED_BY," +
-            //19        20          21          22
-            "CREATED_AT,MODIFIED_BY,MODIFIED_AT,MANDATOR,DBIN_ID,DBIN_VER,DBIN_QUALITY,DBIN_ACL)" +
-            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,-1,1,1,1)";
+            //19        20          21          22                                              23
+            "CREATED_AT,MODIFIED_BY,MODIFIED_AT,MANDATOR,DBIN_ID,DBIN_VER,DBIN_QUALITY,DBIN_ACL,GROUP_POS)" +
+            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,-1,1,1,1,?)";
 
     protected static final String CONTENT_MAIN_UPDATE = "UPDATE " + TBL_CONTENT + " SET " +
             //    1     2      3         4          5           6            7          8          9
             "TDEF=?,ACL=?,STEP=?,MAX_VER=?,LIVE_VER=?,ISMAX_VER=?,ISLIVE_VER=?,ISACTIVE=?,MAINLANG=?," +
-            //         10           11          12           13           14           15            16          17
-            "RELSRC_ID=?,RELSRC_VER=?,RELDST_ID=?,RELDST_VER=?,RELSRC_POS=?,RELDST_POS=?,MODIFIED_BY=?,MODIFIED_AT=? " +
-            //        18    19
+            //         10           11          12           13           14           15            16          17   18
+            "RELSRC_ID=?,RELSRC_VER=?,RELDST_ID=?,RELDST_VER=?,RELSRC_POS=?,RELDST_POS=?,MODIFIED_BY=?,MODIFIED_AT=?,GROUP_POS=? " +
+            //      19      20
             "WHERE ID=? AND VER=?";
     //                                                        1  2   3    4   5    6       7        8         9
     protected static final String CONTENT_MAIN_LOAD = "SELECT ID,VER,TDEF,ACL,STEP,MAX_VER,LIVE_VER,ISMAX_VER,ISLIVE_VER," +
             //10      11       12        13         14        15         16         17         18         19
             "ISACTIVE,MAINLANG,RELSRC_ID,RELSRC_VER,RELDST_ID,RELDST_VER,RELSRC_POS,RELDST_POS,CREATED_BY,CREATED_AT," +
-            //20         21          22       23      24
-            "MODIFIED_BY,MODIFIED_AT,MANDATOR,DBIN_ID,DBIN_ACL FROM " + TBL_CONTENT;
+            //20         21          22       23      24       25
+            "MODIFIED_BY,MODIFIED_AT,MANDATOR,DBIN_ID,DBIN_ACL,GROUP_POS FROM " + TBL_CONTENT;
 
-    //                                                        1   2    3      4     5       6
-    protected static final String CONTENT_DATA_LOAD = "SELECT POS,LANG,ASSIGN,XMULT,ISGROUP,ISMLDEF," +
+    //                                                        1   2    3      4     5                6
+    protected static final String CONTENT_DATA_LOAD = "SELECT POS,LANG,ASSIGN,XMULT,FALSE as ISGROUP,ISMLDEF," +
             //7     8      9     10    11   12      13        14      15     16    17      18
             "FDATE1,FDATE2,FBLOB,FCLOB,FINT,FBIGINT,FTEXT1024,FDOUBLE,FFLOAT,FBOOL,FSELECT,FREF FROM " + TBL_CONTENT_DATA +
             //         1         2
@@ -123,13 +122,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //single insert statement for content data
     protected static final String CONTENT_DATA_INSERT = "INSERT INTO " + TBL_CONTENT_DATA +
-            //1  2   3   4    5      6     7      8           9         10         11      12      13    14
-            "(ID,VER,POS,LANG,ASSIGN,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,TPROP,XDEPTH," +
-            //15     16   17     18     19      20     21    22   23      24
+            //1  2   3   4    5      6     7      8           9         10         11      12    13
+            "(ID,VER,POS,LANG,ASSIGN,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISMLDEF,TPROP,XDEPTH," +
+            //14     15     16   17     18     19      20     21    22   23
             "FSELECT,FREF,FDATE1,FDATE2,FDOUBLE,FFLOAT,FBOOL,FINT,FBIGINT,FTEXT1024," +
-            //25        26    27    28
+            //24         25   26    27
             "UFTEXT1024,FBLOB,FCLOB,UFCLOB)" +
-            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?," +
+            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?," +
             "?,?,?,?,?,?,?,?,?,?," +
             "?,?,?,?)";
 
@@ -143,11 +142,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             "FINT=?,FBIGINT=?,FTEXT1024=?,UFTEXT1024=?,FBLOB=?,FCLOB=?,UFCLOB=? " +
             //        17        18         19           20          21
             "WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?";
-
-    protected static final String GROUP_DATA_INSERT = "INSERT INTO " + TBL_CONTENT_DATA +
-            // 1  2   3   4    5      6     7      8           9         10         11      12      13     14
-            " (ID,VER,POS,LANG,ASSIGN,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,XDEPTH,FSELECT) " +
-            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     /**
      * update statements for content type conversion
@@ -227,11 +221,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //prepared statement positions
     protected final static int INSERT_LANG_POS = 4;
-    protected final static int INSERT_ISDEF_LANG_POS = 12;
+    protected final static int INSERT_ISDEF_LANG_POS = 11;
     //position of first value
-    protected final static int INSERT_VALUE_POS = 14;
+    protected final static int INSERT_VALUE_POS = 13;
     //position of last value
-    protected final static int INSERT_END_POS = 28;
+    protected final static int INSERT_END_POS = 27;
     //position of the id field (start of the where clause) for detail updates
     protected final static int UPDATE_ID_POS = 17;
     protected final static int UPDATE_POS_POS = 1;
@@ -251,52 +245,52 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         detailColumnInsertPosHash = new HashMap<FxDataType, int[]>(20);
         detailColumnUpdatePosHash = new HashMap<FxDataType, int[]>(20);
         detailColumnNameHash.put(FxDataType.Binary, array("FBLOB"));
-        detailColumnInsertPosHash.put(FxDataType.Binary, array(26));
+        detailColumnInsertPosHash.put(FxDataType.Binary, array(25));
         detailColumnUpdatePosHash.put(FxDataType.Binary, array(14));
         detailColumnNameHash.put(FxDataType.Boolean, array("FBOOL"));
-        detailColumnInsertPosHash.put(FxDataType.Boolean, array(21));
+        detailColumnInsertPosHash.put(FxDataType.Boolean, array(20));
         detailColumnUpdatePosHash.put(FxDataType.Boolean, array(9));
         detailColumnNameHash.put(FxDataType.Date, array("FDATE1"));
-        detailColumnInsertPosHash.put(FxDataType.Date, array(17));
+        detailColumnInsertPosHash.put(FxDataType.Date, array(16));
         detailColumnUpdatePosHash.put(FxDataType.Date, array(5));
         detailColumnNameHash.put(FxDataType.DateRange, array("FDATE1", "FDATE2"));
-        detailColumnInsertPosHash.put(FxDataType.DateRange, array(17, 18));
+        detailColumnInsertPosHash.put(FxDataType.DateRange, array(16, 17));
         detailColumnUpdatePosHash.put(FxDataType.DateRange, array(5, 6));
         detailColumnNameHash.put(FxDataType.DateTime, array("FDATE1"));
-        detailColumnInsertPosHash.put(FxDataType.DateTime, array(17));
+        detailColumnInsertPosHash.put(FxDataType.DateTime, array(16));
         detailColumnUpdatePosHash.put(FxDataType.DateTime, array(5));
         detailColumnNameHash.put(FxDataType.DateTimeRange, array("FDATE1", "FDATE2"));
-        detailColumnInsertPosHash.put(FxDataType.DateTimeRange, array(17, 18));
+        detailColumnInsertPosHash.put(FxDataType.DateTimeRange, array(16, 17));
         detailColumnUpdatePosHash.put(FxDataType.DateTimeRange, array(5, 6));
         detailColumnNameHash.put(FxDataType.Double, array("FDOUBLE"));
-        detailColumnInsertPosHash.put(FxDataType.Double, array(19));
+        detailColumnInsertPosHash.put(FxDataType.Double, array(18));
         detailColumnUpdatePosHash.put(FxDataType.Double, array(7));
         detailColumnNameHash.put(FxDataType.Float, array("FFLOAT"));
-        detailColumnInsertPosHash.put(FxDataType.Float, array(20));
+        detailColumnInsertPosHash.put(FxDataType.Float, array(19));
         detailColumnUpdatePosHash.put(FxDataType.Float, array(8));
         detailColumnNameHash.put(FxDataType.LargeNumber, array("FBIGINT"));
-        detailColumnInsertPosHash.put(FxDataType.LargeNumber, array(23));
+        detailColumnInsertPosHash.put(FxDataType.LargeNumber, array(22));
         detailColumnUpdatePosHash.put(FxDataType.LargeNumber, array(11));
         detailColumnNameHash.put(FxDataType.Number, array("FINT"));
-        detailColumnInsertPosHash.put(FxDataType.Number, array(22));
+        detailColumnInsertPosHash.put(FxDataType.Number, array(21));
         detailColumnUpdatePosHash.put(FxDataType.Number, array(10));
         detailColumnNameHash.put(FxDataType.Reference, array("FREF"));
-        detailColumnInsertPosHash.put(FxDataType.Reference, array(16));
+        detailColumnInsertPosHash.put(FxDataType.Reference, array(15));
         detailColumnUpdatePosHash.put(FxDataType.Reference, array(4));
         detailColumnNameHash.put(FxDataType.String1024, array("FTEXT1024"));
-        detailColumnInsertPosHash.put(FxDataType.String1024, array(24));
+        detailColumnInsertPosHash.put(FxDataType.String1024, array(23));
         detailColumnUpdatePosHash.put(FxDataType.String1024, array(12));
         detailColumnNameHash.put(FxDataType.Text, array("FCLOB"));
-        detailColumnInsertPosHash.put(FxDataType.Text, array(27));
+        detailColumnInsertPosHash.put(FxDataType.Text, array(26));
         detailColumnUpdatePosHash.put(FxDataType.Text, array(15));
         detailColumnNameHash.put(FxDataType.HTML, array("FCLOB", "FBOOL", "UFCLOB"));
-        detailColumnInsertPosHash.put(FxDataType.HTML, array(27, 21, 28));
+        detailColumnInsertPosHash.put(FxDataType.HTML, array(26, 20, 27));
         detailColumnUpdatePosHash.put(FxDataType.HTML, array(15, 9, 16));
         detailColumnNameHash.put(FxDataType.SelectOne, array("FSELECT"));
-        detailColumnInsertPosHash.put(FxDataType.SelectOne, array(15));
+        detailColumnInsertPosHash.put(FxDataType.SelectOne, array(14));
         detailColumnUpdatePosHash.put(FxDataType.SelectOne, array(3));
         detailColumnNameHash.put(FxDataType.SelectMany, array("FSELECT", "FTEXT1024"/*comma separated list of selected id's*/, "FINT" /*number of selected options*/));
-        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(15, 24/*comma separated list of selected id's*/, 22/*number of selected options*/));
+        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(14, 23/*comma separated list of selected id's*/, 21/*number of selected options*/));
         detailColumnUpdatePosHash.put(FxDataType.SelectMany, array(3, 12/*comma separated list of selected id's*/, 10/*number of selected options*/));
 
         mainColumnHash = new HashMap<Long, String[]>(20);
@@ -431,9 +425,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return -1;
         switch (prop.getDataType()) {
             case String1024:
-                return insert ? 25 : 13; //UFTEXT1024
+                return insert ? 24 : 13; //UFTEXT1024
             case Text:
-                return insert ? 28 : 16; //UFCLOB
+                return insert ? 27 : 16; //UFCLOB
             default:
                 return -1;
         }
@@ -461,8 +455,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     protected int getValueDataInsertPos(FxDataType dataType) {
         if (dataType == FxDataType.Number || dataType == FxDataType.SelectMany)
-            return 23; //FBIGINT
-        return 22; //FINT
+            return 22; //FBIGINT
+        return 21; //FINT
     }
 
     /**
@@ -558,17 +552,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         FxPK pk = createMainEntry(con, newId, version, content);
         FxType type = env.getType(content.getTypeId());
-        PreparedStatement ps = null, psGroup = null;
+        PreparedStatement ps = null;
         FulltextIndexer ft = getFulltextIndexer(pk, con);
         try {
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            psGroup = con.prepareStatement(GROUP_DATA_INSERT);
-            createDetailEntries(con, ps, psGroup, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
 
             ps.executeBatch();
-            psGroup.executeBatch();
 
             ft.commitChanges();
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
@@ -597,7 +589,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            Database.closeObjects(GenericHierarchicalStorage.class, ps, psGroup);
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
             ft.cleanup();
         }
         return pk;
@@ -747,7 +739,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
 
         FxPK pk;
-        PreparedStatement ps = null, psGroup = null;
+        PreparedStatement ps = null;
         FulltextIndexer ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
@@ -757,11 +749,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            psGroup = con.prepareStatement(GROUP_DATA_INSERT);
-            createDetailEntries(con, ps, psGroup, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
 
             ps.executeBatch();
-            psGroup.executeBatch();
 
             if (type.isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
@@ -782,7 +772,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            Database.closeObjects(GenericHierarchicalStorage.class, ps, psGroup);
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
             if (ft != null)
                 ft.cleanup();
         }
@@ -961,6 +951,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setLong(21, content.getValue(FxDateTime.class, "/MODIFIED_AT").getBestTranslation().getTime());
             }
             ps.setLong(22, content.getMandatorId());
+            final String groupPositions = getGroupPositions(content);
+            if (groupPositions != null) {
+                StorageManager.getStorageImpl().setBigString(ps, 23, groupPositions);
+            } else {
+                ps.setNull(23, Types.CLOB);
+            }
             ps.executeUpdate();
 
             updateACLEntries(con, content, pk, true);
@@ -1033,7 +1029,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      *
      * @param con         an open and valid connection
      * @param ps          batch prepared statement for detail inserts
-     * @param psGroup     batch prepared statement for group data inserts
      * @param ft          fulltext indexer
      * @param sql         an optional StringBuffer
      * @param pk          primary key of the content
@@ -1044,10 +1039,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    protected void createDetailEntries(Connection con, PreparedStatement ps, PreparedStatement psGroup, FulltextIndexer ft, StringBuilder sql,
+    protected void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, StringBuilder sql,
                                        FxPK pk, boolean maxVersion, boolean liveVersion, List<FxData> data)
             throws FxNotFoundException, FxDbException, FxCreateException {
-        createDetailEntries(con, ps, psGroup, ft, sql, pk, maxVersion, liveVersion, data, false);
+        createDetailEntries(con, ps, ft, sql, pk, maxVersion, liveVersion, data, false);
     }
 
     /**
@@ -1066,7 +1061,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    private void createDetailEntries(Connection con, PreparedStatement ps, PreparedStatement psGroup, FulltextIndexer ft, StringBuilder sql,
+    private void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, StringBuilder sql,
                                      FxPK pk, boolean maxVersion, boolean liveVersion, List<FxData> data,
                                      boolean disregardFlatStorageEntry) throws FxNotFoundException, FxDbException, FxCreateException {
         try {
@@ -1078,8 +1073,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     if (!prop.isSystemInternal())
                         insertPropertyData(prop, data, con, ps, ft, pk, pdata, maxVersion, liveVersion, disregardFlatStorageEntry);
                 } else {
-                    insertGroupData(pk, psGroup, ((FxGroupData) curr), maxVersion, liveVersion);
-                    createDetailEntries(con, ps, psGroup, ft, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
+                    //insertGroupData(pk, psGroup, ((FxGroupData) curr), maxVersion, liveVersion);
+                    createDetailEntries(con, ps, ft, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
                 }
             }
         } catch (SQLException e) {
@@ -1160,7 +1155,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
         clearPreparedStatement(ps, INSERT_VALUE_POS, INSERT_END_POS);
-        ps.setLong(15, 0); //FSELECT has to be set to 0 and not null
+        ps.setLong(14, 0); //FSELECT has to be set to 0 and not null
 
         ps.setLong(1, pk.getId());
         ps.setInt(2, pk.getVersion());
@@ -1168,16 +1163,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         ps.setLong(5, data.getAssignmentId());
 //        ps.setString(6, "dummy"/*XPathElement.stripType(data.getXPath())*/);
 //        ps.setString(7, "dummyfull"/*XPathElement.stripType(data.getXPathFull())*/);
-        String xmult = StringUtils.join(ArrayUtils.toObject(data.getIndices()), ',');
+        String xmult = FxArrayUtils.toStringArray(data.getIndices(), ',');
         ps.setString(6, xmult);
         ps.setInt(7, data.getIndex());
         ps.setString(8, getParentGroupXMult(xmult));
         ps.setBoolean(9, isMaxVer);
         ps.setBoolean(10, isLiveVer);
-        ps.setBoolean(11, false); //ISGROUP
-        ps.setLong(13, prop.getId());
+        ps.setLong(12, prop.getId());
 //        ps.setString(16, "dummyParent"/*XPathElement.stripType(data.getParent().getXPathFull())*/);
-        ps.setInt(14, data.getIndices().length);
+        ps.setInt(13, data.getIndices().length);
 
         if (!data.getValue().isMultiLanguage()) {
             ps.setBoolean(INSERT_LANG_POS, true);
@@ -1536,39 +1530,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
-     * Insert group detail data into the database
-     *
-     * @param pk        primary key of the content
-     * @param ps        a batched statement for creating group data
-     * @param groupData the group
-     * @param isMaxVer  is this content in the max. version?
-     * @param isLiveVer is this content in the live version?
-     * @throws SQLException on errors
-     */
-    protected void insertGroupData(FxPK pk, PreparedStatement ps, FxGroupData groupData, boolean isMaxVer, boolean isLiveVer) throws SQLException {
-        if (groupData == null || (groupData.isEmpty() && groupData.isRemoveable()))
-            return;
-
-        ps.setLong(1, pk.getId());
-        ps.setInt(2, pk.getVersion());
-        ps.setInt(3, groupData.getPos());
-        ps.setInt(4, (int) FxLanguage.SYSTEM_ID);
-        ps.setLong(5, groupData.getAssignmentId());
-        final String xmult = StringUtils.join(ArrayUtils.toObject(groupData.getIndices()), ',');
-        ps.setString(6, xmult);
-        ps.setInt(7, groupData.getIndex());
-        ps.setString(8, getParentGroupXMult(xmult));
-        ps.setBoolean(9, isMaxVer);
-        ps.setBoolean(10, isLiveVer);
-        ps.setBoolean(11, true);
-        ps.setBoolean(12, false);
-        ps.setInt(13, groupData.getIndices().length);
-        ps.setLong(14, 0); //FSELECT
-
-        ps.addBatch();
-    }
-
-    /**
      * Remove a detail data entry (group or property, in all existing languages)
      *
      * @param con  an open and valid Connection
@@ -1640,10 +1601,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             final long aclId = rs.getLong(4);
             Step step = env.getStep(rs.getLong(5));
             Mandator mand = env.getMandator(rs.getInt(22));
+            final GroupPositionsProvider groupPositions = new GroupPositionsProvider(rs.getString(25));
             if (!type.getAssignmentsForDataType(FxDataType.Binary).isEmpty()) {
                 conNoTX = Database.getNonTXDataSource().getConnection();
             }
-            FxGroupData root = loadDetails(con, conNoTX, type, env, contentPK, pk.getVersion());
+            FxGroupData root = loadDetails(con, conNoTX, type, env, contentPK, pk.getVersion(), groupPositions);
             rs.getLong(12);
             if (!rs.wasNull()) {
                 sourcePK = new FxPK(rs.getLong(12), rs.getInt(13));
@@ -1709,7 +1671,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException               on errors
      */
     @SuppressWarnings("unchecked")
-    protected FxGroupData loadDetails(Connection con, Connection conNoTX, FxType type, FxEnvironment env, FxPK pk, int requestedVersion) throws FxLoadException, SQLException, FxInvalidParameterException, FxDbException {
+    protected FxGroupData loadDetails(Connection con, Connection conNoTX, FxType type, FxEnvironment env, FxPK pk, int requestedVersion, GroupPositionsProvider groupPositionsProvider) throws FxLoadException, SQLException, FxInvalidParameterException, FxDbException {
         FxGroupData root;
         PreparedStatement ps = null;
         try {
@@ -1754,12 +1716,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             //add flat entries that are positioned before the current entry
                             FxFlatStorageLoadColumn flatColumn;
                             while ((flatColumn = flatContainer.pop(currXPath.substring(0, currXPath.lastIndexOf('/') + 1), currXDepth, currPos)) != null) {
-                                addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(),
+                                addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(), groupPositionsProvider,
                                         flatColumn.getValue());
                             }
                         }
                     }
-                    addValue(root, currXPath, currAssignment, currPos, currValue);
+                    addValue(root, currXPath, currAssignment, currPos, groupPositionsProvider, currValue);
                     currValue = null;
                     defLang = FxLanguage.SYSTEM_ID;
                 }
@@ -1925,30 +1887,53 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         defLang = currLang;
                 }
             }
+
+            // check for empty groups
+            for (Map.Entry<Long, Map<String, Integer>> entry : groupPositionsProvider.getPositions().entrySet()) {
+                final long assignmentId = entry.getKey();
+                final FxGroupAssignment groupAssignment = (FxGroupAssignment) env.getAssignment(assignmentId);
+
+                final Set<String> existingMults = Sets.newHashSet();
+                try {
+                    for (FxData data : root.getGroup(assignmentId).getElements()) {
+                        existingMults.add(FxArrayUtils.toStringArray(data.getIndices(), ','));
+                    }
+                } catch (FxRuntimeException e) {
+                    // group not found
+                }
+                for (Map.Entry<String, Integer> position : entry.getValue().entrySet()) {
+                    final String xmult = position.getKey();
+                    if (!existingMults.contains(xmult)) {
+                        // add (empty) group
+                        root.addGroup(XPathElement.toXPathMult(groupAssignment.getXPath(), xmult.replace('/', ',')), groupAssignment, position.getValue());
+                    }
+                }
+            }
+
             if (currValue != null) {
                 if (flatContainer != null) {
                     //add flat entries that are positioned before the current entry
                     FxFlatStorageLoadColumn flatColumn;
                     while ((flatColumn = flatContainer.pop(currXPath.substring(0, currXPath.lastIndexOf('/') + 1), currXDepth, currPos)) != null) {
-                        addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(),
+                        addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(), groupPositionsProvider,
                                 flatColumn.getValue());
                     }
                 }
                 //add last property
                 if (!isGroup)
                     currValue.setDefaultLanguage(defLang);
-                addValue(root, currXPath, currAssignment, currPos, currValue);
+                addValue(root, currXPath, currAssignment, currPos, groupPositionsProvider, currValue);
             } else {
                 if (flatContainer == null && isGroup && currAssignment != null) //make sure to add the last assignment if it is a group and no flat storage is enabled
-                    addValue(root, currXPath, currAssignment, currPos, currValue);
+                    addValue(root, currXPath, currAssignment, currPos, groupPositionsProvider, currValue);
             }
             if (flatContainer != null) {
                 if (isGroup && currAssignment != null) //if the last value was a group, add it (can only happen when using a flat storage)
-                    addValue(root, currXPath, currAssignment, currPos, currValue);
+                    addValue(root, currXPath, currAssignment, currPos, groupPositionsProvider, currValue);
                 //add remaining flat entries
                 FxFlatStorageLoadColumn flatColumn;
                 while ((flatColumn = flatContainer.pop()) != null) {
-                    addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(),
+                    addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(), groupPositionsProvider,
                             flatColumn.getValue());
                 }
             }
@@ -2107,12 +2092,31 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxCreateException           if failed to create group entries
      */
     protected void addValue(FxGroupData root, String xPath, FxAssignment assignment,
-                            int pos, FxValue value) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
+                            int pos, GroupPositionsProvider groupPositionsProvider, FxValue value) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
         if (!assignment.isEnabled())
             return;
         if (assignment instanceof FxGroupAssignment) {
             root.addGroup(xPath, (FxGroupAssignment) assignment, pos, true);
         } else {
+            final FxGroupAssignment parentAssignment = assignment.getParentGroupAssignment();
+            if (parentAssignment != null) {
+                // check if group already exists
+                final List<XPathElement> split = XPathElement.split(xPath);
+                String groupXPath = "";
+                for (int i = 0; i < split.size() - 1; i++) {
+                    groupXPath += '/' + split.get(i).toString();
+                }
+                try {
+                    root.getGroup(groupXPath);
+                } catch (FxRuntimeException e) {
+                    final int[] indices = XPathElement.getIndices(xPath);
+                    final int[] parentXMult = ArrayUtils.subarray(indices, 0, indices.length - 1);
+                    root.addGroup(groupXPath, parentAssignment,
+                            groupPositionsProvider.getPosition(parentAssignment.getId(), parentXMult),
+                            true
+                    );
+                }
+            }
             root.addProperty(xPath, (FxPropertyAssignment) assignment, value, pos);
         }
     }
@@ -2187,8 +2191,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         lockTables(con, pk.getId(), pk.getVersion());
 
-        if (delta.isInternalPropertyChanged())
+        if (delta.isInternalPropertyChanged() || delta.isGroupDataChanged()) {
             updateMainEntry(con, content);
+        }
+
         try {
             disableDetailUniqueChecks(con);
             //full replace code start
@@ -2259,12 +2265,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             List<FxDelta.FxDeltaChange> updatesRemaining = new ArrayList<FxDelta.FxDeltaChange>(delta.getUpdates());
 
             PreparedStatement ps_insert = null;
-            PreparedStatement ps_insert_group = null;
             PreparedStatement ps_update = null;
 
             try {
                 ps_insert = con.prepareStatement(CONTENT_DATA_INSERT);
-                ps_insert_group = con.prepareStatement(GROUP_DATA_INSERT);
                 ps_update = con.prepareStatement(CONTENT_DATA_UPDATE);
 
                 while (updatesRemaining.size() > 0) {
@@ -2316,28 +2320,23 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         if (!ticket.mayCreateACL(acl.getId(), content.getLifeCycleInfo().getCreatorId()))
                             throw new FxNoAccessException("ex.acl.noAccess.property.create", acl.getDisplayName(), change.getXPath());
                     }
-                    if (!change.getNewData().isSystemInternal()) {
-                        if (change.isGroup())
-                            insertGroupData(pk, ps_insert_group, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
-                        else {
-                            final FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
-                            insertPropertyData(prop,
-                                    content.getData("/"), con, ps_insert, null, pk, ((FxPropertyData) change.getNewData()),
-                                    content.isMaxVersion(), content.isLiveVersion());
-                            ft.index(change);
-                            //check if the property changed is a FQN
-                            if (prop.getId() == fqnPropertyId) {
-                                syncFQNName(con, content, pk, change);
-                            }
+                    if (!change.getNewData().isSystemInternal() && change.isProperty()) {
+                        final FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
+                        insertPropertyData(prop,
+                                content.getData("/"), con, ps_insert, null, pk, ((FxPropertyData) change.getNewData()),
+                                content.isMaxVersion(), content.isLiveVersion());
+                        ft.index(change);
+                        //check if the property changed is a FQN
+                        if (prop.getId() == fqnPropertyId) {
+                            syncFQNName(con, content, pk, change);
                         }
                     }
                 }
 
                 ps_update.executeBatch();
                 ps_insert.executeBatch();
-                ps_insert_group.executeBatch();
             } finally {
-                Database.closeObjects(GenericHierarchicalStorage.class, ps_update, ps_insert, ps_insert_group);
+                Database.closeObjects(GenericHierarchicalStorage.class, ps_update, ps_insert);
             }
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
@@ -2493,8 +2492,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(CONTENT_MAIN_UPDATE);
-            ps.setLong(18, content.getPk().getId());
-            ps.setInt(19, content.getPk().getVersion());
+            ps.setLong(19, content.getPk().getId());
+            ps.setInt(20, content.getPk().getVersion());
             ps.setLong(1, content.getTypeId());
             ps.setLong(2, content.getAclIds().size() > 1 ? ACL.NULL_ACL_ID : content.getAclIds().get(0));
             ps.setLong(3, content.getStepId());
@@ -2528,6 +2527,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
                 ps.setLong(16, userId);
                 ps.setLong(17, System.currentTimeMillis());
+            }
+            final String groupPositions = getGroupPositions(content);
+            if (groupPositions != null) {
+                StorageManager.getStorageImpl().setBigString(ps, 18, groupPositions);
+            } else {
+                ps.setNull(18, Types.CLOB);
             }
             ps.executeUpdate();
 
@@ -3452,10 +3457,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     // use case 2: flat --> hierarchical
                     if (!nonFlatSourceAssignments.contains(sourceId) && nonFlatDestinationAssignments.contains(destinationId)) {
                         ps = con.prepareStatement(CONTENT_DATA_INSERT);
-                        ps_group = con.prepareStatement(GROUP_DATA_INSERT);
 
                         // data for the current xpath
-                        createDetailEntries(con, ps, ps_group, null, new StringBuilder(2000), content.getPk(), content.isMaxVersion(), content.isLiveVersion(), data, true);
+                        createDetailEntries(con, ps, null, new StringBuilder(2000), content.getPk(), content.isMaxVersion(), content.isLiveVersion(), data, true);
                         ps.executeBatch();
                         ps.close();
 
@@ -3565,4 +3569,41 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.close();
         }
     }
+
+    /**
+     * Build the GROUP_POS entry for FX_CONTENT.
+     *
+     * @param content    the content instance
+     * @return           the positions of all groups
+     */
+    private String getGroupPositions(FxContent content) {
+        final Multimap<Long, FxGroupData> positions = HashMultimap.create();
+        collectGroupChildren(positions, content.getRootGroup());
+        if (positions.isEmpty()) {
+            return null;
+        } else {
+            final GroupPositionsProvider.Builder builder = GroupPositionsProvider.builder();
+            for (Map.Entry<Long, Collection<FxGroupData>> entry : positions.asMap().entrySet()) {
+                builder.startAssignment(entry.getKey());
+                for (FxGroupData groupData : entry.getValue()) {
+                    builder.addPos(groupData.getIndices(), groupData.getPos());
+                }
+            }
+            return builder.build();
+        }
+    }
+
+    private void collectGroups(Multimap<Long, FxGroupData> groups, FxGroupData group) {
+        groups.put(group.getAssignmentId(), group);
+        collectGroupChildren(groups, group);
+    }
+
+    private void collectGroupChildren(Multimap<Long, FxGroupData> groups, FxGroupData group) {
+        for (FxData child : group.getChildren()) {
+            if (child instanceof FxGroupData) {
+                collectGroups(groups, (FxGroupData) child);
+            }
+        }
+    }
+
 }

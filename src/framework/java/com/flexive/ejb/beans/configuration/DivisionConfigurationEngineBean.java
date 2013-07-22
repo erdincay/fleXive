@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
@@ -85,6 +86,9 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
 
     @Resource
     javax.ejb.SessionContext ctx;
+
+    @EJB
+    DatabasePatchUtilsLocal patchUtils;
 
     @Override
     protected ParameterScope getDefaultScope() {
@@ -249,7 +253,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void patchDatabase() throws FxApplicationException {
         final long oldVersion = get(SystemParameters.DB_VERSION);
         final long patchedVersion = performPatching();
@@ -258,7 +262,6 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     private long performPatching() throws FxApplicationException {
         FxContext.get().runAsSystem();
         try {
@@ -324,6 +327,17 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                             if (ps.from == currentVersion) {
                                 LOG.info("Patching database schema from version [" + ps.from + "] to [" + ps.to + "] ... ");
                                 new SQLScriptExecutor(ps.script, stmt).execute();
+                                if (ps.to == 2863) {
+                                    patchUtils.migrateContentDataGroups();
+
+                                    // remove ISGROUP after the migration was committed
+                                    try {
+                                        stmt.execute("ALTER TABLE " + DatabaseConst.TBL_CONTENT_DATA + " DROP COLUMN ISGROUP;");
+                                    } catch (SQLException e) {
+                                        // not critical, column will be ignored in future versions
+                                        LOG.warn("Failed to remove " + DatabaseConst.TBL_CONTENT_DATA + ".ISGROUP (ignored)", e);
+                                    }
+                                }
                                 currentVersion = ps.to;
                                 patching = true;
                                 if (ps.to > maxVersion)
@@ -351,7 +365,6 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     private void modifyDatabaseVersion(long currentVersion) throws FxApplicationException {
         FxContext.get().runAsSystem();
         try {

@@ -31,13 +31,13 @@
  ***************************************************************/
 package com.flexive.ejb.beans.structure;
 
-import com.flexive.core.structure.FxEnvironmentUtils;
 import com.flexive.core.Database;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.FulltextIndexer;
+import com.flexive.core.storage.GroupPositionsProvider;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.ejb.beans.EJBUtils;
@@ -2690,7 +2690,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     private long getGroupInstanceMultiplicity(Connection con, long groupId, boolean minimum) throws SQLException {
         PreparedStatement ps = null;
-        long mult = 0;
+        long mult = -1;
         List<Long> assignmentIds = new ArrayList<Long>();
         try { // retrieve the assignment ids, then the max / min xindex from the content table for the given ids
             ps = con.prepareStatement("SELECT ID FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP=?");
@@ -2702,30 +2702,33 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.close();
 
             if (assignmentIds.size() > 0) {
-                StringBuilder query;
-                if (minimum) {
-                    query = new StringBuilder("SELECT MIN(s.MAXIDX) FROM (SELECT MAX(d.XINDEX) AS MAXIDX,d.ID,d.VER FROM " + TBL_CONTENT_DATA + " d WHERE d.ASSIGN=");
-                } else
-                    query = new StringBuilder("SELECT MAX(d.XINDEX) FROM " + TBL_CONTENT_DATA + " d WHERE d.ASSIGN=");
-                for (int i = 0; i < assignmentIds.size(); i++) { // build the complete query
-                    query.append(assignmentIds.get(i).toString());
-                    if (i < assignmentIds.size() - 1) {
-                        query.append(" OR d.ASSIGN=");
+                ps = con.prepareStatement("SELECT GROUP_POS FROM " + TBL_CONTENT);
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    final GroupPositionsProvider positions = new GroupPositionsProvider(rs.getString(1));
+                    for (Long id : assignmentIds) {
+                        final Map<String, Integer> entry = positions.getPositions().get(id);
+                        if (entry != null) {
+                            for (String xmult : entry.keySet()) {
+                                try {
+                                    final int index = Integer.parseInt(xmult.substring(xmult.lastIndexOf('/') + 1));
+                                    if (mult == -1) {
+                                        mult = minimum ? Long.MAX_VALUE : 1;
+                                    }
+                                    mult = minimum ? Math.min(mult, index) : Math.max(mult, index);
+                                } catch (NumberFormatException e) {
+                                    LOG.warn("Failed to parse group multiplicity: " + xmult);
+                                }
+                            }
+                        }
                     }
                 }
-                if (minimum) {
-                    query.append(" GROUP BY d.ID, d.VER) s");
-                }
-                ps = con.prepareStatement(query.toString());
-                rs = ps.executeQuery();
-                rs.next();
-                mult = rs.getLong(1);
                 ps.close();
             }
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
-        return mult;
+        return Math.max(0, mult);
     }
 
     /**
