@@ -69,6 +69,12 @@
         	<groupId>com.fasterxml.jackson.jaxrs</groupId>
         	<artifactId>jackson-jaxrs-xml-provider</artifactId>
         	<version>${jackson.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.xml.stream</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
