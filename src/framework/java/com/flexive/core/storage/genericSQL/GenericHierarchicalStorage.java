@@ -106,6 +106,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             "RELSRC_ID=?,RELSRC_VER=?,RELDST_ID=?,RELDST_VER=?,RELSRC_POS=?,RELDST_POS=?,MODIFIED_BY=?,MODIFIED_AT=?,GROUP_POS=? " +
             //      19      20
             "WHERE ID=? AND VER=?";
+
+    //                                                                                       1                 2        3
+    protected static final String CONTENT_GROUP_POS_UPDATE = "UPDATE " + TBL_CONTENT + " SET GROUP_POS=? WHERE ID=? AND VER=?";
+
     //                                                        1  2   3    4   5    6       7        8         9
     protected static final String CONTENT_MAIN_LOAD = "SELECT ID,VER,TDEF,ACL,STEP,MAX_VER,LIVE_VER,ISMAX_VER,ISLIVE_VER," +
             //10      11       12        13         14        15         16         17         18         19
@@ -840,12 +844,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             } catch (SQLException e) {
                 throw new FxUpdateException(e, "ex.content.step.dependencies.update.failed", id, e.getMessage());
             } finally {
-                try {
-                    if (ps != null)
-                        ps.close();
-                } catch (SQLException e) {
-                    LOG.error(e, e);
-                }
+                Database.closeObjects(GenericHierarchicalStorage.class, ps);
             }
         }
     }
@@ -885,12 +884,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxNotFoundException(e, "ex.content.versionInfo.sqlError", id, e.getMessage());
         } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-            } catch (SQLException e) {
-                LOG.error(e, e);
-            }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
         return new FxContentVersionInfo(id, min_ver, max_ver, live_ver, lastMod_ver, versions);
     }
@@ -966,12 +960,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxUpdateException e) {
             throw new FxCreateException(e);
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
         return pk;
     }
@@ -1473,12 +1462,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -1561,8 +1545,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setString(4, FxArrayUtils.toStringArray(data.getIndices(), ','));
             ps.executeUpdate();
         } finally {
-            if (ps != null)
-                ps.close();
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -1942,8 +1925,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);
         } finally {
-            if (ps != null)
-                ps.close();
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
         return root;
     }
@@ -2036,8 +2018,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
             return ref;
         } finally {
-            if (ps != null)
-                ps.close();
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -2056,12 +2037,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxLoadException(e, "ex.db.sqlError", e.getMessage());
         } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-            } catch (SQLException e) {
-                LOG.error(e);
-            }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -2191,8 +2167,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         lockTables(con, pk.getId(), pk.getVersion());
 
-        if (delta.isInternalPropertyChanged() || delta.isGroupDataChanged()) {
+        if (delta.isInternalPropertyChanged()) {
             updateMainEntry(con, content);
+        } else if (delta.isGroupDataChanged()) {
+            updateGroupPositions(con, content);
         }
 
         try {
@@ -2497,8 +2475,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, content.getTypeId());
             ps.setLong(2, content.getAclIds().size() > 1 ? ACL.NULL_ACL_ID : content.getAclIds().get(0));
             ps.setLong(3, content.getStepId());
-            ps.setInt(4, content.getVersion());
-            ps.setInt(5, content.isLiveVersion() ? 1 : 0);
+            ps.setInt(4, content.getMaxVersion());
+            ps.setInt(5, content.getLiveVersion());
             ps.setBoolean(6, content.isMaxVersion());
             ps.setBoolean(7, content.isLiveVersion());
             ps.setBoolean(8, content.isActive());
@@ -2528,12 +2506,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setLong(16, userId);
                 ps.setLong(17, System.currentTimeMillis());
             }
-            final String groupPositions = getGroupPositions(content);
-            if (groupPositions != null) {
-                StorageManager.getStorageImpl().setBigString(ps, 18, groupPositions);
-            } else {
-                ps.setNull(18, Types.CLOB);
-            }
+            setGroupPositions(ps, content, 18);
             ps.executeUpdate();
 
             if (content.isForceLifeCycle()) {
@@ -2553,12 +2526,31 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxCreateException e) {
             throw new FxUpdateException(e);
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
+        }
+    }
+
+    private void setGroupPositions(PreparedStatement ps, FxContent content, int parameterIndex) throws SQLException {
+        final String groupPositions = getGroupPositions(content);
+        if (groupPositions != null) {
+            StorageManager.getStorageImpl().setBigString(ps, parameterIndex, groupPositions);
+        } else {
+            ps.setNull(parameterIndex, Types.CLOB);
+        }
+    }
+
+    protected void updateGroupPositions(Connection con, FxContent content) throws FxUpdateException {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(CONTENT_GROUP_POS_UPDATE);
+            setGroupPositions(ps, content, 1);
+            ps.setLong(2, content.getPk().getId());
+            ps.setInt(3, content.getPk().getVersion());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -2638,12 +2630,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxLockException e) {
             throw new FxLoadException(e);
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -2692,7 +2679,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         throw new FxRemoveException("ex.content.reference.inUse.instance", id, refCount);
                 }
             } finally {
-                if (ps != null) ps.close();
+                Database.closeObjects(GenericHierarchicalStorage.class, ps);
             }
         } catch (SQLException e) {
             throw new FxRemoveException(e, "ex.db.sqlError", e.getMessage());
@@ -2731,12 +2718,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxApplicationException e) {
             throw new FxRemoveException(e);
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
             ft.cleanup();
         }
         if (type.isTrackHistory())
@@ -2786,12 +2768,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             throw new FxRemoveException(e);
         } finally {
             ft.cleanup();
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
         if (type.isTrackHistory())
             EJBLookup.getHistoryTrackerEngine().track(type, pk, null, "history.content.removed.version", ver);
@@ -2831,12 +2808,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             throw new FxRemoveException(e);
         } finally {
             ft.cleanup();
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -2864,12 +2836,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -3065,8 +3032,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         throw new FxUpdateException("ex.content.update.multi2single.contentExist", CacheAdmin.getEnvironment().getAssignment(assignmentId).getXPath(), count);
             }
         } finally {
-            if (ps != null)
-                ps.close();
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
@@ -3236,8 +3202,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             rs.next();
             count = rs.getLong(1);
         } finally {
-            if (ps != null)
-                ps.close();
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
         return count;
     }
@@ -3565,8 +3530,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (ps != null)
-                ps.close();
+            Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
     }
 
