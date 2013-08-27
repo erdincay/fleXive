@@ -1886,9 +1886,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
                 for (Map.Entry<String, Integer> position : entry.getValue().entrySet()) {
                     final String xmult = position.getKey();
-                    if (!existingMults.contains(xmult)) {
+                    if (!existingMults.contains(xmult) && groupAssignment.getMultiplicity().isRequired()) {
                         // add (empty) group
-                        root.addGroup(XPathElement.toXPathMult(groupAssignment.getXPath(), xmult.replace('/', ',')), groupAssignment, position.getValue());
+                        root.addGroup(XPathElement.toXPathMult(groupAssignment.getXPath(), xmult.replace('/', ',')), groupAssignment, position.getValue(), true);
                     }
                 }
             }
