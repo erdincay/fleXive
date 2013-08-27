@@ -61,10 +61,7 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1920,6 +1917,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             flatColumn.getValue());
                 }
             }
+            // fix group positions after all groups have been added
+            fixGroupPositions(root, groupPositionsProvider);
         } catch (FxCreateException e) {
             throw new FxLoadException(e);
         } catch (FxNotFoundException e) {
@@ -1928,6 +1927,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             Database.closeObjects(GenericHierarchicalStorage.class, ps);
         }
         return root;
+    }
+
+    private void fixGroupPositions(FxGroupData group, GroupPositionsProvider groupPositions) {
+        // TODO generic but inefficient implementation (lots of copying of the group's data list)
+        if (group.getParent() != null && groupPositions.getPositions().containsKey(group.getAssignmentId()) && !group.isEmpty()) {
+            group.getParent().setChildPosition(group, groupPositions.getPosition(group.getAssignmentId(), group.getIndices()));
+        }
+        for (FxData child : ImmutableList.copyOf(group.getChildren())) {
+            if (child.isGroup()) {
+                fixGroupPositions((FxGroupData) child, groupPositions);
+            }
+        }
     }
 
     /**
@@ -2087,10 +2098,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 } catch (FxRuntimeException e) {
                     final int[] indices = XPathElement.getIndices(xPath);
                     final int[] parentXMult = ArrayUtils.subarray(indices, 0, indices.length - 1);
-                    root.addGroup(groupXPath, parentAssignment,
-                            groupPositionsProvider.getPosition(parentAssignment.getId(), parentXMult),
-                            true
-                    );
+                    root.addGroup(groupXPath, parentAssignment, Integer.MAX_VALUE, true);
                 }
             }
             root.addProperty(xPath, (FxPropertyAssignment) assignment, value, pos);

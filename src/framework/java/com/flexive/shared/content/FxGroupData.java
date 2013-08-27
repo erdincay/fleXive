@@ -285,9 +285,11 @@ public class FxGroupData extends FxData {
         int pos = (data.size() == 0 ? 0 : child.getPos());
         switch (child.getPos()) {
             case POSITION_TOP:
+            case Integer.MIN_VALUE:
                 pos = 0;
                 break;
             case POSITION_BOTTOM:
+            case Integer.MAX_VALUE:
                 pos = data.size();
                 break;
         }
@@ -1079,6 +1081,46 @@ public class FxGroupData extends FxData {
                 ((FxGroupData) child).setChangeListener(changeListener, includeSubGroups);
             else
                 ((FxPropertyData) child).getValue().setChangeListener(changeListener);
+        }
+    }
+
+    /**
+     * Move a child to a new position.
+     *
+     * @param child     the child data
+     * @param newPos    the new position
+     * @since 3.1.7
+     */
+    public void setChildPosition(FxData child, int newPos) {
+        if (child.getPos() == newPos) {
+            return;
+        }
+        boolean found = false;
+        int maxPos = Math.min(data.size(), newPos);
+        for (int i = 0; i < data.size(); i++) {
+            if (data.get(i) == child) {
+                if (i == newPos) {
+                    return; // may happen when the positions were not compacted
+                }
+                data.remove(i);
+                found = true;
+                if (i < newPos) {
+                    newPos--;
+                } else {
+                    maxPos = i + 1;
+                }
+                break;
+            }
+        }
+        if (!found) {
+            throw new FxInvalidParameterException("child", "ex.content.group.child", child.getXPath(), getXPath()).asRuntimeException();
+        }
+
+        data.add(newPos, child);
+
+        // fix positions
+        for (int i = 0; i < maxPos; i++) {
+            data.get(i).setPos(i);
         }
     }
 
