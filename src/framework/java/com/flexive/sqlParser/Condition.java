@@ -64,7 +64,8 @@ public class Condition implements BraceElement {
         NOT_IN("not in"),
         NEAR(null) /* no SQL equivalent */,
         IS_CHILD_OF(null),
-        IS_DIRECT_CHILD_OF(null);
+        IS_DIRECT_CHILD_OF(null),
+        IN_BRIEFCASE("IN");
 
         private String sql;
 

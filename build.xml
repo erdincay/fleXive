@@ -1168,7 +1168,7 @@ database.vendor=MySQL
         </copy>
     </target>
 
-    <target name="jar.maven.sources" description="Creates the source JAR files">
+    <target name="jar.maven.sources" description="Creates the source JAR files" unless="maven.sources.skip">
         <mkdir dir="${flexive.build.repo.dir}"/>
 
         <parallel>

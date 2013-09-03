@@ -206,6 +206,24 @@ public class FxFileUtils {
     }
 
     /**
+     * Move a file if possible, fallback to normal copy/delete if it fails.
+     *
+     * @param source         the source file
+     * @param destination    the target file
+     * @return  true on success
+     * @since 3.1.7
+     */
+    public static boolean moveFile(File source, File destination) {
+        if (!source.renameTo(destination)) {
+            if (!copyFile(source, destination)) {
+                return false;
+            }
+            removeFile(source);
+        }
+        return true;
+    }
+
+    /**
      * Remove a directory and all its sub directories and files
      *
      * @param dir directory to remove recursively

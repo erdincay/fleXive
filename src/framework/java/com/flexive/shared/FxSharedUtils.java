@@ -1655,6 +1655,25 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Return a {@link SelectableObject} by its ID.
+     *
+     * @param values    the values to search
+     * @param id        the ID to look for
+     * @param <T>       the value type
+     * @return  the first matching value
+     * @throws com.flexive.shared.exceptions.FxRuntimeException if no element with the given ID was found
+     * @since 3.1.7
+     */
+    public static <T extends SelectableObject> T getSelectableObject(List<T> values, long id) {
+        for (T value : values) {
+            if (value.getId() == id) {
+                return value;
+            }
+        }
+        throw new FxNotFoundException("ex.selectable.id.notFound", id).asRuntimeException();
+    }
+
+    /**
      * Return the elements of {@code values} that match the given {@code ids}.
      *
      * @param values the values to be search

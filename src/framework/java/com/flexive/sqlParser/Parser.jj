@@ -94,6 +94,7 @@ TOKEN [IGNORE_CASE] :
 | < NOT_GTR   : "!>" >
 | < IS_CHILD_OF   : "IS"(" ")+"CHILD"(" ")+"OF" >
 | < IS_DIRECT_CHILD_OF   : "IS"(" ")+"DIRECT"(" ")+"CHILD"(" ")+"OF" >
+| < IN_BRIEFCASE : "EXISTS"(" ")+"IN"(" ")+"BRIEFCASE" >
 | < NOT_LSS   : "!<" >
 | < NEQ       : "!=" >
 | < NEQ2      : "<>" >
@@ -531,6 +532,8 @@ Condition.ValueComparator comperator(final FxStatement PI) throws SqlParserExcep
   { return Condition.ValueComparator.IS;}
   | <IS_NOT>
   { return Condition.ValueComparator.IS_NOT;}
+  | <IN_BRIEFCASE>
+  { return Condition.ValueComparator.IN_BRIEFCASE;}
 }
 
 

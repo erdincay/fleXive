@@ -716,4 +716,45 @@ public class XPathElement implements Serializable {
             return ch;
         }
     }
+
+    /**
+     * Return the depth of the XPath element (= the number of slashes)
+     *
+     * @param xpath    the xpath
+     * @return         the depth (min. 1 for valid xpaths)
+     * @since 3.1.7
+     */
+    public static int getDepth(String xpath) {
+        int depth = 0;
+        for (int i = 0; i < xpath.length(); i++) {
+            if (xpath.charAt(i) == '/') {
+                depth++;
+            }
+        }
+        return depth;
+    }
+
+    /**
+     * Add default indices (= 1) to a string representation.
+     *
+     * @param xmult    the existing list of indices, comma-separated (may be empty)
+     * @param count    the number of indices that should be added
+     * @return  the new xmult string
+     * @since 3.1.7
+     */
+    public static String addDefaultIndices(String xmult, int count) {
+        // add missing indices after the base group - TODO: optimize?
+        final StringBuilder indices = new StringBuilder(xmult.length() + count * 2);
+        indices.append(xmult);
+        for (int i = 0; i < count; i++) {
+            if (indices.length() > 0) {
+                indices.append(',');
+            }
+            indices.append('1');
+        }
+        return indices.toString();
+    }
+
+
+
 }

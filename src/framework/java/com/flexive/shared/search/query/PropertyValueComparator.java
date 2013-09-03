@@ -33,7 +33,6 @@ package com.flexive.shared.search.query;
 
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
-import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.Table;
@@ -46,6 +45,8 @@ import com.flexive.shared.value.FxValue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 
 /**
  * Supported value comparators for FxValues.
@@ -90,7 +91,9 @@ public enum PropertyValueComparator implements ValueComparator {
         @Override
         protected String getSql(String leftHandSide, String rightHandSide) {
             return super.getSql(leftHandSide, ensureTuple(rightHandSide));
-        }};
+        }},
+    /** @since 3.1.7 */
+    EXISTS_IN_BRIEFCASE("EXISTS IN BRIEFCASE");
 
     private static final List<PropertyValueComparator> NUMERIC_OPERATORS = Collections.unmodifiableList(Arrays.asList(
             EQ, NE, LT, LE, GT, GE

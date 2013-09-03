@@ -338,6 +338,9 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                                         LOG.warn("Failed to remove " + DatabaseConst.TBL_CONTENT_DATA + ".ISGROUP (ignored)", e);
                                     }
                                 }
+
+                                FxFlatStorageManager.getInstance().patchDatabase(con, ps.from, ps.to);
+
                                 currentVersion = ps.to;
                                 patching = true;
                                 if (ps.to > maxVersion)
@@ -496,13 +499,21 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns, int doubleColumns, int selectColumns) throws FxApplicationException {
+        createFlatStorage(name, FxFlatStorageInfo.Type.TypeNormal, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
+        createFlatStorage(name, FxFlatStorageInfo.Type.TypeGroups, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void createFlatStorage(String name, FxFlatStorageInfo.Type storageType, String description, int stringColumns, int textColumns, int bigIntColumns, int doubleColumns, int selectColumns) throws FxApplicationException {
         try {
             Connection con = null;
             try {
                 con = Database.getNonTXDataSource().getConnection();
-                FxFlatStorageManager.getInstance().createFlatStorage(con, name, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
+                FxFlatStorageManager.getInstance().createFlatStorage(con, name, storageType, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
             } catch (FxApplicationException e) {
                 EJBUtils.rollback(ctx);
                 throw e;

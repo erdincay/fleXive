@@ -246,6 +246,20 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
         return parentGroupAssignment;
     }
 
+    /**
+     * @return  the depth of the assignment (= the number of parent groups, including the root group). Minimum is 1.
+     * @since 3.1.7
+     */
+    public int getDepth() {
+        int depth = 1;
+        FxGroupAssignment parent = getParentGroupAssignment();
+        while (parent != null) {
+            depth++;
+            parent = parent.getParentGroupAssignment();
+        }
+        return depth;
+    }
+
 
     /**
      * base assignment (if derived the parent, if not the root assignment, if its a root assignment FxAssignment.ROOT_BASE)

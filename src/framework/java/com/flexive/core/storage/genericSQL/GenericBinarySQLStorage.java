@@ -527,6 +527,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             } else {
                 //transit file resides on the local file system
                 binaryTransit = FxBinaryUtils.getTransitFile(divisionId, binary.getHandle());
+                removeTransitFile = true;   // temporary transit file can be removed as well
                 if (binaryTransit == null)
                     throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
             }
@@ -546,9 +547,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                         needExplicitBlobInsert = true;
                     }
                 } else {
-                    //binary is stored on the filesystem -> copy transit file to binary storage file
+                    //binary is stored on the filesystem -> move transit file to binary storage file
                     try {
-                        if (!FxFileUtils.copyFile(binaryTransit,
+                        if (!FxFileUtils.moveFile(binaryTransit,
                                 FxBinaryUtils.createBinaryFile(divisionId, created.getId(), created.getVersion(), created.getQuality(),
                                         PreviewSizes.ORIGINAL.getBlobIndex())))
                             throw new FxDbException(LOG, "ex.content.binary.fsCopyFailed", created.getId());

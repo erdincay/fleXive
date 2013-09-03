@@ -40,7 +40,9 @@ import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -349,8 +351,7 @@ public class SqlQueryBuilder implements Serializable {
     public SqlQueryBuilder type(String typeName) {
         checkParameterNull(typeName, "typeName");
         // get type from environment to fail early if it doesn't exist
-        condition("typedef", PropertyValueComparator.EQ, CacheAdmin.getEnvironment().getType(typeName).getName());
-        return this;
+        return type(CacheAdmin.getEnvironment().getType(typeName).getId());
     }
 
     /**
@@ -370,6 +371,12 @@ public class SqlQueryBuilder implements Serializable {
                     PropertyValueComparator.GE,
                     typeName
             );
+            if (operatorStack.size() == 1 && operatorStack.peek() == Operator.AND) {
+                final FxType type = CacheAdmin.getEnvironment().getType(typeName);
+                getParams().setHintTypes(
+                        FxSharedUtils.getSelectableObjectIdList(type.getDerivedTypes(true, true))
+                );
+            }
             return this;
         } else {
             return type(typeName);
@@ -386,6 +393,9 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder type(long typeId) {
         condition("typedef", PropertyValueComparator.EQ, CacheAdmin.getEnvironment().getType(typeId).getName());
+        if (operatorStack.size() == 1 && operatorStack.peek() == Operator.AND) {
+            getParams().setHintTypes(ImmutableList.of(typeId));
+        }
         return this;
     }
 
@@ -529,6 +539,23 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder filterBriefcase(long briefcaseId) {
         return uniqueFilter("briefcase", briefcaseId);
+    }
+
+    /**
+     * Return only objects of the given briefcase, add this to an existing briefcase filter if one exists.
+     *
+     * @param briefcaseId    the briefcase ID
+     * @return this
+     * @since 3.1.7
+     */
+    public SqlQueryBuilder addFilterBriefcase(long briefcaseId) {
+        final int index = getFilterIndex("briefcase");
+        if (index == -1) {
+            filterBriefcase(briefcaseId);
+        } else {
+            filters.set(index, filters.get(index) + "," + briefcaseId);
+        }
+        return this;
     }
 
     /**

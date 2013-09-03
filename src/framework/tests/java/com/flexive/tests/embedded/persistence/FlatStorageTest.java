@@ -190,7 +190,7 @@ public class FlatStorageTest {
 
         Map<String, List<FxPropertyAssignment>> pot = ass.getPotentialFlatAssignments(CacheAdmin.getEnvironment().getType(TEST_TYPE));
         Assert.assertEquals(pot.size(), 5, "Expected 5 flat mappings");
-        Assert.assertEquals(pot.get(FxFlatColumnType.STRING.name()).size(), 1);
+        Assert.assertEquals(pot.get(FxFlatColumnType.STRING.name()).size(), 2);
         Assert.assertEquals(pot.get(FxFlatColumnType.TEXT.name()).size(), 2);
         Assert.assertEquals(pot.get(FxFlatColumnType.BIGINT.name()).size(), 2);
         Assert.assertEquals(pot.get(FxFlatColumnType.DOUBLE.name()).size(), 1);

@@ -35,12 +35,12 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.value.FxReference;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -283,9 +283,24 @@ public class FxPK implements Serializable, Comparable<FxPK> {
      * @since 3.1
      */
     public static List<Long> getIds(Collection<? extends FxPK> pks) {
-        final List<Long> result = new ArrayList<Long>(pks.size());
+        final List<Long> result = Lists.newArrayListWithCapacity(pks.size());
         for (FxPK pk : pks) {
             result.add(pk.getId());
+        }
+        return result;
+    }
+
+    /**
+     * Wrap the content IDs in FxPK objects.
+     *
+     * @param ids    the content IDs
+     * @return       the FxPK wrappers
+     * @since 3.1.7
+     */
+    public static List<FxPK> getPks(Collection<Long> ids) {
+        final List<FxPK> result = Lists.newArrayListWithCapacity(ids.size());
+        for (Long id : ids) {
+            result.add(new FxPK(id));
         }
         return result;
     }

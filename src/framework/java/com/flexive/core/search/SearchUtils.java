@@ -10,6 +10,7 @@ import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.workflow.Step;
@@ -139,11 +140,11 @@ public class SearchUtils {
         // include readable instance ACLs
         if (!typesWithInstancePerms.isEmpty()) {
             // collect all readable instance ACLs
-            final List<Long> readable = new ArrayList<Long>(
+            final Set<Long> readable = Sets.newHashSet(
                     Arrays.asList(ticket.getACLsId(-1, ACLCategory.INSTANCE, ACLPermission.READ))
             );
             // collect all ACLs that can be read if the calling user is the owner
-            final List<Long> privateReadable = new ArrayList<Long>(
+            final Set<Long> privateReadable = Sets.newHashSet(
                     Arrays.asList(ticket.getACLsId(ticket.getUserId(), ACLCategory.INSTANCE, ACLPermission.READ))
             );
             // remove all ACLs that are readable regardless of the owner
@@ -162,8 +163,8 @@ public class SearchUtils {
         if (!typesWithStepPerms.isEmpty()) {
 
             // collect all readable workflow steps
-            final List<Long> readable = new ArrayList<Long>();
-            final List<Long> privateReadable = new ArrayList<Long>();
+            final Set<Long> readable = Sets.newHashSet();
+            final Set<Long> privateReadable = Sets.newHashSet();
 
             final FxEnvironment env = CacheAdmin.getEnvironment();
             for (Long typeId : typesWithStepPerms) {
@@ -231,7 +232,7 @@ public class SearchUtils {
         }
     }
 
-    private static String contentAclFilter(String contentTableAlias, List<Long> acls) {
+    private static String contentAclFilter(String contentTableAlias, Set<Long> acls) {
         return acls.isEmpty() ? null :
                 // first check for contents that have the desired ACL in the main table column
                 "(" + contentTableAlias + ".acl IN (" + StringUtils.join(acls, ',') + ") " +
@@ -241,12 +242,12 @@ public class SearchUtils {
                 + "))";
     }
 
-    private static String contentAclFilter(String contentTableAlias, String table, List<Long> acls) {
+    private static String contentAclFilter(String contentTableAlias, String table, Set<Long> acls) {
         return "SELECT c.acl FROM " + table + " c WHERE c.id=" + contentTableAlias + ".id AND c.ver=" + contentTableAlias + ".ver " +
                 " AND c.acl IN (" + StringUtils.join(acls, ',') + ")";
     }
 
-    private static String contentFilterWithPrivate(UserTicket ticket, String tableAlias, List<Long> readableIds, List<Long> privateReadableIds, String column) {
+    private static String contentFilterWithPrivate(UserTicket ticket, String tableAlias, Set<Long> readableIds, Set<Long> privateReadableIds, String column) {
         return contentFilterWithPrivate(
                 ticket,
                 tableAlias,
@@ -273,9 +274,13 @@ public class SearchUtils {
 
     private static String flatStorageFilterCondition(String flatTableAlias, FxPropertyAssignment assignment) {
         final String alias = StringUtils.isNotBlank(flatTableAlias) ? flatTableAlias + "." : "";
+        final FxFlatStorageMapping mapping = assignment.getFlatStorageMapping();
         return "(" + alias + "typeid=" + assignment.getAssignedType().getId()
-                + " AND " + alias + "lvl=" + assignment.getFlatStorageMapping().getLevel()
+                + " AND " + alias + "lvl=" + mapping.getLevel()
                 + (assignment.isMultiLang() ? "" : " AND " + alias + "lang=" + FxLanguage.SYSTEM_ID)
+                + (mapping.isGroupStorageMode()
+                    ? " AND group_assid=" + mapping.getGroupAssignmentId()
+                    : "")
                 + ")";
     }
 }

@@ -1586,8 +1586,9 @@ try {
                             flatStorage.removeFlatStorage(tableName);
                             break;
                         }
-                    } 
-                    flatStorage.createFlatStorage(con, tableName, description, cstring, ctext, cbigInt, cdouble, cselect);
+                    }
+                    // TODO - flat storage type detection
+                    flatStorage.createFlatStorage(con, tableName, FxFlatStorageInfo.Type.TypeNormal, description, cstring, ctext, cbigInt, cdouble, cselect);
                     storages.add(tableName);
                 }
             }

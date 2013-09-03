@@ -32,14 +32,14 @@
 package com.flexive.ejb.beans.structure;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.flatstorage.FxFlatStorage;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.core.conversion.ConversionEngine;
+import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.FxPreloadType;
 import com.flexive.core.structure.StructureLoader;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSystemSequencer;
@@ -53,7 +53,6 @@ import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
-import com.flexive.ejb.beans.EJBUtils;
 import com.thoughtworks.xstream.converters.ConversionException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -62,7 +61,11 @@ import org.apache.commons.logging.LogFactory;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.flexive.core.DatabaseConst.*;
 
 
 /**
@@ -301,17 +304,29 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flatten(String storage, long typeId) throws FxApplicationException {
+        flatten(storage, typeId, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void flatten(String storage, long typeId, FlattenOptions options) throws FxApplicationException {
+        Connection con = null;
         try {
-            FxFlatStorageManager.getInstance().flattenType(storage, CacheAdmin.getEnvironment().getType(typeId));
+            con = Database.getDbConnection();
+
+            FxFlatStorageManager.getInstance().flattenType(con, storage, CacheAdmin.getEnvironment().getType(typeId), options);
+
+            StructureLoader.reload(con);
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw e;
-        }
-        try {
-            StructureLoader.reload(null);
-        } catch (FxCacheException e) {
+        } catch (Exception e) {
             EJBUtils.rollback(ctx);
-            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+            throw new FxUpdateException(e);
+        } finally {
+            Database.closeObjects(TypeEngineBean.class, con, null);
         }
     }
 
@@ -320,18 +335,30 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flatten(long typeId) throws FxApplicationException {
+        flatten(typeId, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void flatten(long typeId, FlattenOptions options) throws FxApplicationException {
+        Connection con = null;
         try {
+            con = Database.getDbConnection();
+
             final FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
-            flatStorage.flattenType(flatStorage.getDefaultStorage(), CacheAdmin.getEnvironment().getType(typeId));
+            flatStorage.flattenType(con, flatStorage.getDefaultStorage(), CacheAdmin.getEnvironment().getType(typeId), options);
+
+            StructureLoader.reload(con);
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw e;
-        }
-        try {
-            StructureLoader.reload(null);
-        } catch (FxCacheException e) {
+        } catch (Exception e) {
             EJBUtils.rollback(ctx);
-            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+            throw new FxUpdateException(e);
+        } finally {
+            Database.closeObjects(TypeEngineBean.class, con, null);
         }
     }
 
@@ -340,7 +367,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void unflatten(long typeId) throws FxApplicationException {
+        Connection con = null;
         try {
+            con = Database.getDbConnection();
+
             final FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
             final FxType type = CacheAdmin.getEnvironment().getType(typeId);
             for (FxAssignment as : type.getAllAssignments()) {
@@ -348,17 +378,21 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     continue;
                 FxPropertyAssignment pa = (FxPropertyAssignment) as;
                 if (pa.isFlatStorageEntry())
-                    flatStorage.unflatten(pa);
+                    flatStorage.unflatten(con, pa);
             }
+
+            StructureLoader.reload(con);
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw e;
-        }
-        try {
-            StructureLoader.reload(null);
+        } catch (SQLException e) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(e);
         } catch (FxCacheException e) {
             EJBUtils.rollback(ctx);
-            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+            throw new FxUpdateException(e);
+        } finally {
+            Database.closeObjects(TypeEngineBean.class, con, null);
         }
     }
 

@@ -33,11 +33,13 @@ package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxXMLUtils;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPropertyData;
@@ -57,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import java.sql.*;
 
 import static com.flexive.core.DatabaseConst.TBL_CONTENT_DATA_FT;
+import static com.flexive.core.flatstorage.FxFlatStorageInfo.Type.TypeGroups;
 
 /**
  * Fulltext indexer (generic SQL implementation)
@@ -85,6 +88,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     private FxPK pk;
     protected Connection con;
     private PreparedStatement psu, psi, psd, psd_all;
+    private boolean initializedStatements;
 
     /**
      * {@inheritDoc}
@@ -92,33 +96,6 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     public void init(FxPK pk, Connection con) {
         this.pk = pk;
         this.con = con;
-        if (pk != null) {
-            try {
-                psu = con.prepareStatement(getUpdateSql());
-                psu.setLong(2, pk.getId());
-                psu.setInt(3, pk.getVersion());
-                psi = con.prepareStatement(getInsertSql());
-                psi.setLong(1, pk.getId());
-                psi.setInt(2, pk.getVersion());
-                psd_all = con.prepareStatement(getDeleteAllSql());
-                psd_all.setLong(1, pk.getId());
-                psd_all.setInt(2, pk.getVersion());
-                psd = con.prepareStatement(getDeleteSql());
-                psd.setLong(1, pk.getId());
-                psd.setInt(2, pk.getVersion());
-            } catch (SQLException e) {
-                LOG.error(e);
-                psu = null;
-                psi = null;
-                psd = null;
-                psd_all = null;
-            }
-        } else {
-            psu = null;
-            psi = null;
-            psd = null;
-            psd_all = null;
-        }
     }
 
     /**
@@ -173,6 +150,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
      * {@inheritDoc}
      */
     public void index(FxPropertyData data) {
+        initStatements();
         if (pk == null || psi == null || psu == null || psd == null || psd_all == null) {
             LOG.warn("Tried to index FxPropertyData with no pk provided!");
             return;
@@ -207,6 +185,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
      * {@inheritDoc}
      */
     public void index(FxDelta.FxDeltaChange change) {
+        initStatements();
         if (pk == null || psi == null || psu == null || psd == null || psd_all == null) {
             LOG.warn("Tried to index FxDeltaChange with no pk provided!");
             return;
@@ -467,9 +446,11 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
             final String TRUE = storage.getBooleanTrueExpression();
             stmtAssignment = con.createStatement();
             stmtFetch = con.createStatement();
-            //                                                   1     2           3         4          5          6    7        8     9
-            ResultSet rs = stmtAssignment.executeQuery("SELECT a.id, p.datatype, m.typeid, m.tblname, m.colname, m.lvl, a.xpath, p.id, p.sysinternal " +
-                    "FROM FXS_TYPEPROPS p, FXS_ASSIGNMENTS a LEFT JOIN FXS_FLAT_MAPPING m ON (m.assid=a.id) " +
+            //                                                   1     2           3         4          5          6    7        8     9              10         11
+            ResultSet rs = stmtAssignment.executeQuery("SELECT a.id, p.datatype, m.typeid, m.tblname, m.colname, m.lvl, a.xpath, p.id, p.sysinternal, s.tbltype, m.group_assid " +
+                    "FROM " + DatabaseConst.TBL_STRUCT_PROPERTIES + " p, " + DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " a LEFT JOIN " +
+                    DatabaseConst.TBL_STRUCT_FLATSTORE_MAPPING + " m ON (m.assid=a.id) LEFT JOIN " +
+                    DatabaseConst.TBL_STRUCT_FLATSTORE_INFO + " s ON (m.tblname=s.tblname)" +
                     "WHERE p.ISFULLTEXTINDEXED=" + TRUE + " AND a.APROPERTY=p.id" +
                     (propertyId >= 0 ? " AND p.id=" + propertyId : "") +
                     " ORDER BY p.datatype");
@@ -489,23 +470,23 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
                 if (!rs.wasNull()) {
                     //flatstorage
                     String xpath = rs.getString(7);
-                    String xmult;
+                    final String xmult;
+                    int xpathDepth = 1;
                     if (!StringUtils.isEmpty(xpath)) {
-                        xmult = "";
-                        for (char c : xpath.toCharArray()) {
-                            if (c == '/') {
-                                if (xmult.length() > 0)
-                                    xmult += ",1";
-                                else
-                                    xmult = "1";
-                            }
-                        }
-                    } else
+                        xpathDepth = XPathElement.getDepth(xpath);
+                        xmult = XPathElement.addDefaultIndices("", xpathDepth);
+                    } else {
                         xmult = "1";
+                    }
                     ps.setString(5, xmult);
+                    final FxFlatStorageInfo.Type flatType = FxFlatStorageInfo.Type.forId(rs.getInt(10));
                     //                                                1  2   3      4
-                    ResultSet rsData = stmtFetch.executeQuery("SELECT ID,VER,LANG," + rs.getString(5) + " FROM " + rs.getString(4) +
-                            " WHERE TYPEID=" + flatTypeId + " AND LVL=" + rs.getInt(6));
+                    ResultSet rsData = stmtFetch.executeQuery("SELECT ID,VER,LANG," + rs.getString(5) +
+                            //                          5
+                            (flatType == TypeGroups ? ",XMULT" : "") +
+                            " FROM " + rs.getString(4) +
+                            " WHERE TYPEID=" + flatTypeId + " AND LVL=" + rs.getInt(6) +
+                            (flatType == TypeGroups ? " AND GROUP_ASSID=" + rs.getLong(11) : ""));
                     batchCounter = 0;
                     while (rsData != null && rsData.next()) {
                         String value = rsData.getString(4);
@@ -514,6 +495,12 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
                         ps.setLong(1, rsData.getLong(1));
                         ps.setInt(2, rsData.getInt(2));
                         ps.setInt(3, rsData.getInt(3));
+                        if (flatType == TypeGroups) {
+                            // xmult is based on the base group's xmult
+                            final String groupXMult = rsData.getString(5);
+                            final int missingIndices = Math.max(0, xpathDepth - XPathElement.getDepth(groupXMult));
+                            ps.setString(5, XPathElement.addDefaultIndices(groupXMult, missingIndices));
+                        }
                         ps.setString(6, value.trim().toUpperCase());
                         ps.addBatch();
                         batchCounter++;
@@ -610,6 +597,32 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         } finally {
             Database.closeObjects(GenericSQLFulltextIndexer.class, ps);
+        }
+    }
+
+    private void initStatements() {
+        if (!initializedStatements && pk != null) {
+            try {
+                initializedStatements = true;
+                psu = con.prepareStatement(getUpdateSql());
+                psu.setLong(2, pk.getId());
+                psu.setInt(3, pk.getVersion());
+                psi = con.prepareStatement(getInsertSql());
+                psi.setLong(1, pk.getId());
+                psi.setInt(2, pk.getVersion());
+                psd_all = con.prepareStatement(getDeleteAllSql());
+                psd_all.setLong(1, pk.getId());
+                psd_all.setInt(2, pk.getVersion());
+                psd = con.prepareStatement(getDeleteSql());
+                psd.setLong(1, pk.getId());
+                psd.setInt(2, pk.getVersion());
+            } catch (SQLException e) {
+                LOG.error(e);
+                psu = null;
+                psi = null;
+                psd = null;
+                psd_all = null;
+            }
         }
     }
 }

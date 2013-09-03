@@ -41,7 +41,7 @@ package com.flexive.shared;
 public interface SelectableObject {
     /**
 	 * The object's unique identifier
-     * @return	the object's unique identiefier
+     * @return	the object's unique identifier
      */
     long getId();
 }

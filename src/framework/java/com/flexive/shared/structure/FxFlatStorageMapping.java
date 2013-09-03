@@ -10,6 +10,7 @@ import java.io.Serializable;
 public class FxFlatStorageMapping implements Serializable {
     private static final long serialVersionUID = -4876287678910187513L;
     private long assignmentId;
+    private long groupAssignmentId;
     private String storage;
     private String column;
     private int level;
@@ -18,12 +19,14 @@ public class FxFlatStorageMapping implements Serializable {
      * Ctor
      *
      * @param assignmentId id of the assignment
+     * @param groupAssignmentId the group assignment when the assignment is in "group storage" mode, otherwise -1
      * @param storage      storage name
      * @param column       column name
      * @param level        nesting level
      */
-    public FxFlatStorageMapping(long assignmentId, String storage, String column, int level) {
+    public FxFlatStorageMapping(long assignmentId, long groupAssignmentId, String storage, String column, int level) {
         this.assignmentId = assignmentId;
+        this.groupAssignmentId = groupAssignmentId;
         this.storage = storage;
         this.column = column;
         this.level = level;
@@ -63,5 +66,16 @@ public class FxFlatStorageMapping implements Serializable {
      */
     public int getLevel() {
         return level;
+    }
+
+    /**
+     * @return  the group assignment used for "group storage", -1 if the mapping is in normal flat storage
+     */
+    public long getGroupAssignmentId() {
+        return groupAssignmentId;
+    }
+
+    public boolean isGroupStorageMode() {
+        return groupAssignmentId > 0;
     }
 }

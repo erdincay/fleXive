@@ -17,4 +17,5 @@ CREATE ALIAS IF NOT EXISTS TREE_FTEXT1024_PATHS FOR "com.flexive.H2.StoredProced
 CREATE ALIAS IF NOT EXISTS TREE_CAPTIONPATHTOID FOR "com.flexive.H2.StoredProcedures.tree_captionPathToID";
 CREATE ALIAS IF NOT EXISTS TREE_NODEINDEX FOR "com.flexive.H2.StoredProcedures.tree_nodeIndex";
 CREATE ALIAS IF NOT EXISTS TREE_GETPOSITION FOR "com.flexive.H2.StoredProcedures.tree_getPosition";
-CREATE ALIAS IF NOT EXISTS CONCAT_WS FOR "com.flexive.H2.StoredProcedures.concat_ws";
+-- no longer required with H2 1.3.172+
+-- CREATE ALIAS IF NOT EXISTS CONCAT_WS FOR "com.flexive.H2.StoredProcedures.concat_ws";

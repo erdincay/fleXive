@@ -996,10 +996,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             posMultis.put(fxga.getPosition(), fxga.getDefaultMultiplicity());
         }
         // after this get a sorted list containing the positions (collected)
-        List<Integer> tmpList = new ArrayList<Integer>();
-        tmpList.addAll(posMultis.keySet());
-        Integer [] sortedKeys = new Integer[tmpList.size()];
-        tmpList.toArray(sortedKeys);
+        final Integer[] sortedKeys = posMultis.keySet().toArray(new Integer[posMultis.size()]);
         Arrays.sort(sortedKeys);
         int nextFreePos = 0;
 /*

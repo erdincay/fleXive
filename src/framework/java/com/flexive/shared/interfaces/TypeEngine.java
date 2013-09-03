@@ -32,6 +32,7 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.structure.FlattenOptions;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
 
@@ -101,6 +102,17 @@ public interface TypeEngine {
     public void flatten(String storage, long typeId) throws FxApplicationException;
 
     /**
+     * Migrate all assignments of the given type that can be stored in a flat storage
+     *
+     * @param storage name of the storage
+     * @param typeId  id of the type
+     * @param options options to filter the flatten operations
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    public void flatten(String storage, long typeId, FlattenOptions options) throws FxApplicationException;
+
+    /**
      * Migrate all assignments of the given type that can be stored in the default flat storage
      *
      * @param typeId  id of the type
@@ -108,6 +120,16 @@ public interface TypeEngine {
      * @since 3.1
      */
     public void flatten(long typeId) throws FxApplicationException;
+
+    /**
+     * Migrate all assignments of the given type that can be stored in the default flat storage
+     *
+     * @param typeId  id of the type
+     * @param options options to filter the flatten operations
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    public void flatten(long typeId, FlattenOptions options) throws FxApplicationException;
 
     /**
      * Migrate all assignments of the given type that are stored in a flat storage to the hierarchical storage

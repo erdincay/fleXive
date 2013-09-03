@@ -34,32 +34,23 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
-
-import static com.flexive.shared.CacheAdmin.getEnvironment;
-import static com.flexive.shared.EJBLookup.getTypeEngine;
-
-import com.flexive.shared.content.FxPK;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxSelectOne;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
-
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
-
 import com.flexive.tests.embedded.TestUsers;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
-import static org.testng.Assert.*;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -67,8 +58,14 @@ import org.testng.annotations.Test;
 import javax.naming.Context;
 import javax.transaction.UserTransaction;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
+
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import static com.flexive.shared.EJBLookup.getTypeEngine;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static org.testng.Assert.*;
 
 /**
  * Structure tests
@@ -1842,6 +1839,23 @@ public class StructureTest {
                 te.remove(derTypeId);
             if (baseTypeId != -1)
                 te.remove(baseTypeId);
+        }
+    }
+
+    @Test(groups = {"ejb", "structure"})
+    public void testAutoPropertyNames() throws FxApplicationException {
+        // ensure that auto property names work for more than 10 (where subtle sorting/ID generation issues can occur)
+        final long typeId = createTestTypeAndProp("AUTO_PROP_TEST", null, false);
+        final FxTypeEdit type = CacheAdmin.getEnvironment().getType(typeId).asEditable();
+        try {
+            for (int i = 0; i < 15; i++) {
+                final FxGroupAssignmentEdit group = type.addGroup("group_" + i);
+                final FxPropertyAssignmentEdit pa = type.addProperty(XPathElement.stripType(group.getXPath()) + "/autoprop", FxDataType.String1024);
+                assertTrue(pa.getId() > 0);
+                assertTrue(i == 0 || !"autoprop".equalsIgnoreCase(pa.getProperty().getName()), "Unique property name not set");
+            }
+        } finally {
+            te.remove(typeId);
         }
     }
 

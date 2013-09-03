@@ -811,7 +811,7 @@ public class FxGroupData extends FxData {
      * @throws com.flexive.shared.exceptions.FxCreateException           on errors
      */
     public void addGroup(String xPath, FxGroupAssignment fxGroupAssignment, int pos) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
-        addGroup(xPath, fxGroupAssignment, pos, false);
+        addGroup(xPath, fxGroupAssignment, pos, DEFAULT_ADD_OPTIONS);
     }
 
     /**
@@ -821,14 +821,14 @@ public class FxGroupData extends FxData {
      * @param xPath             requested XPath
      * @param fxGroupAssignment the assignment of the group
      * @param pos               position
-     * @param onlySystemInternal    when true, only system-internal groups or properties are added
+     * @param options           options for creating the new group
      * @throws FxInvalidParameterException on errors
      * @throws FxNotFoundException         on errors
      * @throws FxCreateException           on errors
      *
      * @since 3.1.7
      */
-    public void addGroup(String xPath, FxGroupAssignment fxGroupAssignment, int pos, boolean onlySystemInternal) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
+    public void addGroup(String xPath, FxGroupAssignment fxGroupAssignment, int pos, AddGroupOptions options) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
         if (xPath.endsWith("/"))
             xPath = xPath.substring(0, xPath.length() - 1);
         List<XPathElement> xp = XPathElement.split(xPath);
@@ -840,11 +840,12 @@ public class FxGroupData extends FxData {
                 currGroup = tmp;
             } else {
                 FxGroupAssignment gaNew = (FxGroupAssignment) fxGroupAssignment.getAssignedType().getAssignment(XPathElement.buildXPath(true, currGroup.getXPath(), curr.getAlias()));
-                FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex(), gaNew.getPosition(), onlySystemInternal);
-                //TODO: check if adding allowed here!
-//                System.out.println("creating " + curr + " in " + xPath);
-                if (addy.equals(curr)) {
-//                    System.out.println("creating the actual addy group...");
+                final boolean finalGroup = addy.equals(curr);
+                FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex(), gaNew.getPosition(),
+                        finalGroup || options.middleGroupOptions == null
+                                ? options.onlySystemInternal
+                                : options.middleGroupOptions.onlySystemInternal);
+                if (finalGroup) {
                     gdNew.setPos(pos);
                 }
                 currGroup.addChild(gdNew);
@@ -1096,7 +1097,7 @@ public class FxGroupData extends FxData {
             return;
         }
         boolean found = false;
-        int maxPos = Math.min(data.size(), newPos);
+        int maxPos = Math.min(data.size(), newPos + 1);
         for (int i = 0; i < data.size(); i++) {
             if (data.get(i) == child) {
                 if (i == newPos) {
@@ -1104,9 +1105,7 @@ public class FxGroupData extends FxData {
                 }
                 data.remove(i);
                 found = true;
-                if (i < newPos) {
-                    newPos--;
-                } else {
+                if (i > newPos) {
                     maxPos = i + 1;
                 }
                 break;
@@ -1116,7 +1115,7 @@ public class FxGroupData extends FxData {
             throw new FxInvalidParameterException("child", "ex.content.group.child", child.getXPath(), getXPath()).asRuntimeException();
         }
 
-        data.add(newPos, child);
+        data.add(Math.min(data.size(), newPos), child);
 
         // fix positions
         for (int i = 0; i < maxPos; i++) {
@@ -1134,4 +1133,36 @@ public class FxGroupData extends FxData {
         if(this.changeListener != null)
             this.changeListener.onValueChanged(xpath, changeType);
     }
+
+    /**
+     * Options for {@link #addGroup(String, com.flexive.shared.structure.FxGroupAssignment, int, AddGroupOptions)}
+     *
+     * @since 3.1.7
+     */
+    public static class AddGroupOptions {
+        private boolean onlySystemInternal = false;
+        private AddGroupOptions middleGroupOptions;
+
+        /**
+         * Only system-internal groups or properties are added.
+         *
+         * @return  this
+         */
+        public AddGroupOptions onlySystemInternal() {
+            this.onlySystemInternal = true;
+            return this;
+        }
+
+        /**
+         * Set the options used for creating parent groups of the requested XPath.
+         *
+         * @return this
+         */
+        public AddGroupOptions middleGroupOptions(AddGroupOptions middleGroupOptions) {
+            this.middleGroupOptions = middleGroupOptions;
+            return this;
+        }
+    }
+
+    static final AddGroupOptions DEFAULT_ADD_OPTIONS = new AddGroupOptions();
 }

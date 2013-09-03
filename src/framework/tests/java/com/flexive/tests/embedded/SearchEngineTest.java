@@ -331,6 +331,16 @@ public class SearchEngineTest {
                     "Optimzed content table query did not filter the briefcase correctly"
             );
 
+            // test explicit briefcase conditions
+            final List<FxPK> briefcaseContents = new SqlQueryBuilder().select("@pk").filterBriefcase(result.getCreatedBriefcaseId()).getResult().collectColumn(1);
+            assertEquals(
+                    new SqlQueryBuilder().select("@pk")
+                            .condition("ID", PropertyValueComparator.EXISTS_IN_BRIEFCASE, result.getCreatedBriefcaseId())
+                    .getResult()
+                    .collectColumn(1),
+                    briefcaseContents,
+                    "Unexpected result of explicit briefcase condition"
+            );
         } finally {
             getBriefcaseEngine().remove(bcId);
         }

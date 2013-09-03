@@ -33,18 +33,34 @@
  ***************************************************************/
 package com.flexive.tests.embedded
 
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxFormatUtils
 import com.flexive.shared.scripting.groovy.GroovyQueryBuilder
 import com.flexive.shared.search.query.SqlQueryBuilder
-import com.flexive.shared.FxFormatUtils;
-import org.testng.annotations.Test
 import com.flexive.shared.value.FxDateTime
 import org.testng.Assert
+import org.testng.annotations.AfterClass
+import org.testng.annotations.BeforeClass
+import org.testng.annotations.Test
 
 /**
  * Test scripts for the query builder test bean
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 class GroovyQueryBuilderTest {
+    long briefcaseId = -1;
+
+    @BeforeClass(groups = ["scripting", "ejb", "search"])
+    void init() {
+        briefcaseId = EJBLookup.briefcaseEngine.create("GroovyQueryBuilderTest", "", null)
+    }
+
+    @AfterClass(groups = ["scripting", "ejb", "search"])
+    void cleanup() {
+        if (briefcaseId != -1) {
+            EJBLookup.briefcaseEngine.remove(briefcaseId)
+        }
+    }
 
     @Test (groups = ["scripting", "ejb", "search"])
     void simpleBuilderTest() {
@@ -76,10 +92,10 @@ class GroovyQueryBuilderTest {
     @Test (groups = ["scripting", "ejb", "search"])
     void filterBriefcaseTest() {
         def root = new GroovyQueryBuilder().select(["@pk"]) {
-            filterBriefcase(21)
+            filterBriefcase(briefcaseId)
         }
         def query = root.sqlQuery
-        Assert.assertTrue(query.indexOf("briefcase=21") > 0, "Query should contain briefcase=21 filter: " + query)
+        Assert.assertTrue(query.indexOf("briefcase=${briefcaseId}") > 0, "Query should contain briefcase=${briefcaseId} filter: " + query)
         // check if search can be submitted
         root.queryBuilder.getResult()
     }
@@ -88,9 +104,9 @@ class GroovyQueryBuilderTest {
     void filterBriefcaseTestExternalBuilder() {
         def builder = new SqlQueryBuilder()
         new GroovyQueryBuilder(builder).select(["@pk"]) {
-            filterBriefcase(21)
+            filterBriefcase(briefcaseId)
         }
-        Assert.assertTrue(builder.query.indexOf("briefcase=21") > 0, "Query should contain briefcase=21 filter: " + builder.query)
+        Assert.assertTrue(builder.query.indexOf("briefcase=${briefcaseId}") > 0, "Query should contain briefcase=${briefcaseId} filter: " + builder.query)
         // check if search can be submitted
         builder.getResult()
     }

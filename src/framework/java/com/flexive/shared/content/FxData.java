@@ -88,9 +88,10 @@ public abstract class FxData implements Serializable {
     FxGroupData parent;
 
     /**
-     * XPathElement of this entry
+     * Unboxed XPathElement info
      */
-    protected XPathElement xp;
+    protected String xpAlias;
+    protected int xpIndex;
 
     /**
      * xXPath prefix like "FxType name[@pk=..]"
@@ -105,7 +106,8 @@ public abstract class FxData implements Serializable {
         this.assignmentId = assignmentId;
         this.pos = pos;
         this.parent = parent;
-        this.xp = new XPathElement(alias, index, true);
+        this.xpAlias = alias;
+        this.xpIndex = index;
         if (index != 1)
             applyIndices();
     }
@@ -124,7 +126,8 @@ public abstract class FxData implements Serializable {
         this.assignmentId = other.assignmentId;
         this.pos = other.pos;
         this.parent = parent;
-        this.xp = new XPathElement(other.xp.getAlias(), other.xp.getIndex(), true);
+        this.xpAlias = other.xpAlias;
+        this.xpIndex = other.xpIndex;
     }
 
     /**
@@ -171,7 +174,7 @@ public abstract class FxData implements Serializable {
     }
 
     public int getIndex() {
-        return xp.getIndex();
+        return xpIndex;
     }
 
     /**
@@ -180,7 +183,7 @@ public abstract class FxData implements Serializable {
      * @param index the index to set
      */
     private void setIndex(int index) {
-        this.xp.setIndex(index);
+        this.xpIndex = index;
         this.applyIndices();
     }
 
@@ -221,7 +224,7 @@ public abstract class FxData implements Serializable {
      * @return XPathElement
      */
     public XPathElement getXPathElement() {
-        return xp;
+        return new XPathElement(xpAlias, xpIndex, true);
     }
 
     /**
@@ -453,7 +456,7 @@ public abstract class FxData implements Serializable {
      * @return alias
      */
     public String getAlias() {
-        return xp.getAlias();
+        return xpAlias;
     }
 
     /**

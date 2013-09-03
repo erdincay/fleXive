@@ -772,8 +772,19 @@ public class FxContent implements Serializable {
      * @return XPath of the added group
      * @since 3.1.4
      */
-    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public String addGroup(String XPath) {
+        return addGroup(XPath, FxGroupData.DEFAULT_ADD_OPTIONS);
+    }
+
+    /**
+     * Add (or create) another group. The group to create is the last element in the requested XPath.
+     *
+     * @param XPath XPath with the group alias as last element
+     * @param options   options for adding the group
+     * @return XPath of the added group
+     * @since 3.1.7
+     */
+    public String addGroup(String XPath, FxGroupData.AddGroupOptions options) {
         XPath = XPathElement.stripType(XPath);
         if (!isGroupXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath).asRuntimeException();
@@ -785,7 +796,7 @@ public class FxContent implements Serializable {
 
         FxGroupAssignment ga = CacheAdmin.getEnvironment().getType(this.getTypeId()).getGroupAssignment(xpGroup);
         try {
-            getRootGroup().addGroup(xpGroup, ga, FxData.POSITION_BOTTOM);
+            getRootGroup().addGroup(xpGroup, ga, FxData.POSITION_BOTTOM, options);
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -920,7 +931,8 @@ public class FxContent implements Serializable {
             for (int m = 1; m < elements.get(i).getIndex(); m++)
                 missing.add(new XPathElement(elements.get(i).getAlias(), m, true));
             for (FxData currData : currGroup.getChildren()) {
-                if (currData.getXPathElement().equals(elements.get(i))) {
+                final XPathElement xp = currData.getXPathElement();
+                if (xp.equals(elements.get(i))) {
                     if (currData instanceof FxPropertyData) {
                         if(currGroup.hasChangeListener()) //ensure a change listener is attached
                             ((FxPropertyData) currData).getValue().setChangeListener(currGroup.getChangeListener());
@@ -929,8 +941,8 @@ public class FxContent implements Serializable {
                     found = true;
                     currGroup = (FxGroupData) currData;
                     break;
-                } else if (missing.contains(currData.getXPathElement())) {
-                    missing.remove(currData.getXPathElement());
+                } else if (missing.contains(xp)) {
+                    missing.remove(xp);
                 }
             }
             if (found)

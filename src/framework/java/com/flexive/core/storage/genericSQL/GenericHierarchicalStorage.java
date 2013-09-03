@@ -63,7 +63,6 @@ import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
 import com.google.common.collect.*;
 import com.thoughtworks.xstream.XStream;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,6 +74,7 @@ import java.util.*;
 import java.util.Date;
 
 import static com.flexive.core.DatabaseConst.*;
+import static com.flexive.shared.content.FxGroupData.AddGroupOptions;
 
 /**
  * Generic implementation of hierarchical content handling.
@@ -179,8 +179,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //calculate max_ver and live_ver for a content instance
     protected static final String CONTENT_VER_CALC = "SELECT MAX(VER) AS MAX_VER, COALESCE((SELECT s.VER FROM " +
-            TBL_CONTENT + " s WHERE s.STEP=(SELECT w.ID FROM " + TBL_WORKFLOW_STEP + " w, " + TBL_STRUCT_TYPES + " t WHERE w.STEPDEF=" +
-            StepDefinition.LIVE_STEP_ID + " AND w.WORKFLOW=t.WORKFLOW AND t.ID=c.TDEF) AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT +
+            TBL_CONTENT + " s WHERE s.STEP=? AND s.id=c.id),-1) AS LIVE_VER FROM " + TBL_CONTENT +
             " c WHERE c.ID=? GROUP BY c.ID,c.TDEF";
     protected static final String CONTENT_VER_UPDATE_1 = "UPDATE " + TBL_CONTENT + " SET MAX_VER=?, LIVE_VER=?, ISMAX_VER=(VER=?), ISLIVE_VER=(VER=?) WHERE ID=?";
 //    protected static final String CONTENT_VER_UPDATE_2 = "UPDATE " + TBL_CONTENT + " SET ISMAX_VER=(MAX_VER=VER), ISLIVE_VER=(LIVE_VER=VER) WHERE ID=?";
@@ -541,11 +540,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         final Long contentIdValue = content.getValue(FxLargeNumber.class, "/ID").getBestTranslation();
         final int version = content.isForcePkOnCreate() && contentVersionValue != -1 ? contentVersionValue : 1;
 
+        boolean stepsUpdated = false;
         if (content.isForcePkOnCreate() && contentIdValue != -1) {
             // if a specific ID was set, other versions of this content may exist and we need to process the
             // workflow as if creating a new version of an existing content
             try {
-                updateStepDependencies(con, contentIdValue, version, env, env.getType(content.getTypeId()), content.getStepId());
+                stepsUpdated = updateStepDependencies(con, contentIdValue, version, env, env.getType(content.getTypeId()), content.getStepId());
             } catch (FxApplicationException e) {
                 throw new FxCreateException(LOG, e);
             }
@@ -567,17 +567,19 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
-                        content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()));
+                        content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()), true);
             }
 
             if (content.isForcePkOnCreate()) {
                 // we must fix the MAX_VER/LIVE_VER columns now, since they may not have been set correctly in the insert
-                fixContentVersionStats(con, type, pk.getId(), true);
+                fixContentVersionStats(con, env, type, pk.getId(), true, stepsUpdated);
             }
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             content.resolveBinaryPreview();
-            binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+            if (content.getBinaryPreviewId() != -1) {
+                binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+            }
             if (type.isTrackHistory())
                 EJBLookup.getHistoryTrackerEngine().track(type, pk, ConversionEngine.getXStream().toXML(content),
                         "history.content.created");
@@ -605,13 +607,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param createMode    whether a new instance (or version) is being created
      * @throws FxUpdateException if a sql error occurs
      */
-    protected void fixContentVersionStats(Connection con, FxType type, long id, boolean createMode) throws FxUpdateException {
+    protected void fixContentVersionStats(Connection con, FxEnvironment env, FxType type, long id, boolean createMode, boolean stepsUpdated) throws FxUpdateException {
         PreparedStatement ps = null;
         final DBStorage storage = StorageManager.getStorageImpl();
         try {
             // determine current max and live version
             ps = con.prepareStatement(CONTENT_VER_CALC);
-            ps.setLong(1, id);
+            try {
+                ps.setLong(1, env.getStepByDefinition(type.getWorkflow().getId(), StepDefinition.LIVE_STEP_ID).getId());
+            } catch (FxRuntimeException e) {
+                ps.setLong(1, -1);
+            }
+            ps.setLong(2, id);
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 return;
@@ -690,10 +697,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setInt(2, live_ver);
                 ps.setLong(3, id);
                 ps.executeUpdate();
+                if (type.isContainsFlatStorageAssignments()) {
+                    syncContentStats(con, type.getId(), id, max_ver, live_ver, limitVersions);
+                }
+            } else {
+                if (stepsUpdated && type.isContainsFlatStorageAssignments()) {
+                    // this would also happen in syncContentStats in the other branch, so we have to
+                    // sync the new step(s) manually
+                    FxFlatStorageManager.getInstance().syncContentSteps(con, type.getId(), id);
+                }
             }
-
-            if (type.isContainsFlatStorageAssignments())
-                syncContentStats(con, type.getId(), id, max_ver, live_ver);
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxNotFoundException e) {
@@ -720,8 +733,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param live_ver live version
      * @throws SQLException on errors
      */
-    protected void syncContentStats(Connection con, long typeId, long id, int max_ver, int live_ver) throws SQLException {
-        FxFlatStorageManager.getInstance().syncContentStats(con, typeId, id, max_ver, live_ver);
+    protected void syncContentStats(Connection con, long typeId, long id, int max_ver, int live_ver, String limitVer) throws SQLException {
+        FxFlatStorageManager.getInstance().syncContentStats(con, typeId, id, max_ver, live_ver, limitVer);
     }
 
     /**
@@ -744,7 +757,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         FulltextIndexer ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
-            updateStepDependencies(con, content.getPk().getId(), new_version, env, env.getType(content.getTypeId()), content.getStepId());
+            final boolean stepsUpdated = updateStepDependencies(con, content.getPk().getId(), new_version, env, env.getType(content.getTypeId()), content.getStepId());
             pk = createMainEntry(con, content.getPk().getId(), new_version, content);
             ft = getFulltextIndexer(pk, con);
             if (sql == null)
@@ -757,13 +770,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (type.isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
-                        content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()));
+                        content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()), true);
             }
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
-            binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+            if (content.getBinaryPreviewId() != -1) {
+                binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+            }
             ft.commitChanges();
 
-            fixContentVersionStats(con, type, content.getPk().getId(), true);
+            fixContentVersionStats(con, env, type, content.getPk().getId(), true, stepsUpdated);
         } catch (FxApplicationException e) {
             if (e instanceof FxCreateException)
                 throw (FxCreateException) e;
@@ -803,10 +818,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param env           FxEnvironment
      * @param type          FxType
      * @param stepId        the step id @throws FxNotFoundException on errors
+     * @return              true when other versions were affected (due to unique steps)
      * @throws FxUpdateException   on errors
      * @throws FxNotFoundException on errors
      */
-    protected void updateStepDependencies(Connection con, long id, int ignoreVersion, FxEnvironment env, FxType type, long stepId) throws FxNotFoundException, FxUpdateException {
+    protected boolean updateStepDependencies(Connection con, long id, int ignoreVersion, FxEnvironment env, FxType type, long stepId) throws FxNotFoundException, FxUpdateException {
         Step step = env.getStep(stepId);
         StepDefinition stepDef = env.getStepDefinition(step.getStepDefinitionId());
         if (stepDef.isUnique()) {
@@ -838,11 +854,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setLong(3, id);
                 ps.setInt(4, ignoreVersion);
                 ps.executeUpdate();
+                return true;
             } catch (SQLException e) {
                 throw new FxUpdateException(e, "ex.content.step.dependencies.update.failed", id, e.getMessage());
             } finally {
                 Database.closeObjects(GenericHierarchicalStorage.class, ps);
             }
+        } else {
+            return false;
         }
     }
 
@@ -1885,7 +1904,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     final String xmult = position.getKey();
                     if (!existingMults.contains(xmult) && groupAssignment.getMultiplicity().isRequired()) {
                         // add (empty) group
-                        root.addGroup(XPathElement.toXPathMult(groupAssignment.getXPath(), xmult.replace('/', ',')), groupAssignment, position.getValue(), true);
+                        root.addGroup(XPathElement.toXPathMult(groupAssignment.getXPath(), xmult.replace('/', ',')),
+                                groupAssignment, position.getValue(), new AddGroupOptions().onlySystemInternal());
                     }
                 }
             }
@@ -2083,22 +2103,26 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (!assignment.isEnabled())
             return;
         if (assignment instanceof FxGroupAssignment) {
-            root.addGroup(xPath, (FxGroupAssignment) assignment, pos, true);
+            root.addGroup(xPath, (FxGroupAssignment) assignment, pos, new AddGroupOptions().onlySystemInternal());
         } else {
             final FxGroupAssignment parentAssignment = assignment.getParentGroupAssignment();
             if (parentAssignment != null) {
                 // check if group already exists
                 final List<XPathElement> split = XPathElement.split(xPath);
-                String groupXPath = "";
+                final StringBuilder groupXPath = new StringBuilder();
                 for (int i = 0; i < split.size() - 1; i++) {
-                    groupXPath += '/' + split.get(i).toString();
-                }
-                try {
-                    root.getGroup(groupXPath);
-                } catch (FxRuntimeException e) {
-                    final int[] indices = XPathElement.getIndices(xPath);
-                    final int[] parentXMult = ArrayUtils.subarray(indices, 0, indices.length - 1);
-                    root.addGroup(groupXPath, parentAssignment, Integer.MAX_VALUE, true);
+                    groupXPath.append('/').append(split.get(i).toString());
+                    final String currXPath = groupXPath.toString();
+                    try {
+                        root.getGroup(currXPath);
+                    } catch (FxRuntimeException e) {
+                        final int[] parentXMult = new int[i + 1];
+                        for (int j = 0; j <= i; j++) {
+                            parentXMult[j] = split.get(j).getIndex();
+                        }
+                        final FxGroupAssignment currGroup = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentAssignment.getAssignedType().getName() + currXPath);
+                        root.addGroup(currXPath, currGroup, Integer.MAX_VALUE, new AddGroupOptions().onlySystemInternal());
+                    }
                 }
             }
             root.addProperty(xPath, (FxPropertyAssignment) assignment, value, pos);
@@ -2241,8 +2265,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             syncFQNName(con, content, pk, change);
                         }
                     }
-                    if (fs != null && change.isFlatStorageChange())
-                        fs.deletePropertyData(con, pk, (FxPropertyData) change.getOriginalData());
                     ft.index(change);
                 }
             }
@@ -2297,7 +2319,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 //flatstorage adds/updates
                 if (fs != null && delta.getFlatStorageAddsUpdates().size() > 0)
                     fs.setPropertyData(con, pk, type.getId(), content.getStepId(), content.isMaxVersion(),
-                            content.isLiveVersion(), delta.getFlatStorageAddsUpdates());
+                            content.isLiveVersion(), delta.getFlatStorageAddsUpdates(), false);
 
                 //delta-adds:
                 for (FxDelta.FxDeltaChange change : delta.getAdds()) {
@@ -2327,8 +2349,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             if (delta.isInternalPropertyChanged()) {
-                updateStepDependencies(con, content.getPk().getId(), content.getPk().getVersion(), env, type, content.getStepId());
-                fixContentVersionStats(con, type, content.getPk().getId(), false);
+                final boolean stepsUpdated = updateStepDependencies(con, content.getPk().getId(), content.getPk().getVersion(), env, type, content.getStepId());
+                fixContentVersionStats(con, env, type, content.getPk().getId(), false, stepsUpdated);
             }
             content.resolveBinaryPreview();
             if (original.getBinaryPreviewId() != content.getBinaryPreviewId() ||
@@ -2741,6 +2763,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (!cvi.containsVersion(pk))
             return;
 
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         int ver = pk.getVersion();
         if (!pk.isDistinctVersion())
             ver = cvi.getDistinctVersion(pk.getVersion());
@@ -2768,7 +2791,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             ps.setInt(2, ver);
             if (ps.executeUpdate() > 0)
-                fixContentVersionStats(con, type, pk.getId(), false);
+                fixContentVersionStats(con, env, type, pk.getId(), false, false);
             StorageManager.getTreeStorage().afterContentVersionRemoved(nodes, con, pk.getId(), ver, cvi);
         } catch (SQLException e) {
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());

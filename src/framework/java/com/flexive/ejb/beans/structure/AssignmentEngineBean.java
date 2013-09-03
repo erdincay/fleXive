@@ -190,46 +190,33 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.executeUpdate();
             else {
                 //fetch used property names
-                Statement stmt = null;
+                PreparedStatement ps2 = null;
                 try {
-                    stmt = con.createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT NAME FROM " + TBL_STRUCT_PROPERTIES + " WHERE NAME LIKE '" +
-                            property.getName() + "_%' OR NAME='" + property.getName() + "' ORDER BY NAME DESC");
-                    if (rs.next()) {
+                    ps2 = con.prepareStatement("SELECT NAME FROM " + TBL_STRUCT_PROPERTIES + " WHERE NAME LIKE ? OR NAME=?");
+                    ps2.setString(1, property.getName() + "_%");
+                    ps2.setString(2, property.getName());
+                    ResultSet rs = ps2.executeQuery();
+                    int max = -1;
+                    while (rs.next()) {
                         String last = rs.getString(1);
-                        boolean found = true;
-                        final boolean differentProp = last.lastIndexOf('_') > 0 && !StringUtils.isNumeric(last.substring(last.lastIndexOf("_") + 1));
-                        //since postgres handles underscores as wildcards, find the first relevant entry
-                        if (differentProp || !(last.equals(property.getName()) || last.startsWith(property.getName() + "_"))) {
-                            found = last.equals(property.getName()) || (last.startsWith(property.getName() + "_") && StringUtils.isNumeric(last.substring(last.lastIndexOf("_") + 1)));
-                            while (rs.next()) {
-                                last = rs.getString(1);
-                                if (last.equals(property.getName())) {
-                                    found = true;
-                                    break;
-                                } else if (last.startsWith(property.getName() + "_")) {
-                                    if (StringUtils.isNumeric(last.substring(last.lastIndexOf("_") + 1))) {
-                                        //ignore since its a different property that contains an underscore
-                                        found = true;
-                                        break;
-                                    }
+                        if (last.equals(property.getName()) || last.startsWith(property.getName() + "_")) {
+                            if (last.equals(property.getName())) {
+                                max = Math.max(0, max);
+                            } else if (last.startsWith(property.getName() + "_")) {
+                                final String suffix = last.substring(last.lastIndexOf("_") + 1);
+                                if (StringUtils.isNumeric(suffix)) {
+                                    max = Math.max(Integer.parseInt(suffix), max);
                                 }
                             }
                         }
-                        if (found) {
-                            String autoName;
-                            if (last.indexOf(property.getName() + "_") == -1)
-                                autoName = property.getName() + "_1";
-                            else
-                                autoName = property.getName() + "_" +
-                                        (Integer.parseInt(last.substring(last.lastIndexOf("_") + 1)) + 1);
+                        if (max != -1) {
+                            final String autoName = property.getName() + "_" + (max + 1);
                             ps.setString(2, autoName);
                             LOG.info("Assigning unique property name [" + autoName + "] to [" + type.getName() + "." + property.getName() + "]");
                         }
                     }
                 } finally {
-                    if (stmt != null)
-                        stmt.close();
+                    Database.closeObjects(AssignmentEngineBean.class, ps2);
                 }
                 ps.executeUpdate();
             }
@@ -907,9 +894,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         final FxFlatStorage fs = FxFlatStorageManager.getInstance();
                         assignment = CacheAdmin.getEnvironment().getAssignment(returnId); //make sure we have the updated version
                         if (assignment instanceof FxPropertyAssignment) {
-                            if (((FxPropertyAssignment) assignment).isFlatStorageEntry() &&
-                                    !fs.isFlattenable((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(returnId))) {
-                                fs.unflatten(con, (FxPropertyAssignment) assignment);
+                            final FxPropertyAssignment pa = (FxPropertyAssignment) assignment;
+                            if (pa.isFlatStorageEntry() && !fs.isValidFlatStorageType(pa)) {
+                                fs.unflatten(con, pa);
+                                if (fs.isFlattenable(pa)) {
+                                    // moved to other storage type, flatten again
+                                    fs.flatten(con, pa.getFlatStorageMapping().getStorage(), pa);
+                                }
                                 StructureLoader.reload(con);
                             }
                         } else if (assignment instanceof FxGroupAssignment) {
@@ -917,9 +908,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             for (FxAssignment as : ((FxGroupAssignment) assignment).getAllChildAssignments()) {
                                 if (!(as instanceof FxPropertyAssignment))
                                     continue;
-                                if (((FxPropertyAssignment) as).isFlatStorageEntry() &&
-                                        !fs.isFlattenable((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(as.getId()))) {
-                                    fs.unflatten(con, (FxPropertyAssignment) as);
+                                final FxPropertyAssignment pa = (FxPropertyAssignment) as;
+                                if (pa.isFlatStorageEntry() && !fs.isValidFlatStorageType(pa)) {
+                                    fs.unflatten(con, pa);
+                                    if (fs.isFlattenable(pa)) {
+                                        // moved to other storage type, flatten again
+                                        fs.flatten(con, pa.getFlatStorageMapping().getStorage(), pa);
+                                    }
                                     needReload = true;
                                 }
                             }
@@ -928,7 +923,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         }
                         if (divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)) {
                             //check if some assignments can now be flattened
-                            FxFlatStorageManager.getInstance().flattenType(con, fs.getDefaultStorage(), assignment.getAssignedType());
+                            FxFlatStorageManager.getInstance().flattenType(con, fs.getDefaultStorage(), assignment.getAssignedType(), null);
                             StructureLoader.reload(con);
                         }
                     }
@@ -1500,7 +1495,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         List<FxPropertyAssignment> flattened = new ArrayList<FxPropertyAssignment>(refAssignments.size());
                         for (FxPropertyAssignment refAssignment : refAssignments) {
                             if (refAssignment.isFlatStorageEntry()) {
-                                fs.unflatten(refAssignment);
+                                fs.unflatten(con, refAssignment);
                                 flattened.add(refAssignment);
                             }
                         }
@@ -1512,7 +1507,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                                 for (FxPropertyAssignment ref : flattened) {
                                     final FxPropertyAssignment paNew = (FxPropertyAssignment) envNew.getAssignment(ref.getId());
                                     if (fs.isFlattenable(paNew)) {
-                                        fs.flatten(fs.getDefaultStorage(), paNew);
+                                        fs.flatten(con, fs.getDefaultStorage(), paNew);
                                         needReload = true;
                                     }
                                 }
@@ -2736,7 +2731,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public Map<String, List<FxPropertyAssignment>> getPotentialFlatAssignments(FxType type) {
-        return FxFlatStorageManager.getInstance().getPotentialFlatAssignments(type);
+        return FxFlatStorageManager.getInstance().getPotentialFlatAssignments(type, null);
     }
 
     /**
@@ -2752,19 +2747,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException {
-        try {
-            final FxFlatStorage fs = FxFlatStorageManager.getInstance();
-            fs.flatten(fs.getDefaultStorage(), assignment);
-        } catch (FxApplicationException e) {
-            EJBUtils.rollback(ctx);
-            throw e;
-        }
-        try {
-            StructureLoader.reload(null);
-        } catch (FxCacheException e) {
-            EJBUtils.rollback(ctx);
-            throw new FxUpdateException(e, "ex.cache", e.getMessage());
-        }
+        flattenAssignment(FxFlatStorageManager.getInstance().getDefaultStorage(), assignment);
     }
 
     /**
@@ -2772,17 +2755,24 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flattenAssignment(String storage, FxPropertyAssignment assignment) throws FxApplicationException {
+        Connection con = null;
         try {
-            FxFlatStorageManager.getInstance().flatten(storage, assignment);
+            con = Database.getDbConnection();
+            final FxFlatStorage fs = FxFlatStorageManager.getInstance();
+            fs.flatten(con, storage, assignment);
+
+            StructureLoader.reload(con);
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw e;
-        }
-        try {
-            StructureLoader.reload(null);
+        } catch (SQLException e) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(e);
         } catch (FxCacheException e) {
             EJBUtils.rollback(ctx);
-            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+            throw new FxUpdateException(e);
+        } finally {
+            Database.closeObjects(AssignmentEngineBean.class, con, null);
         }
     }
 
@@ -2791,17 +2781,24 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void unflattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException {
+        Connection con = null;
         try {
-            FxFlatStorageManager.getInstance().unflatten(assignment);
+            con = Database.getDbConnection();
+
+            FxFlatStorageManager.getInstance().unflatten(con, assignment);
+
+            StructureLoader.reload(con);
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw e;
-        }
-        try {
-            StructureLoader.reload(null);
         } catch (FxCacheException e) {
             EJBUtils.rollback(ctx);
-            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+            throw new FxUpdateException(e);
+        } catch (SQLException e) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(e);
+        } finally {
+            Database.closeObjects(AssignmentEngineBean.class, con, null);
         }
     }
 }

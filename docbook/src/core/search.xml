@@ -323,6 +323,31 @@ ORDER BY @node_position DESC   -- invert tree sort order]]></programlisting>
             </section>
         </section>
 
+        <section xml:id="css_briefcase">
+            <title>Briefcase Search</title>
+
+            <para>
+                In addition to the briefcase filters described in
+                <xref linkend="css_filters"/>
+                &flexive; 3.1.7 added arbitrary conditions for the contents contained in a briefcase.
+                This can be used to implement nested queries by building "filter briefcases" which
+                are then matched against some reference property,
+                without having to use explicit "IN (...)" conditions (which do have
+                database-dependent limitations on the maximum number of constant elements).
+            </para>
+
+            <section xml:id="cssb_exists_briefcase">
+                <title>Select all contents where a reference is present in the specified briefcase</title>
+                <para>
+                    This code selects all contents where the reference property
+                    <code>MY_REFERENCE</code>
+                    points to a content which is part of the briefcase with ID 138.
+                </para>
+                <programlisting language="sql"><![CDATA[SELECT @pk
+WHERE MY_REFERENCE EXISTS IN BRIEFCASE 138]]></programlisting>
+            </section>
+        </section>
+
         <section xml:id="css_datetime">
             <title>Date and Time Functions</title>
 

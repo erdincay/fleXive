@@ -88,6 +88,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * Is the a flat storage engine enabled for this division?
      *
      * @return if a flat storage engine is enabled for this division
+     * @since 3.1
      */
     boolean isFlatStorageEnabled();
 
@@ -96,11 +97,12 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      *
      * @return List containing information about existing flat storages
      * @throws FxApplicationException on errors
+     * @since 3.1
      */
     List<FxFlatStorageInfo> getFlatStorageInfos() throws FxApplicationException;
 
     /**
-     * Create a flat storage
+     * Create a flat storage (creates both normal and "group" storages with the same settings).
      *
      * @param name          name of the flat storage (table name)
      * @param description   flat storage description
@@ -110,8 +112,26 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @param doubleColumns number of Double columns
      * @param selectColumns number of Select/Boolean columns
      * @throws FxApplicationException on errors
+     * @since 3.1
      */
     void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns,
+                                  int doubleColumns, int selectColumns) throws FxApplicationException;
+
+    /**
+     * Create a flat storage
+     *
+     * @param name          name of the flat storage (table name)
+     * @param storageType   storage table type (normal or group storage)
+     * @param description   flat storage description
+     * @param stringColumns number of String columns
+     * @param textColumns   number of Text columns
+     * @param bigIntColumns number of BigInt columns
+     * @param doubleColumns number of Double columns
+     * @param selectColumns number of Select/Boolean columns
+     * @throws FxApplicationException on errors
+     * @since 3.1.7
+     */
+    void createFlatStorage(String name, FxFlatStorageInfo.Type storageType, String description, int stringColumns, int textColumns, int bigIntColumns,
                                   int doubleColumns, int selectColumns) throws FxApplicationException;
 
     /**
@@ -119,6 +139,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      *
      * @param name name of the flat storage
      * @throws FxApplicationException on errors
+     * @since 3.1
      */
     void removeFlatStorage(String name) throws FxApplicationException;
 

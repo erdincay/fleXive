@@ -364,6 +364,12 @@ public class SqlParserTest {
         assertTrue(sub.getElements().indexOf(s02) != -1, "s02 not found in subquery");
     }
 
+    @Test(groups = {"shared", "search"})
+    public void briefcaseConditionTest() throws SqlParserException {
+        parse("SELECT id WHERE some_prop EXISTS IN BRIEFCASE 21");
+        parse("SELECT id WHERE some_prop EXISTS IN BRIEFCASE 21 OR IS DIRECT CHILD OF 5");
+    }
+
     private void checkNoReorg(String conditions, Brace.GroupFunction fun) throws SqlParserException {
         final FxStatement stmt = parse("SELECT id WHERE " + conditions);
         assertEquals(
