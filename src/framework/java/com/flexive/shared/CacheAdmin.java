@@ -94,9 +94,13 @@ public class CacheAdmin {
      * {@see #isSharedCache()}
      */
     private static final boolean SHARED_CACHE;
+    private static final boolean CACHE_ALL_VERSIONS;
 
     // system property to override SHARED_CACHE setting
     private static final String CONFIG_SHARED_CACHE = "flexive.cache.shared";
+
+    // system property to override CACHE_ALL_VERSIONS settings
+    private static final String CONFIG_CACHE_ALL_VERSIONS = "flexive.cache.allVersions";
 
     /**
      * {@see #isWebProfileDeployment}
@@ -106,14 +110,16 @@ public class CacheAdmin {
     static {
         // initialize web profile and shared cache configuration.
         
-        WEB_PROFILE_DEPLOYMENT = Thread.currentThread().getContextClassLoader().getResourceAsStream("flexive-ejb-interfaces-onlylocal.properties") != null;
+        WEB_PROFILE_DEPLOYMENT = Thread.currentThread().getContextClassLoader().getResource("flexive-ejb-interfaces-onlylocal.properties") != null;
 
-        final String sharedCacheEnabled = (String) System.getProperties().get(CONFIG_SHARED_CACHE);
+        final String sharedCacheEnabled = System.getProperty(CONFIG_SHARED_CACHE);
         SHARED_CACHE =
                 // shared cache manually activated
                 Boolean.parseBoolean(sharedCacheEnabled)
                 // web profile deployment (and not disabled explicitly)
                 || (WEB_PROFILE_DEPLOYMENT && !"false".equals(sharedCacheEnabled));
+
+        CACHE_ALL_VERSIONS = Boolean.parseBoolean(System.getProperty(CONFIG_SHARED_CACHE));
 
         if (LOG.isInfoEnabled()) {
             LOG.info("EJB web profile deployment: " + (WEB_PROFILE_DEPLOYMENT ? "yes" : "no"));
@@ -320,6 +326,9 @@ public class CacheAdmin {
      * @param content the content to cache
      */
     public static void cacheContent(FxCachedContent content) {
+        if (!isCacheAllVersions() && !(content.getContent().isMaxVersion() || content.getContent().isLiveVersion())) {
+            return;
+        }
         try {
             final String cachePath = getContentCachePath(content.getContent().getId());
             FxCachedContentContainer container = (FxCachedContentContainer) getInstance().get(cachePath, CONTENTCACHE_KEY_STORE);
@@ -486,6 +495,24 @@ public class CacheAdmin {
      */
     public static boolean isSharedCache() {
         return SHARED_CACHE;
+    }
+
+    /**
+     * Should all content versions be cached, or only the maximum/live versions?
+     *
+     * <p>
+     *     Beginning with flexive 3.1.7, only the maximum and live versions of a content are cached by default.
+     *     This is to avoid memory load issues when the database contains many instances with lots of versions.
+     *     When loading all versions of an instance (e.g. due to an export operation), they will all end up in the
+     *     cache but the entry still count as only one content (since all versions are stored in a single cache node).
+     * </p>
+     *
+     * @return  whether all content versions should be cached
+     *
+     * @since 3.1.7
+     */
+    public static boolean isCacheAllVersions() {
+        return CACHE_ALL_VERSIONS;
     }
 
     /**
