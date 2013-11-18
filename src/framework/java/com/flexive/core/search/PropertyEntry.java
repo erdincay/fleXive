@@ -32,6 +32,7 @@
 package com.flexive.core.search;
 
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.StorageManager;
@@ -480,11 +481,13 @@ public class PropertyEntry {
     }
 
     protected final String[] readColumns;
+    protected final String dataColumn;
     protected final String filterColumn;
     protected final String tableName;
     protected final FxProperty property;
     protected final FxPropertyAssignment assignment;
     protected final PropertyResolver.Table tbl;
+    protected final int flatColumnIndex;
     protected final Type type;
     protected final boolean multilanguage;
     protected final List<FxSQLFunction> functions = new ArrayList<FxSQLFunction>();
@@ -492,6 +495,7 @@ public class PropertyEntry {
     protected FxDataType overrideDataType;
     protected FxEnvironment environment;
     protected boolean processXPath = true;
+    protected boolean processData = false;
 
     /**
      * Create a new instance based on the given (search) property.
@@ -607,6 +611,7 @@ public class PropertyEntry {
         }
 
         this.readColumns = getReadColumns(storage, property);
+
         if (assignment != null && assignment.isFlatStorageEntry()) {
             final String column = StorageManager.getStorageImpl().escapeFlatStorageColumn(assignment.getFlatStorageMapping().getColumn());
             this.filterColumn = !ignoreCase
@@ -616,17 +621,36 @@ public class PropertyEntry {
                     ? column
                     // calculate upper-case function for text queries
                     : "UPPER(" + column + ")";
+            this.flatColumnIndex = FxFlatStorageManager.getInstance().getColumnDataIndex(assignment);
+            if (this.flatColumnIndex == -1) {
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.flatMappingIndex", searchProperty);
+            }
         } else {
             String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
             if (fcol == null) {
                 fcol = this.readColumns == null ? null : this.readColumns[0];
             }
             this.filterColumn = fcol;
+            this.flatColumnIndex = -1;
         }
 
         if (this.filterColumn == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.propertyDoesNotHaveColumnMapping",
                     searchProperty.getPropertyName());
+        }
+
+        if (this.tbl == PropertyResolver.Table.T_CONTENT_DATA) {
+            switch (this.property.getDataType()) {
+                case Number:
+                case SelectMany:
+                    this.dataColumn = "FBIGINT";
+                    break;
+                default:
+                    this.dataColumn = "FINT";
+                    break;
+            }
+        } else {
+            this.dataColumn = null;
         }
 
         this.multilanguage = this.property.isMultiLang();
@@ -639,6 +663,7 @@ public class PropertyEntry {
 
     public PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType) {
         this.readColumns = readColumns;
+        this.dataColumn = null; // n/a for custom property entries
         this.filterColumn = filterColumn;
         this.tbl = tbl;
         this.type = type;
@@ -647,11 +672,13 @@ public class PropertyEntry {
         this.property = null;
         this.assignment = null;
         this.tableName = tbl != null && tbl != PropertyResolver.Table.T_CONTENT_DATA_FLAT ? tbl.getTableName() : null;
+        this.flatColumnIndex = -1;
     }
 
     public PropertyEntry(Type type, PropertyResolver.Table tbl, FxPropertyAssignment assignment, String[] readColumns,
                          String filterColumn, boolean multilanguage, FxDataType overrideDataType) {
         this.readColumns = readColumns;
+        this.dataColumn = null;
         this.filterColumn = filterColumn;
         this.tbl = tbl;
         this.type = type;
@@ -661,8 +688,10 @@ public class PropertyEntry {
         this.assignment = assignment;
         if (PropertyResolver.Table.T_CONTENT_DATA_FLAT == tbl) {
             this.tableName = assignment.getFlatStorageMapping().getStorage();
+            this.flatColumnIndex = FxFlatStorageManager.getInstance().getColumnDataIndex(assignment);
         } else {
             this.tableName = tbl != null ? tbl.getTableName() : null;
+            this.flatColumnIndex = -1;
         }
     }
 
@@ -780,10 +809,13 @@ public class PropertyEntry {
                 result.setEmpty(languageId);
             }
 
+            int currentPosition = positionInResultSet + getReadColumns().length;
+
+            // process XPath
             if (isProcessXPath()) {
                 if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
                     // Get the XPATH if we are reading from the content data table
-                    result.setXPath(rebuildXPath(rs.getString(positionInResultSet + getReadColumns().length)));
+                    result.setXPath(rebuildXPath(rs.getString(currentPosition++)));
                 } else if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
                     // set XPath for system-internal properties
                     result.setXPath("ROOT/" + property.getName());
@@ -796,6 +828,27 @@ public class PropertyEntry {
             } else {
                 result.setXPath(null);
             }
+
+            // process data
+            if (isProcessData() && getTableType() != null) {
+                final Integer valueData;
+                switch (getTableType()) {
+                    case T_CONTENT_DATA:
+                        final int data = rs.getInt(currentPosition++);
+                        valueData = rs.wasNull() ? null : data;
+                        break;
+                    case T_CONTENT_DATA_FLAT:
+                        // comma-separated string with the data entries of all columns
+                        final String csvData = rs.getString(currentPosition++);
+                        valueData = FxArrayUtils.getHexIntElementAt(csvData, ',', flatColumnIndex);
+                        break;
+                    default:
+                        // no value data in other tables
+                        valueData = null;
+                }
+                result.setValueData(valueData);
+            }
+
             return result;
         } catch (SQLException e) {
             throw new FxSqlSearchException(e);
@@ -1127,6 +1180,18 @@ public class PropertyEntry {
 
     public void setProcessXPath(boolean processXPath) {
         this.processXPath = processXPath;
+    }
+
+    public boolean isProcessData() {
+        return processData;
+    }
+
+    public void setProcessData(boolean processData) {
+        this.processData = processData;
+    }
+
+    public String getDataColumn() {
+        return dataColumn;
     }
 
     public boolean isPropertyPermsEnabled() {

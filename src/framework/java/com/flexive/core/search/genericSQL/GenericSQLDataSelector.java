@@ -311,6 +311,8 @@ public class GenericSQLDataSelector extends DataSelector {
         // disable XPath processing if corresponding hint is set
         entry.setProcessXPath(!FxContext.getUserTicket().isGlobalSupervisor() && !search.getParams().isHintIgnoreXPath());
 
+        entry.setProcessData(search.getParams().isHintSelectData());
+
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
@@ -402,11 +404,24 @@ public class GenericSQLDataSelector extends DataSelector {
                                 getContentDataSubselect("XMULT", entry, true));
                         result.addItem(xpath, resultPos, true);
                     }
+                    if (search.getParams().isHintSelectData()) {
+                        if (entry.getDataColumn() != null) {
+                            final String select = getContentDataSubselect(entry.getDataColumn(), entry, true);
+                            result.addItem(select, resultPos, true);
+                        }
+                    }
                     break;
                 case T_CONTENT_DATA_FLAT:
                     final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
-                    final String sel = getFlatStorageColumnSelect(entry, mapping);
+                    final String sel = getFlatStorageColumnSelect(entry, mapping, mapping.getColumn());
                     result.addItem(sel, resultPos, false);
+                    if (search.getParams().isHintSelectData()) {
+                        // straight-forward but slow implementation. When multiple flat storage columns are selected,
+                        // we may select the same valuedata column many times
+                        final String select = getFlatStorageColumnSelect(entry, mapping, "VALUEDATA");
+                        result.addItem(select, resultPos, true);
+                    }
+
                     break;
                 default:
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.table.typeNotSupported", entry.getTableName());
@@ -421,10 +436,11 @@ public class GenericSQLDataSelector extends DataSelector {
      *
      * @param entry   entry to select
      * @param mapping flatstorage mapping
+     * @param column  the column name
      * @return select statement
      */
-    protected String getFlatStorageColumnSelect(PropertyEntry entry, FxFlatStorageMapping mapping) {
-        return "(SELECT " + mapping.getColumn() + " FROM " + mapping.getStorage()
+    protected String getFlatStorageColumnSelect(PropertyEntry entry, FxFlatStorageMapping mapping, String column) {
+        return "(SELECT " + column + " FROM " + mapping.getStorage()
                 + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"
                 + " AND "
                 + SearchUtils.getFlatStorageAssignmentFilter(

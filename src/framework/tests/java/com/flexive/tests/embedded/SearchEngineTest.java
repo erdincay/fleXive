@@ -1985,6 +1985,56 @@ public class SearchEngineTest {
         assertTrue(result.getRowCount() > 0);
     }
 
+    @Test
+    public void selectDataTest() throws FxApplicationException {
+        FxPK pk = null;
+        try {
+            final String xpMulti = "/multiSearchProp";
+            final String xpSingle = "/stringSearchProp";
+            final String sval = "selectDataTest";
+
+            // test FX_CONTENT_DATA data select
+            final FxContent co = getContentEngine().initialize(TEST_TYPE);
+            co.setValue(xpMulti, sval);
+            co.getValue(xpMulti).setValueData(21);
+            co.setValue(xpSingle, sval);
+            co.getValue(xpSingle).setValueData(42);
+
+            pk = getContentEngine().save(co);
+
+            final SqlQueryBuilder sqb = new SqlQueryBuilder().select("@pk", TEST_TYPE + xpMulti + " AS value");
+            sqb.condition(TEST_TYPE + xpMulti, PropertyValueComparator.EQ, sval);
+            sqb.getParams().setHintSelectData(true);
+
+            final FxResultSet rs1 = sqb.getResult();
+
+            assertEquals(rs1.getRowCount(), 1, "Only one matching substance expected");
+            final FxValue value1 = rs1.getResultRow(0).getFxValue("value");
+            assertEquals(value1.getBestTranslation(), sval);
+            assertNotNull(value1.getValueData(), "Data field was not loaded");
+            assertEquals(value1.getValueData().intValue(), 21);
+
+            // test flat storage data select
+            sqb.select("@pk", TEST_TYPE + xpMulti + " AS value", TEST_TYPE + xpSingle + " AS valueSingle");
+            final FxResultSet rs2 = sqb.getResult();
+
+            assertEquals(rs2.getRowCount(), 1, "Only one matching substance expected");
+            final FxValue value2 = rs2.getResultRow(0).getFxValue("value");
+            final FxValue single2 = rs2.getResultRow(0).getFxValue("valueSingle");
+            assertEquals(value2.getBestTranslation(), sval);
+            assertEquals(single2.getBestTranslation(), sval);
+            assertNotNull(value2.getValueData());
+            assertNotNull(single2.getValueData());
+            assertEquals(value2.getValueData().intValue(), 21);
+            assertEquals(single2.getValueData().intValue(), 42);
+        } finally {
+            if (pk != null) {
+                EJBLookup.getContentEngine().remove(pk);
+            }
+        }
+
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());

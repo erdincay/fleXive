@@ -118,6 +118,9 @@ public class PropertyResolver {
             // also select XPATH, unless 'ignore XPath' hint is set and property permission checks are not required
             resultSetPos += 1;
         }
+        if (search.getParams().isHintSelectData() && (e.getTableType() == Table.T_CONTENT_DATA || e.getTableType() == Table.T_CONTENT_DATA_FLAT)) {
+            resultSetPos++;
+        }
         // compute total result set columns
         resultSetColumnCount += e.getReadColumns().length;
     }

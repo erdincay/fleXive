@@ -158,6 +158,7 @@ public class FxSQLSearchParams implements Serializable {
     private List<Long> hintTypes = null;
     private boolean hintIgnoreXPath = false;
     private boolean hintNoResultInfo = false;
+    private boolean hintSelectData = false;
     private boolean noInternalSort = false;
 
     /**
@@ -387,5 +388,26 @@ public class FxSQLSearchParams implements Serializable {
      */
     public void setNoInternalSort(boolean noInternalSort) {
         this.noInternalSort = noInternalSort;
+    }
+
+    /**
+     * @return  when true, the "data" field of FxValues will be included in the search result. Disabled by default
+     * for performance reasons.
+     * @since 3.1.7
+     * @see com.flexive.shared.value.FxValue#getValueData()
+     */
+    public boolean isHintSelectData() {
+        return hintSelectData;
+    }
+
+    /**
+     * Select the "data" field of FxValues.
+     *
+     * @param hintSelectData    true to select the data of FxValues
+     * @see com.flexive.shared.value.FxValue#getValueData()
+     * @since 3.1.7
+     */
+    public void setHintSelectData(boolean hintSelectData) {
+        this.hintSelectData = hintSelectData;
     }
 }
