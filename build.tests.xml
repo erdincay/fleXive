@@ -26,7 +26,7 @@
     <property name="run.profile.settings" value=""/>
     <property name="run.dist.settings" value=""/>
 
-    <property name="findbugs.dir" value="${flexive.lib.dir}/findbugs"/>
+    <property name="findbugs.dir" value="${flexive.lib.dir}/findbugs2"/>
     <property name="findbugs.xsl" value="${findbugs.dir}/src/xsl/fancy.xsl"/>
     <property name="findbugs.report.dir" value="${base.reports.dir}/findbugs"/>
 
