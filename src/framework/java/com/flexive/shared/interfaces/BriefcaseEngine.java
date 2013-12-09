@@ -139,17 +139,6 @@ public interface BriefcaseEngine {
      * Add the given items to the briefcase.
      *
      * @param id    the briefcase ID
-     * @param objectIds the object IDs to be added
-     * @throws FxApplicationException   if the items could not be added
-     * @deprecated use {@link #addItems(long, java.util.Collection)}
-     */
-    @Deprecated
-    void addItems(long id, long[] objectIds) throws FxApplicationException;
-
-    /**
-     * Add the given items to the briefcase.
-     *
-     * @param id    the briefcase ID
      * @param contents the content instances to be added
      * @throws FxApplicationException   if the items could not be added
      * @since 3.1
@@ -161,35 +150,11 @@ public interface BriefcaseEngine {
      * briefcase, then add the given objects).
      *
      * @param id    the briefcase ID
-     * @param objectIds the new briefcase content
-     * @throws FxApplicationException   if the content could not be replaced
-     * @deprecated use {@link #setItems(long, java.util.Collection)}
-     */
-    @Deprecated
-    void setItems(long id, long[] objectIds) throws FxApplicationException;
-
-    /**
-     * Replace the current briefcase content with the given objects (i.e. clear the
-     * briefcase, then add the given objects).
-     *
-     * @param id    the briefcase ID
      * @param contents the new briefcase content
      * @throws FxApplicationException   if the content could not be replaced
      * @since 3.1
      */
     void setItems(long id, Collection<FxPK> contents) throws FxApplicationException;
-
-    /**
-     * Adds/removes the given items for the briefcase.
-     *
-     * @param id    the briefcase ID
-     * @param addObjectIds  items to be added
-     * @param removeObjectIds   items to be removed
-     * @throws FxApplicationException if the briefcase could not be updated
-     * @deprecated use {@link #updateItems(long, java.util.Collection, java.util.Collection)}
-     */
-    @Deprecated
-    void updateItems(long id, long[] addObjectIds, long[] removeObjectIds) throws FxApplicationException;
 
     /**
      * Adds/removes the given items for the briefcase.
@@ -255,17 +220,6 @@ public interface BriefcaseEngine {
      * @since 3.1
      */
     FxReferenceMetaData<FxPK> getMetaData(long briefcaseId, FxPK pk) throws FxApplicationException;
-
-    /**
-     * Removes the given items from the briefcase.
-     *
-     * @param id    the briefcase ID
-     * @param objectIds the objects to be removed
-     * @throws FxApplicationException   if the items could not be removed
-     * @deprecated use {@link #removeItems(long, java.util.Collection)}
-     */
-    @Deprecated
-    void removeItems(long id, long[] objectIds) throws FxApplicationException;
 
     /**
      * Removes the given items from the briefcase.

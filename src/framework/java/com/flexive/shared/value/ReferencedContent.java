@@ -41,7 +41,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -82,20 +81,6 @@ public class ReferencedContent extends FxPK implements Serializable {
         }
         this.content = null;
         this.accessGranted = false;
-    }
-
-    /**
-     * Ctor
-     *
-     * @param pk      referenced primary key
-     * @param caption caption of the referenced content, only available if loaded
-     * @param step    the step
-     * @param acl     the acl
-     * @deprecated    use {@link #ReferencedContent(com.flexive.shared.content.FxPK, String, com.flexive.shared.workflow.Step, java.util.List)}
-     */
-    @Deprecated
-    public ReferencedContent(FxPK pk, String caption, Step step, ACL acl) {
-        this(pk, caption, step, acl == null ? null : Arrays.asList(acl));
     }
 
     /**
@@ -208,19 +193,6 @@ public class ReferencedContent extends FxPK implements Serializable {
         if (!hasStep())
             throw new FxApplicationException("ex.content.reference.step.missing").asRuntimeException();
         return step;
-    }
-
-    /**
-     * Get the first ACL for this reference
-     *
-     * @return ACL for this reference
-     * @deprecated  use {@link #getAcls()}
-     */
-    @Deprecated
-    public ACL getAcl() {
-        if (!hasACL())
-            throw new FxApplicationException("ex.content.reference.ACL.missing").asRuntimeException();
-        return acls.get(0);
     }
 
     /**

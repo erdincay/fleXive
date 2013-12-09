@@ -569,27 +569,6 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     public abstract FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity);
 
     /**
-     * Resolve preload dependencies after initial loading
-     *
-     * @param assignments all known assignment
-     * @deprecated Use {@link #resolveDependencies(java.util.Map)}
-     */
-    public void resolvePreloadDependencies(List<FxAssignment> assignments) {
-        if (parentGroupAssignment != null && parentGroupAssignment.getAlias() == null) {
-            if (parentGroupAssignment.getId() == FxAssignment.NO_PARENT)
-                parentGroupAssignment = null;
-            else {
-                for (FxAssignment as : assignments)
-                    if (as instanceof FxGroupAssignment && as.getId() == parentGroupAssignment.getId()) {
-                        parentGroupAssignment = (FxGroupAssignment) as;
-                        return;
-                    }
-                parentGroupAssignment = null; //if we reach this, the parent assignment could not be found => clear it
-            }
-        }
-    }
-
-    /**
      * Resolve preload dependencies after initial loading (improved version for large environments).
      *
      * @param groupAssignments all known group assignments

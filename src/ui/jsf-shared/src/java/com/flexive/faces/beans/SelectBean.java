@@ -383,16 +383,6 @@ public class SelectBean implements Serializable {
      * Return all available content ACLs.
      *
      * @return all available content ACLs.
-     * @deprecated since 3.1.1 use getInstanceACLs instead
-     */
-    public List<SelectItem> getContentACLs() {
-        return getInstanceACLs();
-    }
-
-    /**
-     * Return all available content ACLs.
-     *
-     * @return all available content ACLs.
      * @since 3.1.1
      */
     public List<SelectItem> getInstanceACLs() {

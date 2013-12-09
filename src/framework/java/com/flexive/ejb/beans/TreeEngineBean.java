@@ -385,63 +385,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
 
 
     /**
-     * Deletes the given node.
-     *
-     * @param mode                    tree mode to use (Live or Edit tree)
-     * @param nodeId                  the node to delete
-     * @param deleteReferencedContent delete referenced content
-     * @param deleteChildren          delete all child nodes as well?
-     * @throws FxApplicationException on errors
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public void remove(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
-        Connection con = null;
-        if (nodeId < 0) {
-            throw new FxInvalidParameterException("nodeId", "ex.tree.delete.nodeId");
-        }
-        try {
-            con = Database.getDbConnection();
-            final FxTreeNode subTree;
-            if (deleteReferencedContent) {
-                subTree = deleteChildren ? getTree(mode, nodeId, Integer.MAX_VALUE) : getNode(mode, nodeId);
-            } else {
-                subTree = null;
-            }
-            StorageManager.getTreeStorage().removeNode(con, mode, contentEngine, nodeId, deleteChildren);
-            if (deleteReferencedContent) {
-                for (FxTreeNode node : subTree) {
-                    if (node.getReference() != null && contentEngine.getReferencedContentCount(node.getReference()) == 0) {
-                        // remove only contents that are not referenced elsewhere
-                        contentEngine.remove(node.getReference());
-                    }
-                }
-            }
-            StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
-            FxContext.get().setTreeWasModified();
-        } catch (FxNotFoundException nf) {
-            // Node does not exist and we wanted to delete it anyway .. so this is no error
-        } catch (FxApplicationException ae) {
-            EJBUtils.rollback(ctx);
-            throw ae;
-        } catch (Throwable t) {
-            EJBUtils.rollback(ctx);
-            throw new FxRemoveException(LOG, t, "ex.tree.delete.failed", nodeId, t.getMessage());
-        } finally {
-            Database.closeObjects(TreeEngineBean.class, con, null);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException {
-        remove(node.getMode(), node.getId(), removeReferencedContent, removeChildren);
-    }
-
-    /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -567,15 +510,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException {
-        return copy(mode, source, destination, destinationPosition, false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long copy(FxTreeMode mode, long source, long destination, int destinationPosition, boolean deepReferenceCopy) throws FxApplicationException {
         Connection con = null;
         boolean success = false;
@@ -626,15 +560,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         }
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void activate(FxTreeMode mode, long nodeId, boolean includeChildren) throws FxApplicationException {
-        activate(mode, nodeId, includeChildren, true);
-    }
 
     /**
      * {@inheritDoc}

@@ -103,25 +103,6 @@ public class FxScriptInfoEdit extends FxScriptInfo {
         this.code = code;
     }
 
-     /**
-     * Constructor
-     *
-     * @param id          script id
-     * @param event       script type
-     * @param name        (unique) name of the script
-     * @param description description
-     * @param code        the script code
-     * @param active      if the script is active
-     * @throws FxInvalidParameterException on errors
-     * @see FxScriptEvent
-     * @deprecated use {@link #FxScriptInfoEdit(long, FxScriptEvent, String, String, String, boolean, boolean)} instead
-     */
-    @Deprecated
-    public FxScriptInfoEdit(long id, FxScriptEvent event, String name, String description, String code, boolean active) throws FxInvalidParameterException {
-        super(id, event, name, description, active);
-        this.code = code;
-    }
-
     /**
      * Constructs a editable script info object from FxScriptInfo.
      *

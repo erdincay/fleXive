@@ -148,23 +148,6 @@ public class FxStreamUtils {
 
     /**
      * Upload a binary (using an OutputStream) to the StreamServer with a given time to live.
-     * Warning: if using a remote connection, this method will return a few milliseconds before
-     * all binary data is stored in the DB! Local connected clients will return *after* all
-     * data is stored. This is currently a 'feature' that might be fixed sometime.
-     *
-     * @param length     expected length of the stream/binary
-     * @param stream     the Stream containing the binary
-     * @param timeToLive time in milliseconds the binary is guaranteed to exist server side (will be removed once expired)
-     * @return payload containing server side handle of the binary, mimeType and meta data
-     * @throws FxStreamException on errors
-     * @deprecated
-     */
-    public static BinaryUploadPayload uploadBinary(long length, InputStream stream, long timeToLive) throws FxStreamException {
-        return uploadBinary(length, stream, timeToLive, FxMimeType.UNKNOWN);
-    }
-
-    /**
-     * Upload a binary (using an OutputStream) to the StreamServer with a given time to live.
      * Warning: if using a remote connection, this method will return a few miliseconds before
      * all binary data is stored in the DB! Local connected clients will return *after* all
      * data is stored. This is currently a 'feature' that might be fixed sometime.

@@ -1,11 +1,12 @@
-import com.flexive.shared.*
-import com.flexive.shared.value.*
-import com.flexive.shared.scripting.groovy.*
-import com.flexive.shared.structure.*
-import com.flexive.shared.security.*
-import com.flexive.shared.scripting.FxScriptInfo
-import com.flexive.shared.scripting.FxScriptEvent
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
 import com.flexive.shared.exceptions.FxEntryExistsException
+import com.flexive.shared.scripting.FxScriptEvent
+import com.flexive.shared.scripting.FxScriptInfo
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.security.ACLCategory
+import com.flexive.shared.structure.*
+import com.flexive.shared.value.FxString
 
 println "Creating newsletter types ... "
 
@@ -1085,7 +1086,9 @@ if(scriptOverride && CacheAdmin.getEnvironment().scriptExists("SubscriberCode.gr
 	scriptId = CacheAdmin.getEnvironment().getScript("SubscriberCode.groovy").getId()
 	EJBLookup.getScriptingEngine().updateScriptCode(scriptId, scriptCode)
 } else {
-	siType = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentCreate, "SubscriberCode.groovy", "Create a subscriber code", scriptCode)
+    def scriptInfo = new FxScriptInfo(-1, FxScriptEvent.BeforeContentCreate, "SubscriberCode.groovy", "Create a subscriber code", true, false).asEditable()
+    scriptInfo.setCode(scriptCode)
+	siType = EJBLookup.getScriptingEngine().createScript(scriptInfo)
     scriptId = siType.id
 }
 try {

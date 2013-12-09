@@ -70,26 +70,6 @@ public class FxPermissionUtils {
      * @param permission     permission to check
      * @param type           used type
      * @param stepACL        step ACL
-     * @param contentACL     content ACL
-     * @param throwException should exception be thrown
-     * @return access granted
-     * @throws FxNoAccessException if not accessible for calling user
-     * @deprecated use {@link #checkPermission(com.flexive.shared.security.UserTicket, long, com.flexive.shared.security.ACLPermission, com.flexive.shared.structure.FxType, long, java.util.Collection, boolean)}
-     */
-    @Deprecated
-    public static boolean checkPermission(UserTicket ticket, long ownerId, ACLPermission permission, FxType type, long stepACL,
-                                          long contentACL, boolean throwException) throws FxNoAccessException {
-        return checkPermission(ticket, ownerId, permission, type, stepACL, Arrays.asList(contentACL), throwException);
-    }
-
-    /**
-     * Permission check for (new) contents
-     *
-     * @param ticket         calling users ticket
-     * @param ownerId        owner of the content to check
-     * @param permission     permission to check
-     * @param type           used type
-     * @param stepACL        step ACL
      * @param contentACLs    content ACL(s)
      * @param throwException should exception be thrown
      * @return access granted

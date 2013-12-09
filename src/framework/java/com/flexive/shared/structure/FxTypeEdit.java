@@ -268,42 +268,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param name                    name of the type
      * @param label                   label
      * @param acl                     type ACL
-     * @param workflow                workflow to use
-     * @param parent                  parent type or <code>null</code> if not derived
-     * @param enableParentAssignments if parent is not <code>null</code> enable all derived assignments from the parent?
-     * @param storageMode             the storage mode
-     * @param category                category mode (system, user)
-     * @param mode                    type mode (content, relation)
-     * @param language                language mode
-     * @param state                   type state (active, locked, etc)
-     * @param permissions             permissions bit coded
-     * @param trackHistory            track history
-     * @param historyAge              max. age of the history to track
-     * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
-     * @param autoVersion             automatically create a new version when contents changed during a save operation
-     * @param maxRelSource            max. number of instance related as source
-     * @param maxRelDestination       max. number of instance related as destination
-     * @return FxTypeEdit instance for creating a new FxType
-     * @deprecated since 3.1.1 (defaultInstanceACL added to method)
-     */
-    public static FxTypeEdit createNew(String name, FxString label, ACL acl, Workflow workflow,
-                                       FxType parent, boolean enableParentAssignments,
-                                       TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
-                                       LanguageMode language, TypeState state, byte permissions,
-                                       boolean trackHistory, long historyAge, long maxVersions,
-                                       boolean autoVersion, int maxRelSource, int maxRelDestination) {
-        return new FxTypeEdit(name, label, acl, null, workflow, parent, enableParentAssignments,
-                storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
-                parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
-                maxVersions, autoVersion, maxRelSource, maxRelDestination, null);
-    }
-
-    /**
-     * Create a new FxTypeEdit instance for creating a new FxType (no structure options)
-     *
-     * @param name                    name of the type
-     * @param label                   label
-     * @param acl                     type ACL
      * @param defaultInstanceACL      optional default ACL to assign for new instances
      * @param workflow                workflow to use
      * @param parent                  parent type or <code>null</code> if not derived
@@ -333,42 +297,6 @@ public class FxTypeEdit extends FxType implements Serializable {
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
                 maxVersions, autoVersion, maxRelSource, maxRelDestination, null);
-    }
-
-    /**
-     * Create a new FxTypeEdit instance for creating a new FxType
-     *
-     * @param name                    name of the type
-     * @param label                   label
-     * @param acl                     type ACL
-     * @param workflow                workflow to use
-     * @param parent                  parent type or <code>null</code> if not derived
-     * @param enableParentAssignments if parent is not <code>null</code> enable all derived assignments from the parent?
-     * @param storageMode             the storage mode
-     * @param category                category mode (system, user)
-     * @param mode                    type mode (content, relation)
-     * @param language                language mode
-     * @param state                   type state (active, locked, etc)
-     * @param permissions             permissions bit coded
-     * @param trackHistory            track history
-     * @param historyAge              max. age of the history to track
-     * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
-     * @param maxRelSource            max. number of instance related as source
-     * @param maxRelDestination       max. number of instance related as destination
-     * @param options                 list of structure options
-     * @return FxTypeEdit instance for creating a new FxType
-     * @deprecated since 3.1.1 (defaultInstanceACL added to method)
-     */
-    public static FxTypeEdit createNew(String name, FxString label, ACL acl, Workflow workflow,
-                                       FxType parent, boolean enableParentAssignments,
-                                       TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
-                                       LanguageMode language, TypeState state, byte permissions,
-                                       boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
-                                       int maxRelDestination, List<FxStructureOption> options) {
-        return new FxTypeEdit(name, label, acl, null, workflow, parent, enableParentAssignments,
-                storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
-                parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
-                maxVersions, false, maxRelSource, maxRelDestination, options);
     }
 
     /**
@@ -523,18 +451,6 @@ public class FxTypeEdit extends FxType implements Serializable {
         return this;
     }
 
-
-    /**
-     * Set the description (=label) of this type
-     *
-     * @param description description
-     * @return the type itself, useful for chained calls
-     * @deprecated replaced by {@link #setLabel(com.flexive.shared.value.FxString)}
-     */
-    @Deprecated
-    public FxTypeEdit setDescription(FxString description) {
-        return setLabel(description);
-    }
 
     /**
      * Set the label of this type

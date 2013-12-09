@@ -858,20 +858,6 @@ public class FxContext implements Serializable {
     }
 
     /**
-     * Replace the threadlocal context with another one.
-     * This method provides a mean to escalate the current context to other threads.
-     * As a safeguard, the context can only be replaced if the current UserTicket is <code>null</code>
-     *
-     * @param context the FxContext to use as replacement
-     * @deprecated use {@link com.flexive.shared.FxContext#replace()}
-     */
-    @Deprecated
-    public static void replace(FxContext context) {
-        if (FxContext.getUserTicket() == null)
-            context.replace();
-    }
-
-    /**
      * Shortcut for {@code FxContext.get().runAsSystem()}.
      *
      * @since 3.1

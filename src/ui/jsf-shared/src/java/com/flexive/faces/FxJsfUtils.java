@@ -70,8 +70,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.Writer;
 import java.text.Collator;
 import java.util.*;
 
@@ -114,37 +112,6 @@ public class FxJsfUtils {
      */
     public static String decodeJSFIdentifier(String identifier) {
         return identifier.replaceAll(BRACKET_CLOSE, "]").replace(SLASH, "/").replace(BRACKET_OPEN, "[");
-    }
-
-    /**
-     * Renders the value as returned from a flexive search query to the
-     * given output writer.
-     *
-     * @param out   the output writer
-     * @param value the value to be formatted
-     * @param linkFormatter link formatter
-     * @param linkFormat link format
-     * @param itemLinkFormat item link format
-     * @throws java.io.IOException if the value could not be written
-     * @deprecated  use {@link #formatResultValue(String, Object, com.flexive.shared.ContentLinkFormatter, String, String)}
-     */
-    @Deprecated
-    public static void writeResultValue(Writer out, Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) throws IOException {
-        out.write(formatResultValue(null, value, linkFormatter, linkFormat, itemLinkFormat));
-    }
-
-    /**
-     * Formats the value as returned from a flexive search query.
-     *
-     * @param value the value to be formatted
-     * @param linkFormatter link formatter
-     * @param linkFormat link format
-     * @param itemLinkFormat item link format
-     * @return the formatted string value
-     * @deprecated  use {@link #formatResultValue(String, Object, com.flexive.shared.ContentLinkFormatter, String, String)}
-     */
-    public static String formatResultValue(Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) {
-        return formatResultValue(null, value, linkFormatter, linkFormat, itemLinkFormat);
     }
 
     /**
@@ -696,20 +663,6 @@ public class FxJsfUtils {
      */
     public static UIComponent createComponent(String componentType) {
         return getApplication().createComponent(componentType);
-    }
-
-    /**
-     * Add a child component of the given type to the parent component. The child component
-     * is returned to the caller.
-     *
-     * @param parent        the parent component
-     * @param componentType child component type, e.g. <code>javax.faces.SelectOne</code>
-     * @return the created child component
-     * @deprecated          adding the child without its final ID leads to problems with JSF2 events. Use
-     * {@link #addChildComponent(javax.faces.component.UIComponent, java.lang.String, java.lang.String)}
-     */
-    public static UIComponent addChildComponent(UIComponent parent, String componentType) {
-        return addChildComponent(parent, null, componentType);
     }
 
     /**

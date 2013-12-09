@@ -68,7 +68,7 @@ EJBLookup.treeEngine.save(FxTreeNodeEdit.createNew("Welcome to [flexive] 3.1").s
 
 // create demo briefcase
 def bcId = EJBLookup.briefcaseEngine.create("Demo Briefcase", "Briefcases are collections of objects. You can add and remove objects to a briefcase, and also share them with other users.", null)
-EJBLookup.briefcaseEngine.addItems(bcId, pk.id)
+EJBLookup.briefcaseEngine.addItems(bcId, [pk])
 
 // create demo query
 final QueryRootNode root = new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, AdminResultLocations.ADMIN);

@@ -1588,23 +1588,6 @@ public final class FxSharedUtils {
      *
      * @param values the input values
      * @return the IDs of the input values
-     * @deprecated use {@link #getSelectableObjectIdList(Iterable)}
-     */
-    @Deprecated
-    public static long[] getSelectableObjectIds(Collection<? extends SelectableObject> values) {
-        final long[] result = new long[values.size()];
-        int idx = 0;
-        for (SelectableObject object : values) {
-            result[idx++] = object.getId();
-        }
-        return result;
-    }
-
-    /**
-     * Extract the unique IDs of the given {@link SelectableObject} collection.
-     *
-     * @param values the input values
-     * @return the IDs of the input values
      * @since 3.1
      */
     public static List<Long> getSelectableObjectIdList(Iterable<? extends SelectableObject> values) {

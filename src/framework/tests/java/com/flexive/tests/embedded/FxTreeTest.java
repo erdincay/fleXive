@@ -561,7 +561,7 @@ public class FxTreeTest {
             assertEquals(scriptCounter, 1);
             long topNode = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/A/B/C")[0];
             assertEquals(scriptCounter, 4);
-            tree.copy(mode, topNode, nodeId, 0);
+            tree.copy(mode, topNode, nodeId, 0, false);
             assertEquals(scriptCounter, 7);
             tree.remove(tree.getNode(mode, topNode), FxTreeRemoveOp.Unfile, true);
             assertEquals(scriptCounter, 4);
@@ -973,7 +973,7 @@ public class FxTreeTest {
         FxPK contentPK = createTestContent(node, typeId, testData);
         FxTreeNode contentNode1 = tree.findChild(mode, nodes[0], contentPK);
 
-        long copyId = tree.copy(mode, contentNode1.getId(), nodes[2], 0);
+        long copyId = tree.copy(mode, contentNode1.getId(), nodes[2], 0, false);
         FxTreeNode contentNode2 = tree.findChild(mode, nodes[2], contentPK); // get the new tree node
 
         assertEquals(copyId, contentNode2.getId());

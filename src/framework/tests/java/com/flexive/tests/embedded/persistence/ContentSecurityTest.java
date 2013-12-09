@@ -133,8 +133,8 @@ public class ContentSecurityTest {
                 live = workflow.getSteps().get(1);
                 edit = workflow.getSteps().get(0);
             }
-            EJBLookup.getWorkflowStepEngine().updateStep(edit.getId(), editACL.getId());
-            EJBLookup.getWorkflowStepEngine().updateStep(live.getId(), liveACL.getId());
+            EJBLookup.getWorkflowStepEngine().updateStep(edit.getId(), editACL.getId(), 1);
+            EJBLookup.getWorkflowStepEngine().updateStep(live.getId(), liveACL.getId(), 1);
             workflow = CacheAdmin.getEnvironment().getWorkflow(wf);
             //create routes for the route test
             wfEdit = workflow.asEditable();

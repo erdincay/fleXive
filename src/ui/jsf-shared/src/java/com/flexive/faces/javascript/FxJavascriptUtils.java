@@ -54,17 +54,6 @@ public class FxJavascriptUtils {
     /**
      * Start a javascript block.
      *
-     * @param out the output writer
-     * @throws IOException if the code could not be written
-     * @deprecated  use {@link #beginJavascript(javax.faces.context.ResponseWriter)} to correctly encode CDATA script blocks
-     */
-    public static void beginJavascript(Writer out) throws IOException {
-        out.write("<script type=\"text/javascript\" language=\"javascript\">\n//<![CDATA[\n<!--\n");
-    }
-
-    /**
-     * Start a javascript block.
-     *
      * @param out the response writer
      * @throws IOException if the code could not be written
      * @since 3.1.4
@@ -77,17 +66,6 @@ public class FxJavascriptUtils {
 
         out.startElement("script", null);
         out.writeAttribute("type", "text/javascript", null);
-    }
-
-    /**
-     * End a javascript block.
-     *
-     * @param out the output writer
-     * @throws IOException if the code could not be written
-     * @deprecated  use {@link #endJavascript(javax.faces.context.ResponseWriter)} to correctly encode CDATA script blocks
-     */
-    public static void endJavascript(Writer out) throws IOException {
-        out.write("\n//-->\n//]]>\n</script>");
     }
 
     /**

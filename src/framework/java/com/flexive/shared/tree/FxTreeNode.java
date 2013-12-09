@@ -34,7 +34,6 @@ package com.flexive.shared.tree;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.value.FxString;
@@ -202,16 +201,6 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public long getId() {
         return id;
-    }
-
-    /**
-     * Get the id of the first ACL assigned to the referenced content
-     *
-     * @return id of the first ACL assigned to the referenced content
-     * @deprecated use {@link #getACLIds()}
-     */
-    public long getACLId() {
-        return acls != null && acls.length > 0 ? acls[0] : ACL.NULL_ACL_ID;
     }
 
     /**

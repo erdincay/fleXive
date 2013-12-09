@@ -33,10 +33,8 @@ package com.flexive.shared.content;
 
 
 import com.flexive.shared.FxLock;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -109,30 +107,6 @@ public class FxContentSecurityInfo implements Serializable {
      * Lock of the content
      */
     private final FxLock lock;
-
-    /**
-     * Constructor
-     *
-     * @param pk              the primary key this info relates to
-     * @param ownerId         owner of the content
-     * @param previewId       Id of preview image, only relevant for security if &gt; 0
-     * @param typeId          id of the used type
-     * @param mandatorId      id of the mandator
-     * @param typePermissions byte encoded type permission handling
-     * @param typeACL         ACL of the type
-     * @param stepACL         ACL of the step
-     * @param contentACL      ACL of the content instance
-     * @param previewACL      Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
-     * @param usedPropertyACL relevant property ACL's
-     * @param lock            lock of the content
-     * @deprecated use {@link #FxContentSecurityInfo(FxPK, long, long, long, long, byte, long, long, java.util.List, long, java.util.List, FxLock)}
-     */
-    @Deprecated
-    public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, long mandatorId, byte typePermissions, int typeACL, int stepACL, int contentACL,
-                                 int previewACL, long[] usedPropertyACL, FxLock lock) {
-        this(pk, ownerId, previewId, typeId, mandatorId, typePermissions, typeACL, stepACL,
-                Arrays.asList((long) contentACL), previewACL, Arrays.asList(ArrayUtils.toObject(usedPropertyACL)), lock);
-    }
 
     /**
      * Constructor
@@ -232,35 +206,12 @@ public class FxContentSecurityInfo implements Serializable {
     }
 
     /**
-     * Get the ACL of the content instance
-     *
-     * @return ACL of the content instance
-     * @deprecated use {@link #getContentACLs()}
-     */
-    @Deprecated
-    public long getContentACL() {
-        return contentACLs.isEmpty() ? -1 : contentACLs.get(0);
-    }
-
-    /**
      * Get the ACL(s) of the content instance
      *
      * @return ACL(s) of the content instance
      */
     public List<Long> getContentACLs() {
         return Collections.unmodifiableList(contentACLs);
-    }
-
-    /**
-     * Get all used and relevant property ACL's. will be empty if property permissions are disabled for
-     * the type
-     *
-     * @return relevant property ACL's
-     * @deprecated use {@link #getUsedPropertyACLs()}
-     */
-    @Deprecated
-    public long[] getUsedPropertyACL() {
-        return ArrayUtils.toPrimitive(usedPropertyACLs.toArray(new Long[usedPropertyACLs.size()]));
     }
 
     /**

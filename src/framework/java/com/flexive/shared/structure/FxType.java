@@ -211,44 +211,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
-     * [fleXive] internal constructor for FxTypes, do not used this outside the flexive core!
-     *
-     * @param id                         type id
-     * @param acl                        type ACL
-     * @param workflow                   the types workflow
-     * @param name                       name
-     * @param label                      label
-     * @param parent                     parent type
-     * @param storageMode                storage mode
-     * @param category                   type category
-     * @param mode                       type mode
-     * @param language                   language mode
-     * @param state                      type state
-     * @param permissions                permissions to use (bit coded)
-     * @param multipleContentACLs        does this type support multiple acls for instances?
-     * @param includedInSupertypeQueries include this type in super type queries?
-     * @param trackHistory               track history?
-     * @param historyAge                 max. age of history to keep
-     * @param maxVersions                max. number of versions to keep for instances of this type
-     * @param maxRelSource               max. number of relation sources
-     * @param maxRelDestination          max. number of relation destination
-     * @param lifeCycleInfo              life cycle info for the type
-     * @param derivedTypes               list of types derived from this type
-     * @param relations                  list of relations this type is affiliated with
-     * @param options                    type options
-     * @deprecated since 3.1.1
-     */
-    public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
-                  TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
-                  boolean multipleContentACLs, boolean includedInSupertypeQueries, boolean trackHistory,
-                  long historyAge, long maxVersions, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
-                  List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxStructureOption> options) {
-        this(id, acl, null, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
-                multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge, maxVersions, false, maxRelSource,
-                maxRelDestination, lifeCycleInfo, derivedTypes, relations, options);
-    }
-
-    /**
      * Get the category of this FxType (System, User, ...)
      *
      * @return the category.
@@ -350,17 +312,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * Get the description (=label) of this FxType
-     *
-     * @return description (=label)
-     * @deprecated replaced by {@link #getLabel()}
-     */
-    @Deprecated
-    public FxString getDescription() {
-        return getLabel();
     }
 
     /**
@@ -501,56 +452,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public TypeStorageMode getStorageMode() {
         return storageMode;
-    }
-
-    /**
-     * Use permissions at all?
-     *
-     * @return if permissions are used at all
-     * @deprecated will be removed in 3.2
-     */
-    public boolean usePermissions() {
-        return isUsePermissions();
-    }
-
-    /**
-     * Use content instance permissions?
-     *
-     * @return if content instance permissions are used
-     * @deprecated will be removed in 3.2
-     */
-    public boolean useInstancePermissions() {
-        return isUseInstancePermissions();
-    }
-
-    /**
-     * Use property permissions?
-     *
-     * @return if property permissions are used
-     * @deprecated will be removed in 3.2
-     */
-    public boolean usePropertyPermissions() {
-        return isUsePropertyPermissions();
-    }
-
-    /**
-     * Use step permissions?
-     *
-     * @return if step permissions are used
-     * @deprecated will be removed in 3.2
-     */
-    public boolean useStepPermissions() {
-        return isUseStepPermissions();
-    }
-
-    /**
-     * Use type permissions?
-     *
-     * @return if type permissions are used
-     * @deprecated will be removed in 3.2
-     */
-    public boolean useTypePermissions() {
-        return isUseTypePermissions();
     }
 
     /**

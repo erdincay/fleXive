@@ -66,43 +66,6 @@ public interface TreeEngine {
 
     /**
      * Remove a node and optionally its children.
-     * Referenced contents will only be removed if removedReferencedContent is set to true and the referenced
-     * content is not referenced elsewhere.
-     * The only exception is if the referenced content is of type FOLDER, then the folder is removed if it is not referenced
-     * from anywhere else.
-     *
-     * @param node                    the node to removed
-     * @param removeReferencedContent remove referenced content
-     * @param removeChildren          if true all nodes that are inside the subtree of the given node are
-     *                                deleted as well, if false the subtree is moved one level up (to the parent of the specified
-     *                                node)
-     * @throws FxApplicationException on errors
-     * @deprecated use TreeEngine#remove(com.flexive.shared.tree.FxTreeNode, com.flexive.shared.tree.FxTreeRemoveOp, boolean)
-     */
-    @Deprecated
-    void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
-
-    /**
-     * Remove a node and optionally its children.
-     * Referenced contents will only be removed if removedReferencedContent is set to true and the referenced
-     * content is not referenced elsewhere.
-     * The only exception is if the referenced content is of type FOLDER, then the folder is removed if it is not referenced
-     * from anywhere else.
-     *
-     * @param mode                    the tree mode (edit or live)
-     * @param nodeId                  the node to removed
-     * @param removeReferencedContent remove referenced content
-     * @param removeChildren          if true all nodes that are inside the subtree of the given node are
-     *                                deleted as well, if false the subtree is moved one level up (to the parent of the specified
-     *                                node)
-     * @throws FxApplicationException on errors
-     * @deprecated use TreeEngine#remove(com.flexive.shared.tree.FxTreeMode, long, com.flexive.shared.tree.FxTreeRemoveOp, boolean)
-     */
-    @Deprecated
-    void remove(FxTreeMode mode, long nodeId, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
-
-    /**
-     * Remove a node and optionally its children.
      * Referenced contents will be removed depending on chosen <code>removeOp</code>.
      * If the referenced content is of type FOLDER, then the folder is removed if it is not referenced
      * from anywhere else.
@@ -174,20 +137,6 @@ public interface TreeEngine {
      * @param source              the parent id of the structure to copy
      * @param destination         the destination node
      * @param destinationPosition the position in the destination node's children @return the (root-)id the copy
-     * @return the id of the new node (the "copy")
-     * @throws FxApplicationException on errors
-     * @deprecated
-     */
-    @Deprecated
-    long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException;
-
-    /**
-     * Copies a node to the specified parent and the specified position.
-     *
-     * @param mode                tree mode to use (Live or Edit tree)
-     * @param source              the parent id of the structure to copy
-     * @param destination         the destination node
-     * @param destinationPosition the position in the destination node's children @return the (root-)id the copy
      * @param deepReferenceCopy   create a copy of all referenced contents or reference the original contents?
      * @return the id of the new node (the "copy")
      * @throws FxApplicationException on errors
@@ -203,19 +152,6 @@ public interface TreeEngine {
      * @param data   the data, or null for no data
      */
     void setData(FxTreeMode mode, long nodeId, String data);
-
-    /**
-     * Activates a node - copying it from the "Edit" to the "Live" tree
-     *
-     * @param mode            tree mode (currently only Edit supported)
-     * @param nodeId          the node to activate
-     * @param includeChildren if true all children of the node are activated as well
-     * @throws FxApplicationException on errors
-     * @see com.flexive.shared.interfaces.TreeEngine#activate(com.flexive.shared.tree.FxTreeMode, long, boolean, boolean)
-     * @deprecated use com.flexive.shared.interfaces.TreeEngine#activate(com.flexive.shared.tree.FxTreeMode, long, boolean, boolean)
-     */
-    @Deprecated
-    void activate(FxTreeMode mode, long nodeId, boolean includeChildren) throws FxApplicationException;
 
     /**
      * Activates a node - copying it from the "Edit" to the "Live" tree

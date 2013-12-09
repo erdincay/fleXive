@@ -363,16 +363,6 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
     /**
      * {@inheritDoc}
-     *
-     * @deprecated
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateStep(long stepId, long aclId) throws FxApplicationException {
-        updateStep(stepId, aclId, 1);
-    }
-
-    /**
-     * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateStep(long stepId, long aclId, int position)

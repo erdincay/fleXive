@@ -32,7 +32,6 @@
 package com.flexive.shared.scripting;
 
 import com.flexive.shared.AbstractSelectableObjectWithName;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
@@ -80,23 +79,6 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
         if (StringUtils.isBlank(this.name) || this.name.length() > 255) {
             throw new FxInvalidParameterException("NAME", "ex.scripting.name.invalid", name);
         }
-    }
-
-    /**
-     * Constructor
-     *
-     * @param id          script id
-     * @param event       script type
-     * @param name        (unique) name of the script
-     * @param description description
-     * @param active      if the script is active
-     * @throws FxInvalidParameterException on errors
-     * @see FxScriptEvent
-     * @deprecated use {@link #FxScriptInfo(long, FxScriptEvent, String, String, boolean, boolean)} instead
-     */
-    @Deprecated
-    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, boolean active) throws FxInvalidParameterException {
-        this(id, event,name,description,active,StringUtils.isNotBlank(name) ? FxSharedUtils.isGroovyScript(name) : false);
     }
 
     /**

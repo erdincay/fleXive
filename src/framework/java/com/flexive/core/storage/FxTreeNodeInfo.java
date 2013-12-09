@@ -197,17 +197,6 @@ public abstract class FxTreeNodeInfo implements Serializable {
     }
 
     /**
-     * Get the id of the ACL assigned to the referenced content
-     *
-     * @return id of the ACL assigned to the referenced content
-     * @deprecated  use {@link #getACLIds()}
-     */
-    @Deprecated
-    public long getACLId() {
-        return aclIds.isEmpty() ? -1 : aclIds.get(0);
-    }
-
-    /**
      * Get the id(s) of the ACL(s) assigned to the referenced content
      *
      * @return id(s) of the ACL(s) assigned to the referenced content

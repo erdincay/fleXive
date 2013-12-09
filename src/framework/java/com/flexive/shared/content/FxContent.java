@@ -198,18 +198,6 @@ public class FxContent implements Serializable {
     }
 
     /**
-     * Getter for the first ACL id
-     *
-     * @return ACL id
-     * @deprecated use {@link #getAclIds()}
-     */
-    @Deprecated
-    public long getAclId() {
-        final List<Long> acls = getAclIds();
-        return acls.isEmpty() ? -1 : acls.get(0);
-    }
-
-    /**
      * Set the content ACL id. If more than one ACL was assigned, the additional ACLs are removed
      * before assigning the new ACL.
      *
@@ -1124,20 +1112,6 @@ public class FxContent implements Serializable {
                 return false;
         }
         return true;
-    }
-
-    /**
-     * Check if the given XPath is valid for this content.
-     * This is a shortcut to the corresponding type's method!
-     *
-     * @param XPath         the XPath to check
-     * @param checkProperty should the XPath point to a property?
-     * @return if the XPath is valid or not
-     * @see FxType#isXPathValid(String,boolean)
-     * @deprecated use #isGroupXPath(String or #isPropertyXPath(String) instead
-     */
-    public boolean isXPathValid(String XPath, boolean checkProperty) {
-        return CacheAdmin.getEnvironment().getType(this.getTypeId()).isXPathValid(XPath, checkProperty);
     }
 
     /**

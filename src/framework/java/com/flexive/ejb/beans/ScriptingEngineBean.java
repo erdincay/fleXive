@@ -280,16 +280,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code, boolean active) throws FxApplicationException {
-        FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
-        updateScriptInfo(new FxScriptInfoEdit(scriptId, event, name, description, code, active, si.isCached()));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptInfo(FxScriptInfoEdit script) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
@@ -446,26 +436,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
-        return createScript(new FxScriptInfoEdit(-1, event, name, description, code, true,
-                StringUtils.isNotBlank(name) && FxSharedUtils.isGroovyScript(name)));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
-        return createScriptFromLibrary(libraryname, new FxScriptInfo(-1,event,name,description,true,
-                StringUtils.isNotBlank(name) && FxSharedUtils.isGroovyScript(name)));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScriptFromLibrary(String libraryname, FxScriptInfo scriptInfo) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         String code = FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream("fxresources/scripts/library/" + libraryname), -1);
@@ -507,16 +477,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         return createScript(new FxScriptInfoEdit(-1, scriptInfo.getEvent(),
                 scriptInfo.getName(), scriptInfo.getDescription(), code,
                 scriptInfo.isActive(), scriptInfo.isCached()));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
-        return createScriptFromDropLibrary(dropName, libraryname, new FxScriptInfo(-1,event,name,description,true,
-                StringUtils.isNotBlank(name) && FxSharedUtils.isGroovyScript(name)));
     }
 
     /**

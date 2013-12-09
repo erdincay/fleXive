@@ -85,25 +85,6 @@ public class FxDropApplication implements Serializable {
      * @param name              the unique name of the application
      * @param contextRoot       the context root of the web application
      * @param displayName       a human-readable name of the application
-     * @param resourceJarURL    the URL of the JAR file containing the resources of the drop application
-     * @deprecated              pass the actual URL as the last argument for better compatibility
-     */
-    public FxDropApplication(String name, String contextRoot, String displayName, String resourceJarURL) {
-        checkParameterEmpty(name, "name");
-        checkParameterEmpty(displayName, "displayName");
-        this.name = name;
-        this.contextRoot = contextRoot;
-        this.displayName = displayName;
-        this.resourceURL = resourceJarURL;
-        this.isJarProtocol = true;
-    }
-
-    /**
-     * Create a new application descriptor.
-     *
-     * @param name              the unique name of the application
-     * @param contextRoot       the context root of the web application
-     * @param displayName       a human-readable name of the application
      * @param resourceURL       the URL that was used for loading flexive-application.properties
      * @since 3.1
      */
@@ -192,21 +173,6 @@ public class FxDropApplication implements Serializable {
      */
     public String getResourceJarURL() {
         return resourceURL;
-    }
-
-    /**
-     * Returns a stream to the JAR file containing the resources of the drop applications.
-     *
-     * @return a stream to the JAR file containing the resources of the drop applications.
-     * @throws IOException if the JAR file stream could not be opened
-     * @deprecated  use {@link #loadTextResources(String)} for better compatibility, since drop applications may also
-     * be served directly from a directory (e.g. in Maven test suites).
-     */
-    public JarInputStream getResourceJarStream() throws IOException {
-        if (!isJarProtocol) {
-            throw new IllegalArgumentException("Cannot create a JarInputStream for a file URL.");
-        }
-        return getJarStream();
     }
 
     private JarInputStream getJarStream() throws IOException {

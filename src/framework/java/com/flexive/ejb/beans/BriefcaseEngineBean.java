@@ -334,15 +334,6 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public void addItems(long id, long[] objectIds) throws FxApplicationException {
-        addItems(id, toPKList(objectIds));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addItems(long id, Collection<FxPK> contents) throws FxApplicationException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -387,15 +378,6 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public void removeItems(long id, long[] objectIds) throws FxApplicationException {
-        removeItems(id, toPKList(objectIds));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeItems(long id, Collection<FxPK> contents) throws FxApplicationException {
         if (contents == null || contents.isEmpty()) {
             return;
@@ -427,27 +409,9 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public void updateItems(long id, long[] addObjectIds, long[] removeObjectIds) throws FxApplicationException {
-        updateItems(id, toPKList(addObjectIds), toPKList(removeObjectIds));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateItems(long id, Collection<FxPK> addContents, Collection<FxPK> removeContents) throws FxApplicationException {
         removeItems(id, removeContents);
         addItems(id, addContents);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    @Deprecated
-    public void setItems(long id, long[] objectIds) throws FxApplicationException {
-        setItems(id, toPKList(objectIds));
     }
 
     /**
