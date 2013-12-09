@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.shared.exceptions;
 
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
@@ -220,28 +219,6 @@ public class FxExceptionMessage implements Serializable {
             LOG.warn("Unknown message key: " + key);
             return "??" + key + "??";
         }
-    }
-
-    /**
-     * Get the localized message for a given language code
-     *
-     * @param localeId locale id of the desired output
-     * @return localized message
-     * @deprecated use {@link #getLocalizedMessage(com.flexive.shared.FxLanguage) } if possible
-     */
-    public String getLocalizedMessage(long localeId) {
-         return getLocalizedMessage(CacheAdmin.getEnvironment().getLanguage(localeId));
-    }
-
-    /**
-     * Get the localized message for given ISO code
-     *
-     * @param localeIso requested ISO code for desired output
-     * @return localized message
-     * @deprecated use {@link #getLocalizedMessage(com.flexive.shared.FxLanguage) } if possible
-     */
-    public String getLocalizedMessage(String localeIso) {
-        return getLocalizedMessage(CacheAdmin.getEnvironment().getLanguage(localeIso));
     }
 
     /**

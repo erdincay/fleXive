@@ -203,7 +203,7 @@ public final class FxDBAuthentication {
             } catch (FxApplicationException e) {
                 if (callback.getSessionContext() != null)
                     callback.getSessionContext().setRollbackOnly();
-                throw new FxLoginFailedException(e.getExceptionMessage().getLocalizedMessage(FxLanguage.DEFAULT_ID),
+                throw new FxLoginFailedException(e.getExceptionMessage().getLocalizedMessage(CacheAdmin.getEnvironment().getLanguage(FxLanguage.DEFAULT_ID)),
                         FxLoginFailedException.TYPE_UNKNOWN_ERROR);
             }
         } catch (SQLException exc) {

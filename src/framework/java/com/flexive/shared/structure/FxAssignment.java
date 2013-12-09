@@ -650,16 +650,6 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     }
 
     /**
-     * Resolve parent dependecies after initial loading
-     *
-     * @param assignments all known assignments
-     * @deprecated Use {@link #resolveDependencies(java.util.Map)}
-     */
-    public void resolveParentDependencies(List<FxAssignment> assignments) {
-        // do nothing, only interesting for group assignments
-    }
-
-    /**
      * Compare function
      *
      * @param o other assignment to compare to

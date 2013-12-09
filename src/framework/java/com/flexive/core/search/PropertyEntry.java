@@ -584,7 +584,7 @@ public class PropertyEntry {
                                         return input.isFlatStorageEntry();
                                     }
                                 })
-                        ).getLocalizedMessage(Locale.getDefault().getLanguage())
+                        ).getLocalizedMessage(FxContext.get().getLanguage())
                         );
                     }
                 }

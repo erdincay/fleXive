@@ -36,6 +36,7 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.LogLevel;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxEnvironment;
 import org.apache.commons.logging.Log;
 
 /**
@@ -365,7 +366,8 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * {@inheritDoc}
      */
     public String getMessage(long localeId) {
-        return message.getLocalizedMessage(localeId) + evaluateCause(CacheAdmin.getEnvironment().getLanguage(localeId));
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        return message.getLocalizedMessage(env.getLanguage(localeId)) + evaluateCause(env.getLanguage(localeId));
     }
 
     /**
