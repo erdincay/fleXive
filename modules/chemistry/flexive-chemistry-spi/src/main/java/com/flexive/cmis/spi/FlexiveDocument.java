@@ -33,8 +33,6 @@ package com.flexive.cmis.spi;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
-import static com.flexive.shared.EJBLookup.getContentEngine;
-import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
@@ -46,21 +44,25 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.google.common.collect.Lists;
-import static com.google.common.collect.Lists.newArrayList;
 import org.apache.chemistry.*;
+import org.apache.chemistry.impl.simple.SimpleContentStream;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.apache.chemistry.impl.simple.SimpleContentStream;
-import org.apache.commons.lang.StringUtils;
+
+import static com.flexive.shared.EJBLookup.getContentEngine;
+import static com.flexive.shared.EJBLookup.getTreeEngine;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * A non-folder FxContent instance.
@@ -356,7 +358,7 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
             for (FxTreeNode node : nodes) {
                 // remove node with our document reference. Since there could be children that CMIS cannot see,
                 // unfile the children as well.
-                getTreeEngine().remove(node, false, true);
+                getTreeEngine().remove(node, FxTreeRemoveOp.Unfile,  true);
             }
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();

@@ -49,6 +49,7 @@ import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxString;
 import com.google.common.collect.Lists;
 import org.apache.chemistry.*;
+import org.apache.chemistry.impl.simple.SimpleTree;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +58,6 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
-import org.apache.chemistry.impl.simple.SimpleTree;
 
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
@@ -404,7 +404,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
             throw new ConstraintViolationException("Folder not empty.");
         }
         try {
-            getTreeEngine().remove(getTreeMode(), getNodeId(), true, true);
+            getTreeEngine().remove(getTreeMode(), getNodeId(), FxTreeRemoveOp.RemoveSingleFiled, true);
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
