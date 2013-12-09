@@ -108,7 +108,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
      * @return List of implemented data types that should be shown in UI's to select from
      */
     public static FxDataType[] getImplementedValues() {
-        return IMPLEMENTED_VALUES;
+        return IMPLEMENTED_VALUES.clone();
     }
 
     /**

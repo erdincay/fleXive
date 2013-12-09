@@ -32,8 +32,6 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_HISTORY;
-
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxHistory;
@@ -55,6 +53,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.TBL_HISTORY;
 
 /**
  * History tracker service
@@ -192,8 +192,8 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             con = Database.getDbConnection();
             String query = "";
             if (accountMatch != null) query += " AND ACCOUNT=" + accountMatch;
-            if (typeMatch != null) query += " AND TYPEID=" + Long.valueOf(typeMatch);
-            if (contentMatch != null) query += " AND PKID=" + Long.valueOf(contentMatch);
+            if (typeMatch != null) query += " AND TYPEID=" + typeMatch;
+            if (contentMatch != null) query += " AND PKID=" + contentMatch;
             ps = con.prepareStatement(StorageManager.escapeReservedWords(HISTORY_SELECT) + " WHERE TIMESTP>=? AND TIMESTP<=? AND ACTION_KEY LIKE ? " + query + " ORDER BY TIMESTP DESC");
             ps.setLong(1, startDate == null ? 0 : startDate.getTime());
             ps.setLong(2, endDate == null ? Long.MAX_VALUE - 1 : endDate.getTime());

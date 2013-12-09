@@ -41,8 +41,6 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import static com.flexive.shared.EJBLookup.getScriptingEngine;
-
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.Role;
@@ -58,6 +56,8 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.*;
+
+import static com.flexive.shared.EJBLookup.getScriptingEngine;
 
 /**
  * JSF scripting bean
@@ -554,7 +554,7 @@ public class ScriptBean implements Serializable {
         Map requestParams = context.getExternalContext().getRequestParameterMap();
         long oid = -1;
         if (requestParams.get("oid") != null) {
-            oid = Long.valueOf(requestParams.get("oid").toString());
+            oid = Long.parseLong(requestParams.get("oid").toString());
         }
         if (oid != -1) {
             // this specifies the script to work on...

@@ -33,9 +33,9 @@ package com.flexive.shared.search;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
 
 /**
  * Tree-paths returned by queries
@@ -113,9 +113,9 @@ public class FxPaths implements Serializable {
         private Item(String encodedPath) {
             String split[] = encodedPath.split(":");
             caption = split[0];
-            nodeId = Long.valueOf(split[1]);
-            referenceId = Long.valueOf(split[2]);
-            contentTypeId = Long.valueOf(split[3]);
+            nodeId = Long.parseLong(split[1]);
+            referenceId = Long.parseLong(split[2]);
+            contentTypeId = Long.parseLong(split[3]);
         }
 
         /**

@@ -648,11 +648,15 @@ public class BinaryDescriptor implements Serializable {
         BinaryDescriptor b = (BinaryDescriptor) obj;
 //        if( this.isNewBinary() && b.isNewBinary() )
 //            return true;
+        final String otherMeta;
+        synchronized (b) {
+            otherMeta = b.metadata;
+        }
         return
 //                !(b.getMetadata() != null && !b.getMetadata().equals(this.getMetadata())) &&
 //                !(this.getMetadata() != null && !this.getMetadata().equals(b.getMetadata())) &&
-                !(this.metadata == null && b.metadata != null) &&
-                        !(b.metadata == null && this.metadata != null) &&
+                !(this.metadata == null && otherMeta != null) &&
+                        !(otherMeta == null && this.metadata != null) &&
                         !(b.getMimeType() != null && !b.getMimeType().equals(this.getMimeType())) &&
                         !(this.getMimeType() != null && !this.getMimeType().equals(b.getMimeType())) &&
                         !(this.getMimeType() == null && b.getMimeType() != null) &&

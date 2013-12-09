@@ -61,7 +61,6 @@ import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.ReferencedContent;
 import com.flexive.shared.value.renderer.FxValueFormatter;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1340,7 +1339,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
             public FxPK get(Object key) {
                 // avoid JSF integer/long conversion bug
-                Integer i = new Integer(key.toString());
+                int i = Integer.parseInt(key.toString());
                 // cap possible overflows
                 if (sortedPKArray.size() <= i) {
                     i = sortedPKArray.size() - 1;

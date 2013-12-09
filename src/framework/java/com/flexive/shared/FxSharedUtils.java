@@ -138,8 +138,8 @@ public final class FxSharedUtils {
         try {
             String[] ver = System.getProperty("java.specification.version").split("\\.");
             if (ver.length >= 2) {
-                major = Integer.valueOf(ver[0]);
-                minor = Integer.valueOf(ver[1]);
+                major = Integer.parseInt(ver[0]);
+                minor = Integer.parseInt(ver[1]);
             }
         } catch (Exception e) {
             LOG.error(e);
@@ -153,7 +153,7 @@ public final class FxSharedUtils {
             fxEdition = bundle.getString("flexive.edition");
             fxProduct = bundle.getString("flexive.product");
             fxBuild = bundle.getString("flexive.buildnumber");
-            fxDBVersion = Long.valueOf(bundle.getString("flexive.dbversion"));
+            fxDBVersion = Long.parseLong(bundle.getString("flexive.dbversion"));
             fxBuildDate = bundle.getString("flexive.builddate");
             fxBuildUser = bundle.getString("flexive.builduser");
             fxHeader = bundle.getString("flexive.header");
@@ -1565,14 +1565,7 @@ public final class FxSharedUtils {
      * @return the UTF-8 byte representation of the given string
      */
     public static byte[] getBytes(String s) {
-        try {
-            return s.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Failed to decode UTF-8 string: " + e.getMessage(), e);
-            }
-            return s.getBytes();
-        }
+        return s.getBytes(Charsets.UTF_8);
     }
 
     /**

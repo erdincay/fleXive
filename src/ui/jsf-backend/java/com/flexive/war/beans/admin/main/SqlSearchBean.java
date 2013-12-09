@@ -123,7 +123,7 @@ public class SqlSearchBean implements Serializable {
             if (cacheMode == null || cacheMode.trim().length() == 0) {
                 return null;
             }
-            return FxSQLSearchParams.CacheMode.getById(Integer.valueOf(cacheMode));
+            return FxSQLSearchParams.CacheMode.getById(Integer.parseInt(cacheMode));
         } catch (Throwable t) {
             return null;
         }

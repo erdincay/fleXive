@@ -39,16 +39,16 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import static com.flexive.shared.EJBLookup.getAccountEngine;
-import static com.flexive.shared.EJBLookup.getUserGroupEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.*;
-import static com.google.common.collect.Lists.newArrayList;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
 import java.util.*;
 
-import org.apache.commons.lang.ArrayUtils;
+import static com.flexive.shared.EJBLookup.getAccountEngine;
+import static com.flexive.shared.EJBLookup.getUserGroupEngine;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Bean providing access the the userGroup functionality.
@@ -70,7 +70,7 @@ public class UserGroupBean implements Serializable {
     /**
      * Holder class for a user gruop 
      */
-    private class UserGroupData {
+    private static class UserGroupData {
         private String name = null;
         private String color = null;
         private long mandator = -1;

@@ -32,18 +32,19 @@
 
 package com.flexive.shared.structure.export;
 
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxGroupAssignment;
-import static com.flexive.shared.structure.export.StructureExporterTools.*;
-import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
-import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxGroupAssignment;
+import com.flexive.shared.structure.FxType;
 
 import java.util.*;
+
+import static com.flexive.shared.structure.export.StructureExporterTools.*;
 
 /**
  * Generate an export hierarchy for (a) type(s).
@@ -623,7 +624,7 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * A class to handle multiple structureExporter requests (i.e. exporting more than 1 node)
      */
-    class MultipleStructureExporter {
+    static class MultipleStructureExporter {
         private List<ResultObject> resultList;
         private StructureExporter exp;
         private Map<FxType, List<FxAssignment>> typeAssignments;

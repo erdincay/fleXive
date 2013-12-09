@@ -214,7 +214,7 @@ public class FxStructureOption implements Serializable {
     public int getIntValue() {
         String value = getValue();
         try {
-            return Integer.valueOf(value);
+            return Integer.parseInt(value);
         } catch (Exception e) {
             return 0;
         }

@@ -230,7 +230,7 @@ public class FxWrappedContent implements Serializable {
      * @param value the workflow step id as string.
      */
     public void setStep(String value) {
-        long stepId = Long.valueOf(value);
+        long stepId = Long.parseLong(value);
         content.setStepId(stepId);
     }
 

@@ -37,7 +37,6 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.EJBLookup.getAclEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLAssignment;
@@ -48,6 +47,8 @@ import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.shared.EJBLookup.getAclEngine;
 
 /**
  * Management of ACLs.
@@ -136,7 +137,7 @@ public class AclBean implements Serializable {
             long result[] = new long[ids.length];
             int pos = 0;
             for (String id : ids) {
-                result[pos++] = Long.valueOf(id);
+                result[pos++] = Long.parseLong(id);
             }
             return result;
         }

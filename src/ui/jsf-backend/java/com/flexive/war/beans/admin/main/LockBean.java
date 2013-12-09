@@ -204,7 +204,7 @@ public class LockBean implements Serializable {
             }
         } else
             account = null;
-        Long typeId = !StringUtils.isEmpty(type) ? (Long.valueOf(type) >= 0 ? Long.valueOf(type) : null) : null;
+        Long typeId = !StringUtils.isEmpty(type) ? (Long.parseLong(type) >= 0 ? Long.parseLong(type) : null) : null;
 
         try {
             results = EJBLookup.getContentEngine().getLocks(lockType, account == null ? -1L : account, typeId == null ? -1L : typeId, null);

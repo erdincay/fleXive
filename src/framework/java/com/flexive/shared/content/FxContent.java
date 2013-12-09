@@ -1746,7 +1746,7 @@ public class FxContent implements Serializable {
      *
      * @return a copy of this FxContent
      */
-    public FxContent copy() {
+    public synchronized FxContent copy() {
         FxContent clone;
         clone = new FxContent(pk, lock, typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
                 mainLanguage, relatedSource, relatedDestination, relatedSourcePosition, relatedDestinationPosition,

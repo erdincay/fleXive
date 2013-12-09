@@ -44,18 +44,19 @@ import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.structure.export.AssignmentDifferenceAnalyser;
 import com.flexive.shared.structure.export.StructureExporterTools;
-import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPES;
-import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPESSIMPLE;
 import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.ArrayUtils;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.stripToEmpty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPES;
+import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPESSIMPLE;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.stripToEmpty;
 
 /**
  * Tools and utilities for GroovyScriptExporter code generation
@@ -79,11 +80,11 @@ public final class GroovyScriptExporterTools {
     /**
      * Enumeration of SYSTEM TYPES which can optionally be ignored
      */
-    protected enum IgnoreTypes {
+    enum IgnoreTypes {
         FOLDER, ROOT, IMAGE, ARTICLE, CONTACTDATA, DOCUMENTFILE
     }
 
-    protected final static StringBuilder GROOVYPACKAGEIMPORTS = new StringBuilder("import com.flexive.shared.*\nimport com.flexive.shared.interfaces.*")
+    final static StringBuilder GROOVYPACKAGEIMPORTS = new StringBuilder("import com.flexive.shared.*\nimport com.flexive.shared.interfaces.*")
             .append("\nimport com.flexive.shared.value.*\nimport com.flexive.shared.content.*")
             .append("\nimport com.flexive.shared.search.*\nimport com.flexive.shared.tree.*")
             .append("\nimport com.flexive.shared.workflow.*\nimport com.flexive.shared.media.*")
@@ -91,18 +92,18 @@ public final class GroovyScriptExporterTools {
             .append("\nimport com.flexive.shared.exceptions.*\nimport com.flexive.shared.scripting.*")
             .append("\nimport com.flexive.shared.security.*\nimport java.text.SimpleDateFormat;\n\n");
 
-    protected final static String SCRIPTHEADER = "def builder\n"; // init Groovy variable
-    protected final static String STRUCTHEADER = "// *******************************\n// Structure Creation\n// *******************************\n\n";
-    protected final static String DEPHEADER = "// *******************************\n// (Mutual) Dependencies\n// *******************************\n\n";
-    protected final static String DELHEADER = "// *******************************\n// Delete Content / Types\n// *******************************\n\n";
-    protected final static String SCRIPTASSHEADER = "// *******************************\n// Script Assignments\n// *******************************\n\n";
+    final static String SCRIPTHEADER = "def builder\n"; // init Groovy variable
+    final static String STRUCTHEADER = "// *******************************\n// Structure Creation\n// *******************************\n\n";
+    final static String DEPHEADER = "// *******************************\n// (Mutual) Dependencies\n// *******************************\n\n";
+    final static String DELHEADER = "// *******************************\n// Delete Content / Types\n// *******************************\n\n";
+    final static String SCRIPTASSHEADER = "// *******************************\n// Script Assignments\n// *******************************\n\n";
     public final static Log LOG = LogFactory.getLog(GroovyScriptExporterTools.class);
-    protected static final String[] JAVA_KEYWORDS = {"abstract", "continue", "for", "new", "switch", "assert", "default", "goto",
+    static final String[] JAVA_KEYWORDS = {"abstract", "continue", "for", "new", "switch", "assert", "default", "goto",
             "package", "synchronized", "boolean", "do", "if", "private", "this", "break", "double", "implements", "protected",
             "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch",
             "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp",
             "volatile", "const", "float", "native", "super", "while"};
-    protected final static String[] GROOVY_KEYWORDS = {"as", "def", "in", "property"};
+    final static String[] GROOVY_KEYWORDS = {"as", "def", "in", "property"};
 
     private GroovyScriptExporterTools() {
         // no instantiation

@@ -34,13 +34,11 @@
 package com.flexive.war.beans.admin.structure;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.structure.FxPropertyAssignment;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
-import java.util.Map;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Provides getters and setters for boolean flags that
@@ -107,7 +105,7 @@ public class StructureTreeControllerBean implements Serializable {
         long oid = -1;
         String action = "";
         if (requestParams.get("oid") != null && requestParams.get("action") != null) {
-            oid = Long.valueOf(requestParams.get("oid").toString());
+            oid = Long.parseLong(requestParams.get("oid").toString());
             action = requestParams.get("action").toString();
             // get the bean
             StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");

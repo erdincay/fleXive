@@ -39,10 +39,10 @@ import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.io.Serializable;
 
 
 /**
@@ -215,8 +215,8 @@ public class HistoryBean implements Serializable {
             }
         } else
             account = null;
-        Long typeId = !StringUtils.isEmpty(type) ? (Long.valueOf(type) >= 0 ? Long.valueOf(type) : null) : null;
-        Long contentId = !StringUtils.isEmpty(content) ? Long.valueOf(content) : null;
+        Long typeId = !StringUtils.isEmpty(type) ? (Long.parseLong(type) >= 0 ? Long.parseLong(type) : null) : null;
+        Long contentId = !StringUtils.isEmpty(content) ? Long.parseLong(content) : null;
 
         results = EJBLookup.getHistoryTrackerEngine().getEntries(category, account, typeId, contentId,
                 startDate.isEmpty() ? null : startDate.getDefaultTranslation(),

@@ -298,7 +298,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                     List<SQLPatchScript> scripts = new ArrayList<SQLPatchScript>(50);
                     for (String file : files) {
                         String[] f = file.split("\\|");
-                        int size = Integer.valueOf(f[1]);
+                        int size = Integer.parseInt(f[1]);
                         String[] data = f[0].split("_");
                         if (data.length != 3) {
                             LOG.warn("Expected " + f[0] + " to have format xxx_yyy_zzz.sql");

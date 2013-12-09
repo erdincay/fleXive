@@ -71,7 +71,7 @@ public class ContentImportBean implements ActionBean, Serializable {
             return null;
         }
         if ("importFromTree".equals(action)) {
-            nodeId = Long.valueOf(FxJsfUtils.getParameter("nodeId"));
+            nodeId = Long.parseLong(FxJsfUtils.getParameter("nodeId"));
             if (LOG.isInfoEnabled())
                 LOG.info("Importing for nodeId " + nodeId);
         }

@@ -65,6 +65,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static com.flexive.core.DatabaseConst.*;
 
@@ -168,7 +169,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * @throws FxApplicationException if the user account could not be loaded
      */
     private Account load(String loginName, Long accountId, Long contactId) throws FxApplicationException {
-        Statement stmt = null;
+        PreparedStatement stmt = null;
         String curSql;
         Connection con = null;
         try {
@@ -184,16 +185,28 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     "MODIFIED_BY,MODIFIED_AT,REST_TOKEN,REST_EXPIRES FROM " + TBL_ACCOUNTS +
                     " WHERE " +
                     (loginName != null
-                            ? "UPPER(LOGIN_NAME)='" + loginName.toUpperCase() + "'"
+                            ? "UPPER(LOGIN_NAME)=?"
                             : "") +
                     (accountId != null
-                            ? ((loginName != null) ? " AND " : "") + "ID=" + accountId
+                            ? ((loginName != null) ? " AND " : "") + "ID=?"
                             : "") +
                     (contactId != null
-                            ? ((loginName != null || accountId != null) ? " AND " : "") + "CONTACT_ID=" + contactId
+                            ? ((loginName != null || accountId != null) ? " AND " : "") + "CONTACT_ID=?"
                             : "");
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(curSql);
+            stmt = con.prepareStatement(curSql);
+
+            int pos = 1;
+            if (loginName != null) {
+                stmt.setString(pos++, loginName.toUpperCase(Locale.ENGLISH));
+            }
+            if (accountId != null) {
+                stmt.setLong(pos++, accountId);
+            }
+            if (contactId != null) {
+                stmt.setLong(pos++, contactId);
+            }
+
+            ResultSet rs = stmt.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.account.notFound", (loginName != null ? loginName : accountId));
             long id = rs.getLong(1);
