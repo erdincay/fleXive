@@ -138,46 +138,6 @@ public class FxContext implements Serializable {
     }
 
     /**
-     * Get the current users active tree node id, used for FxSQL tree queries
-     *
-     * @return the current users active tree node id
-     * @deprecated will be removed as soon as tree search is fixed
-     */
-    public long getNodeId() {
-        return nodeId;
-    }
-
-    /**
-     * Set the current users active tree node id used for FxSQL tree queries
-     *
-     * @param nodeId active tree node id
-     * @deprecated will be removed as soon as tree search is fixed
-     */
-    public void setNodeId(long nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    /**
-     * Get the current users tree mode, used for FxSQL tree queries
-     *
-     * @return the current users active tree node id
-     * @deprecated will be removed as soon as tree search is fixed
-     */
-    public FxTreeMode getTreeMode() {
-        return treeMode;
-    }
-
-    /**
-     * Set the current users tree mode, used for FxSQL tree queries
-     *
-     * @param treeMode the active tree mode
-     * @deprecated will be removed as soon as tree search is fixed
-     */
-    public void setTreeMode(FxTreeMode treeMode) {
-        this.treeMode = treeMode;
-    }
-
-    /**
      * Returns true if the tree was modified within this thread by the
      * user belonging to this thread.
      *
@@ -628,7 +588,6 @@ public class FxContext implements Serializable {
         result.setDivisionId(division);
         result.setContextPath(contextPath);
         result.setGlobalAuthenticated(globalAuthenticated);
-        result.setNodeId(nodeId);
         result.setSessionID(sessionID);
         if (treeWasModified) {
             result.setTreeWasModified();

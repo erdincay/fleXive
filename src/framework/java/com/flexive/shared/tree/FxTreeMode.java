@@ -45,11 +45,6 @@ public enum FxTreeMode implements Serializable {
     Edit(FxSystemSequencer.TREE_EDIT);
 
     /**
-     * All available modes
-     */
-    public final static FxTreeMode[] ALL_MODES = {Live, Edit};
-
-    /**
      * sequencer to use
      */
     private FxSystemSequencer sequencer;

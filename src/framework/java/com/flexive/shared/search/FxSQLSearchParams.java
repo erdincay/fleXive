@@ -38,6 +38,8 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
 import com.google.common.collect.Lists;
 
 import java.io.Serializable;
@@ -160,6 +162,8 @@ public class FxSQLSearchParams implements Serializable {
     private boolean hintNoResultInfo = false;
     private boolean hintSelectData = false;
     private boolean noInternalSort = false;
+    private long treeRootId = FxTreeNode.ROOT_NODE;
+    private FxTreeMode treeMode = FxTreeMode.Edit;
 
     /**
      * Constructor.
@@ -409,5 +413,43 @@ public class FxSQLSearchParams implements Serializable {
      */
     public void setHintSelectData(boolean hintSelectData) {
         this.hintSelectData = hintSelectData;
+    }
+
+    /**
+     * @return  the node ID which should be used as the root node for calculating @node_position
+     * @since   3.2.0
+     */
+    public long setTreeRootId() {
+        return treeRootId;
+    }
+
+    /**
+     * When using @node_position, you may need to specify the tree node where the node position should be calculated from
+     * if the same content is used in multiple subtrees.
+     *
+     * @param treeRootId    the node ID which should be used as the root node for calculating @node_position
+     * @since   3.2.0
+     * @see <a href="http://issuetracker.flexive.org/jira/browse/FX-718">FX-718</a>
+     */
+    public void setTreeRootId(long treeRootId) {
+        this.treeRootId = treeRootId;
+    }
+
+    /**
+     * @return  the tree mode for all tree queries (edit or live)
+     * @since 3.2.0
+     */
+    public FxTreeMode getTreeMode() {
+        return treeMode;
+    }
+
+    /**
+     * Set the tree for tree queries (edit or live).
+     *
+     * @param treeMode    the tree mode
+     * @since 3.2.0
+     */
+    public void setTreeMode(FxTreeMode treeMode) {
+        this.treeMode = treeMode;
     }
 }

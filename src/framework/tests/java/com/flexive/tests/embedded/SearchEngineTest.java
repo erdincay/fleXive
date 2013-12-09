@@ -1778,8 +1778,9 @@ public class SearchEngineTest {
             }
 
             // check with FxSQL
-            FxContext.get().setNodeId(parentId);    // see FX-718
-            final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT @pk, @node_position WHERE IS CHILD OF '/FX746' ORDER BY @node_position");
+            final FxSQLSearchParams params = new FxSQLSearchParams();
+            params.setTreeRootId(parentId);
+            final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT @pk, @node_position WHERE IS CHILD OF '/FX746' ORDER BY @node_position", 0, Integer.MAX_VALUE, params);
             assertEquals(result.getRowCount(), numChildren);
             int lastPosition = 0;
             final String positions = result.collectColumn(2).toString();

@@ -313,14 +313,16 @@ public class GenericSQLDataSelector extends DataSelector {
 
         entry.setProcessData(search.getParams().isHintSelectData());
 
+        final FxTreeMode treeMode = search.getParams() != null ? search.getParams().getTreeMode() : FxTreeMode.Edit;
+
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
-            long root = FxContext.get().getNodeId();
-            if (root == -1) root = FxTreeNode.ROOT_NODE;
+
+            long root = search.getParams() != null ? search.getParams().setTreeRootId() :  FxTreeNode.ROOT_NODE;
             final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id," +
                     search.getStorage().getBooleanExpression(
-                            FxContext.get().getTreeMode() == FxTreeMode.Live
+                            treeMode == FxTreeMode.Live
                     )
                     + ")" + search.getStorage().getFromDual() + ")";
             result.addItem(sel, resultPos, false);
@@ -329,7 +331,7 @@ public class GenericSQLDataSelector extends DataSelector {
             final String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
                     search.getLanguage().getId() + "," + propertyId + "," +
                     search.getStorage().getBooleanExpression(
-                            FxContext.get().getTreeMode() == FxTreeMode.Live
+                            treeMode == FxTreeMode.Live
                     )
                     + ")" + search.getStorage().getFromDual() + ")";
             result.addItem(sel, resultPos, false);
