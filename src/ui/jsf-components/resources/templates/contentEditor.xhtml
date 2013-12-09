@@ -150,7 +150,7 @@
                                     <fx:formRow labelKey="ContentEditor.field.ACL" id="#{_ceContent.editorId}_acl">
                                          <h:selectOneListbox id="#{_ceContent.editorId}_acl" size="1" value="#{_ceContent.aclId}"
                                                             disabled="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId}">
-                                            <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                            <f:selectItems value="#{fxSelectBean.instanceACLs}"/>
                                         </h:selectOneListbox>
                                     </fx:formRow>
                                 </ui:fragment>
@@ -158,7 +158,7 @@
                                     <fx:formRow labelKey="ContentEditor.field.ACL" id="#{_ceContent.editorId}_acls">
                                          <h:selectManyListbox id="#{_ceContent.editorId}_acls" size="4" value="#{_ceContent.aclIds}"
                                                             disabled="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId}">
-                                            <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                            <f:selectItems value="#{fxSelectBean.instanceACLs}"/>
                                         </h:selectManyListbox>
                                     </fx:formRow>
                                 </ui:fragment>
