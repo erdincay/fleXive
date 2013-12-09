@@ -99,7 +99,7 @@ public class ConfigurationManagerBean {
     private boolean editBool = false;
     private String newName = "";
     private boolean strAlreadySet = false;
-    private boolean showValues = true;
+    private boolean showValues = false;
 
     private final static String STYLE_CLASS_VISIBLE = "visible";
     private final static String STYLE_CLASS_HIDDEN = "hidden";

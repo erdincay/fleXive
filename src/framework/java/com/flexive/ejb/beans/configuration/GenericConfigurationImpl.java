@@ -46,6 +46,7 @@ import com.flexive.shared.interfaces.GenericConfigurationEngine;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
@@ -487,10 +488,14 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                 } else {
                     parameter = ParameterFactory.newInstance(String.class, path, key, true, null);
                 }
-                result.put(
-                        parameter.getData(),
-                        (Serializable) parameter.getValue(dbValue)
-                );
+                try {
+                    result.put(
+                            parameter.getData(),
+                            (Serializable) parameter.getValue(dbValue)
+                    );
+                } catch (XStreamException e) {
+                    LOG.warn("Not including parameter " + parameter + " because its value could not be deserialized", e);
+                }
             }
             return result;
         } catch (SQLException e) {
