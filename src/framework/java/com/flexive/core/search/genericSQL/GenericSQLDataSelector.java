@@ -319,7 +319,7 @@ public class GenericSQLDataSelector extends DataSelector {
             result.addItem(prop.getValue().toString(), resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
 
-            long root = search.getParams() != null ? search.getParams().setTreeRootId() :  FxTreeNode.ROOT_NODE;
+            long root = search.getParams() != null ? search.getParams().getTreeRootId() :  FxTreeNode.ROOT_NODE;
             final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id," +
                     search.getStorage().getBooleanExpression(
                             treeMode == FxTreeMode.Live

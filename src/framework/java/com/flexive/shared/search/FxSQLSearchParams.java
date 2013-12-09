@@ -419,7 +419,7 @@ public class FxSQLSearchParams implements Serializable {
      * @return  the node ID which should be used as the root node for calculating @node_position
      * @since   3.2.0
      */
-    public long setTreeRootId() {
+    public long getTreeRootId() {
         return treeRootId;
     }
 
