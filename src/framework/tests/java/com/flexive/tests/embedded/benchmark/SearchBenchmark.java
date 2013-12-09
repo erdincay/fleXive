@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,7 +33,6 @@ package com.flexive.tests.embedded.benchmark;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.cmis.search.CmisResultRow;
@@ -55,9 +54,8 @@ import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
-import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -65,7 +63,10 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+
+import static com.flexive.shared.EJBLookup.getContentEngine;
+import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
+import static org.testng.Assert.*;
 
 /**
  * Some benchmarks for the {@link com.flexive.shared.interfaces.SearchEngine}.

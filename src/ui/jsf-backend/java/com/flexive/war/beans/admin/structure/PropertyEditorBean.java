@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,15 +36,15 @@ package com.flexive.war.beans.admin.structure;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.beans.SelectBean;
-import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.faces.messages.FxFacesMessage;
+import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.*;
-import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
@@ -58,7 +58,10 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and propertyOptionEditor to

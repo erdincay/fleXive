@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,27 +32,25 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.structure.FxTypeEdit;
-import static com.flexive.shared.EJBLookup.getAclEngine;
-import static com.flexive.shared.EJBLookup.getContentEngine;
-import static com.flexive.shared.EJBLookup.getTypeEngine;
-import static com.flexive.shared.FxContext.getUserTicket;
-import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.exceptions.*;
+import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.security.*;
-import com.flexive.shared.security.ACLPermission;
+import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.value.FxString;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static com.flexive.shared.EJBLookup.*;
+import static com.flexive.shared.FxContext.getUserTicket;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import static org.testng.Assert.assertEquals;
-import org.testng.annotations.Test;
-import org.testng.Assert;
-
-import java.util.List;
-import java.util.Arrays;
 
 /**
  * Basic ACL engine tests.

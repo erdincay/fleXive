@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,7 +33,6 @@
  ***************************************************************/
 package com.flexive.tests.embedded.jsf.bean;
 
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxAccountInUseException;
@@ -41,16 +40,17 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.UserGroup;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import com.flexive.war.beans.admin.main.UserGroupBean;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import java.util.List;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * UserGroupBean tests

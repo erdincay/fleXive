@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,15 +31,16 @@
  ***************************************************************/
 package com.flexive.tests.shared;
 
-import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
-import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.cmis.search.CmisResultValue;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.value.FxString;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

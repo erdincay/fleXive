@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,18 +32,15 @@
 package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfComponentUtils;
-import com.flexive.faces.FxJsfComponentUtils;
-import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.input.AbstractFxValueInput;
 import com.flexive.shared.ContentLinkFormatter;
 import com.flexive.shared.value.FxValue;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 import java.io.IOException;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * <p>Renders a single result value returned from the flexive SQL search.

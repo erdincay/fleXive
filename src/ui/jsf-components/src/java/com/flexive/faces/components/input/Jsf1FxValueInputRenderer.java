@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -35,12 +35,13 @@ import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxValue;
-import javax.faces.context.FacesContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
+
+import javax.faces.context.FacesContext;
 
 /**
  * JSF1 renderer implementation for {@code fxValueInput}.

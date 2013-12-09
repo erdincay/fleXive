@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,9 +33,6 @@ package com.flexive.tests.embedded.cmis;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
-import static com.flexive.shared.EJBLookup.getContentEngine;
-import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.cmis.CmisVirtualProperty;
@@ -43,39 +40,29 @@ import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.shared.exceptions.FxStreamException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
-import com.flexive.shared.structure.FxDataType;
-import com.flexive.shared.structure.FxMultiplicity;
-import com.flexive.shared.structure.FxSelectListItem;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxTypeEdit;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeRemoveOp;
-import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.value.FxBinary;
-import com.flexive.shared.value.FxNoAccess;
-import com.flexive.shared.value.FxNumber;
-import com.flexive.shared.value.SelectMany;
+import com.flexive.shared.value.*;
 import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import java.io.ByteArrayInputStream;
 import org.apache.commons.lang.StringUtils;
-import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayInputStream;
 import java.util.*;
+
+import static com.flexive.shared.EJBLookup.*;
+import static org.testng.Assert.*;
 
 /**
  * Tests for the CMIS search engine.

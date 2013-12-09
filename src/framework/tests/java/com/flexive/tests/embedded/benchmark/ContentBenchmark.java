@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,32 +33,33 @@ package com.flexive.tests.embedded.benchmark;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.scripting.FxScriptInfoEdit;
-import com.flexive.shared.search.query.SqlQueryBuilder;
-import com.flexive.shared.search.query.PropertyValueComparator;
-import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ContentEngine;
-import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptEvent;
+import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.scripting.FxScriptInfoEdit;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxString;
-import com.flexive.tests.embedded.TestUsers;
 import com.flexive.tests.embedded.FxTestUtils;
-import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
-import static org.testng.Assert.assertEquals;
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
+import com.flexive.tests.embedded.TestUsers;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Benchmarks content instances.

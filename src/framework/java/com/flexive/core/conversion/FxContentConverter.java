@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,7 +33,6 @@ package com.flexive.core.conversion;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import static com.flexive.shared.FxSharedUtils.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPK;
@@ -49,6 +48,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
+
+import static com.flexive.shared.FxSharedUtils.*;
 
 /**
  * XStream converter for FxContent

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,10 +33,10 @@ package com.flexive.core.search.cmis.impl.sql.H2;
 
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.ResultScore;
+import com.flexive.core.search.cmis.impl.sql.Capabilities;
 import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
-import com.flexive.core.search.cmis.impl.sql.Capabilities;
 import com.flexive.core.search.cmis.model.ContainsCondition;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;

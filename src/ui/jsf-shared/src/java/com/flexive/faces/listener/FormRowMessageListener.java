@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,13 +33,13 @@ package com.flexive.faces.listener;
 
 import org.apache.commons.lang.StringUtils;
 
-import javax.faces.event.PhaseListener;
-import javax.faces.event.PhaseEvent;
-import javax.faces.event.PhaseId;
-import javax.faces.context.FacesContext;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputLabel;
-import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.faces.event.PhaseEvent;
+import javax.faces.event.PhaseId;
+import javax.faces.event.PhaseListener;
 import java.util.Iterator;
 
 /**

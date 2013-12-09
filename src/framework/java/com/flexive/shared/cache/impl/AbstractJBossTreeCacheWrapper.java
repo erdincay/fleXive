@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,12 +33,12 @@ package com.flexive.shared.cache.impl;
 
 import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxCacheException;
-import org.jboss.cache.Fqn;
 import org.jboss.cache.CacheException;
+import org.jboss.cache.Fqn;
 import org.jboss.cache.Node;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Base implementation of JBoss Cache wrappers.

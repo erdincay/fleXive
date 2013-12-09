@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -43,8 +43,8 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.FxValue;
 import groovy.util.BuilderSupport;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>

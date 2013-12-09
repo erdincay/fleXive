@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,15 +37,14 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.ResultLocation;
 import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.*;
-import static com.flexive.shared.search.query.QueryRootNode.Type.CONTENTSEARCH;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
@@ -53,13 +52,15 @@ import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxLargeNumber;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import static com.flexive.shared.search.query.QueryRootNode.Type.CONTENTSEARCH;
 
 /**
  * Search query editor beans.

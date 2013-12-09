@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -35,21 +35,19 @@ package com.flexive.war.javascript;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLockType;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.tree.FxTreeNode;
-import com.flexive.war.JsonWriter;
-import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.beans.SearchResultBean;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeRemoveOp;
+import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.io.IOException;
 
 /**
  * Content editor actions invoked via JSON/RPC.

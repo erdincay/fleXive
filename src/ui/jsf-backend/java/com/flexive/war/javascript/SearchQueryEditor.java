@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,8 +34,6 @@
 package com.flexive.war.javascript;
 
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.search.AdminResultLocations;
-import static com.flexive.shared.search.AdminResultLocations.ADMIN;
 import com.flexive.war.JsonWriter;
 
 import java.io.Serializable;
@@ -43,6 +41,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.flexive.shared.search.AdminResultLocations.ADMIN;
 
 /**
  * Implements JSON/RPC methods for the search query panel.

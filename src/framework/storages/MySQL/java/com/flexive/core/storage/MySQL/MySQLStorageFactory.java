@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,8 +32,6 @@
 package com.flexive.core.storage.MySQL;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM;
-
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.SqlSearch;
@@ -53,7 +51,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static com.flexive.core.DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM;
 
 /**
  * Factory for the MySQL storage

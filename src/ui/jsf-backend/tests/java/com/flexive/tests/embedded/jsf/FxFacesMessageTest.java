@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,13 +37,14 @@ import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * FxFacesMessage tests.

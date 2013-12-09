@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,17 +31,17 @@
  ***************************************************************/
 package com.flexive.tests.embedded.roles;
 
-import static com.flexive.shared.EJBLookup.getScriptingEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.scripting.FxScriptEvent;
-import static com.flexive.shared.security.Role.ScriptExecution;
-import static com.flexive.shared.security.Role.ScriptManagement;
-
 import com.flexive.shared.scripting.FxScriptInfoEdit;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+
+import static com.flexive.shared.EJBLookup.getScriptingEngine;
+import static com.flexive.shared.security.Role.ScriptExecution;
+import static com.flexive.shared.security.Role.ScriptManagement;
 
 /**
  * Script management role tests.

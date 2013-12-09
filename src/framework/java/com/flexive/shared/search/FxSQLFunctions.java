@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,10 +32,9 @@
 package com.flexive.shared.search;
 
 import com.flexive.shared.exceptions.FxNotFoundException;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Container for all supported FxSQL functions.

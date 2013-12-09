@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,12 +37,13 @@ import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUser;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.Assert;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Role test base class.

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,18 +32,19 @@
 package com.flexive.tests.embedded.roles;
 
 import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.EJBLookup.getAssignmentEngine;
-import static com.flexive.shared.EJBLookup.getTypeEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
-import static com.flexive.shared.security.Role.StructureManagement;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxPropertyAssignmentEdit;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+
+import static com.flexive.shared.EJBLookup.getAssignmentEngine;
+import static com.flexive.shared.EJBLookup.getTypeEngine;
+import static com.flexive.shared.security.Role.StructureManagement;
 
 /**
  * Structure management role tests.

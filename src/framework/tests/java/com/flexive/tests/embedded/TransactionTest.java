@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -38,9 +38,9 @@ import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.interfaces.StatelessTest;
 import com.flexive.shared.structure.FxEnvironment;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import java.io.Serializable;
 import java.util.ArrayList;

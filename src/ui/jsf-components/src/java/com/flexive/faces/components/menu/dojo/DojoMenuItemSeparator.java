@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,11 +31,10 @@
  ***************************************************************/
 package com.flexive.faces.components.menu.dojo;
 
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.javascript.menu.DojoMenuItemData;
 import com.flexive.faces.javascript.menu.DojoMenuItemSeparatorData;
 import com.flexive.faces.javascript.menu.MenuItemContainer;
-import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.javascript.menu.*;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;

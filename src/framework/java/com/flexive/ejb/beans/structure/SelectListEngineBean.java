@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,7 +32,6 @@
 package com.flexive.ejb.beans.structure;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.StorageManager;
@@ -66,6 +65,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
+import static com.flexive.core.DatabaseConst.*;
 
 /**
  * SelectListEngine implementation

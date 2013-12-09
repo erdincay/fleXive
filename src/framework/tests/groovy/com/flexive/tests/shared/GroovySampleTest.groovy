@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) project.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,8 +33,8 @@
  ***************************************************************/
 package com.flexive.tests.shared
 
-import org.testng.annotations.Test
 import org.testng.Assert
+import org.testng.annotations.Test
 
 /**
  * A simple Groovy TestNG test.

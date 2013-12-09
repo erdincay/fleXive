@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,20 +31,19 @@
  ***************************************************************/
 package com.flexive.tests.browser;
 
-import org.testng.annotations.*;
+import com.flexive.tests.browser.exceptions.*;
+import com.thoughtworks.selenium.SeleniumException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.testng.annotations.*;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
-
-import com.thoughtworks.selenium.SeleniumException;
-import com.flexive.tests.browser.exceptions.*;
 
 /**
  * Base class for backend browser tests.

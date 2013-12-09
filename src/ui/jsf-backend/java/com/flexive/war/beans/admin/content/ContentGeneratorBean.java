@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,11 +33,11 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.content;
 
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.faces.FxJsfUtils;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.interfaces.ContentEngine;

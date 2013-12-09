@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,11 +32,12 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.components.WriteWebletIncludes;
-import java.io.IOException;
+import org.apache.commons.lang.StringUtils;
+
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
-import org.apache.commons.lang.StringUtils;
+import java.io.IOException;
 
 /**
  *

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -35,8 +35,8 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import org.apache.commons.lang.StringUtils;
-import org.testng.annotations.Test;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.util.Set;
 

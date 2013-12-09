@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,18 +31,18 @@
  ***************************************************************/
 package com.flexive.ejb.beans;
 
-import com.flexive.core.timer.FxQuartz;
 import com.flexive.core.Database;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.timer.FxQuartz;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.interfaces.FxTimerService;
 import com.flexive.shared.interfaces.FxTimerServiceLocal;
-import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptSchedule;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.TypeStorageMode;

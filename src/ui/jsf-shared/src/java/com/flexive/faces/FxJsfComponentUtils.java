@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.faces;
 
+import com.flexive.faces.renderer.FxSelectRenderer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,10 +47,8 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
-import java.util.*;
 import java.lang.reflect.Array;
-
-import com.flexive.faces.renderer.FxSelectRenderer;
+import java.util.*;
 
 /**
  * Utility functions for JSF/Facelets components.

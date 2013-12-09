@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) project.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,17 +33,16 @@
  ***************************************************************/
 package com.flexive.tests.embedded
 
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.content.FxPK
+import com.flexive.shared.exceptions.FxRuntimeException
 import com.flexive.shared.scripting.groovy.GroovyContentBuilder
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.structure.FxMultiplicity
 import com.flexive.shared.value.FxString
 import org.testng.Assert
 import org.testng.annotations.Test
-import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
-import com.flexive.shared.structure.FxMultiplicity
-import com.flexive.shared.CacheAdmin
-import com.flexive.shared.EJBLookup
-import com.flexive.shared.exceptions.FxRuntimeException
-import com.flexive.shared.content.FxPK
-import com.flexive.tests.embedded.TestUsers
 
 /**
 * GroovyContentBuilder test cases.

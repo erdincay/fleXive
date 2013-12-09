@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -39,12 +39,13 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxType;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Tests for locks

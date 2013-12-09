@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,15 +31,15 @@
  ***************************************************************/
 package com.flexive.extractor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.IOException;
 
 
 public class PdfExtractor {

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,18 +31,16 @@
  ***************************************************************/
 package com.flexive.core.search;
 
-import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.sqlParser.Property;
 import com.flexive.sqlParser.Value;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Helper to store subselect values

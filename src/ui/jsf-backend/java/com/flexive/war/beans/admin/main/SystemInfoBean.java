@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,9 +33,9 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMediaEngine;
@@ -43,10 +43,10 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.util.Date;
 import java.util.Formatter;
-import java.io.Serializable;
 
 /**
  * JSF Bean exposing miscellaneous system/runtime parameters.

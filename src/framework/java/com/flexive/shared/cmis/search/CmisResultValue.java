@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,11 +32,11 @@
 package com.flexive.shared.cmis.search;
 
 import com.flexive.shared.SelectableObject;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -40,12 +40,14 @@ import com.flexive.shared.search.*;
 import com.flexive.sqlParser.FxStatement;
 import com.flexive.sqlParser.SelectedValue;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * FxResultSet implementation

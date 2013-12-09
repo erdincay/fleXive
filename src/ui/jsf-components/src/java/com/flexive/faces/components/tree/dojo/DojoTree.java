@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,7 +32,6 @@
 package com.flexive.faces.components.tree.dojo;
 
 import com.flexive.faces.FxJsfComponentUtils;
-import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 import com.flexive.faces.components.menu.dojo.TreeContextMenu;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import com.flexive.shared.exceptions.FxInvalidStateException;
@@ -41,6 +40,8 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
+
+import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 
 /**
  * Tree root component. Renders the tree DIVs and javascript to show

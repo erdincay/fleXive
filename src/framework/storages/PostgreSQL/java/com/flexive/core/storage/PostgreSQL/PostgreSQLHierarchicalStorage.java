@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,11 +34,11 @@ package com.flexive.core.storage.PostgreSQL;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.FulltextIndexer;
-import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
 import com.flexive.core.storage.genericSQL.GenericBinarySQLStorage;
+import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.content.FxPK;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,13 +36,13 @@ import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLAssignment;
-import com.flexive.shared.structure.FxEnvironment;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;

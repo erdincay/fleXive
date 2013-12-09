@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -48,13 +48,13 @@ import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxString;
-import java.lang.reflect.Method;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 /**
  * A class for parsing content instances of DOCUMENTFILE and its derived types.

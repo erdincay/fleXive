@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,25 +31,24 @@
  ***************************************************************/
 package com.flexive.core.search.cmis.impl.sql.MySQL;
 
+import com.flexive.core.search.PropertyResolver;
 import com.flexive.core.search.cmis.impl.ResultColumnReference;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
-import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericColumnReference;
 import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
+import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericColumnReference;
 import com.flexive.core.search.cmis.model.ColumnReference;
-import com.flexive.core.search.PropertyResolver;
-import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
-import com.flexive.core.DatabaseConst;
-import static com.flexive.core.DatabaseConst.TBL_CONTENT;
-import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
-import com.flexive.shared.security.ACL;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.TBL_CONTENT;
+import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

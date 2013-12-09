@@ -1,7 +1,7 @@
 /** *************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,16 +36,18 @@
 //  ticket ... UserTicket
 //  scriptname ... name of this script
 //author: Markus Plesser, Unique Computing Solutions GmbH
-
-import com.flexive.shared.*
-import com.flexive.shared.exceptions.*
-import com.flexive.shared.interfaces.*
-import com.flexive.shared.scripting.*
-import com.flexive.shared.structure.*
-import com.flexive.shared.security.*
-import com.flexive.shared.value.FxString
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.exceptions.FxRuntimeException
+import com.flexive.shared.interfaces.ScriptingEngine
+import com.flexive.shared.scripting.FxScriptEvent
+import com.flexive.shared.scripting.FxScriptInfo
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.search.*
+import com.flexive.shared.security.ACL
+import com.flexive.shared.security.ACLCategory
+import com.flexive.shared.structure.*
+import com.flexive.shared.value.FxString
 
 void createSelectLists() {
     ACL aclList = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLIST);

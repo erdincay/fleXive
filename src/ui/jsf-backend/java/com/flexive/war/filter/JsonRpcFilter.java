@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,8 +33,6 @@
  ***************************************************************/
 package com.flexive.war.filter;
 
-import static com.flexive.war.filter.FxFilter.getJsonRpcBridge;
-import static com.flexive.war.filter.FxFilter.setJsonRpcBridge;
 import com.flexive.war.javascript.BriefcaseEditor;
 import com.flexive.war.javascript.ContentEditor;
 import com.flexive.war.javascript.SearchQueryEditor;
@@ -44,13 +42,16 @@ import com.flexive.war.javascript.tree.ContentTreeWriter;
 import com.flexive.war.javascript.tree.StructureTreeEditor;
 import com.flexive.war.javascript.tree.StructureTreeWriter;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import static com.flexive.war.filter.FxFilter.getJsonRpcBridge;
+import static com.flexive.war.filter.FxFilter.setJsonRpcBridge;
 
 /**
  * A servlet filter that provides the JSON-RPC-Java objects for the backend administration.

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -45,21 +45,22 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
-import com.flexive.tests.embedded.TestUsers;
 import com.flexive.tests.embedded.FxTestUtils;
+import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.*;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Tests for FxValues (single/multi language, store/load)

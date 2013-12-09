@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,13 +31,13 @@
  ***************************************************************/
 package com.flexive.shared.media.impl;
 
-import com.flexive.shared.media.FxMetadata;
 import com.flexive.shared.media.FxMediaType;
+import com.flexive.shared.media.FxMetadata;
 
 import javax.xml.stream.XMLStreamWriter;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Metadata for unknown formats

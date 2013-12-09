@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,13 +32,13 @@
 package com.flexive.faces.beans;
 
 import com.flexive.shared.*;
-import com.flexive.shared.structure.*;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.structure.*;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.StepDefinition;
 import org.apache.commons.lang.StringUtils;
 

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,15 +36,14 @@ package com.flexive.war.javascript.tree;
 import com.flexive.faces.RequestRelativeUriMapper;
 import com.flexive.faces.components.tree.dojo.DojoTreeRenderer;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
-import static com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLockType;
-import com.flexive.shared.FxContext;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLockType;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.war.JsonWriter;
@@ -56,6 +55,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.*;
+
+import static com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
 
 /**
  * Renders the content tree for the current user, either in the live

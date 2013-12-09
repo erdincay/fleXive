@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,8 +32,8 @@
 package com.flexive.core.storage;
 
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.security.PermissionSet;
+import com.flexive.shared.tree.FxTreeMode;
 
 import java.io.Serializable;
 import java.math.BigInteger;

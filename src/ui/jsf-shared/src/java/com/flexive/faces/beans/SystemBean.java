@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,35 +32,36 @@
 package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.AdminResultLocations;
-import com.flexive.shared.search.ResultLocation;
 import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.ResultLocation;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.war.FxRequest;
-import com.flexive.war.filter.FxResponseWrapper;
 import com.flexive.war.filter.FxRequestUtils;
+import com.flexive.war.filter.FxResponseWrapper;
 import com.google.common.collect.Lists;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
-import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.model.DataModel;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.util.*;
+
+import static javax.faces.context.FacesContext.getCurrentInstance;
 
 
 /**

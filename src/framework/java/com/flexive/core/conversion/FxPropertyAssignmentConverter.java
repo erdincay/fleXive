@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,8 +36,6 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;

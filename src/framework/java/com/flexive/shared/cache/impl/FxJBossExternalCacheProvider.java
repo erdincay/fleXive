@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,10 +31,10 @@
  ***************************************************************/
 package com.flexive.shared.cache.impl;
 
+import com.flexive.shared.Pair;
 import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.mbeans.MBeanHelper;
-import com.flexive.shared.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,10 +42,10 @@ import org.jboss.cache.CacheException;
 import org.jboss.cache.Fqn;
 import org.jboss.cache.jmx.CacheJmxWrapperMBean;
 
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
-import javax.management.MBeanServer;
-import javax.management.MBeanInfo;
 
 /**
  * FxBackingCache Provider for a JBossCache instance registered via an external -service.xml deployment

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,7 +32,6 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_CONTENT;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
@@ -40,7 +39,9 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.content.*;
+import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
@@ -53,16 +54,16 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset.Entry;
-
-import java.util.*;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigInteger;
 import java.sql.*;
+import java.util.*;
+
+import static com.flexive.core.DatabaseConst.TBL_CONTENT;
 
 /**
  * Generic tree storage implementation using a spreaded nested set tree

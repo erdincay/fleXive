@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -39,10 +39,11 @@ import com.flexive.shared.security.UserTicket;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.application.FacesMessage;
-import static javax.faces.context.FacesContext.getCurrentInstance;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+
+import static javax.faces.context.FacesContext.getCurrentInstance;
 
 /**
  * A Flexive Faces Message.

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,8 +33,9 @@ package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.value.FxValue;
-import javax.faces.component.UIComponent;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
+
+import javax.faces.component.UIComponent;
 
 /**
  * JSF1-specific implementation of {@link EditModeHelper}.

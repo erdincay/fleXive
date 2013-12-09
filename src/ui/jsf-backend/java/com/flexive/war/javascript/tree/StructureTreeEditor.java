@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,12 +36,11 @@ package com.flexive.war.javascript.tree;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.*;
-import com.flexive.faces.beans.MessageBean;
+import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -39,13 +39,14 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLock;
 import com.flexive.shared.FxLockType;
-import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.security.PermissionSet;
-import com.flexive.shared.structure.*;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.JsonWriter;
@@ -62,6 +63,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 
 /**
  * Provides map interfaces for generating JSON row and column information

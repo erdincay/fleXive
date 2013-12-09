@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,33 +33,33 @@ package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.cmis.search.CmisResultSet;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
-import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.ReferencedContent;
+import com.flexive.shared.value.mapper.FxPkSelectOneInputMapper;
 import com.flexive.shared.value.mapper.IdentityInputMapper;
 import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.value.mapper.NumberQueryInputMapper;
-import com.flexive.shared.value.mapper.FxPkSelectOneInputMapper;
 import com.flexive.shared.value.renderer.FxValueFormatter;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 import com.flexive.war.servlet.DownloadServlet;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.faces.component.UIInput;
 import javax.faces.component.UIViewRoot;
+import javax.faces.component.html.HtmlGraphicImage;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import java.io.IOException;
-import javax.faces.component.html.HtmlGraphicImage;
 
 /**
  * Input fields for FxValue variables, including multi-language support.

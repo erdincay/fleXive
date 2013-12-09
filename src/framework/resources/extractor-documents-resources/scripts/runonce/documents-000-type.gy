@@ -1,7 +1,7 @@
 /** *************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,14 +36,13 @@
 //  scriptname ... name of this script
 //author: Markus Plesser, Unique Computing Solutions GmbH
 //+author: Christopher Blasnik, Unique Computing Solutions Gmbh
-
-import com.flexive.shared.*
-import com.flexive.shared.structure.*
-
-import com.flexive.shared.security.*
-import com.flexive.shared.value.FxString
-import com.flexive.shared.search.*
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.search.*
+import com.flexive.shared.security.ACLCategory
+import com.flexive.shared.structure.*
+import com.flexive.shared.value.FxString
 
 new GroovyTypeBuilder().document(
         parentTypeName: FxType.DOCUMENTFILE,

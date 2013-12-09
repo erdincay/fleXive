@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -29,12 +29,16 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
+
 import com.flexive.shared.CacheAdmin
 import com.flexive.shared.EJBLookup
 import com.flexive.shared.configuration.SystemParameters
-import com.flexive.shared.security.*
-import com.flexive.shared.structure.*
+import com.flexive.shared.security.ACLCategory
+import com.flexive.shared.structure.FxDataType
+import com.flexive.shared.structure.FxMultiplicity
+import com.flexive.shared.structure.FxPropertyEdit
 import com.flexive.shared.value.FxString
+
 /**
 * Core System initialization script, has to be run before anything else!
 *

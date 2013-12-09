@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,12 +31,13 @@
  ***************************************************************/
 package com.flexive.shared.configuration;
 
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.search.ResultPreferences;
 import com.flexive.shared.search.query.QueryRootNode;
-import static com.flexive.shared.configuration.SystemParameterPaths.*;
-import com.flexive.shared.configuration.parameters.ParameterFactory;
 
 import java.util.ArrayList;
+
+import static com.flexive.shared.configuration.SystemParameterPaths.*;
 
 /**
  * Flexive system parameter definitions.

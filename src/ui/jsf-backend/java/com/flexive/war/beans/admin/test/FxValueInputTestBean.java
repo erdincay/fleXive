@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -35,24 +35,25 @@ package com.flexive.war.beans.admin.test;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.search.query.SqlQueryBuilder;
-import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxResultRow;
-import static com.flexive.shared.FxLanguage.ENGLISH;
-import static com.flexive.shared.FxLanguage.GERMAN;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
-import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.value.mapper.FxPkSelectOneInputMapper;
+import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.value.mapper.NumberQueryInputMapper;
 import com.flexive.shared.value.mapper.SelectOneInputMapper;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
-import java.io.Serializable;
+
+import static com.flexive.shared.FxLanguage.ENGLISH;
+import static com.flexive.shared.FxLanguage.GERMAN;
 
 /**
  * Miscellanous test methods for the fxValueInput test page (/adm/test/fxvalueinput.xhtml).

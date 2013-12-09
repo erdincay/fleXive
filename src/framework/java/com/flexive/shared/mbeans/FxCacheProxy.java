@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -35,14 +35,14 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxCacheException;
-import java.io.Serializable;
-import org.jboss.cache.Cache;
-
-import javax.management.*;
-import java.util.Set;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.cache.Cache;
+
+import javax.management.*;
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Proxy for the FxCache MBean (only for internal use!)

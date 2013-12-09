@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,22 +34,23 @@
 package com.flexive.tests.embedded.jsf.bean;
 
 import com.flexive.faces.beans.MessageBean;
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.UserTicket;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.StringUtils;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

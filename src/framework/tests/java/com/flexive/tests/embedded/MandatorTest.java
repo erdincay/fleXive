@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,32 +34,33 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
+import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.MandatorEngine;
 import com.flexive.shared.interfaces.TypeEngine;
-import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.search.query.SqlQueryBuilder;
-import com.flexive.shared.security.Mandator;
-import com.flexive.shared.security.AccountEdit;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.AccountEdit;
+import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
-import static com.flexive.tests.embedded.FxTestUtils.*;
+import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
-import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static com.flexive.tests.embedded.FxTestUtils.*;
+import static org.testng.Assert.*;
 
 /**
  * Mandator tests.

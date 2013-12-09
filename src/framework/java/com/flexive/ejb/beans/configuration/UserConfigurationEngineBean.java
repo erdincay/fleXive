@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,15 +33,15 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.interfaces.UserConfigurationEngine;
 import com.flexive.shared.interfaces.UserConfigurationEngineLocal;
+import com.flexive.shared.security.UserTicket;
 
 import javax.ejb.*;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * User configuration. Currently no security checks are included - a user

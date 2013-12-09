@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -42,6 +42,7 @@ import com.flexive.core.search.cmis.model.Condition;
 import com.flexive.core.search.cmis.model.TableReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,7 +34,6 @@ package com.flexive.core.conversion;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxPropertyData;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.value.FxValue;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;

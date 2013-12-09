@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,7 +37,6 @@ import com.flexive.shared.structure.*;
 import javax.ejb.Remote;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 /**
  * Structure Assignment management

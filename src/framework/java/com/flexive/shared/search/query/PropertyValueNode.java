@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.shared.search.query;
 
-import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxEnvironment;
@@ -42,6 +41,8 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.InputMapper;
 
 import java.util.List;
+
+import static com.flexive.shared.CacheAdmin.getEnvironment;
 
 /**
  * A property query condition

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,8 +33,8 @@ package com.flexive.core.search.PostgreSQL;
 
 import com.flexive.core.search.SqlSearch;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
-import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxSqlSearchException;
 
 import java.sql.Connection;
 import java.sql.SQLException;

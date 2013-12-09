@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,12 +36,12 @@ package com.flexive.war.beans;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
 
 /**
  * This beans handles the main navigation menu.

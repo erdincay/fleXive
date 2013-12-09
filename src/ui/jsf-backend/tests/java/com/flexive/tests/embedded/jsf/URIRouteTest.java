@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,13 +36,14 @@ package com.flexive.tests.embedded.jsf;
 import com.flexive.faces.*;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import org.testng.annotations.Test;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for the {@link com.flexive.faces.ContentURIRoute} class.

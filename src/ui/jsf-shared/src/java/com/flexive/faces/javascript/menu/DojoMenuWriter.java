@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,8 +37,8 @@ import com.flexive.war.JsonWriter;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.Map;
 
 /**

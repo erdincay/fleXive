@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) project.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,10 +33,10 @@
  ***************************************************************/
 package com.flexive.war.filter;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**

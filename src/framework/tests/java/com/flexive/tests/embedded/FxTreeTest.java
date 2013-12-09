@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -60,6 +60,7 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.ReferencedContent;
 import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.testng.annotations.AfterClass;
@@ -69,7 +70,6 @@ import org.testng.annotations.Test;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang.RandomStringUtils;
 
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import static com.flexive.shared.EJBLookup.getContentEngine;

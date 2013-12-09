@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,11 +31,11 @@
  ***************************************************************/
 package com.flexive.tests.shared;
 
-import org.testng.annotations.Test;
-import org.testng.Assert;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
 import com.flexive.shared.security.PermissionSet;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for the {@link com.flexive.shared.security.PermissionSet} class.

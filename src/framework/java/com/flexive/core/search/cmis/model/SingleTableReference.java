@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,13 +31,13 @@
  ***************************************************************/
 package com.flexive.core.search.cmis.model;
 
+import com.flexive.core.search.PropertyEntry;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
-import com.flexive.core.search.PropertyEntry;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

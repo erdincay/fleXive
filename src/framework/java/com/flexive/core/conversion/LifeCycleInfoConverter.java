@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,12 +34,12 @@ package com.flexive.core.conversion;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.structure.FxTypeEdit;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;

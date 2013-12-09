@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -38,7 +38,6 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
-import static com.flexive.shared.exceptions.FxCmisSqlParseException.ErrorCause;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.search.query.PropertyValueComparator;
@@ -48,13 +47,17 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
-import java.sql.Connection;
 import org.antlr.runtime.tree.Tree;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-import org.apache.commons.lang.StringUtils;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.flexive.shared.exceptions.FxCmisSqlParseException.ErrorCause;
 
 /**
  * Translates a CMIS SQL AST to a {@link Statement}.

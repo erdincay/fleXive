@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,9 +33,9 @@ package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.search.FxFoundType;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.ResultLocation;
 import com.flexive.shared.search.ResultViewType;
-import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.tree.FxTreeMode;

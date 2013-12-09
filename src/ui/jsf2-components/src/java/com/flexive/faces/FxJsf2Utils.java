@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,7 +31,8 @@
  ***************************************************************/
 package com.flexive.faces;
 
-import java.util.Map;
+import org.apache.commons.lang.StringUtils;
+
 import javax.faces.FacesException;
 import javax.faces.application.Application;
 import javax.faces.application.Resource;
@@ -39,7 +40,7 @@ import javax.faces.application.ResourceHandler;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.FacesEvent;
-import org.apache.commons.lang.StringUtils;
+import java.util.Map;
 
 /**
  * JSF2-specific utility functions.

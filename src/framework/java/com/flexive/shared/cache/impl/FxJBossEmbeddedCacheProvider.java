@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,14 +32,12 @@
 package com.flexive.shared.cache.impl;
 
 import com.flexive.shared.cache.FxBackingCache;
-import com.flexive.shared.cache.FxBackingCacheProvider;
 import com.flexive.shared.cache.FxCacheException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
-import org.jboss.cache.*;
-import org.jboss.cache.eviction.LRUConfiguration;
-import org.jboss.cache.eviction.LRUPolicy;
+import org.jboss.cache.Cache;
+import org.jboss.cache.DefaultCacheFactory;
 
 /**
  * JBossCache FxBackingCacheProvider

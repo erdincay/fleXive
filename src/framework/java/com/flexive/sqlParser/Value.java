@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -35,8 +35,8 @@ import com.flexive.shared.search.FxSQLFunction;
 import com.flexive.shared.search.FxSQLFunctions;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

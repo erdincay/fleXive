@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,20 +34,18 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLAssignment;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLookupException;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import com.thoughtworks.xstream.XStream;
 import org.testng.Assert;
@@ -56,6 +54,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Random;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Tests for importing and exporting data

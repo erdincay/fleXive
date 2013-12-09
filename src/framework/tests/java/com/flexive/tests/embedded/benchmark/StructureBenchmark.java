@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,9 +34,10 @@ package com.flexive.tests.embedded.benchmark;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.structure.FxEnvironment;
-import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
 import org.apache.commons.lang.SerializationUtils;
 import org.testng.annotations.Test;
+
+import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
 
 /**
  * Structure-related benchmarks (FxEnvironment and structure classes).

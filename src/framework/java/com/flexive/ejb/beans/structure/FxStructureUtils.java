@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.ejb.beans.structure;
 
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.shared.structure.FxAssignment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +40,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.*;
 
 /**
  * Server side utility methods for structures

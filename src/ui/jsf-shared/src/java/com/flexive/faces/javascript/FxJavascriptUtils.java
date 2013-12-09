@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,7 +36,6 @@ import org.apache.commons.lang.StringUtils;
 import javax.faces.context.ResponseWriter;
 import java.io.IOException;
 import java.io.Writer;
-import javax.faces.context.FacesContext;
 
 /**
  * Utility functions for handling/creating javascript code.

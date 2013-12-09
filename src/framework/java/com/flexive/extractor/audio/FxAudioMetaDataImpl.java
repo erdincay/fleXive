@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,11 +32,11 @@
 package com.flexive.extractor.audio;
 
 import com.flexive.shared.media.FxMediaType;
+import org.apache.commons.lang.time.DurationFormatUtils;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
-import org.apache.commons.lang.time.DurationFormatUtils;
 
 import static com.flexive.shared.FxXMLUtils.writeSimpleTag;
 

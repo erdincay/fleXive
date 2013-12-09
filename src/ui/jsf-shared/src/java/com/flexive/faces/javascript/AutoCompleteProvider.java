@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,31 +31,28 @@
  ***************************************************************/
 package com.flexive.faces.javascript;
 
-import com.flexive.war.JsonWriter;
-import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.value.mapper.NumberQueryInputMapper;
-import static com.flexive.shared.value.mapper.NumberQueryInputMapper.ReferenceQueryInputMapper;
-import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.search.query.SqlQueryBuilder;
-import com.flexive.shared.search.query.PropertyValueComparator;
-import com.flexive.shared.search.SortDirection;
-import com.flexive.shared.search.FxResultSet;
-import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.search.FxResultRow;
+import com.flexive.shared.search.SortDirection;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.Account;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Serializable;
-import java.net.URLDecoder;
-
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.war.JsonWriter;
+import com.flexive.war.servlet.ThumbnailServlet;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.StringWriter;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.flexive.shared.value.mapper.NumberQueryInputMapper.ReferenceQueryInputMapper;
 
 /**
  * Provides autocomplete query methods for the fx:fxValueInput tag.

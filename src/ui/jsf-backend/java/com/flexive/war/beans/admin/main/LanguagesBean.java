@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,15 +33,16 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
-import com.flexive.shared.FxLanguage;
-import static com.flexive.shared.EJBLookup.getLanguageEngine;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.google.common.collect.Lists;
 
-import java.util.List;
 import java.io.Serializable;
+import java.util.List;
+
+import static com.flexive.shared.EJBLookup.getLanguageEngine;
 
 /**
  * Languages settings

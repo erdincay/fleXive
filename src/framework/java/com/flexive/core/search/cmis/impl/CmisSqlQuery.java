@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,11 +32,12 @@
 package com.flexive.core.search.cmis.impl;
 
 import com.flexive.core.search.cmis.model.*;
-import static com.flexive.core.search.cmis.model.ValueFunction.Functions;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.shared.structure.FxEnvironment;
 
 import java.util.*;
+
+import static com.flexive.core.search.cmis.model.ValueFunction.Functions;
 
 /**
  * Describes a CMIS {@link com.flexive.core.search.cmis.model.Statement} as an ANSI SQL statement for the

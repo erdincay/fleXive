@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,12 +36,13 @@ import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Tests for the {@link com.flexive.shared.search.FxResultRow FxResultRow} wrapper object.

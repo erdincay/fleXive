@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,32 +31,32 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
-import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
-import static com.flexive.shared.EJBLookup.getSearchEngine;
-import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.search.BriefcaseItemData;
-import com.flexive.shared.security.ACL;
+import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.search.Briefcase;
+import com.flexive.shared.search.BriefcaseItemData;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
-import static org.testng.Assert.*;
-
+import com.flexive.shared.security.ACL;
 import com.google.common.collect.Lists;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static java.util.Arrays.asList;
 import java.util.List;
+
+import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static java.util.Arrays.asList;
+import static org.testng.Assert.*;
 
 /**
  * Briefcase engine tests.

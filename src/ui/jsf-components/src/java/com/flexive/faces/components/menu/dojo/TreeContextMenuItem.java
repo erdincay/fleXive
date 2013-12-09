@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,12 +31,13 @@
  ***************************************************************/
 package com.flexive.faces.components.menu.dojo;
 
-import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.context.FacesContext;
 import java.util.Arrays;
 import java.util.Map;
+
+import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 
 /**
  * Renders a tree context menu item. Must be embedded in a fx:tree component.

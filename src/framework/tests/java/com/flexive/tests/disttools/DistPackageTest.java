@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,21 +31,21 @@
  ***************************************************************/
 package com.flexive.tests.disttools;
 
-import org.testng.annotations.Test;
-import org.testng.Assert;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.MagicNames;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
-import org.apache.tools.ant.MagicNames;
-import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.input.InputHandler;
 import org.apache.tools.ant.input.InputRequest;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.io.*;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * <p>

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,11 +33,12 @@ package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsf2Const;
 import com.flexive.faces.FxJsf2Utils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.faces.application.ResourceDependencies;
 import javax.faces.application.ResourceDependency;
 import javax.faces.component.html.HtmlGraphicImage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * JSF2 implementation of fx:fxValueInput. Optional resource dependencies like TinyMCE are currently not

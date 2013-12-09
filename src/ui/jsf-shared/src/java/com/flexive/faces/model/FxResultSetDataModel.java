@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -40,12 +40,13 @@ import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.ACL;
-import static com.flexive.shared.EJBLookup.getSearchEngine;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.DataModel;
-import java.util.List;
 import java.io.Serializable;
+import java.util.List;
+
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 
 public class FxResultSetDataModel extends DataModel implements Serializable {
     private static final long serialVersionUID = -3476884537673965415L;

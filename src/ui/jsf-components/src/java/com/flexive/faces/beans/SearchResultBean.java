@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,19 +37,19 @@ import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.messages.FxFacesMsgWarn;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxValue;
@@ -60,14 +60,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
-import javax.faces.context.FacesContext;
+import java.util.List;
 
 public class SearchResultBean implements ActionBean, Serializable {
     private static final long serialVersionUID = -3167186971609121457L;

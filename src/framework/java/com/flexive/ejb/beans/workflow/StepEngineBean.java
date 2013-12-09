@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,8 +33,8 @@ package com.flexive.ejb.beans.workflow;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.structure.StructureLoader;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSystemSequencer;
@@ -43,13 +43,15 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.interfaces.StepEngine;
 import com.flexive.shared.interfaces.StepEngineLocal;
-import com.flexive.shared.security.*;
+import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.StepPermission;
 import com.flexive.shared.workflow.StepPermissionEdit;
-import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -62,6 +64,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import static com.flexive.core.DatabaseConst.*;
 
 
 /**

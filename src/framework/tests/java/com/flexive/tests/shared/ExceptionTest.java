@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,8 +33,8 @@ package com.flexive.tests.shared;
 
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import org.testng.annotations.Test;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  * Test for the localized flexive exception messages

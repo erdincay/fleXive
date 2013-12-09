@@ -24,7 +24,7 @@
             <xsl:with-param name="dingbat">copyright</xsl:with-param>
         </xsl:call-template>
         <xsl:call-template name="gentext.space"/>
-        <xsl:text>1999-2010 UCS - unique computing solutions gmbh</xsl:text>
+        <xsl:text>1999-2014 UCS - unique computing solutions gmbh</xsl:text>
         <xsl:call-template name="gentext.space"/>
     </xsl:template>
 

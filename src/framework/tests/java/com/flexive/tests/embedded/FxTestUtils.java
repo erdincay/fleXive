@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -40,8 +40,8 @@ import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
 import org.testng.Assert;
 

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -35,8 +35,6 @@ import com.flexive.core.search.cmis.model.Statement;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.TreeStorage;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
-import java.sql.Connection;
-import static com.flexive.shared.exceptions.FxCmisSqlParseException.ErrorCause;
 import org.antlr.runtime.NoViableAltException;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
@@ -45,6 +43,10 @@ import org.antlr.runtime.tree.CommonTree;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.sql.Connection;
+
+import static com.flexive.shared.exceptions.FxCmisSqlParseException.ErrorCause;
 
 /**
  * Methods for working with the CMIS SQL parser. Includes error reporting and convenience methods for parsing

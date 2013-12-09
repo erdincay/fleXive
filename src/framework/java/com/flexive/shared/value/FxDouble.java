@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,15 +32,13 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.apache.commons.lang.math.NumberUtils;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Map;
-
-import com.flexive.shared.FxFormatUtils;
 
 /**
  * A multilingual Double, internally represented as Double

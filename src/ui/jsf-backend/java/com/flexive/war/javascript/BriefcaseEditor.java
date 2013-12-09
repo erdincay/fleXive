@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -38,13 +38,14 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.war.JsonWriter;
-import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * JSON/RPC beans for the briefcase navigation page.

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,29 +33,27 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import static com.flexive.shared.EJBLookup.getApplicationConfigurationEngine;
-import static com.flexive.shared.EJBLookup.getUserConfigurationEngine;
-import static com.flexive.shared.EJBLookup.getNodeConfigurationEngine;
-import static com.flexive.shared.EJBLookup.getMandatorConfigurationEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.*;
 import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.tests.shared.TestParameters;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import static org.testng.Assert.*;
 import org.testng.annotations.*;
 
 import java.io.Serializable;
 import java.util.*;
+
+import static com.flexive.shared.EJBLookup.*;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static org.testng.Assert.*;
 
 /**
  * Configuration test suite

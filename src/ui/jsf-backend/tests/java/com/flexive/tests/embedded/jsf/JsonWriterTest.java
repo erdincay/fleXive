@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,11 +33,11 @@
  ***************************************************************/
 package com.flexive.tests.embedded.jsf;
 
-import com.flexive.war.JsonWriter;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.ResultViewType;
-import org.testng.annotations.Test;
+import com.flexive.war.JsonWriter;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;

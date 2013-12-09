@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,14 +34,12 @@ package com.flexive.core.structure;
 import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.FxLanguage;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Environment helper functions (core)

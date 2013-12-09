@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,7 +32,8 @@
 package com.flexive.shared.configuration.parameters;
 
 
-import com.flexive.shared.configuration.*;
+import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterData;
 
 /**
  * Integer parameters for flexive.

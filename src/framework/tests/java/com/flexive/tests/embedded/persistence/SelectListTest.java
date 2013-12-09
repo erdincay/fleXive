@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -38,9 +38,9 @@ import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.interfaces.SelectListEngine;
 import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.SelectListEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
@@ -52,18 +52,19 @@ import com.flexive.shared.value.SelectMany;
 import com.flexive.shared.value.renderer.FxValueRenderer;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.tests.embedded.FxTestUtils;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
-import org.testng.Assert;
 
 import java.util.Iterator;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * FxSelectList and FxSelectListItem tests

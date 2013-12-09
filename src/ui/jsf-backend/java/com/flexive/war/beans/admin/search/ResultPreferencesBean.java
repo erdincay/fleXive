@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -42,7 +42,6 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -66,8 +65,10 @@ import javax.faces.event.PhaseId;
 import javax.faces.model.DataModel;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
-import java.util.*;
 import java.io.Serializable;
+import java.util.*;
+
+import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 
 /**
  * Bean for creating and updating result preferences.

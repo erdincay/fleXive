@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,8 +32,9 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.shared.FxLanguage;
-import java.io.IOException;
+
 import javax.faces.component.UIComponent;
+import java.io.IOException;
 
 /**
  * Shared interface of the render helper classes of {@code fx:fxValueInput}.

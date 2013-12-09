@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,7 +33,8 @@ package com.flexive.core.search.cmis.impl.sql.generic;
 
 import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
-import com.flexive.core.search.cmis.model.*;
+import com.flexive.core.search.cmis.model.ConditionList;
+import com.flexive.core.search.cmis.model.TableReference;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;

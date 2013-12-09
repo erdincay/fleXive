@@ -1,7 +1,7 @@
 /** *************************************************************
  *  This file is part of the [fleXive](R) project.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,30 +33,26 @@
  ************************************************************** */
 package com.flexive.tests.embedded
 
+import com.flexive.core.flatstorage.FxFlatStorageManager
 import com.flexive.shared.CacheAdmin
 import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxLanguage
 import com.flexive.shared.exceptions.FxInvalidParameterException
 import com.flexive.shared.exceptions.FxRuntimeException
 import com.flexive.shared.scripting.groovy.GroovyContentBuilder
+import com.flexive.shared.scripting.groovy.GroovyOptionBuilder
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.security.ACLCategory
+import com.flexive.shared.security.UserGroup
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
-
-import static org.testng.Assert.assertEquals
+import com.flexive.shared.workflow.*
+import org.testng.Assert
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import org.testng.Assert
-import com.flexive.shared.security.ACLCategory
-import com.flexive.shared.FxLanguage
-import com.flexive.core.flatstorage.FxFlatStorageManager
-import com.flexive.shared.workflow.StepDefinitionEdit
-import com.flexive.shared.workflow.StepDefinition
-import com.flexive.shared.workflow.Route
-import com.flexive.shared.security.UserGroup
-import com.flexive.shared.workflow.Workflow
-import com.flexive.shared.workflow.Step
-import com.flexive.shared.scripting.groovy.GroovyOptionBuilder
+
+import static org.testng.Assert.assertEquals
 
 /**
  * Tests for the                                    {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                    class.

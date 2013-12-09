@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,9 +32,9 @@
 package com.flexive.shared.media;
 
 import com.flexive.shared.media.impl.FxMimeType;
-import java.io.Serializable;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 

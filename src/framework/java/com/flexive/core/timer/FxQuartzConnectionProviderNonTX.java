@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,7 +32,6 @@
 package com.flexive.core.timer;
 
 import com.flexive.core.Database;
-import com.flexive.shared.FxContext;
 import org.quartz.utils.ConnectionProvider;
 
 import java.sql.Connection;

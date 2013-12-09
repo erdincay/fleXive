@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) project.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,10 +33,10 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cmis.search.CmisResultSet;
-import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.faces.FxJsfUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.DataModel;

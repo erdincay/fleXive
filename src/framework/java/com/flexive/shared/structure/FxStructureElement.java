@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,8 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
-import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;

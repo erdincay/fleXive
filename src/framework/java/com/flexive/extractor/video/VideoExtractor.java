@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,6 +36,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
 import com.flexive.shared.media.impl.FxMimeType;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * The video extractor class

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,11 +31,11 @@
  ***************************************************************/
 package com.flexive.ejb.beans.test;
 
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.interfaces.StatelessTest;
 import com.flexive.shared.interfaces.StatelessTestLocal;
-import com.flexive.ejb.beans.EJBUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;

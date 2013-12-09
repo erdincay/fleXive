@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,8 +37,6 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ResultSessionData;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
-import static com.flexive.shared.EJBLookup.getSearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.Briefcase;
@@ -48,6 +46,9 @@ import com.flexive.shared.search.FxResultSet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 
 /**
  * Management of Briefcases.

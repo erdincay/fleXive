@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,12 +32,13 @@
 package com.flexive.faces;
 
 import com.sun.facelets.tag.jsf.ComponentSupport;
+import net.java.dev.weblets.FacesWebletUtils;
+import org.apache.commons.lang.StringUtils;
+
 import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
-import net.java.dev.weblets.FacesWebletUtils;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * JSF1-specific utility methods

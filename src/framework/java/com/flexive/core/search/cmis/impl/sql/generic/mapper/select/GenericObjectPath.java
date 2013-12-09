@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,18 +31,18 @@
  ***************************************************************/
 package com.flexive.core.search.cmis.impl.sql.generic.mapper.select;
 
-import com.flexive.core.search.cmis.impl.ResultColumnReference;
-import com.flexive.core.search.cmis.impl.CmisSqlQuery;
-import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
-import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
-import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
-import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
-import com.flexive.core.search.cmis.model.TableReference;
 import com.flexive.core.search.PropertyEntry;
+import com.flexive.core.search.cmis.impl.CmisSqlQuery;
+import com.flexive.core.search.cmis.impl.ResultColumnReference;
+import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
+import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
+import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
+import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
+import com.flexive.core.search.cmis.model.TableReference;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.structure.FxDataType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

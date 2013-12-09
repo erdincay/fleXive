@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,8 +34,8 @@ package com.flexive.ejb.beans.workflow;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
-import static com.flexive.core.DatabaseConst.TBL_WORKFLOW;
 import com.flexive.core.structure.StructureLoader;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSystemSequencer;
@@ -48,7 +48,6 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.Workflow;
-import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,6 +62,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.flexive.core.DatabaseConst.TBL_WORKFLOW;
 
 
 /**

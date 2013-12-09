@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -29,9 +29,11 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
+
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
 import com.flexive.shared.scripting.FxScriptEvent
-import com.flexive.shared.*
-import com.flexive.shared.scripting.*
+import com.flexive.shared.scripting.FxScriptInfo
 import com.flexive.shared.structure.FxType
 
 def se = EJBLookup.getScriptingEngine()

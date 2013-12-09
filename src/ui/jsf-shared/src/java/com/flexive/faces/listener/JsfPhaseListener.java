@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,8 +32,8 @@
 package com.flexive.faces.listener;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.beans.SystemBean;
 import com.flexive.faces.beans.PageBean;
+import com.flexive.faces.beans.SystemBean;
 
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;

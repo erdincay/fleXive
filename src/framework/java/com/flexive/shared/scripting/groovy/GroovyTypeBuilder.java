@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,23 +34,23 @@ package com.flexive.shared.scripting.groovy;
 import com.flexive.core.structure.FxEnvironmentUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.media.FxMimeTypeWrapper;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
+import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.FxReference;
 import com.flexive.shared.workflow.Workflow;
 import groovy.util.BuilderSupport;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.*;
 import java.io.Serializable;
+import java.util.*;
 
 /**
  * A {@link com.flexive.shared.structure.FxType FxType} groovy builder. By convention,

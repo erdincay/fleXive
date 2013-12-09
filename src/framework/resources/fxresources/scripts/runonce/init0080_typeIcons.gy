@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,15 +36,16 @@
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev: 618 $
  */
-
-import com.flexive.shared.*
-import com.flexive.shared.value.FxBinary
-import com.flexive.shared.value.BinaryDescriptor
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxSharedUtils
 import com.flexive.shared.content.FxPK
 import com.flexive.shared.scripting.groovy.GroovyContentBuilder
+import com.flexive.shared.structure.FxType
+import com.flexive.shared.value.BinaryDescriptor
+import com.flexive.shared.value.FxBinary
 import com.flexive.shared.value.FxReference
 import com.flexive.shared.value.ReferencedContent
-import com.flexive.shared.structure.FxType
 
 InputStream getImageResource(path) {
     return Thread.currentThread().getContextClassLoader().getResourceAsStream("fxresources/binaries/thumbs/" + path)

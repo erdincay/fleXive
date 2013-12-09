@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,26 +32,26 @@
 package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfUtils;
-import static com.flexive.faces.FxJsfComponentUtils.getBooleanValue;
-import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 import com.flexive.faces.beans.SystemBean;
-import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
-import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import net.java.dev.weblets.FacesWebletUtils;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import java.io.IOException;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import net.java.dev.weblets.FacesWebletUtils;
+import static com.flexive.faces.FxJsfComponentUtils.getBooleanValue;
+import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
+import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
+import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
 
 /**
  * Renders all weblet resources required by the current page.

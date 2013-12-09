@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,12 +37,13 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.EJBLookup.getMandatorEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.Mandator;
 
-import java.util.*;
 import java.io.Serializable;
+import java.util.*;
+
+import static com.flexive.shared.EJBLookup.getMandatorEngine;
 
 /**
  * This Bean provides access to the mandator functionality.

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -38,9 +38,9 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxTreeException;
-import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.structure.FxType;

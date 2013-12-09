@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,9 +33,6 @@ package com.flexive.war.servlet;
 
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -43,9 +40,12 @@ import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.stream.BinaryDownloadCallback;
 import com.flexive.shared.stream.FxStreamUtils;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxValue;
 import com.flexive.war.FxThumbnailURIConfigurator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

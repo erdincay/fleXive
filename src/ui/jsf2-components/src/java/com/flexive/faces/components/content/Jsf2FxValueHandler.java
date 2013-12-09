@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -38,7 +38,8 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.value.renderer.FxValueFormatter;
 import com.sun.faces.facelets.el.VariableMapperWrapper;
-import java.io.IOException;
+import org.apache.commons.lang.StringUtils;
+
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
@@ -48,7 +49,7 @@ import javax.faces.view.facelets.FaceletContext;
 import javax.faces.view.facelets.TagAttribute;
 import javax.faces.view.facelets.TagConfig;
 import javax.faces.view.facelets.TagHandler;
-import org.apache.commons.lang.StringUtils;
+import java.io.IOException;
 
 /**
  * A facelets handler that renders a complete form element for editing or displaying

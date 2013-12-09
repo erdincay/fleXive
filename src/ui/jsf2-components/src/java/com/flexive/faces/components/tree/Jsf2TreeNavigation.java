@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,10 +33,10 @@ package com.flexive.faces.components.tree;
 
 import com.flexive.faces.FxJsf2Const;
 import com.flexive.faces.FxJsf2Utils;
+
 import javax.faces.application.ResourceDependencies;
 import javax.faces.application.ResourceDependency;
 import javax.faces.context.FacesContext;
-import javax.faces.event.AbortProcessingException;
 import javax.faces.event.FacesEvent;
 
 /**

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -37,13 +37,14 @@ import com.flexive.core.search.cmis.impl.ResultScore;
 import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
 import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
-import static com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect.FILTER_ALIAS;
 import com.flexive.core.search.cmis.impl.sql.generic.mapper.condition.GenericContainsCondition;
 import com.flexive.core.search.cmis.model.ContainsCondition;
 import com.flexive.shared.FxFormatUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect.FILTER_ALIAS;
 
 /**
  * Postgres fulltext query/scoring provider. The values returned by SCORE() are not normalized, thus the

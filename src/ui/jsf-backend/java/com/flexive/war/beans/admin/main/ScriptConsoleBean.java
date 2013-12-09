@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -45,8 +45,8 @@ import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.Formatter;
 
 /**

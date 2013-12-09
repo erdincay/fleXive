@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,7 +32,6 @@
 package com.flexive.core.conversion;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_STRUCT_TYPES;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.structure.FxPreloadType;
 import com.flexive.core.structure.StructureLoader;
@@ -65,6 +64,8 @@ import org.apache.commons.lang.ArrayUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
+
+import static com.flexive.core.DatabaseConst.TBL_STRUCT_TYPES;
 
 /**
  * XStream converter for FxType

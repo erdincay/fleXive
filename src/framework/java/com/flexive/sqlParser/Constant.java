@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,8 +31,8 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
-import java.util.Iterator;
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Class holding constant values.

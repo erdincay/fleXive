@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,9 +34,9 @@ package com.flexive.faces.components;
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.war.servlet.ThumbnailServlet;

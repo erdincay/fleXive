@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) project.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -34,23 +34,25 @@
 
 package com.flexive.tests.embedded.persistence;
 
-import org.testng.annotations.*;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxRemoveException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.exceptions.FxRemoveException;
+import com.flexive.shared.interfaces.AssignmentEngine;
+import com.flexive.shared.interfaces.TypeEngine;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.structure.export.StructureExporter;
 import com.flexive.shared.structure.export.StructureExporterCallback;
 import com.flexive.shared.structure.export.StructureExporterTools;
-import com.flexive.shared.interfaces.TypeEngine;
-import com.flexive.shared.interfaces.AssignmentEngine;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.util.*;
 

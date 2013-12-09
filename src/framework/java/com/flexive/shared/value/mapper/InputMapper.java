@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,17 +33,16 @@ package com.flexive.shared.value.mapper;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.search.query.ValueComparator;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxSelectList;
-import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.value.FxValue;
+import org.apache.commons.lang.StringUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * InputMapper introduces another level of abstraction for the FxValue input

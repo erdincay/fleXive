@@ -1,7 +1,7 @@
 /** *************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -29,12 +29,12 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ************************************************************** */
-package com.flexive.tests.embedded;
+package com.flexive.tests.embedded
 
-import org.testng.annotations.Test
 import com.flexive.shared.scripting.groovy.GroovyOptionBuilder
+import com.flexive.shared.structure.FxStructureOption
 import org.testng.Assert
-import com.flexive.shared.structure.FxStructureOption;
+import org.testng.annotations.Test
 
 /**
  * Tests for the     {@link com.flexive.shared.scripting.groovy.GroovyOptionBuilder GroovyOptionBuilder}     class.

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,8 +36,8 @@ package com.flexive.tests.embedded.jsf;
 import com.flexive.faces.components.input.Jsf1FxValueInput;
 import com.flexive.faces.converter.EnumConverter;
 import com.flexive.shared.search.query.PropertyValueComparator;
-import org.testng.annotations.Test;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import javax.faces.context.FacesContext;
 

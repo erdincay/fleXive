@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,17 +32,17 @@
 package com.flexive.war.filter;
 
 import com.flexive.war.FxRequest;
-import static com.flexive.war.FxRequest.Browser;
 import com.google.common.collect.Maps;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import static com.flexive.war.FxRequest.Browser;
 
 public class BrowserDetect {
     private static final Log LOG = LogFactory.getLog(BrowserDetect.class);

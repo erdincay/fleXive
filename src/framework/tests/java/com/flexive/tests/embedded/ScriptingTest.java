@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,10 +31,13 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.ejb.beans.ScriptingEngineBean;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.configuration.*;
+import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterScope;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -45,17 +48,18 @@ import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
-import com.flexive.ejb.beans.ScriptingEngineBean;
 import org.testng.Assert;
-import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static org.testng.Assert.*;
 
 /**
  * Tests for the scripting engine (grooooooovy)

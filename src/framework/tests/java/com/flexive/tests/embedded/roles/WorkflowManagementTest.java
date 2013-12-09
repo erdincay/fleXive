@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,14 +33,11 @@ package com.flexive.tests.embedded.roles;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import static com.flexive.shared.EJBLookup.getWorkflowEngine;
-import static com.flexive.shared.EJBLookup.getWorkflowStepEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.StepDefinitionEngine;
-import static com.flexive.shared.security.Role.WorkflowManagement;
-import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
@@ -50,6 +47,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+
+import static com.flexive.shared.EJBLookup.getWorkflowEngine;
+import static com.flexive.shared.EJBLookup.getWorkflowStepEngine;
+import static com.flexive.shared.security.Role.WorkflowManagement;
 
 /**
  * Workflow role tests.

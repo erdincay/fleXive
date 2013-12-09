@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.core;
 
-import java.util.Enumeration;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.ejb.beans.configuration.GlobalConfigurationEngineBean;
@@ -50,10 +49,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.flexive.core.DatabaseConst.DS_GLOBAL_CONFIG;
 import static com.flexive.core.DatabaseConst.ML;

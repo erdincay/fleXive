@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,28 +32,29 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.*;
-import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserGroup;
-import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.*;
 import com.google.common.collect.Lists;
-import static com.flexive.tests.embedded.FxTestUtils.*;
 import org.apache.commons.lang.StringUtils;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import static com.flexive.tests.embedded.FxTestUtils.*;
 
 /**
  * Workflow tests.

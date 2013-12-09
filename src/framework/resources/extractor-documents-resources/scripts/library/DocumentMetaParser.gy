@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -39,7 +39,10 @@
 // [optional] binaryDescriptor ... BinaryDescriptor (retrieved from content instance if null)
 //  content ... the FxContent being processed
 //author: Markus Plesser, Unique Computing Solutions GmbH
-import com.flexive.shared.value.*
+import com.flexive.shared.value.FxBoolean
+import com.flexive.shared.value.FxDateTime
+import com.flexive.shared.value.FxNumber
+import com.flexive.shared.value.FxString
 
 if( !content.containsValue("/File") ) {
     println "No document present to parse!"

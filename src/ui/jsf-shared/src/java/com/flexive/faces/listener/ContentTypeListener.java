@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,10 +31,10 @@
  ***************************************************************/
 package com.flexive.faces.listener;
 
-import javax.faces.event.PhaseListener;
+import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
-import javax.faces.context.FacesContext;
+import javax.faces.event.PhaseListener;
 
 /**
  * <p>Forces the Facelets content type to be text/html, even if none was specified (or no f:view tag exists).</p>

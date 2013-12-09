@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -46,12 +46,12 @@ import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.stream.ServerLocation;
 import com.flexive.stream.StreamServer;
 import com.google.common.collect.Lists;
-import java.io.Serializable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.cache.Cache;
 
 import javax.management.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

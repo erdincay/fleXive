@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) project.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -41,8 +41,8 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Handles security checks for the backend administration - checks if the calling user has the role

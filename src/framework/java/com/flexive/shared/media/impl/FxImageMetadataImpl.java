@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,13 +33,13 @@ package com.flexive.shared.media.impl;
 
 import com.flexive.shared.media.FxImageMetadata;
 import com.flexive.shared.media.FxMediaType;
-import com.flexive.shared.FxXMLUtils;
-import static com.flexive.shared.FxXMLUtils.writeSimpleTag;
 
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.awt.color.ICC_Profile;
 import java.util.List;
+
+import static com.flexive.shared.FxXMLUtils.writeSimpleTag;
 
 /**
  * Image metadata

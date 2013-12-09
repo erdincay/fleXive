@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,8 +32,9 @@
 package com.flexive.tests.browser;
 
 import org.testng.Assert;
-import static org.testng.Assert.fail;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.fail;
 
 /**
  * Search result tests for the backend administration.

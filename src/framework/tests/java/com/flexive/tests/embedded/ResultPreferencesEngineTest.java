@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,25 +32,26 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.FxContext;
-import static com.flexive.shared.EJBLookup.*;
 import com.flexive.shared.content.FxPK;
-import static com.flexive.shared.CacheAdmin.getEnvironment;
-import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ResultPreferencesEngine;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxTypeEdit;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
-import org.testng.Assert;
-import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
+
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import static com.flexive.shared.EJBLookup.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Basic unit tests for the result preferences EJB.

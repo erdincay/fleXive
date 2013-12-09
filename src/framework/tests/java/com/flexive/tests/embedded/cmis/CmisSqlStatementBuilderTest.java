@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,8 +33,6 @@ package com.flexive.tests.embedded.cmis;
 
 import com.flexive.core.Database;
 import com.flexive.core.search.cmis.model.*;
-import static com.flexive.core.search.cmis.model.ConditionList.Connective;
-import static com.flexive.core.search.cmis.parser.CmisSqlUtils.buildStatement;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.TreeStorage;
@@ -49,16 +47,19 @@ import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeRemoveOp;
-import java.sql.Connection;
-import java.sql.SQLException;
-import static org.testng.Assert.*;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import org.testng.annotations.AfterClass;
+
+import static com.flexive.core.search.cmis.model.ConditionList.Connective;
+import static com.flexive.core.search.cmis.parser.CmisSqlUtils.buildStatement;
+import static org.testng.Assert.*;
 
 /**
  * Tests for the CMIS SQL statement builder. Disabled tests are expected to fail because they

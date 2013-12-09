@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.faces.components.tree.dojo;
 
-import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
@@ -43,6 +42,8 @@ import javax.faces.context.FacesContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 
 /**
  * Tree node component. Specifies a node in a Tree. Must be nested in

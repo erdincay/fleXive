@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -39,13 +39,14 @@ import com.flexive.core.storage.ContentStorage;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 /**
  * This class represents a reference to a column in a CMIS-SQL query. In FxSQL, this would be a property selector.

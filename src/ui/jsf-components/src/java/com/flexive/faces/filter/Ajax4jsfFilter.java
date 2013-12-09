@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2010
+ *  Copyright (c) 1999-2014
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.faces.filter;
 
+import com.flexive.war.filter.FxRequestUtils;
 import org.ajax4jsf.Filter;
 
 import javax.servlet.FilterChain;
@@ -40,8 +41,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
-import com.flexive.war.filter.FxRequestUtils;
 
 
 public class Ajax4jsfFilter extends Filter {
