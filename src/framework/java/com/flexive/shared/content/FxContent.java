@@ -782,7 +782,7 @@ public class FxContent implements Serializable {
      * @param XPath XPath with the group alias as last element
      * @param options   options for adding the group
      * @return XPath of the added group
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public String addGroup(String XPath, FxGroupData.AddGroupOptions options) {
         XPath = XPathElement.stripType(XPath);

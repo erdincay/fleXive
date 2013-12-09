@@ -337,7 +337,7 @@ public class FxArrayUtils {
      * @param elements  elements to convert to a String
      * @param separator separator for the resulting String
      * @return String representation of the array
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static String toStringArray(long[] elements, char separator) {
         StringBuilder sb = new StringBuilder(elements.length + 20);

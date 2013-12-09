@@ -352,7 +352,7 @@ public class FxSQLSearchParams implements Serializable {
     /**
      * @return  when true, indicates that the caller does not need 'global' information about the result set
      * such as the total row count or the found content types
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public boolean isHintNoResultInfo() {
         return hintNoResultInfo;
@@ -364,7 +364,7 @@ public class FxSQLSearchParams implements Serializable {
      * temporary table first.
      *
      * @param hintNoResultInfo    when true, no result information will be available in the {@link FxResultSet}
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public void setHintNoResultInfo(boolean hintNoResultInfo) {
         this.hintNoResultInfo = hintNoResultInfo;
@@ -372,7 +372,7 @@ public class FxSQLSearchParams implements Serializable {
 
     /**
      * @return  when true and no "order by" clause was specified, disable the internal default sort by content ID and version.
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public boolean isNoInternalSort() {
         return noInternalSort;
@@ -384,7 +384,7 @@ public class FxSQLSearchParams implements Serializable {
      * undefined (and, depending on the DB, not repeatable across multiple queries).
      *
      * @param noInternalSort    to disable the internal default sorting
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public void setNoInternalSort(boolean noInternalSort) {
         this.noInternalSort = noInternalSort;
@@ -393,7 +393,7 @@ public class FxSQLSearchParams implements Serializable {
     /**
      * @return  when true, the "data" field of FxValues will be included in the search result. Disabled by default
      * for performance reasons.
-     * @since 3.1.7
+     * @since 3.2.0
      * @see com.flexive.shared.value.FxValue#getValueData()
      */
     public boolean isHintSelectData() {
@@ -405,7 +405,7 @@ public class FxSQLSearchParams implements Serializable {
      *
      * @param hintSelectData    true to select the data of FxValues
      * @see com.flexive.shared.value.FxValue#getValueData()
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public void setHintSelectData(boolean hintSelectData) {
         this.hintSelectData = hintSelectData;

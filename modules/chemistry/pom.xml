@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.flexive</groupId>
         <artifactId>flexive-modules-parent</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.2-SNAPSHOT</version>
         <relativePath>../flexive-modules-parent</relativePath>
     </parent>
 
     <properties>
-        <spi.version>3.1-SNAPSHOT</spi.version>
+        <spi.version>3.2-SNAPSHOT</spi.version>
 
         <!--
             Use the last version of the old (2010) chemistry library. This dependency has to be built manually,

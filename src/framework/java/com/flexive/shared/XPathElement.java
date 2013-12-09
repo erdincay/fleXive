@@ -686,7 +686,7 @@ public class XPathElement implements Serializable {
      * 
      * @param xpath the XPath
      * @return      the uppercased XPath
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static String xpToUpperCase(String xpath) {
         if (xpath == null) {
@@ -722,7 +722,7 @@ public class XPathElement implements Serializable {
      *
      * @param xpath    the xpath
      * @return         the depth (min. 1 for valid xpaths)
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static int getDepth(String xpath) {
         int depth = 0;
@@ -740,7 +740,7 @@ public class XPathElement implements Serializable {
      * @param xmult    the existing list of indices, comma-separated (may be empty)
      * @param count    the number of indices that should be added
      * @return  the new xmult string
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static String addDefaultIndices(String xmult, int count) {
         // add missing indices after the base group - TODO: optimize?

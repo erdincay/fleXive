@@ -5,7 +5,7 @@ package com.flexive.shared.exceptions;
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
- * @since 3.1.7
+ * @since 3.2.0
  */
 public class FxRestApiTokenExpiredException extends FxApplicationException {
     private final String token;

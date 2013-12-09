@@ -1655,7 +1655,7 @@ public final class FxSharedUtils {
      * @param <T>       the value type
      * @return  the first matching value
      * @throws com.flexive.shared.exceptions.FxRuntimeException if no element with the given ID was found
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static <T extends SelectableObject> T getSelectableObject(List<T> values, long id) {
         for (T value : values) {
@@ -1711,7 +1711,7 @@ public final class FxSharedUtils {
      * @param i1    the first value
      * @param i2    the second value
      * @return      see {@link Integer#compareTo}
-     * @since       3.1.7
+     * @since       3.2.0
      */
     public static int compare(int i1, int i2) {
         if (i1 < i2) {
@@ -1730,7 +1730,7 @@ public final class FxSharedUtils {
      * @param i1    the first value
      * @param i2    the second value
      * @return      see {@link Integer#compareTo}
-     * @since       3.1.7
+     * @since       3.2.0
      */
     public static int compare(long i1, long i2) {
         if (i1 < i2) {
@@ -2205,7 +2205,7 @@ public final class FxSharedUtils {
 
     /**
      * @return  the name of the current network node (used by flexive for the {@link com.flexive.shared.interfaces.NodeConfigurationEngine}.
-     * @since   3.1.7
+     * @since   3.2.0
      */
     public static synchronized String getNodeId() {
         if (NODE_ID == null) {

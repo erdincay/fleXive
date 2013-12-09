@@ -501,7 +501,7 @@ public class CacheAdmin {
      * Should all content versions be cached, or only the maximum/live versions?
      *
      * <p>
-     *     Beginning with flexive 3.1.7, only the maximum and live versions of a content are cached by default.
+     *     Beginning with flexive 3.2.0, only the maximum and live versions of a content are cached by default.
      *     This is to avoid memory load issues when the database contains many instances with lots of versions.
      *     When loading all versions of an instance (e.g. due to an export operation), they will all end up in the
      *     cache but the entry still count as only one content (since all versions are stored in a single cache node).
@@ -509,7 +509,7 @@ public class CacheAdmin {
      *
      * @return  whether all content versions should be cached
      *
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static boolean isCacheAllVersions() {
         return CACHE_ALL_VERSIONS;

@@ -481,7 +481,7 @@ public interface AccountEngine {
      * @param email        the new e-mail address to assign
      * @param lang         the new language to assign
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     void updateUser(long accountId, String password, boolean hashPassword, String name, String loginName, String email, Long lang) throws FxApplicationException;
 
@@ -548,7 +548,7 @@ public interface AccountEngine {
      *
      * @return  the API token
      * @throws FxApplicationException   on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     String generateRestToken() throws FxApplicationException;
 
@@ -561,7 +561,7 @@ public interface AccountEngine {
      * @throws FxApplicationException on errors
      * @throws FxRestApiTokenExpiredException when the token is expired or invalid (was replaced by a newer one)
      *
-     * @since 3.1.7
+     * @since 3.2.0
      */
     void loginByRestToken(String token) throws FxApplicationException;
 }

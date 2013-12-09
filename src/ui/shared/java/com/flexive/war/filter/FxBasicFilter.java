@@ -21,7 +21,7 @@ import java.io.IOException;
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  *
- * @since 3.1.7
+ * @since 3.2.0
  */
 public class FxBasicFilter implements Filter {
     private static final String CTX_GUEST_ACCESS_ALLOWED = "FxBasicFilter.guestAllowed";

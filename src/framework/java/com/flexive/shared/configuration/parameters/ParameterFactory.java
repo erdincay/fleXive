@@ -227,7 +227,7 @@ public final class ParameterFactory {
      * @param defaultValue  the default value (if null, no default value will be used)
      * @return      a new parameter instance
      * @param <T>   the parameter type (must not be a boxed primitive type, e.g. Integer, which is never handled with XStream)
-     * @since       3.1.7
+     * @since       3.2.0
      */
     public static <T> Parameter<T> newXStreamInstance(Class<T> cls, ParameterPath path, String key, boolean cached, T defaultValue, XStream instance) {
         final ObjectParameter<T> param = (ObjectParameter<T>) newInstance(cls, new ParameterDataBean<T>(path, key, cached, defaultValue));
@@ -246,7 +246,7 @@ public final class ParameterFactory {
      * @param defaultValue  the default value (if null, no default value will be used)
      * @return      a new parameter instance
      * @param <T>   the parameter type (must not be a boxed primitive type, e.g. Integer, which is never handled with XStream)
-     * @since       3.1.7
+     * @since       3.2.0
      */
     public static <T> Parameter<T> newXStreamInstance(Class<T> cls, String path, ParameterScope scope, String key, boolean cached, T defaultValue, XStream instance) {
         return newXStreamInstance(cls, new ParameterPathBean(path, scope), key, cached, defaultValue, instance);

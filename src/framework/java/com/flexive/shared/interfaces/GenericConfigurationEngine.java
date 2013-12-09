@@ -157,7 +157,7 @@ public abstract interface GenericConfigurationEngine {
      * @param instances XStream instances per class name to use for conversions (when none is defined, the default XStream instance is used).
      *                  A wildcard parameter can be used for prefix matches (e.g. "my.config.*")
      * @return all parameters that are visible to the current user.
-     * @since 3.1.7
+     * @since 3.2.0
      */
     Map<ParameterData, Serializable> getAllWithXStream(Map<String, XStream> instances) throws FxApplicationException;
 

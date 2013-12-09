@@ -424,7 +424,7 @@ public interface ContentStorage {
      * @param binaryId id of the binary
      * @return         the binary descriptor
      * @throws FxDbException on database errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     BinaryDescriptor getBinaryDescriptor(Connection con, long binaryId) throws FxDbException;
 

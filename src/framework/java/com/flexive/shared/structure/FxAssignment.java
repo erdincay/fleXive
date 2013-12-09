@@ -248,7 +248,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
 
     /**
      * @return  the depth of the assignment (= the number of parent groups, including the root group). Minimum is 1.
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public int getDepth() {
         int depth = 1;
@@ -551,7 +551,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @param onlySystemInternal    when true, only system-internal groups or properties are added
      * @return FxData
      * @throws FxCreateException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public abstract FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal);
 

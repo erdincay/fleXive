@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Query for phrases
  *
  * @author Markus Plesser (markus.plesser@ucs.at), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @since 3.1.7
+ * @since 3.2.0
  */
 @SuppressWarnings("UnusedDeclaration")
 public class FxPhraseQuery implements Serializable {

@@ -122,7 +122,7 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      * Ctor for a select list item.
      *
      * @param item    the select list item
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public FxJSFSelectItem(FxSelectListItem item) {
         this((SelectableObjectWithLabel) item);

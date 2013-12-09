@@ -105,7 +105,7 @@ public class PropertyEntry {
          * "Standalone" PK selector that can be used outside FxSQL. @pk is optimized for FxSQL
          * since FxSQL always provides the content ID and version in the result set.
          *
-         * @since 3.1.7
+         * @since 3.2.0
          */
         PK_STANDALONE("@pk_standalone"),
 

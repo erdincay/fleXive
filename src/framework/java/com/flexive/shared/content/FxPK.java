@@ -295,7 +295,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
      *
      * @param ids    the content IDs
      * @return       the FxPK wrappers
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static List<FxPK> getPks(Collection<Long> ids) {
         final List<FxPK> result = Lists.newArrayListWithCapacity(ids.size());

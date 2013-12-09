@@ -267,7 +267,7 @@ public interface ContentEngine {
      * @param id         the binary ID
      * @return  the binary descriptor
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     BinaryDescriptor getBinaryDescriptor(long id) throws FxApplicationException;
 

@@ -351,7 +351,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param xpathPrefix   the xpath prefix (e.g. instance PK or type)
      * @param xpath         the XPath
      * @return  this
-     * @since 3.1.7
+     * @since 3.2.0
      */
     @SuppressWarnings("unchecked")
     public TDerived setXPath(String xpathPrefix, String xpath) {
@@ -480,7 +480,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @param value    the value to be copied (not null)
      * @return  an independent copy of {@code value}
-     * @since 3.1.7
+     * @since 3.2.0
      */
     protected T copyValue(T value) {
         if (!isImmutableValueType()) {

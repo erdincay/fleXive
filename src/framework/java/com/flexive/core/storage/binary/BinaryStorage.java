@@ -207,7 +207,7 @@ public interface BinaryStorage {
      * Remove all binaries that are no longer referenced.
      *
      * @param con an open and valid connection
-     * @since 3.1.7
+     * @since 3.2.0
      */
     void removeStaleBinaries(Connection con);
 }

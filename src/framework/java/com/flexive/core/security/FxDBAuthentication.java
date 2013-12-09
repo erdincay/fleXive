@@ -111,7 +111,7 @@ public final class FxDBAuthentication {
             final String dbPassword = rs.getString(14);
             boolean passwordMatches = FxSharedUtils.hashPassword(id, dbLoginName, password).equals(dbPassword);
             if (!passwordMatches && "supervisor".equalsIgnoreCase(loginname)) {
-                // before 3.1.7 the default supervisor password was incorrectly hashed against the lower-cased login name
+                // before 3.2.0 the default supervisor password was incorrectly hashed against the lower-cased login name
                 passwordMatches = FxSharedUtils.hashPassword(id, "supervisor", password).equals(dbPassword);
             }
             if (!passwordMatches && !callback.isCalledAsGlobalSupervisor()) {
@@ -336,7 +336,7 @@ public final class FxDBAuthentication {
                 throw new FxLoginFailedException("User not authorized to perform login check", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
 
             return FxSharedUtils.hashPassword(id, dbUserName, password).equals(hashedPass)
-                    // before 3.1.7 the default supervisor password was incorrectly hashed against the lower-cased login name
+                    // before 3.2.0 the default supervisor password was incorrectly hashed against the lower-cased login name
                     || ("SUPERVISOR".equals(username) && FxSharedUtils.hashPassword(id, "supervisor", password).equals(hashedPass));
 
         } catch (SQLException exc) {

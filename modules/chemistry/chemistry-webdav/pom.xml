@@ -9,7 +9,7 @@
     <properties>
         <chemistry.version>0.5-r936396</chemistry.version>
         <milton.version>1.8.1.4</milton.version>
-        <flexive.version>3.1-SNAPSHOT</flexive.version>
+        <flexive.version>3.2-SNAPSHOT</flexive.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>

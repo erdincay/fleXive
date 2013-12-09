@@ -546,7 +546,7 @@ public class SqlQueryBuilder implements Serializable {
      *
      * @param briefcaseId    the briefcase ID
      * @return this
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public SqlQueryBuilder addFilterBriefcase(long briefcaseId) {
         final int index = getFilterIndex("briefcase");
@@ -935,7 +935,7 @@ public class SqlQueryBuilder implements Serializable {
      * Remove row limitations on the search result and fetch all rows.
      *
      * @return this
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public SqlQueryBuilder allRows() {
         maxRows(Integer.MAX_VALUE);
@@ -949,7 +949,7 @@ public class SqlQueryBuilder implements Serializable {
      * are not required (usually for internal lookup queries).
      *
      * @return  this
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public SqlQueryBuilder noResultInfo() {
         getParams().setHintNoResultInfo(true);

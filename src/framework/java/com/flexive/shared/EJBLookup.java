@@ -383,7 +383,7 @@ public class EJBLookup {
      * Lookup of the PhraseEngine EJB.
      *
      * @return a reference to the PhraseEngine EJB
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static PhraseEngine getPhraseEngine() {
         return getEngine(PhraseEngine.class);

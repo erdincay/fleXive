@@ -129,7 +129,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @param doubleColumns number of Double columns
      * @param selectColumns number of Select/Boolean columns
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     void createFlatStorage(String name, FxFlatStorageInfo.Type storageType, String description, int stringColumns, int textColumns, int bigIntColumns,
                                   int doubleColumns, int selectColumns) throws FxApplicationException;

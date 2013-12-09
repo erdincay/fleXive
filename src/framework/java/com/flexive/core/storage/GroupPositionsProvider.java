@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
- * @since 3.1.7
+ * @since 3.2.0
  */
 public class GroupPositionsProvider {
     private static final Log LOG = LogFactory.getLog(GroupPositionsProvider.class);

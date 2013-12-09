@@ -111,7 +111,7 @@ public interface SequencerStorage {
      *
      * @return  all sequencer names
      * @throws FxApplicationException    on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     List<String> getCustomSequencerNames() throws FxApplicationException;
 

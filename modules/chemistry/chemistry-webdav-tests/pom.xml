@@ -8,7 +8,7 @@
 
     <properties>
         <chemistry.version>0.5-r936396</chemistry.version>
-        <spi.version>3.1-SNAPSHOT</spi.version>
+        <spi.version>3.2-SNAPSHOT</spi.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>

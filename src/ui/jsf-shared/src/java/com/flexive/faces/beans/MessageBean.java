@@ -208,7 +208,7 @@ public class MessageBean extends HashMap {
      * @param key       resource key
      * @param locale    the requested locale
      * @return the resource translation
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public String getResource(String key, Locale locale) {
         if (!initialized) {

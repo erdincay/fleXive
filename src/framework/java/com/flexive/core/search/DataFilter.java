@@ -143,7 +143,7 @@ public abstract class DataFilter {
 
     /**
      * @return  the SQL statement for retrieving the search result, created by a call to {@link #build()}.
-     * @since   3.1.7
+     * @since   3.2.0
      */
     public abstract String getDataSelectSql();
 }

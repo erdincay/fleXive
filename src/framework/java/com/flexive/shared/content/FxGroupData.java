@@ -68,7 +68,7 @@ public class FxGroupData extends FxData {
      *
      * @param other     the group data instance to copy
      * @param parent    the new parent
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public FxGroupData(FxGroupData other, FxGroupData parent) {
         super(other, parent);
@@ -826,7 +826,7 @@ public class FxGroupData extends FxData {
      * @throws FxNotFoundException         on errors
      * @throws FxCreateException           on errors
      *
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public void addGroup(String xPath, FxGroupAssignment fxGroupAssignment, int pos, AddGroupOptions options) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
         if (xPath.endsWith("/"))
@@ -1090,7 +1090,7 @@ public class FxGroupData extends FxData {
      *
      * @param child     the child data
      * @param newPos    the new position
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public void setChildPosition(FxData child, int newPos) {
         if (child.getPos() == newPos) {
@@ -1137,7 +1137,7 @@ public class FxGroupData extends FxData {
     /**
      * Options for {@link #addGroup(String, com.flexive.shared.structure.FxGroupAssignment, int, AddGroupOptions)}
      *
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static class AddGroupOptions {
         private boolean onlySystemInternal = false;

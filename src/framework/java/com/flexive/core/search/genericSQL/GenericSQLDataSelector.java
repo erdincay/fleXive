@@ -538,7 +538,7 @@ public class GenericSQLDataSelector extends DataSelector {
 
     /**
      * @return  true when the database supports rownr variables to preserve the ordering
-     * @since 3.1.7
+     * @since 3.2.0
      */
     protected boolean supportsRowNr() {
         return true;

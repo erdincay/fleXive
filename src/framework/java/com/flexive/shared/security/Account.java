@@ -336,7 +336,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
 
     /**
      * @return the REST API token
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public String getRestToken() {
         return restToken;
@@ -344,7 +344,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
 
     /**
      * @return the REST API token expiry timestamp
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public long getRestTokenExpires() {
         return restTokenExpires;
@@ -352,7 +352,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
 
     /**
      * @return  true when the REST API token expired
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public boolean isRestTokenExpired() {
         return restTokenExpires < System.currentTimeMillis();

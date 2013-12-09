@@ -508,7 +508,7 @@ public class GenericSQLDataFilter extends DataFilter {
      * @param simpleConditions    the conditions to be rendered (the conditions must be selected via {@link #getSimpleContentDataSelects})
      * @return  the subselect
      * @throws FxSqlSearchException on SQL condition errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     private String simpleContentDataUnion(List<Condition> simpleConditions) throws FxSqlSearchException {
         final StringBuilder combined = new StringBuilder();
@@ -542,7 +542,7 @@ public class GenericSQLDataFilter extends DataFilter {
      * @param br    the conditions
      * @return      the "simple" conditions
      * @throws FxSqlSearchException on SQL processing errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     private List<Condition> getSimpleContentDataSelects(Brace br) throws FxSqlSearchException {
         final List<Condition> simpleConditions = Lists.newArrayList();

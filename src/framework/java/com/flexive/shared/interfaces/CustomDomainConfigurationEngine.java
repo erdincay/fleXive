@@ -124,7 +124,7 @@ public interface CustomDomainConfigurationEngine<T extends Serializable> extends
      * @param domain the requested domain
      * @param instances XStream instances to use for conversions (mapped to class names - a wildcard parameter can be used for prefix matches (e.g. "my.config.*"))
      * @return all parameters for the given domain
-     * @since 3.1.7
+     * @since 3.2.0
      */
     Map<ParameterData, Serializable> getAllWithXStream(T domain, Map<String, XStream> instances) throws FxApplicationException;
 

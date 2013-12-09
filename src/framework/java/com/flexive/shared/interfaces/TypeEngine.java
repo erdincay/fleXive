@@ -108,7 +108,7 @@ public interface TypeEngine {
      * @param typeId  id of the type
      * @param options options to filter the flatten operations
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public void flatten(String storage, long typeId, FlattenOptions options) throws FxApplicationException;
 
@@ -127,7 +127,7 @@ public interface TypeEngine {
      * @param typeId  id of the type
      * @param options options to filter the flatten operations
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public void flatten(long typeId, FlattenOptions options) throws FxApplicationException;
 

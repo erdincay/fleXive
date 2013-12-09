@@ -211,7 +211,7 @@ public class FxFileUtils {
      * @param source         the source file
      * @param destination    the target file
      * @return  true on success
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static boolean moveFile(File source, File destination) {
         if (!source.renameTo(destination)) {

@@ -1025,10 +1025,7 @@ BUILD SUCCESSFUL]]></screen>
             <tip>
                 <title>Maven snapshot versions</title>
                 <para>
-                    The snapshot versions in our Maven repository (
-                    <code>3.0-SNAPSHOT</code>
-                    and
-                    <code>3.1-SNAPSHOT</code>)
+                    The snapshot versions in our Maven repository
                     are updated automatically from our internal Continuous Integration server (&hudson;)
                     with the latest stable build of the corresponding branch. A build is considered
                     "stable" in this context when no testcase fails.

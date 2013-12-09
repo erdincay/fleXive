@@ -45,7 +45,7 @@ import java.util.List;
  * Phrase engine
  *
  * @author Markus Plesser (markus.plesser@ucs.at), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @since 3.1.7
+ * @since 3.2.0
  */
 @SuppressWarnings("UnusedDeclaration")
 @Remote

@@ -212,7 +212,7 @@ public interface DBStorage {
     /**
      * @return  true whether the database supports direct result retrieval (without intermediary cache tables)
      *          for FxSQL (with reasonable performance)
-     * @since   3.1.7
+     * @since   3.2.0
      */
     boolean isDirectSearchSupported();
 

@@ -117,7 +117,7 @@ public abstract class FxData implements Serializable {
      *
      * @param other    the FxData instance to be copied
      * @param parent   the new group data parent
-     * @since 3.1.7
+     * @since 3.2.0
      */
     protected FxData(FxData other, FxGroupData parent) {
         this.xpPrefix = other.xpPrefix;

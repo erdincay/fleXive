@@ -185,7 +185,7 @@ public class FxExceptionMessage implements Serializable {
      * Getter for the message values (arguments)
      *
      * @return message key arguments
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public Object[] getArguments() {
         return values;

@@ -31,17 +31,16 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.search.Briefcase;
 import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.search.Briefcase;
 import com.flexive.shared.search.BriefcaseItemData;
 import com.flexive.shared.security.LifeCycleInfo;
 
 import javax.ejb.Remote;
-import java.util.List;
-import java.util.Map;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Bean handling Briefcases.
@@ -77,7 +76,7 @@ public interface BriefcaseEngine {
      * @param forcedLifeCycleInfo the lifecycle info to store for the briefcase, or null if the default values should be used
      * @return the unique briefcase id
      * @throws FxApplicationException if the create failed
-     * @since 3.1.7
+     * @since 3.2.0
      */
     long create(String name, String description, Long aclId, LifeCycleInfo forcedLifeCycleInfo) throws FxApplicationException;
     
@@ -303,7 +302,7 @@ public interface BriefcaseEngine {
      * @param briefcaseId id of the briefcase
      * @param itemData    item data
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     void addItemData(long briefcaseId, BriefcaseItemData itemData) throws FxApplicationException;
 
@@ -313,7 +312,7 @@ public interface BriefcaseEngine {
      * @param briefcaseId id of the briefcase
      * @param itemDatas   item datas
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     void addItemData(long briefcaseId, List<BriefcaseItemData> itemDatas) throws FxApplicationException;
 
@@ -341,7 +340,7 @@ public interface BriefcaseEngine {
      * @param sortOrder   sort order
      * @return list of matching item datas
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     List<BriefcaseItemData> queryItemData(long briefcaseId, Long itemId, String metaData,
                                           Integer intFlag1, Integer intFlag2, Integer intFlag3,
@@ -361,7 +360,7 @@ public interface BriefcaseEngine {
      * @param longFlag2  long flag 2
      * @return number of matching item datas
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     int queryItemDataCount(long briefcaseId, Long itemId, String metaData,
                            Integer intFlag1, Integer intFlag2, Integer intFlag3,
@@ -373,7 +372,7 @@ public interface BriefcaseEngine {
      * @param briefcaseId id of the briefcase
      * @param updateData  data to update
      * @throws FxApplicationException on errors
-     * @since 3.1.7
+     * @since 3.2.0
      */
     void updateItemData(long briefcaseId, BriefcaseItemData updateData) throws FxApplicationException;
 }

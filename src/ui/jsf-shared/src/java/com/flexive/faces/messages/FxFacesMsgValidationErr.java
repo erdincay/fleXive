@@ -67,7 +67,7 @@ public class FxFacesMsgValidationErr extends FxFacesMsgErr {
 
     /**
      * @return  the message key of the message
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public String getSummaryKey() {
         return summaryKey;
@@ -75,7 +75,7 @@ public class FxFacesMsgValidationErr extends FxFacesMsgErr {
 
     /**
      * @return  the parameters for the message key
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public Object[] getSummaryParams() {
         return summaryParams;

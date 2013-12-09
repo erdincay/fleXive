@@ -74,7 +74,7 @@ public class FxPropertyData extends FxData {
      * Copy constructor.
      *
      * @param other    the property data instance to copy
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public FxPropertyData(FxPropertyData other, FxGroupData parent) {
         super(other, parent);

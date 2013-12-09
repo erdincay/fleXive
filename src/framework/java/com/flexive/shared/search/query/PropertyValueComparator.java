@@ -92,7 +92,7 @@ public enum PropertyValueComparator implements ValueComparator {
         protected String getSql(String leftHandSide, String rightHandSide) {
             return super.getSql(leftHandSide, ensureTuple(rightHandSide));
         }},
-    /** @since 3.1.7 */
+    /** @since 3.2.0 */
     EXISTS_IN_BRIEFCASE("EXISTS IN BRIEFCASE");
 
     private static final List<PropertyValueComparator> NUMERIC_OPERATORS = Collections.unmodifiableList(Arrays.asList(

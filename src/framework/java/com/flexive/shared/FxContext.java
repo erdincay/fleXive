@@ -791,7 +791,7 @@ public class FxContext implements Serializable {
      * @param isWebdav      true for WebDAV requests (currently not used)
      * @param forceSession  whether a HTTP session should be created when none exists
      * @return the context
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static FxContext storeEmptyContext(HttpServletRequest request, int divisionId, boolean isWebdav, boolean forceSession) {
         FxContext si = new FxContext(request, divisionId, isWebdav, forceSession);

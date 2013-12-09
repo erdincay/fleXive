@@ -254,7 +254,7 @@
                                 <para>
                                     Return the given group property. Note that
                                     <code language="jsfel">#{content.group.text}</code>
-                                    does not work before &flexive; 3.1.7.
+                                    does not work before &flexive; 3.2.0.
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -265,7 +265,7 @@
                             </term>
                             <listitem>
                                 <para>
-                                    Return a nested fx:content variable for the given group (since &flexive; 3.1.7).
+                                    Return a nested fx:content variable for the given group (since &flexive; 3.2.0).
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -2090,7 +2090,7 @@
                             <listitem>
                                 <para>
                                     If true, include a timestamp that forces the thumbnail to be reloaded
-                                    every time the page is rendered. (since &flexive; 3.1.7)
+                                    every time the page is rendered. (since &flexive; 3.2.0)
                                 </para>
                             </listitem>
                         </varlistentry>

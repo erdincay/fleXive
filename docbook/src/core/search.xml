@@ -329,7 +329,7 @@ ORDER BY @node_position DESC   -- invert tree sort order]]></programlisting>
             <para>
                 In addition to the briefcase filters described in
                 <xref linkend="css_filters"/>
-                &flexive; 3.1.7 added arbitrary conditions for the contents contained in a briefcase.
+                &flexive; 3.2.0 added arbitrary conditions for the contents contained in a briefcase.
                 This can be used to implement nested queries by building "filter briefcases" which
                 are then matched against some reference property,
                 without having to use explicit "IN (...)" conditions (which do have

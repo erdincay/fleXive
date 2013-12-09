@@ -57,7 +57,7 @@ import static com.flexive.core.DatabaseConst.*;
  * Phrase engine implementation
  *
  * @author Markus Plesser (markus.plesser@ucs.at), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @since 3.1.7
+ * @since 3.2.0
  */
 @SuppressWarnings("UnusedDeclaration")
 @Stateless(name = "PhraseEngine", mappedName = "PhraseEngine")

@@ -890,7 +890,7 @@ public class FxJsfUtils {
      * @param items    the list of items to be sorted
      * @param comparator    the comparator to be used
      * @see SelectItemSorter
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static void sortSelectItems(List<SelectItem> items, Comparator<SelectItem> comparator) {
         Collections.sort(items, comparator);
@@ -909,7 +909,7 @@ public class FxJsfUtils {
      *
      * @param items    the list of items to be sorted
      * @see SelectItemSorter
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public static void sortSelectItems(List<SelectItem> items) {
         sortSelectItems(items, new SelectItemSorter());

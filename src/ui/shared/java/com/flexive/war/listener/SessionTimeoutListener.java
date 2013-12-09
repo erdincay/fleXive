@@ -113,7 +113,7 @@ public class SessionTimeoutListener implements HttpSessionListener {
      * Called before the user is actually logged out.
      *
      * @param ticket    the user whose session timed out
-     * @since 3.1.7
+     * @since 3.2.0
      */
     protected void onLogout(UserTicket ticket) {
     }

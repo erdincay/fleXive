@@ -398,7 +398,7 @@ public class FxDelta implements Serializable {
      * Are there any changes relating to groups or group positions?
      *
      * @return  group changes?
-     * @since 3.1.7
+     * @since 3.2.0
      */
     public boolean isGroupDataChanged() {
         return containsGroupChanges(adds) || containsGroupChanges(removes) || containsGroupChanges(updates);
