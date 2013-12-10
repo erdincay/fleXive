@@ -1565,7 +1565,14 @@ public final class FxSharedUtils {
      * @return the UTF-8 byte representation of the given string
      */
     public static byte[] getBytes(String s) {
-        return s.getBytes(Charsets.UTF_8);
+        try {
+            return s.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed to decode UTF-8 string: " + e.getMessage(), e);
+            }
+            return s.getBytes();
+        }
     }
 
     /**
