@@ -101,9 +101,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>net.sf.jtidy</groupId>
             <artifactId>jtidy</artifactId>
-            <version>r8-20060801</version>
+            <version>r938</version>
         </dependency>
 
         <dependency>
