@@ -152,6 +152,7 @@ class GenericSQLForeignTableSelector implements FieldSelector {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
         if (hasTranslationTable && translatedColumn.equalsIgnoreCase(prop.getField())) {
             // select label from translation table
@@ -185,6 +186,7 @@ class GenericSQLForeignTableSelector implements FieldSelector {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getAllowedFields() {
         final String fields = StringUtils.join(columns.keySet(), ',');
         return hasTranslationTable ? fields + "," + translatedColumn : fields;

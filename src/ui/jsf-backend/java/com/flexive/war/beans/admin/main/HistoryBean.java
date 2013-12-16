@@ -161,6 +161,7 @@ public class HistoryBean implements Serializable {
     public Map<Object, String> getDateFormat() {
         if (dateMap == null) {
             dateMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, String>() {
+                @Override
                 public String get(Object key) {
                     try {
                         return FxFormatUtils.getUniversalDateTimeFormat().format(key);

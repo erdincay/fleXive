@@ -52,6 +52,7 @@ import org.apache.commons.lang.StringUtils;
 public class GenericComparisonCondition implements ConditionMapper<ComparisonCondition> {
     private static final GenericComparisonCondition INSTANCE = new GenericComparisonCondition();
 
+    @Override
     public String getConditionSql(SqlMapperFactory sqlMapperFactory, ComparisonCondition condition, SelectedTableVisitor joinedTables) {
         final TableReference table = condition.getLhs().getTableReference();
         final String tableAlias = joinedTables.getTableAlias(table);

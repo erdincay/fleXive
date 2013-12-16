@@ -54,10 +54,12 @@ import java.io.IOException;
  */
 public class BackendAuthorizationFilter implements Filter {
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // nop
     }
 
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // get URI without application context path
         final UserTicket ticket = FxContext.getUserTicket();
@@ -84,6 +86,7 @@ public class BackendAuthorizationFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
     }
 }

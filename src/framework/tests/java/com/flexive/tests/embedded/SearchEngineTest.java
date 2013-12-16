@@ -861,6 +861,7 @@ public class SearchEngineTest {
 
     private int getExpectedPartialMatches(FxResultSet result, final List<FxSelectListItem> queryItems) {
         return Iterables.size(Iterables.filter(result.getResultRows(), new Predicate<FxResultRow>() {
+            @Override
             public boolean apply(FxResultRow row) {
                 final SelectMany selectMany = ((FxSelectMany) row.getValue(2)).getBestTranslation();
                 return !Collections.disjoint(queryItems, selectMany.getSelected());
@@ -870,6 +871,7 @@ public class SearchEngineTest {
 
     private int getExpectedMatchRows(FxResultSet result, final List<FxSelectListItem> queryItems) {
         return Iterables.size(Iterables.filter(result.getResultRows(), new Predicate<FxResultRow>() {
+            @Override
             public boolean apply(FxResultRow row) {
                 final SelectMany selectMany = ((FxSelectMany) row.getValue(2)).getBestTranslation();
                 return selectMany.getSelected().containsAll(queryItems);

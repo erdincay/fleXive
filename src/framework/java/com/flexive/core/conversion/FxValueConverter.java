@@ -198,6 +198,7 @@ public class FxValueConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings("unchecked")
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxValue value = (FxValue) o;
@@ -237,6 +238,7 @@ public class FxValueConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings("unchecked")
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         final FxValue v;
@@ -296,6 +298,7 @@ public class FxValueConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class aClass) {
         return FxValue.class.isAssignableFrom(aClass);
     }

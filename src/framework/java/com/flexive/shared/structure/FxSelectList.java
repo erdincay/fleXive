@@ -195,6 +195,7 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      *
      * @return label
      */
+    @Override
     public FxString getLabel() {
         return label;
     }

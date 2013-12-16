@@ -138,6 +138,7 @@ public class FxProvideContent extends TagHandler {
         return getAttribute(attributeName) != null && !StringUtils.isEmpty(getAttribute(attributeName).getValue(ctx));
     }
 
+    @Override
     public void apply(FaceletContext ctx, UIComponent uiComponent) throws IOException, FaceletException, ELException {
         final String id = getRequiredAttribute("editorId").getValue(ctx);
         final Long contentId = isAttributeSet(ctx, "contentId") ? Long.parseLong(getAttribute("contentId").getValue(ctx)) : null;

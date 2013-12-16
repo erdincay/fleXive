@@ -71,10 +71,12 @@ import java.util.Map;
 public class SessionFixationFilter implements Filter {
     private static final Log LOG = LogFactory.getLog(SessionFixationFilter.class);
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // nop
     }
 
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         if (servletRequest instanceof HttpServletRequest) {
             final HttpServletRequest request = (HttpServletRequest) servletRequest;
@@ -122,6 +124,7 @@ public class SessionFixationFilter implements Filter {
         return attributes;
     }
 
+    @Override
     public void destroy() {
         // nop
     }

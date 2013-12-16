@@ -115,6 +115,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxTypeEdit type) throws FxApplicationException {
         if (type.isNew())
@@ -282,6 +283,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getInstanceCount(long typeId) {
         Connection con = null;
@@ -302,6 +304,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flatten(String storage, long typeId) throws FxApplicationException {
         flatten(storage, typeId, null);
@@ -310,6 +313,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flatten(String storage, long typeId, FlattenOptions options) throws FxApplicationException {
         Connection con = null;
@@ -333,6 +337,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flatten(long typeId) throws FxApplicationException {
         flatten(typeId, null);
@@ -341,6 +346,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flatten(long typeId, FlattenOptions options) throws FxApplicationException {
         Connection con = null;
@@ -365,6 +371,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void unflatten(long typeId) throws FxApplicationException {
         Connection con = null;
@@ -922,6 +929,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -1198,6 +1206,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String export(long id) throws FxApplicationException {
         return ConversionEngine.getXStream().toXML(CacheAdmin.getEnvironment().getType(id));
@@ -1206,6 +1215,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxType importType(String typeXML) throws FxApplicationException {
         try {

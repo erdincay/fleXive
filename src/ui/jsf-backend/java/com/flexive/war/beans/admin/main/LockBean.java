@@ -79,6 +79,7 @@ public class LockBean implements Serializable {
     public Map<Object, String> getDateFormat() {
         if (dateMap == null) {
             dateMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, String>() {
+                @Override
                 public String get(Object key) {
                     try {
                         return FxFormatUtils.getUniversalDateTimeFormat().format(key);
@@ -334,6 +335,7 @@ public class LockBean implements Serializable {
     public Map<Object, String> getReadableDateFormat() {
         if (readableDateFormat == null) {
             readableDateFormat = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, String>() {
+                @Override
                 public String get(Object key) {
                     try {
                         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(key);

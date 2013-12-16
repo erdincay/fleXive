@@ -77,11 +77,13 @@ public class ConditionList implements Condition {
     }
 
     /** {@inheritDoc} */
+    @Override
     public ConditionList getParent() {
         return parent;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.enterSubCondition(connective);
         for (Condition condition : conditions) {

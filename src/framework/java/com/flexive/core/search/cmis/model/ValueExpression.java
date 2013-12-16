@@ -55,6 +55,7 @@ public abstract class ValueExpression<T extends ValueExpression> implements Sele
      *
      * @return  the alias of this value expression (may be null).
      */
+    @Override
     public String getAlias() {
         return alias;
     }

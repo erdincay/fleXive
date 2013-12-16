@@ -56,12 +56,14 @@ class LongParameter extends ParameterImpl<Long> {
 	}
 
     /** {@inheritDoc} */
+    @Override
     public Parameter<Long> copy() {
         return new LongParameter(getData(), false);
     }
 
     /** {@inheritDoc} */
-	public Long getValue(Object dbValue) {
+	@Override
+    public Long getValue(Object dbValue) {
 		return dbValue != null ? Long.valueOf(dbValue.toString()) : null;
 	}
 

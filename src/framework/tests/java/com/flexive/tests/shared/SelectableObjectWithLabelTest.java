@@ -55,10 +55,12 @@ public class SelectableObjectWithLabelTest {
             this.label = label;
         }
 
+        @Override
         public long getId() {
             return id;
         }
 
+        @Override
         public FxString getLabel() {
             return label;
         }

@@ -157,6 +157,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public OutputStream receiveTransitBinary(int divisionId, String handle, String mimeType, long expectedSize, long ttl) throws SQLException, IOException {
         try {
             if (EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_TRANSIT_DB))
@@ -187,6 +188,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public BinaryInputStream fetchBinary(Connection con, int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality) {
         Connection _con = con;
         PreparedStatement ps = null;
@@ -336,6 +338,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void updateContentBinaryEntry(Connection con, FxPK pk, long binaryId, long binaryACL) throws FxUpdateException {
         PreparedStatement ps = null;
         try {
@@ -357,6 +360,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public BinaryDescriptor loadBinaryDescriptor(List<ServerLocation> server, Connection con, long id) throws FxDbException {
         PreparedStatement ps = null;
         try {
@@ -380,6 +384,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBinaryMetaData(Connection con, long binaryId) {
         PreparedStatement ps = null;
         try {
@@ -407,6 +412,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public BinaryDescriptor binaryTransit(Connection con, BinaryDescriptor binary) throws FxApplicationException {
         long id = EJBLookup.getSequencerEngine().getId(FxSystemSequencer.BINARY);
         return binaryTransit(con, binary, id, 1, 1);
@@ -678,6 +684,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void prepareBinary(Connection con, Map<String, String[]> mimeMetaMap, FxBinary binary) throws FxApplicationException {
         for (long lang : binary.getTranslatedLanguages()) {
             BinaryDescriptor bd = binary.getTranslation(lang);
@@ -988,6 +995,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void storeBinary(Connection con, long id, int version, int quality, String name, long length, InputStream binary) throws FxApplicationException {
         BinaryUploadPayload payload = FxStreamUtils.uploadBinary(length, binary);
         BinaryDescriptor desc = new BinaryDescriptor(payload.getHandle(), name, length, null, null);
@@ -998,6 +1006,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void updateBinaryPreview(Connection con, long id, int version, int quality, int preview, int width, int height, long length, InputStream binary) {
         //TODO: code me!
     }
@@ -1005,6 +1014,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeBinaries(Connection con, SelectOperation remOp, FxPK pk, FxType type) throws FxApplicationException {
         if (type != null) {
             // bail out early if type has no binary properties
@@ -1095,6 +1105,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeExpiredTransitEntries(Connection con) {
         PreparedStatement ps = null;
         try {
@@ -1119,6 +1130,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeStaleBinaries(Connection con) {
         PreparedStatement ps = null;
         try {

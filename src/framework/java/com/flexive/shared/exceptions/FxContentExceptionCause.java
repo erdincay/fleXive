@@ -100,6 +100,7 @@ public enum FxContentExceptionCause implements ObjectWithLabel {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }

@@ -52,6 +52,7 @@ public class GenericInTreeCondition implements ConditionMapper<TreeCondition> {
         return INSTANCE;
     }
 
+    @Override
     public String getConditionSql(SqlMapperFactory sqlMapperFactory, TreeCondition condition, SelectedTableVisitor joinedTables) {
         final String alias = joinedTables.getTableAlias(condition.getTableReference());
         return "(SELECT DISTINCT " + joinedTables.getSelectForSingleTable(condition.getTableReference()) + " FROM "

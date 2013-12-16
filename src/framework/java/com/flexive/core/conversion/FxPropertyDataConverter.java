@@ -52,6 +52,7 @@ public class FxPropertyDataConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxPropertyData pd = (FxPropertyData) o;
         pd.compact(); //make sure all gaps are closed
@@ -65,6 +66,7 @@ public class FxPropertyDataConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         FxContent co = (FxContent) ctx.get(ConversionEngine.KEY_CONTENT);
         String xp = reader.getAttribute("xpath");
@@ -81,6 +83,7 @@ public class FxPropertyDataConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class aClass) {
         return FxPropertyData.class.isAssignableFrom(aClass);
     }

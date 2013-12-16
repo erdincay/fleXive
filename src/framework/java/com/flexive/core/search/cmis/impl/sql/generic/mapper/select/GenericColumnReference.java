@@ -79,6 +79,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultColumnReference column, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         // this is a modified version of GenericSQLDataSelector#getContentDataSubSelect
 
@@ -220,6 +221,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultColumnReference column, long languageId) {
         if (column.getPropertyEntry() == null) {
             return null;    // null selected
@@ -281,6 +283,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getConditionColumn(SqlMapperFactory sqlMapperFactory, ColumnReference expression, String tableAlias) {
         return (tableAlias != null ? tableAlias + "." : "")
                 + expression.getPropertyEntry().getFilterColumn();
@@ -289,6 +292,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultColumnReference column, FxDataType dataType) {
         return false;
     }

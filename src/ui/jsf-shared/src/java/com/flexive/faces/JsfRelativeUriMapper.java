@@ -48,6 +48,7 @@ public class JsfRelativeUriMapper implements RelativeUriMapper, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getAbsoluteUri(String uri) {
         return FxJsfUtils.getRequest().getContextPath() + "/" + uri;
     }

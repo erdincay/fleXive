@@ -60,6 +60,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public long getMaxId() throws FxNotFoundException {
         return StorageManager.getSequencerStorage().getMaxId();
@@ -68,6 +69,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getId(final FxSystemSequencer type) throws FxApplicationException {
         try {
@@ -81,6 +83,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getId(String name) throws FxApplicationException {
         try {
@@ -94,6 +97,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getCurrentId(String sequencer) throws FxApplicationException {
         try {
@@ -107,6 +111,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getCurrentId(FxSystemSequencer sequencer) throws FxApplicationException {
         try {
@@ -120,6 +125,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void createSequencer(String name, boolean allowRollover, long startNumber) throws FxApplicationException {
         try {
@@ -133,6 +139,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeSequencer(String name) throws FxApplicationException {
         try {
@@ -146,6 +153,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public boolean sequencerExists(String name) throws FxApplicationException {
         try {
@@ -159,6 +167,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<CustomSequencer> getCustomSequencers() throws FxApplicationException {
         try {
@@ -172,6 +181,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<String> getCustomSequencerNames() throws FxApplicationException {
         try {

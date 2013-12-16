@@ -82,6 +82,7 @@ public abstract class AbstractMenuItemData<T extends AbstractMenuItemData<T>> im
     /**
      * {@inheritDoc}
      */
+    @Override
     public void addMenuItem(T menuItem) {
         menuItems.add(menuItem);
     }
@@ -89,6 +90,7 @@ public abstract class AbstractMenuItemData<T extends AbstractMenuItemData<T>> im
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<T> getMenuItems() {
         return menuItems;
     }
@@ -124,15 +126,18 @@ public abstract class AbstractMenuItemData<T extends AbstractMenuItemData<T>> im
         return itemGroup;
     }
 
+    @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {
             int index = 0;
             Iterator<T> current;
 
+            @Override
             public boolean hasNext() {
                 return (current != null && current.hasNext()) || index < menuItems.size();
             }
 
+            @Override
             public T next() {
                 if (current != null && current.hasNext()) {
                     return current.next();
@@ -143,6 +148,7 @@ public abstract class AbstractMenuItemData<T extends AbstractMenuItemData<T>> im
                 return item;
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }

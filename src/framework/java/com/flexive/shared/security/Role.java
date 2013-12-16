@@ -181,6 +181,7 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
      *
      * @return the description of the role
      */
+    @Override
     public String getName() {
         return this.desc;
     }
@@ -190,6 +191,7 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
      *
      * @return the unique id of the role
      */
+    @Override
     public long getId() {
         return this.id;
     }
@@ -199,6 +201,7 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
      *
      * @return the color of the role.
      */
+    @Override
     public String getColor() {
         return this.color;
     }
@@ -216,6 +219,7 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return this.label;
     }

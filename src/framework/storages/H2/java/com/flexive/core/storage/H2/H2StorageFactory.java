@@ -70,6 +70,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getStorageVendor() {
         return VENDOR;
     }
@@ -77,6 +78,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canHandle(DatabaseMetaData dbm) {
         try {
             return VENDOR.equals(dbm.getDatabaseProductName());
@@ -89,6 +91,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ContentStorage getContentStorage(TypeStorageMode mode) throws FxNotFoundException {
         if (mode == TypeStorageMode.Hierarchical)
             return H2HierarchicalStorage.getInstance();
@@ -98,6 +101,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public EnvironmentLoader getEnvironmentLoader() {
         return H2EnvironmentLoader.getInstance();
     }
@@ -105,6 +109,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public SequencerStorage getSequencerStorage() {
         return H2SequencerStorage.getInstance();
     }
@@ -112,6 +117,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public TreeStorage getTreeStorage() {
         return H2TreeStorage.getInstance();
     }
@@ -119,6 +125,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
         return new H2SQLDataSelector(search);
     }
@@ -126,6 +133,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public DataFilter getDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         return new H2SQLDataFilter(con, search);
     }
@@ -133,6 +141,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
         return new H2Dialect(environment, contentEngine, query, returnPrimitives);
     }
@@ -140,6 +149,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getIfFunction(String condition, String exprtrue, String exprfalse) {
         return "CASEWHEN(" + condition + "," + exprtrue + "," + exprfalse + ")";
     }
@@ -147,6 +157,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getRegExpLikeOperator(String column, String regexp) {
         return column + " REGEXP " + regexp;
     }
@@ -154,6 +165,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getReferentialIntegrityChecksStatement(boolean enable) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("H2: SET REFERENTIAL_INTEGRITY called, current transaction committed.");
@@ -164,6 +176,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDisableIntegrityTransactional() {
         return false;
     }
@@ -171,6 +184,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDirectSearchSupported() {
         return false;   // H2 chokes on the complex nested select statements
     }
@@ -178,6 +192,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTimestampFunction() {
         return "TIMEMILLIS(NOW())";
     }
@@ -185,6 +200,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String concat_ws(String delimiter, String... text) {
         if (text.length == 0)
             return "";
@@ -201,6 +217,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimit(boolean hasWhereClause, long limit) {
         return " LIMIT " + limit;
     }
@@ -208,6 +225,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
     }
@@ -215,6 +233,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isForeignKeyViolation(Exception exc) {
         final int errorCode = Database.getSqlErrorCode(exc);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
@@ -225,6 +244,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isQueryTimeout(Exception e) {
         final int errorCode = Database.getSqlErrorCode(e);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
@@ -234,6 +254,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isRollbackOnConstraintViolation() {
         return false;
     }
@@ -241,6 +262,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isUniqueConstraintViolation(Exception exc) {
         final int sqlErr = Database.getSqlErrorCode(exc);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
@@ -250,6 +272,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDeadlock(Exception exc) {
         final int sqlErr = Database.getSqlErrorCode(exc);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
@@ -259,6 +282,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDuplicateKeyViolation(SQLException exc) {
         return isUniqueConstraintViolation(exc);
     }
@@ -266,6 +290,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean requiresConfigSchema() {
         return false;
     }
@@ -273,6 +298,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
                                     String user, String password, boolean createDB, boolean createSchema,
                                     boolean dropDBIfExist) throws Exception {
@@ -327,6 +353,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean initConfiguration(Connection con, String schema, boolean dropIfExist) throws Exception {
         Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
         List<String> s = new ArrayList<String>();
@@ -366,6 +393,7 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean initDivision(Connection con, String schema, boolean dropIfExist) throws Exception {
         Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
         List<String> s = new ArrayList<String>();

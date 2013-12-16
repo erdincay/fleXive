@@ -48,6 +48,7 @@ public class NullValidator implements Validator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void validate(FacesContext arg0, UIComponent arg1, Object arg2) {
         // do nothing
     }

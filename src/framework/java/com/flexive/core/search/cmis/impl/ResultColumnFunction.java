@@ -64,10 +64,12 @@ public class ResultColumnFunction extends AbstractResultColumn<ColumnReference, 
         return factory.selectColumnFunction();
     }
 
+    @Override
     public ColumnReference getSelectedObject() {
         return resultColumn.getSelectedObject();
     }
 
+    @Override
     public String getAlias() {
         return function.getAlias();
     }

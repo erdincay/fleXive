@@ -950,6 +950,7 @@ public class TypeEditorBean implements Serializable {
 
     public Map<Long, String> getTypeNameForId() {
         return new HashMap<Long, String>() {
+            @Override
             public String get(Object key) {
                 return CacheAdmin.getFilteredEnvironment().getType((Long) key).getDisplayName();
             }

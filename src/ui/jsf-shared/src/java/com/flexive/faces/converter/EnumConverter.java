@@ -49,6 +49,7 @@ public class EnumConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getAsObject(FacesContext facesContext, UIComponent uiComponent, String value) {
         return getValue(value);
     }
@@ -72,6 +73,7 @@ public class EnumConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getAsString(FacesContext facesContext, UIComponent uiComponent, Object object) {
         if (object == null) {
             return null;

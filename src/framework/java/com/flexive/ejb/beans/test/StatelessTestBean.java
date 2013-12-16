@@ -55,7 +55,8 @@ public class StatelessTestBean implements StatelessTest, StatelessTestLocal {
 	@Resource private SessionContext ctx;
 	
 	/** {@inheritDoc} */
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void cachePutRollback(String path, String key, Serializable value) throws FxCacheException {
 		CacheAdmin.getInstance().put(path, key, value);
 		EJBUtils.rollback(ctx);

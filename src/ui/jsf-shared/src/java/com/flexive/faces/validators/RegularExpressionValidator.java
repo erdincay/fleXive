@@ -48,6 +48,7 @@ import java.util.regex.PatternSyntaxException;
  * @version $Rev$
  */
 public class RegularExpressionValidator implements Validator {
+    @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
         if (value == null || !(value instanceof String)) {
             throw new ValidatorException(new FxFacesMsgErr("RegularExpressionValidator.err.invalidClass", value != null ? value.getClass().getCanonicalName() : "null"));

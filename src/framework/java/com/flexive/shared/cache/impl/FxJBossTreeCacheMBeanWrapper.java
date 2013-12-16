@@ -48,6 +48,7 @@ public class FxJBossTreeCacheMBeanWrapper extends AbstractJBossTreeCacheWrapper 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Cache<Object, Object> getCache() {
         return cache.getCache();
     }

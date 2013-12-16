@@ -57,6 +57,7 @@ public class ACLConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         ACL acl = (ACL) o;
         writer.addAttribute("id", String.valueOf(acl.getId()));
@@ -88,6 +89,7 @@ public class ACLConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         long id = Long.valueOf(reader.getAttribute("id"));
         String name = reader.getAttribute("name");
@@ -112,6 +114,7 @@ public class ACLConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class aClass) {
         return ACL.class.isAssignableFrom(aClass);
     }

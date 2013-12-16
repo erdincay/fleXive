@@ -57,6 +57,7 @@ public abstract class AbstractBackingCacheProvider<T extends FxBackingCache> imp
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive, boolean overwrite) throws FxCacheException {
         final Fqn<String> fqn = Fqn.fromString(path);
         final Region region = cache.getCache().getRegion(fqn, true);
@@ -87,6 +88,7 @@ public abstract class AbstractBackingCacheProvider<T extends FxBackingCache> imp
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive) throws FxCacheException {
         setEvictionStrategy(path, maxContents, timeToIdle, timeToLive, true);
     }

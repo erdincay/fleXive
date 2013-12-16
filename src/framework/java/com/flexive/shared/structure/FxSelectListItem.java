@@ -150,6 +150,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      *
      * @return internal id
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -160,6 +161,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      *
      * @return name of the item
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -247,6 +249,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      *
      * @return label
      */
+    @Override
     public FxString getLabel() {
         return label;
     }
@@ -265,6 +268,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      *
      * @return color to display for this item
      */
+    @Override
     public String getColor() {
         return color;
     }

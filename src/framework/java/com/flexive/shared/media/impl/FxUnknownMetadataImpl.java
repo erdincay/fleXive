@@ -65,6 +65,7 @@ public class FxUnknownMetadataImpl extends FxMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxMediaType getMediaType() {
         return FxMediaType.Unknown;
     }
@@ -72,6 +73,7 @@ public class FxUnknownMetadataImpl extends FxMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMimeType() {
         return mimeType;
     }
@@ -79,6 +81,7 @@ public class FxUnknownMetadataImpl extends FxMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFilename() {
         return filename;
     }
@@ -86,6 +89,7 @@ public class FxUnknownMetadataImpl extends FxMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxMetadataItem> getMetadata() {
         return empytmeta;
     }
@@ -93,6 +97,7 @@ public class FxUnknownMetadataImpl extends FxMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void writeXMLTags(XMLStreamWriter writer) {
         //nothing to do
     }

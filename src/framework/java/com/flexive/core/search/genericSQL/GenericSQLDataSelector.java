@@ -129,6 +129,7 @@ public class GenericSQLDataSelector extends DataSelector {
         // nothing to do
     }
 
+    @Override
     public FieldSelector getSelectListItemSelectorInstance() {
         synchronized(UPDATE_LOCK) {
             if (SELECTLIST_ITEM_SELECTOR == null) {

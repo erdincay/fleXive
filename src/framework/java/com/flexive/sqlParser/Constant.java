@@ -57,6 +57,7 @@ public class Constant extends Value implements Iterable<Constant>
      *
      * @return  an iterator over this constant
      */
+    @Override
     @SuppressWarnings({"unchecked"})
     public Iterator<Constant> iterator() {
         return Arrays.asList(this).iterator();

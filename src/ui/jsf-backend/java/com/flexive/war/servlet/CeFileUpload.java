@@ -53,14 +53,17 @@ public class CeFileUpload implements Servlet {
 
     private ServletConfig servletConfig = null;
 
+    @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         this.servletConfig = servletConfig;
     }
 
+    @Override
     public ServletConfig getServletConfig() {
         return servletConfig;
     }
 
+    @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         String renderContent = null;
         try {
@@ -131,10 +134,12 @@ public class CeFileUpload implements Servlet {
         ((HttpServletResponse) servletResponse).setStatus(HttpServletResponse.SC_OK);
     }
 
+    @Override
     public String getServletInfo() {
         return this.getClass().getName();
     }
 
+    @Override
     public void destroy() {
         // nothing to do
     }

@@ -277,6 +277,7 @@ public class UserGroupBean implements Serializable {
      */
     public Map<Long, Long> getUserCount() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Long>() {
+            @Override
             public Long get(Object key) {
                 try {
                     return getAccountEngine().getAssignedUsersCount((Long) key, false);

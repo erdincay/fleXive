@@ -84,6 +84,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLock lock(Connection con, FxLockType lockType, FxPK pk) throws FxLockException {
         switch (lockType) {
             case Loose:
@@ -97,6 +98,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLock lock(Connection con, FxLockType lockType, FxPK pk, long duration) throws FxLockException {
         return _lock(con, lockType, pk, duration);
     }
@@ -104,6 +106,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLock lock(Connection con, FxLockType lockType, String resource) throws FxLockException {
         switch (lockType) {
             case Loose:
@@ -117,6 +120,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLock lock(Connection con, FxLockType lockType, String resource, long duration) throws FxLockException {
         return _lock(con, lockType, resource, duration);
     }
@@ -124,6 +128,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLock getLock(Connection con, FxPK pk) throws FxLockException {
         return _getLock(con, pk);
     }
@@ -131,6 +136,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLock getLock(Connection con, String resource) throws FxLockException {
         return _getLock(con, resource);
     }
@@ -329,6 +335,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void unlock(Connection con, FxPK pk) throws FxLockException {
         _unlock(con, pk);
     }
@@ -336,6 +343,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void unlock(Connection con, String resource) throws FxLockException {
         _unlock(con, resource);
     }
@@ -385,6 +393,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxLock extend(Connection con, FxLock lock, long duration) throws FxLockException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -423,6 +432,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLock takeOver(Connection con, FxLock lock) throws FxLockException {
         return takeOver(con, lock, -1);
     }
@@ -430,6 +440,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxLock takeOver(Connection con, FxLock lock, long duration) throws FxLockException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -476,6 +487,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public List<FxLock> getUserLocks(Connection con, long userId) {
         List<FxLock> result = new ArrayList<FxLock>(10);
@@ -506,6 +518,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public List<FxLock> getLocks(Connection con, FxLockType lockType, long userId, long typeId, String resource) {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -574,6 +587,7 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void removeExpiredLocks(Connection con) {
         PreparedStatement ps = null;

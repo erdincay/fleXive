@@ -1121,6 +1121,7 @@ public class CmisSearchEngineTest {
 
     private int getExpectedPartialMatches(CmisResultSet result, final List<FxSelectListItem> queryItems) {
         return Iterables.size(Iterables.filter(result, new Predicate<CmisResultRow>() {
+            @Override
             public boolean apply(CmisResultRow row) {
                 final SelectMany selectMany = (SelectMany) row.getColumn(2).getValue();
                 return !Collections.disjoint(queryItems, selectMany.getSelected());
@@ -1130,6 +1131,7 @@ public class CmisSearchEngineTest {
 
     private int getExpectedMatchRows(CmisResultSet result, final List<FxSelectListItem> queryItems) {
         return Iterables.size(Iterables.filter(result, new Predicate<CmisResultRow>() {
+            @Override
             public boolean apply(CmisResultRow row) {
                 final SelectMany selectMany = (SelectMany) row.getColumn(2).getValue();
                 return selectMany.getSelected().containsAll(queryItems);

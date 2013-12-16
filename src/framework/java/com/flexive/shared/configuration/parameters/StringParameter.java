@@ -57,12 +57,14 @@ class StringParameter extends ParameterImpl<String> {
 	}
 
     /** {@inheritDoc} */
+    @Override
     public Parameter<String> copy() {
         return new StringParameter(getData(), false);
     }
 
     /** {@inheritDoc} */
-	public String getValue(Object dbValue) {
+	@Override
+    public String getValue(Object dbValue) {
 		return dbValue != null ? dbValue.toString() : null;
 	}
 }

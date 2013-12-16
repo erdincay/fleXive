@@ -50,6 +50,7 @@ public class NullCondition implements Condition {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionList getParent() {
         return parent;
     }
@@ -57,6 +58,7 @@ public class NullCondition implements Condition {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.visit(this);
     }

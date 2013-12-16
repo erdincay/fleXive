@@ -55,6 +55,7 @@ public class StringValueFunction extends ColumnValueFunction<StringValueFunction
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionColumnMapper<? super StringValueFunction> getConditionColumnMapper(SqlMapperFactory factory) {
         return factory.filterColumnFunction();
     }

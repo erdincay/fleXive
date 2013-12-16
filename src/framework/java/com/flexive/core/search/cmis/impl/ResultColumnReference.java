@@ -48,6 +48,7 @@ public class ResultColumnReference extends AbstractResultColumn<ColumnReference,
         this.reference = reference;
     }
 
+    @Override
     public String getAlias() {
         return reference.getAlias();
     }
@@ -57,6 +58,7 @@ public class ResultColumnReference extends AbstractResultColumn<ColumnReference,
         return this;
     }
 
+    @Override
     public ColumnReference getSelectedObject() {
         return reference;
     }

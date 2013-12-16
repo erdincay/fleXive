@@ -208,6 +208,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public <PT extends Serializable> void put(final T domain, final Parameter<PT> parameter, final String key, final PT value) throws FxApplicationException {
         new DomainOverride<Object>(domain) {
             @Override
@@ -221,6 +222,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public <PT extends Serializable> void remove(final T domain, final Parameter<PT> parameter, final String key) throws FxApplicationException {
         new DomainOverride<Object>(domain) {
             @Override
@@ -234,6 +236,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public <PT extends Serializable> void removeAll(final T domain, final Parameter<PT> parameter) throws FxApplicationException {
         new DomainOverride<Object>(domain) {
             @Override
@@ -247,6 +250,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public <PT extends Serializable> PT get(final T domain, final Parameter<PT> parameter, final String key, final boolean ignoreDefault) throws FxApplicationException {
         return new DomainOverride<PT>(domain) {
             @Override
@@ -259,6 +263,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<ParameterData, Serializable> getAll(T domain) throws FxApplicationException {
         return new DomainOverride<Map<ParameterData, Serializable>>(domain) {
             @Override
@@ -271,6 +276,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<ParameterData, Serializable> getAllWithXStream(T domain, final Map<String, XStream> instances) throws FxApplicationException {
         return new DomainOverride<Map<ParameterData, Serializable>>(domain) {
             @Override
@@ -283,6 +289,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<T> getDomains(Parameter parameter) throws FxApplicationException {
         return getMatchingDomains(parameter.getPath().getValue(), parameter.getKey());
     }
@@ -290,6 +297,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<T> getDomains(Parameter parameter, String key) throws FxApplicationException {
         return getMatchingDomains(parameter.getPath().getValue(), key);
     }
@@ -297,6 +305,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<T> getDomains() throws FxApplicationException {
         return getMatchingDomains(null, null);
     }

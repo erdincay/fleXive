@@ -78,6 +78,7 @@ public class FxTypeConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxType type = ((FxType) o);
@@ -170,6 +171,7 @@ public class FxTypeConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         final FxEnvironment env = CacheAdmin.getEnvironment();
@@ -380,6 +382,7 @@ public class FxTypeConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class type) {
         return FxType.class.isAssignableFrom(type);
     }

@@ -95,6 +95,7 @@ public class SearchResultBean implements ActionBean, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getParseRequestParameters() {
         try {
             String action = FxJsfUtils.getParameter("action");

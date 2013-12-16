@@ -71,6 +71,7 @@ public class YahooMenuItemGroup extends UIOutput implements MenuItemContainer<Ya
     /**
      * {@inheritDoc}
      */
+    @Override
     public void addMenuItem(YahooMenuItemData menuItem) {
         menuItems.add(menuItem);
     }
@@ -78,6 +79,7 @@ public class YahooMenuItemGroup extends UIOutput implements MenuItemContainer<Ya
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<YahooMenuItemData> getMenuItems() {
         return menuItems;
     }

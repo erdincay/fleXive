@@ -76,6 +76,7 @@ public class FxSessionWrapper implements HttpSession {
      *
      * @return the time when the session was created
      */
+    @Override
     public long getCreationTime() {
         return wrappedSession.getCreationTime();
     }
@@ -86,6 +87,7 @@ public class FxSessionWrapper implements HttpSession {
      *
      * @return the identifier assigned to this session
      */
+    @Override
     public String getId() {
         return wrappedSession.getId();
     }
@@ -103,6 +105,7 @@ public class FxSessionWrapper implements HttpSession {
      *
      * @return the last time the client sent a request carrying the identifier assigned to the session
      */
+    @Override
     public long getLastAccessedTime() {
         return wrappedSession.getLastAccessedTime();
     }
@@ -113,6 +116,7 @@ public class FxSessionWrapper implements HttpSession {
      * @return The ServletContext object for the web application
      * @since 2.3
      */
+    @Override
     public ServletContext getServletContext() {
         return wrappedSession.getServletContext();
     }
@@ -123,6 +127,7 @@ public class FxSessionWrapper implements HttpSession {
      *
      * @param intervalInSeconds An integer specifying the number of seconds
      */
+    @Override
     public void setMaxInactiveInterval(int intervalInSeconds) {
         wrappedSession.setMaxInactiveInterval(intervalInSeconds);
     }
@@ -135,6 +140,7 @@ public class FxSessionWrapper implements HttpSession {
      *
      * @return an integer specifying the number of seconds this session remains open between client requests
      */
+    @Override
     public int getMaxInactiveInterval() {
         return wrappedSession.getMaxInactiveInterval();
     }
@@ -143,6 +149,7 @@ public class FxSessionWrapper implements HttpSession {
      * @deprecated As of Version 2.1, this method is deprecated and has no replacement.
      *             It will be removed in a future version of the Java Servlet API.
      */
+    @Override
     public HttpSessionContext getSessionContext() {
         return wrappedSession.getSessionContext();
     }
@@ -150,6 +157,7 @@ public class FxSessionWrapper implements HttpSession {
     /**
      * Invalidates this session then unbinds any objects bound to it.
      */
+    @Override
     public void invalidate() {
         synchronized (this) {
             wrappedSession.invalidate();
@@ -164,6 +172,7 @@ public class FxSessionWrapper implements HttpSession {
      *
      * @return true if the server has created a session, but the client has not yet joined
      */
+    @Override
     public boolean isNew() {
         return wrappedSession.isNew();
     }
@@ -176,6 +185,7 @@ public class FxSessionWrapper implements HttpSession {
      * @param name a string specifying the name of the object
      * @return the object with the specified name
      */
+    @Override
     public Object getAttribute(String name) {
         return invalidated ? null : wrappedSession.getAttribute(encodeAttributeName(name));
     }
@@ -185,6 +195,7 @@ public class FxSessionWrapper implements HttpSession {
      * @return the object with the specified name
      * @deprecated As of Version 2.2, this method is replaced by getAttribute(java.lang.String).
      */
+    @Override
     public Object getValue(String name) {
         return invalidated ? null : wrappedSession.getValue(encodeAttributeName(name));
     }
@@ -194,6 +205,7 @@ public class FxSessionWrapper implements HttpSession {
      *
      * @return an Enumeration of String objects specifying the names of all the objects bound to this session
      */
+    @Override
     public Enumeration<String> getAttributeNames() {
         Vector<String> result = new Vector<String>(25);
         if (!invalidated)
@@ -206,6 +218,7 @@ public class FxSessionWrapper implements HttpSession {
      * @return an array of String  objects specifying the names of all the objects bound to this session
      * @deprecated As of Version 2.2, this method is replaced by getAttributeNames().
      */
+    @Override
     public String[] getValueNames() {
         Vector<String> result = new Vector<String>(25);
         if (!invalidated)
@@ -228,6 +241,7 @@ public class FxSessionWrapper implements HttpSession {
      * @param name  the name to which the object is bound; cannot be null
      * @param value the object to be bound
      */
+    @Override
     public void setAttribute(String name, Object value) {
         if (!invalidated)
             wrappedSession.setAttribute(encodeAttributeName(name), value);
@@ -238,6 +252,7 @@ public class FxSessionWrapper implements HttpSession {
      * @param value the object to be bound; cannot be null
      * @deprecated As of Version 2.2, this method is replaced by setAttribute(java.lang.String, java.lang.Object)
      */
+    @Override
     public void putValue(String name, Object value) {
         if (!invalidated)
             wrappedSession.putValue(encodeAttributeName(name), value);
@@ -252,6 +267,7 @@ public class FxSessionWrapper implements HttpSession {
      * @param name the name of the object to remove from this session
      * @deprecated
      */
+    @Override
     public void removeAttribute(String name) {
         if (!invalidated)
             wrappedSession.removeAttribute(encodeAttributeName(name));
@@ -261,6 +277,7 @@ public class FxSessionWrapper implements HttpSession {
      * @param name the name of the object to remove from this session
      * @deprecated As of Version 2.2, this method is replaced by removeAttribute(java.lang.String)
      */
+    @Override
     public void removeValue(String name) {
         if (!invalidated)
             wrappedSession.removeValue(encodeAttributeName(name));

@@ -71,6 +71,7 @@ public class BrowseReferencesBean implements ActionBean, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getParseRequestParameters() {
         setXPath(StringUtils.defaultIfEmpty(FxJsfUtils.getParameter("xPath"), xPath));
         setInputName(StringUtils.defaultIfEmpty(FxJsfUtils.getParameter("inputName"), inputName));

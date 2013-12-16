@@ -853,6 +853,7 @@ public class SelectBean implements Serializable {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<List<Enum>, List<SelectItem>>() {
             private static final long serialVersionUID = 597032145345226494L;
 
+            @Override
             public List<SelectItem> get(Object key) {
                 //noinspection unchecked
                 final List<Enum> enums = (List<Enum>) key;

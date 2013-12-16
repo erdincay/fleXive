@@ -125,6 +125,7 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
     /**
      * {@inheritDoc}
      */
+    @Override
     public void run() {
         PreparedStatement ps = null;
         Connection con = null;

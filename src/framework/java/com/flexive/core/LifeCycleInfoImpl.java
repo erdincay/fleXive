@@ -80,6 +80,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      *
      * @return Id of the User that created this entry
      */
+    @Override
     public long getCreatorId() {
         return creatorId;
     }
@@ -89,6 +90,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      *
      * @return the timestamp when this object was created
      */
+    @Override
     public long getCreationTime() {
         return creationTime;
     }
@@ -98,6 +100,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      *
      * @return Id of the most recent User that modified this entry
      */
+    @Override
     public long getModificatorId() {
         return modificatorId;
     }
@@ -107,6 +110,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      *
      * @return timestamp of the most recent modification
      */
+    @Override
     public long getModificationTime() {
         return modificationTime;
     }

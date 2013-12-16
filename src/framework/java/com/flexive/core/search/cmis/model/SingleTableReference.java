@@ -97,6 +97,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public TableReference findByAlias(String alias) {
         return this.alias.equals(alias) ? this : null;
     }
@@ -104,6 +105,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getAlias() {
         return alias;
     }
@@ -111,6 +113,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<String> getReferencedAliases() {
         return Arrays.asList(alias);
     }
@@ -118,6 +121,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxType> getReferencedTypes() {
         return referencedTypes;
     }
@@ -125,6 +129,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isPropertySecurityEnabled() {
         for (FxType type : referencedTypes) {
             if (type.isUsePropertyPermissions()) {
@@ -137,6 +142,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxPropertyAssignment> resolvePropertyAssignment(FxEnvironment environment, String name) {
         final List<FxPropertyAssignment> result = Lists.newArrayList();
 
@@ -203,6 +209,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getIdFilterColumn() {
         return alias + "_id";
     }
@@ -210,6 +217,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getVersionFilterColumn() {
         return alias + "_ver";
     }
@@ -217,6 +225,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getIdVersionLink(String filterTableAlias, String subSelectTableAlias) {
         return "("
                 + filterTableAlias + "." + getIdFilterColumn() + "=" + subSelectTableAlias + ".id"
@@ -227,6 +236,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<TableReference> getSubTables() {
         return new ArrayList<TableReference>(0);
     }
@@ -234,8 +244,10 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Iterable<TableReference> getLeafTables() {
         return new Iterable<TableReference>() {
+            @Override
             public Iterator<TableReference> iterator() {
                 return Arrays.asList((TableReference) SingleTableReference.this).iterator();
             }
@@ -245,6 +257,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxType getRootType() {
         return baseType;
     }
@@ -252,6 +265,7 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void accept(TableReferenceVisitor visitor) {
         visitor.visit(this);
     }

@@ -151,6 +151,7 @@ public class BinaryDescriptor implements Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public FxString getLabel() {
             return FxSharedUtils.getEnumLabel(this, size, size);
         }

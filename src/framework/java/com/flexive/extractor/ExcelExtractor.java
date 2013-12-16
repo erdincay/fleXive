@@ -57,6 +57,7 @@ class ExcelExtractor  implements POIFSReaderListener {
      *
      * @param event the summary section event.
      */
+    @Override
     public void processPOIFSReaderEvent(POIFSReaderEvent event) {
 
         try {

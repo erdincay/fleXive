@@ -326,12 +326,14 @@ public class SqlParserTest {
     @Test(groups = {"shared", "search"})
     public void groupBraceNoReorg() throws SqlParserException {
         checkNoReorg("id > 0 AND id < 0", new Brace.GroupFunction() {
+            @Override
             public Object apply(Condition cond) {
                 return 1;   //
             }
         });
         checkNoReorg("id > 0 AND (id < 0 OR id > 0)", new Brace.GroupFunction() {
             int ctr = 0;
+            @Override
             public Object apply(Condition cond) {
                 return ctr++;   // all conditions will be in different groups
             }
@@ -348,6 +350,7 @@ public class SqlParserTest {
         assertEquals(s02.getLValueInfo().getValue().toString(), "s02");
 
         final Brace reorg = stmt.getRootBrace().groupConditions(new Brace.GroupFunction() {
+            @Override
             public Object apply(Condition cond) {
                 // group s01 and s02
                 return cond.getLValueInfo().getValue().toString().charAt(0) == 's' ? 0 : 1;

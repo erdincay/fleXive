@@ -225,6 +225,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
                 // extract top-level conditions on the main table
                 final Brace mainTableConditions = getStatement().getRootBrace().extractConditions(new Brace.ExtractFunction() {
+                    @Override
                     public boolean shouldExtract(Condition cond) {
                         try {
                             final Pair<String, ConditionTableInfo> pi = getPropertyInfo(cond);
@@ -430,6 +431,7 @@ public class GenericSQLDataFilter extends DataFilter {
             // check if there are two or more queries on the same flat storage that can be grouped
             try {
                 final Brace grouped = br.groupConditions(new Brace.GroupFunction() {
+                    @Override
                     public Object apply(Condition cond) {
                         try {
                             final Pair<String, ConditionTableInfo> pi = getPropertyInfo(cond);
@@ -595,6 +597,7 @@ public class GenericSQLDataFilter extends DataFilter {
             // check if there are two or more flat storage queries in the same level that can be grouped
             try {
                 final Brace grouped = br.groupConditions(new Brace.GroupFunction() {
+                    @Override
                     public Object apply(Condition cond) {
                         try {
                             return getPropertyInfo(cond);
@@ -674,6 +677,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
     private String getOptimizedMainTableConditions(Brace br, final String mainTableAlias) throws FxSqlSearchException {
         final ConditionBuilder conditionBuilder = new ConditionBuilder() {
+            @Override
             public String buildCondition(Brace br, Condition cond) throws FxSqlSearchException {
                 final PropertyResolver.Table tableType = getTableType(br.getStatement(), cond.getProperty());
                 if (tableType != PropertyResolver.Table.T_CONTENT) {
@@ -694,6 +698,7 @@ public class GenericSQLDataFilter extends DataFilter {
         final ConditionBuilder conditionBuilder = new ConditionBuilder() {
             int conditionCount = 0;
 
+            @Override
             public String buildCondition(Brace br, Condition cond) throws FxSqlSearchException {
                 markProcessed(cond);
                 return buildPropertyCondition(br.getStatement(), cond, cond.getProperty(), true, !singleTableRow || conditionCount++ == 0);

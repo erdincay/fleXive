@@ -68,6 +68,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
@@ -77,6 +78,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> T get(Parameter<T> parameter) throws FxApplicationException {
         return get(parameter, parameter.getData().getKey());
@@ -86,6 +88,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
@@ -107,6 +110,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
         try {
@@ -125,6 +129,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void putInSource(Parameter<T> parameter, String key, T value) throws FxApplicationException {
         getSource(parameter, key).put(parameter, key, value);
@@ -133,6 +138,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void putInSource(Parameter<T> parameter, T value) throws FxApplicationException {
         putInSource(parameter, parameter.getData().getKey(), value);
@@ -160,6 +166,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Map<ParameterData, Serializable> getAll() throws FxApplicationException {
         final Map<ParameterData, Serializable> results = new HashMap<ParameterData, Serializable>();
@@ -172,6 +179,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Map<ParameterData, Serializable> getAllWithXStream(Map<String, XStream> instances) throws FxApplicationException {
         final Map<ParameterData, Serializable> results = new HashMap<ParameterData, Serializable>();
@@ -184,6 +192,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
         List<GenericConfigurationEngine> configs;
@@ -205,6 +214,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
         return getAll(parameter).keySet();
@@ -213,6 +223,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void put(Parameter<T> parameter, String key, T value)
             throws FxApplicationException {
@@ -226,6 +237,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void put(Parameter<T> parameter, T value)
             throws FxApplicationException {
@@ -240,6 +252,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void remove(Parameter<T> parameter, String key)
             throws FxApplicationException {
@@ -253,6 +266,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void remove(Parameter<T> parameter)
             throws FxApplicationException {
@@ -266,6 +280,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void removeAll(Parameter<T> parameter)
             throws FxApplicationException {

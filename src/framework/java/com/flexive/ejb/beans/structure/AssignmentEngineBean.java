@@ -100,6 +100,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createProperty(FxPropertyEdit property, String parentXPath) throws FxApplicationException {
         return createProperty(FxType.ROOT_ID, property, parentXPath);
@@ -108,6 +109,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createProperty(long typeId, FxPropertyEdit property, String parentXPath) throws FxApplicationException {
         return createProperty(typeId, property, parentXPath, property.getName());
@@ -116,6 +118,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createProperty(long typeId, FxPropertyEdit property, String parentXPath, String assignmentAlias) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
@@ -576,6 +579,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeProperty(long propertyId) throws FxApplicationException {
         List<FxPropertyAssignment> assignments = CacheAdmin.getEnvironment().getPropertyAssignments(propertyId, true);
         if (assignments.size() == 0)
@@ -703,6 +707,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createGroup(FxGroupEdit group, String parentXPath) throws FxApplicationException {
         return createGroup(FxType.ROOT_ID, group, parentXPath);
@@ -711,6 +716,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createGroup(long typeId, FxGroupEdit group, String parentXPath) throws FxApplicationException {
         return createGroup(typeId, group, parentXPath, group.getName());
@@ -719,6 +725,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createGroup(long typeId, FxGroupEdit group, String parentXPath, String assignmentAlias) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
@@ -826,6 +833,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeGroup(long groupId) throws FxApplicationException {
         List<FxGroupAssignment> assignments = CacheAdmin.getEnvironment().getGroupAssignments(groupId, true);
@@ -842,6 +850,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxAssignment assignment, boolean createSubAssignments) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
@@ -2237,6 +2246,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeAssignment(long assignmentId, boolean removeSubAssignments, boolean removeDerivedAssignments)
             throws FxApplicationException {
@@ -2246,6 +2256,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeAssignment(long assignmentId) throws FxApplicationException {
         removeAssignment(assignmentId, true, false, false, true);
@@ -2527,6 +2538,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxPropertyEdit property) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
@@ -2556,6 +2568,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxGroupEdit group) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
@@ -2585,6 +2598,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getPropertyInstanceCount(long propertyId) throws FxDbException {
         Connection con = null;
@@ -2615,6 +2629,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getAssignmentInstanceCount(long assignmentId) throws FxApplicationException {
         Connection con = null;
@@ -2729,6 +2744,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public Map<String, List<FxPropertyAssignment>> getPotentialFlatAssignments(FxType type) {
         return FxFlatStorageManager.getInstance().getPotentialFlatAssignments(type, null);
@@ -2737,6 +2753,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public boolean isFlattenable(FxPropertyAssignment pa) {
         return FxFlatStorageManager.getInstance().isFlattenable(pa);
@@ -2745,6 +2762,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException {
         flattenAssignment(FxFlatStorageManager.getInstance().getDefaultStorage(), assignment);
@@ -2753,6 +2771,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flattenAssignment(String storage, FxPropertyAssignment assignment) throws FxApplicationException {
         Connection con = null;
@@ -2779,6 +2798,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void unflattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException {
         Connection con = null;

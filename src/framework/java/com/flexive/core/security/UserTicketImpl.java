@@ -150,6 +150,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final boolean isInRole(Role role) {
         return isGlobalSupervisor() || roles != null && ArrayUtils.contains(roles, role);
     }
@@ -157,6 +158,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getApplicationId() {
         return this.applicationId;
     }
@@ -164,6 +166,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isInGroup(long group) {
         return ArrayUtils.contains(groups, group);
     }
@@ -171,6 +174,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isInGroup(String group) {
         for(UserGroup check: CacheAdmin.getEnvironment().getUserGroups())
             if( check.getName().equalsIgnoreCase(group))
@@ -200,6 +204,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isInGroups(int groups[]) {
         if (groups == null || groups.length == 0) {
             return true;
@@ -215,6 +220,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isInAtLeastOneGroup(long[] groups) {
         if (groups == null || groups.length == 0) {
             return false;
@@ -253,6 +259,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isGuest() {
         return (userId == Account.USER_GUEST);
     }
@@ -260,6 +267,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getUserName() {
         return userName;
     }
@@ -267,6 +275,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLoginName() {
         return loginName;
     }
@@ -274,6 +283,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getUserId() {
         if( /*FxContext.get().getRunAsSystem() &&*/ FxContext.get().isExecutingRunOnceScripts()) {
 //            System.out.println("Executing run once scripts -> user id set to " + Account.USER_GLOBAL_SUPERVISOR);
@@ -285,6 +295,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxPK getContactData() {
         return contactData;
     }
@@ -292,6 +303,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMultiLogin() {
         return multiLogin;
     }
@@ -299,6 +311,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isGlobalSupervisor() {
         return globalSupervisor;
     }
@@ -306,6 +319,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMandatorSupervisor() {
         return (mandatorSupervisor || globalSupervisor);
     }
@@ -313,6 +327,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getMandatorId() {
         return this.mandator;
     }
@@ -320,6 +335,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long[] getGroups() {
         return ArrayUtils.clone(this.groups);
     }
@@ -445,6 +461,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void initUserSpecificSettings() {
         final UserConfigurationEngine uce = EJBLookup.getUserConfigurationEngine();
         String _dateFormat = null;
@@ -483,6 +500,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
      *
      * @return the time that the ticket was created at
      */
+    @Override
     public long getCreationTime() {
         return this.creationTime;
     }
@@ -511,6 +529,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public UserTicketImpl cloneAsGlobalSupervisor() {
         final UserTicketImpl clone = copy(); 
         clone.globalSupervisor = true;
@@ -520,6 +539,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public UserTicketImpl copy() {
         return new UserTicketImpl(this.applicationId, this.webDav, this.userName, this.loginName,
                 this.userId, this.contactData, this.mandator, this.multiLogin, this.groups.clone(), this.roles.clone(),
@@ -532,6 +552,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ACLAssignment[] getACLAssignments() {
         return this.assignments.clone();
     }
@@ -539,6 +560,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isAssignedToACL(long aclId) {
         for (ACLAssignment item : this.assignments) {
             if (item.getAclId() == aclId && !item.isOwnerGroupAssignment()) return true;
@@ -549,6 +571,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean mayReadACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
@@ -561,6 +584,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean mayEditACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
@@ -573,6 +597,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean mayExportACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
@@ -585,6 +610,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean mayRelateACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
@@ -597,6 +623,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean mayCreateACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
@@ -609,6 +636,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean mayDeleteACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
@@ -621,6 +649,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ACLAssignment[] getACLAssignments(ACLCategory category, long ownerId, ACLPermission... perms) {
         Boolean mayCreate = null;
         Boolean mayRead = null;
@@ -686,6 +715,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getACLsCSV(long ownerId, ACLCategory category, ACLPermission... perms) {
         final StringBuilder result = new StringBuilder();
         Long ACLs[] = getACLsId(ownerId, category, perms);
@@ -698,6 +728,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Long[] getACLsId(long ownerId, ACLCategory category, ACLPermission... perms) {
         Boolean mayCreate = null;
         Boolean mayRead = null;
@@ -786,6 +817,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ACL[] getACLs(long owner, ACLCategory category, ACLPermission... perms) {
         Long[] acls = getACLsId(owner, category, perms);
         List<ACL> res = new ArrayList<ACL>(acls.length);
@@ -800,6 +832,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxLanguage getLanguage() {
         return language;
     }
@@ -807,6 +840,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isWebDav() {
         return this.webDav;
     }
@@ -822,6 +856,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getFailedLoginAttempts() {
         return failedLoginAttempts;
     }
@@ -829,6 +864,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public AuthenticationSource getAuthenticationSource() {
         return authenticationSource;
     }
@@ -836,6 +872,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setLanguage(FxLanguage language) {
         if (language != null)
             this.language = language;
@@ -844,6 +881,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDateFormat() {
         return dateFormat;
     }
@@ -851,6 +889,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTimeFormat() {
         return timeFormat;
     }
@@ -858,6 +897,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDateTimeFormat() {
         return dateTimeFormat;
     }
@@ -865,6 +905,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public char getDecimalSeparator() {
         return decimalSeparator;
     }
@@ -872,6 +913,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public char getGroupingSeparator() {
         return groupingSeparator;
     }
@@ -879,6 +921,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean useGroupingSeparator() {
         return useGroupingSeparator;
     }

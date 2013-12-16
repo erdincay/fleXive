@@ -49,14 +49,17 @@ import com.flexive.shared.structure.FxEnvironment;
  */
 public class H2Dialect extends GenericSqlDialect {
     private static final Capabilities CAPABILITIES = new Capabilities() {
+        @Override
         public boolean supportsFulltextScoring() {
             return false;
         }
 
+        @Override
         public boolean normalizedFulltextScore() {
             return false;
         }
 
+        @Override
         public boolean supportsPaging() {
             return true;
         }

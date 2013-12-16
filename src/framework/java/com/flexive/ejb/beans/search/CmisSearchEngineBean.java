@@ -1,34 +1,35 @@
 package com.flexive.ejb.beans.search;
 
 import com.flexive.core.Database;
-import com.flexive.core.storage.StorageManager;
-import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.cmis.parser.CmisSqlUtils;
+import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.TreeStorage;
-import static com.flexive.shared.FxContext.getUserTicket;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.TimestampRecorder;
+import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCmisQueryException;
 import com.flexive.shared.interfaces.CmisSearchEngine;
 import com.flexive.shared.interfaces.CmisSearchEngineLocal;
 import com.flexive.shared.interfaces.ContentEngineLocal;
-import com.flexive.shared.cmis.search.CmisResultSet;
-import com.flexive.shared.TimestampRecorder;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ejb.EJB;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import static com.flexive.shared.FxContext.getUserTicket;
 
 /**
  * @author Daniel Lichtenberger, UCS
@@ -42,11 +43,13 @@ public class CmisSearchEngineBean implements CmisSearchEngine, CmisSearchEngineL
     @EJB
     private ContentEngineLocal contentEngine;
 
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CmisResultSet search(String query) throws FxApplicationException {
         return search(query, true, 0, 2000);
     }
 
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CmisResultSet search(String query, boolean returnPrimitiveValues, int startRow, int maxRows) throws FxApplicationException {
         Connection con = null;

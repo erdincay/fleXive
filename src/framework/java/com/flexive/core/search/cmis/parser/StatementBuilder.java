@@ -551,18 +551,22 @@ class StatementBuilder {
             this.tree = tree;
         }
 
+        @Override
         public Iterator<Tree> iterator() {
             return new Iterator<Tree>() {
                 int index = 0;
 
+                @Override
                 public boolean hasNext() {
                     return index < tree.getChildCount();
                 }
 
+                @Override
                 public Tree next() {
                     return tree.getChild(index++);
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }

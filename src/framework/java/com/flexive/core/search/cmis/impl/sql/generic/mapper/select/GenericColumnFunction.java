@@ -58,6 +58,7 @@ public class GenericColumnFunction implements ResultColumnMapper<ResultColumnFun
     /**
      * {@inheritDoc}
      */
+    @Override
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultColumnFunction column, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         final ValueFunction.Functions function = column.getFunction().getFunction();
         return  // render SQL function (basic functions (LOWER, UPPER) can be mapped directly to SQL)
@@ -75,6 +76,7 @@ public class GenericColumnFunction implements ResultColumnMapper<ResultColumnFun
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultColumnFunction column, long languageId) throws SQLException {
         // string functions do not alter the result type, thus we can forward to the column's decode method
         return column.getResultColumn().decodeResultValue(factory, rs, languageId);
@@ -83,6 +85,7 @@ public class GenericColumnFunction implements ResultColumnMapper<ResultColumnFun
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getConditionColumn(SqlMapperFactory sqlMapperFactory, ColumnValueFunction expression, String tableAlias) {
         // the function wraps the actual column, so we add our function SQL name and include the
         // outpout of the wrapped column
@@ -93,6 +96,7 @@ public class GenericColumnFunction implements ResultColumnMapper<ResultColumnFun
                 + ")";
     }
 
+    @Override
     public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultColumnFunction column, FxDataType dataType) {
         return column.getResultColumn().getSqlMapper(factory).isDirectSelectForMultivalued(factory, column.getResultColumn(), dataType);
     }

@@ -49,6 +49,7 @@ public class CmisResultColumnDefinition implements Serializable {
      * Google transform function to extract the <strong>alias</strong> from a list of column definitions.
      */
     public static final Function<CmisResultColumnDefinition,Long> TRANSFORM_ASSIGNMENT_ID = new Function<CmisResultColumnDefinition, Long>() {
+        @Override
         public Long apply(CmisResultColumnDefinition from) {
             return from.getAssignmentId();
         }
@@ -57,6 +58,7 @@ public class CmisResultColumnDefinition implements Serializable {
      * Google transform function to extract the <strong>assignmentId</strong> from a list of column definitions.
      */
     public static final Function<CmisResultColumnDefinition,String> TRANFORM_ALIAS = new Function<CmisResultColumnDefinition, String>() {
+        @Override
         public String apply(CmisResultColumnDefinition from) {
             return from.getAlias();
         }

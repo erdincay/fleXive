@@ -54,6 +54,7 @@ public interface ValueComparator extends ObjectWithLabel {
      *
      * @return  the label to be displayed to the user.
      */
+    @Override
     FxString getLabel();
 
 }

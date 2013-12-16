@@ -82,6 +82,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void track(String key, Object... args) {
         track(null, null, null, key, args);
@@ -90,6 +91,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void trackData(String data, String key, Object... args) {
         track(null, null, data, key, args);
@@ -98,6 +100,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void track(FxType type, String key, Object... args) {
         track(type, null, null, key, args);
@@ -106,6 +109,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void track(FxType type, FxPK pk, String data, String key, Object... args) {
         Connection con = null;
@@ -158,6 +162,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxHistory> getContentEntries(long contentId) {
         List<FxHistory> ret = new ArrayList<FxHistory>(100);
         Connection con = null;
@@ -184,6 +189,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxHistory> getEntries(String keyMatch, Long accountMatch, Long typeMatch, Long contentMatch, Date startDate, Date endDate, int maxEntries) {
         List<FxHistory> ret = new ArrayList<FxHistory>(100);
         Connection con = null;

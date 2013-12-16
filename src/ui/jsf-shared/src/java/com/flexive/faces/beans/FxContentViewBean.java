@@ -167,6 +167,7 @@ public class FxContentViewBean implements Serializable {
     public Map<String, String> getPropertyName() {
         if (propertyNameMapper == null) {
             propertyNameMapper = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, String>() {
+                @Override
                 public String get(Object key) {
                     if (!(key instanceof String)) {
                         return null;

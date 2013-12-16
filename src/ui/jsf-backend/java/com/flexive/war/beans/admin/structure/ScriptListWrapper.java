@@ -344,6 +344,7 @@ public class ScriptListWrapper implements Serializable {
         private static final long serialVersionUID = -330634661618248486L;
         private final Collator collator = FxSharedUtils.getCollator();
 
+        @Override
         public int compare(ScriptListEntry o1, ScriptListEntry o2) {
             int multiplicator = 1;
             if (sortStatusScriptInfo == SORT_STATUS_ASCENDING)
@@ -363,6 +364,7 @@ public class ScriptListWrapper implements Serializable {
         private static final long serialVersionUID = -1285682507584328636L;
         private final Collator collator = FxSharedUtils.getCollator();
 
+        @Override
         public int compare(ScriptListEntry o1, ScriptListEntry o2) {
             int multiplicator = 1;
             if (sortStatusEvent == SORT_STATUS_ASCENDING)

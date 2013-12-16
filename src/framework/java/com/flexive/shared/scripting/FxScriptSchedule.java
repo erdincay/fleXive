@@ -95,10 +95,12 @@ public class FxScriptSchedule implements Serializable, SelectableObjectWithName 
         this.cronString = cronString;
     }
 
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public String getName() {
         return name;
     }

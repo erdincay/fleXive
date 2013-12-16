@@ -1059,6 +1059,7 @@ public class FxContent implements Serializable {
     }
     
     private static final Comparator<FxPropertyData> COMPARE_INDICES = new Comparator<FxPropertyData>() {
+        @Override
         public int compare(FxPropertyData o1, FxPropertyData o2) {
             return FxSharedUtils.compare(o1.getIndex(), o2.getIndex());
         }

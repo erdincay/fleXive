@@ -30,6 +30,7 @@ public class FxBasicFilter implements Filter {
 
     private volatile boolean guestAccessAllowed;
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         FxRequestUtils.setCharacterEncoding(request, servletResponse);
 
@@ -81,10 +82,12 @@ public class FxBasicFilter implements Filter {
         return (String) FxContext.get().getAttribute(CTX_REQUEST_QUERYSTRING);
     }
 
+    @Override
     public void destroy() {
         // nop
     }
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         this.guestAccessAllowed = "true".equalsIgnoreCase(filterConfig.getInitParameter("allowGuestAccess"));
     }

@@ -49,10 +49,12 @@ public class LikeCondition implements Condition {
         this.negated = negated;
     }
 
+    @Override
     public Condition getParent() {
         return parent;
     }
 
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.visit(this);
     }

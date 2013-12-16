@@ -76,6 +76,7 @@ public class PluginRegistryBeanTest {
     private static class TestExecutorImpl implements TestExecutor {
         private final Stack<Integer> results = new Stack<Integer>();
 
+        @Override
         public void pushResult(int result) {
             results.push(result);
         }
@@ -89,6 +90,7 @@ public class PluginRegistryBeanTest {
      * A demo plugin that always pushes "42" to the TestExecutor
      */
     private static class TestPlugin implements Plugin<TestExecutor> {
+        @Override
         public void apply(TestExecutor executor) {
             executor.pushResult(42);
         }
@@ -98,6 +100,7 @@ public class PluginRegistryBeanTest {
      * A demo plugin that always pushes "21" to the TestExecutor
      */
     private static class TestPluginCallback2 implements Plugin<TestExecutor> {
+        @Override
         public void apply(TestExecutor executor) {
             executor.pushResult(21);
         }
@@ -175,6 +178,7 @@ public class PluginRegistryBeanTest {
         try {
             pluginRegistry.registerPlugin(new ExtensionPoint<NullExecutor>("testExtension") {},
                     new Plugin<NullExecutor>() {
+                        @Override
                         public void apply(NullExecutor executor) {
                         }
                     });
@@ -193,6 +197,7 @@ public class PluginRegistryBeanTest {
         // to use extension points without statically bound type variables
         try {
             pluginRegistry.registerPlugin(new UnboundExtension<NullExecutor>("bla"), new Plugin<NullExecutor>() {
+                @Override
                 public void apply(NullExecutor executor) {
                 }
             });

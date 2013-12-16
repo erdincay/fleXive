@@ -97,6 +97,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxLanguage load(long languageId) throws FxApplicationException {
         try {
@@ -122,6 +123,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxLanguage load(String languageIsoCode) throws FxApplicationException {
         try {
@@ -146,6 +148,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings({"unchecked"})
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxLanguage> loadAvailable() throws FxApplicationException {
@@ -166,6 +169,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxLanguage> loadDisabled() throws FxApplicationException {
         return loadAll(false, false);
@@ -174,6 +178,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxLanguage> loadAvailable(boolean excludeSystemLanguage) throws FxApplicationException {
         List<FxLanguage> tmp = loadAvailable();
@@ -189,6 +194,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public boolean isValid(long languageId) {
         // Does the language exist at all? Check via constructor
@@ -265,6 +271,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void activateLanguage(FxLanguage language) throws FxApplicationException {
         List<FxLanguage> available = loadAvailable();
@@ -279,6 +286,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setAvailable(List<FxLanguage> available, boolean ignoreUsage) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.GlobalSupervisor);

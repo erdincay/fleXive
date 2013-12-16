@@ -1104,14 +1104,17 @@ public class FxTreeTest {
             super();
         }
 
+        @Override
         public int getCopyOfCount(Connection con, FxTreeMode mode, String copyOfPrefix, long parentNodeId, long nodeId) throws FxTreeException {
             return super.getCopyOfCount(con, mode, copyOfPrefix, parentNodeId, nodeId);
         }
 
+        @Override
         public void setData(Connection con, FxTreeMode mode, long nodeId, String data) throws FxApplicationException {
             super.setData(con, mode, nodeId, data);
         }
 
+        @Override
         public void flagDirty(Connection con, FxTreeMode mode, long nodeId) throws FxUpdateException {
             super.flagDirty(con, mode, nodeId);
         }

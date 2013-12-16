@@ -271,6 +271,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
         throw new FxInvalidParameterException("VALUE", LOG, "ex.content.pk.fromObject.invalid", value, value.getClass()).asRuntimeException();
     }
 
+    @Override
     public int compareTo(FxPK o) {
         return id > o.id ? 1 : id < o.id ? -1 : 0;
     }

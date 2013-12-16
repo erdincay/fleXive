@@ -57,18 +57,22 @@ import java.sql.SQLException;
 public class GenericContainsCondition implements ConditionMapper<ContainsCondition>, ResultColumnMapper<ResultScore> {
     private static final GenericContainsCondition INSTANCE = new GenericContainsCondition();
 
+    @Override
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultScore column, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         throw new UnsupportedOperationException("SCORE() not supported by generic SQL dialect.");
     }
 
+    @Override
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultScore column, long languageId) throws SQLException {
         throw new UnsupportedOperationException("SCORE() not supported by generic SQL dialect.");
     }
 
+    @Override
     public String getConditionSql(SqlMapperFactory sqlMapperFactory, ContainsCondition condition, SelectedTableVisitor joinedTables) {
         throw new UnsupportedOperationException("CONTAINS() not supported by generic SQL dialect.");
     }
 
+    @Override
     public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultScore column, FxDataType dataType) {
         return false;
     }

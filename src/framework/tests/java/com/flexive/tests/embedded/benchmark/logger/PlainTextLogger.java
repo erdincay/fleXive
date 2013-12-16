@@ -50,6 +50,7 @@ public class PlainTextLogger extends AbstractResultLogger {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getOutput() {
         final String result = out.toString();
         out.delete(0, out.length());

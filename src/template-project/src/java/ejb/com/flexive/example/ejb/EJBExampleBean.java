@@ -24,6 +24,7 @@ public class EJBExampleBean implements EJBExample, EJBExampleLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<FxType, Integer> getInstanceCounts() throws FxApplicationException {
         final Map<FxType, Integer> result = new HashMap<FxType, Integer>();
         final FxEnvironment environment = CacheAdmin.getEnvironment();

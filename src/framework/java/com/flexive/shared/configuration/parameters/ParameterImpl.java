@@ -73,26 +73,31 @@ public abstract class ParameterImpl<T>  implements Parameter<T>, Serializable {
     }
 
     /** {@inheritDoc} */
+    @Override
     public ParameterData<T> getData() {
         return this.data;
     }
 
     /** {@inheritDoc} */
+    @Override
     public T getDefaultValue() {
         return data.getDefaultValue();
     }
     
     /** {@inheritDoc} */
+    @Override
     public String getKey() {
         return data.getKey();
     }
 
     /** {@inheritDoc} */
+    @Override
     public ParameterPath getPath() {
         return data.getPath();
     }
 
     /** {@inheritDoc} */
+    @Override
     public ParameterScope getScope() {
         return data.getPath().getScope();
     }
@@ -100,22 +105,26 @@ public abstract class ParameterImpl<T>  implements Parameter<T>, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isCached() {
         return data.isCached();
     }
 
 
     /** {@inheritDoc} */
+    @Override
     public boolean isValid(T value) {
         // by default all parameters of the given type are valid
         return true;
     }
     
     /** {@inheritDoc} */
+    @Override
     public String getDatabaseValue(T value) {
         return value != null ? String.valueOf(value) : null;
     }
 
+    @Override
     public Parameter<T> setData(ParameterData<T> parameterData) {
         if (!frozen) {
             this.data = parameterData;
@@ -125,6 +134,7 @@ public abstract class ParameterImpl<T>  implements Parameter<T>, Serializable {
         return this;
     }
 
+    @Override
     public Parameter<T> freeze() {
         frozen = true;
         return this;

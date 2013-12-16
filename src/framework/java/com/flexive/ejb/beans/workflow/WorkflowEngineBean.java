@@ -91,6 +91,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long workflowId) throws FxApplicationException {
         UserTicket ticket = FxContext.getUserTicket();
@@ -161,6 +162,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(Workflow workflow)
             throws FxApplicationException {
@@ -368,6 +370,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(Workflow workflow) throws FxApplicationException {
         UserTicket ticket = FxContext.getUserTicket();

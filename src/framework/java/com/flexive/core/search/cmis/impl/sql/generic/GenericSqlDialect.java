@@ -80,14 +80,17 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
      * Stores the feature set of the generic SQL implementation.
      */
     private static final Capabilities CAPABILITIES = new Capabilities() {
+        @Override
         public boolean supportsFulltextScoring() {
             return false;
         }
 
+        @Override
         public boolean normalizedFulltextScore() {
             return false;
         }
 
+        @Override
         public boolean supportsPaging() {
             return false;
         }
@@ -117,6 +120,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSql() {
         final StringBuilder out = new StringBuilder();
 
@@ -149,6 +153,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void prepareConnection(Connection con) throws SQLException {
         // nothing to do
     }
@@ -156,6 +161,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public CmisResultSet processResultSet(ResultSet rs) throws SQLException {
         final List<CmisResultColumnDefinition> columnAliases = Lists.newArrayListWithCapacity(query.getUserColumns().size());
         for (ResultColumn column : query.getUserColumns()) {
@@ -346,6 +352,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Capabilities getCapabilities() {
         return CAPABILITIES;
     }
@@ -489,6 +496,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String fromContentTable(String alias) {
         return PropertyResolver.Table.T_CONTENT.getTableName() + ' ' + alias;
     }
@@ -496,6 +504,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTypeFilter(String column, Collection<FxType> types) {
         return column + " IN (" +
                 StringUtils.join(
@@ -526,6 +535,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSecurityFilter(TableReference table, String tableAlias, boolean contentTable) {
         return SearchUtils.getSecurityFilter(tableAlias, table.getReferencedTypes(), contentTable);
     }
@@ -534,6 +544,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getAssignmentFilter(PropertyResolver.Table tableType, String tableAlias, boolean constrainResult, Collection<? extends FxPropertyAssignment> assignments) {
         switch (tableType) {
             case T_CONTENT:
@@ -567,6 +578,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getVersionFilter(String tableAlias) {
         // TODO: how to specify the version filter? Currently this limits the query to the max version.
         return (tableAlias != null ? (tableAlias + ".") : "")
@@ -597,6 +609,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isReturnPrimitives() {
         return returnPrimitives;
     }
@@ -604,6 +617,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxEnvironment getEnvironment() {
         return environment;
     }
@@ -611,6 +625,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isPropertyPermissionsEnabled(ResultColumn<? extends ColumnReference> column) {
         if (!propertyPermissionsEnabled.containsKey(column)) {
             boolean enabled = false;
@@ -635,6 +650,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isAllowedByPropertyPermissions(ResultSet rs, ResultColumn<? extends ColumnReference> column, String xpath) throws SQLException {
         final ResultColumn typeIdColumn = getTypeIdColumn(column.getSelectedObject().getTableReference());
         // add the type of the returned instance to the XPath
@@ -663,6 +679,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultColumn getTypeIdColumn(TableReference tableReference) {
         final ResultColumn result = query.getTypeIdColumn(tableReference);
         if (result == null) {
@@ -699,6 +716,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultColumnMapper<ResultRowNumber> selectRowNumber() {
         return GenericRowNumber.getInstance();
     }
@@ -706,6 +724,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultColumnMapper<ResultColumnReference> selectColumnReference() {
         return GenericColumnReference.getInstance();
     }
@@ -713,6 +732,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultColumnMapper<ResultColumnReference> selectPath() {
         return GenericObjectPath.getInstance();
     }
@@ -720,6 +740,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultColumnMapper<ResultColumnReference> selectParentId() {
         return GenericParentId.getInstance();
     }
@@ -728,6 +749,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionColumnMapper<ColumnReference> filterColumnReference() {
         return GenericColumnReference.getInstance();
     }
@@ -735,6 +757,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionMapper<ComparisonCondition> conditionCompare() {
         return GenericComparisonCondition.getInstance();
     }
@@ -742,6 +765,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionColumnMapper<Literal> filterLiteral() {
         return GenericLiteral.getInstance();
     }
@@ -749,6 +773,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultColumnMapper<ResultColumnFunction> selectColumnFunction() {
         return GenericColumnFunction.getInstance();
     }
@@ -756,6 +781,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultColumnMapper<ResultScore> selectScore() {
         return GenericContainsCondition.getInstance();
     }
@@ -763,6 +789,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionColumnMapper<ColumnValueFunction> filterColumnFunction() {
         return GenericColumnFunction.getInstance();
     }
@@ -770,6 +797,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionMapper<ContainsCondition> conditionContain() {
         return GenericContainsCondition.getInstance();
     }
@@ -777,6 +805,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionMapper<LikeCondition> conditionLike() {
         return GenericLikeColumnReferenceCondition.getInstance();
     }
@@ -784,6 +813,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionMapper<InCondition> conditionIn() {
         return GenericInColumnReferenceCondition.getInstance();
     }
@@ -791,6 +821,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionMapper<NullCondition> conditionNull() {
         return GenericNullColumnReferenceCondition.getInstance();
     }
@@ -798,10 +829,12 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionMapper<FolderCondition> conditionFolder() {
         return GenericInFolderCondition.getInstance();
     }
 
+    @Override
     public ConditionMapper<TreeCondition> conditionTree() {
         return GenericInTreeCondition.getInstance();
     }
@@ -810,6 +843,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public SqlDialect getSqlDialect() {
         return this;
     }
@@ -817,6 +851,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public SqlMapperFactory getSqlMapperFactory() {
         return this;
     }
@@ -824,6 +859,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String limitSubquery() {
         return SUBQUERY_LIMIT == -1 ? "" : " LIMIT " + SUBQUERY_LIMIT + " ";
     }
@@ -831,6 +867,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getEmptyId() {
         return "null";
     }
@@ -838,6 +875,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getEmptyVersion() {
         return "null";
     }

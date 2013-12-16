@@ -62,6 +62,7 @@ public class FxPrincipal implements Principal, java.io.Serializable {
      *
      * @return the user name for this FlexivePrincipal
      */
+    @Override
     public String getName() {
         return this.ticket.getUserName();
     }

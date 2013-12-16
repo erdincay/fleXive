@@ -96,6 +96,7 @@ public class Workflow extends AbstractSelectableObjectWithName implements Serial
      *
      * @return the name of the workflow
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -114,6 +115,7 @@ public class Workflow extends AbstractSelectableObjectWithName implements Serial
      *
      * @return the id of the workflow
      */
+    @Override
     public long getId() {
         return this.id;
     }

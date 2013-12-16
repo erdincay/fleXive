@@ -62,11 +62,13 @@ public class TreeValueNode extends QueryValueNode<FxValue, TreeValueNode.TreeVal
         CHILD, DIRECTCHILD;
 
         /** {@inheritDoc} */
+        @Override
         public boolean isNeedsInput() {
             return false;
         }
 
         /** {@inheritDoc} */
+        @Override
         public FxString getLabel() {
             return FxSharedUtils.getEnumLabel(this);
         }
@@ -118,6 +120,7 @@ public class TreeValueNode extends QueryValueNode<FxValue, TreeValueNode.TreeVal
     @Override
     public FxValueFormatter getValueFormatter() {
         return new FxValueFormatter() {
+            @Override
             public String format(FxValue container, Object value, FxLanguage outputLanguage) {
                 if (value == null) {
                     return "";

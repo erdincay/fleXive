@@ -41,6 +41,7 @@ import com.flexive.faces.beans.PluginRegistryBean;
 
 public class FeedbackPluginFactory implements PluginFactory {
 
+    @Override
     public void initialize(PluginRegistryBean registry) {
         registry.registerPlugin(AdmExtensionPoints.ADM_TOOLBAR_PLUGINS, new FeedbackPlugin());
     }

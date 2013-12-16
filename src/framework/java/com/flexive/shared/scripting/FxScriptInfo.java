@@ -100,6 +100,7 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
      *
      * @return id of this script
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -119,6 +120,7 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
      *
      * @return name of this script
      */
+    @Override
     public String getName() {
         return name;
     }

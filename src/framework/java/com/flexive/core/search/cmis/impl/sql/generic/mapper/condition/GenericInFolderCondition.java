@@ -53,6 +53,7 @@ public class GenericInFolderCondition implements ConditionMapper<FolderCondition
         return INSTANCE;
     }
 
+    @Override
     public String getConditionSql(SqlMapperFactory sqlMapperFactory, FolderCondition condition, SelectedTableVisitor joinedTables) {
         final String alias = joinedTables.getTableAlias(condition.getTableReference());
         return "(SELECT DISTINCT " + joinedTables.getSelectForSingleTable(condition.getTableReference()) + " FROM "

@@ -167,6 +167,7 @@ public class TreeNodeWriter {
         private static final long serialVersionUID = -6205709223249640378L;
 
         /** {@inheritDoc} */
+        @Override
         public String format(Node node, RelativeUriMapper uriMapper) {
             return node.getTitle();
         }
@@ -181,6 +182,7 @@ public class TreeNodeWriter {
         private static final String ICON_PATH = "adm/images/tree/";
 
         /** {@inheritDoc} */
+        @Override
         public String format(Node node, RelativeUriMapper uriMapper) {
             final String title = "<div class=\"" + node.getTitleClass() + "\">" + node.getTitle() + "</div>";
             if (node.getIcon() == null) {
@@ -208,6 +210,7 @@ public class TreeNodeWriter {
         private static final long serialVersionUID = -7586232861308540856L;
 
         /** {@inheritDoc} */
+        @Override
         public String format(Node node, RelativeUriMapper uriMapper) {
             final StringBuilder style = new StringBuilder();
             if (node.properties.containsKey("isDirty") && (Boolean) node.properties.get("isDirty")) {

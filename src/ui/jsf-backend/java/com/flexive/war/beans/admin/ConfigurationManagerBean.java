@@ -868,6 +868,7 @@ public class ConfigurationManagerBean {
             return key;
         }
 
+        @Override
         public int compareTo(Object o) {
             try {
                 TableRow other = (TableRow) o;

@@ -101,20 +101,24 @@ public class ParameterDataBean<T> implements ParameterData<T> {
 	}
 
     /** {@inheritDoc} */
-	public synchronized ParameterPath getPath() {
+	@Override
+    public synchronized ParameterPath getPath() {
 		return path;
 	}
 
     /** {@inheritDoc} */
-	public synchronized String getKey() {
+	@Override
+    public synchronized String getKey() {
 		return key;
 	}
 	
     /** {@inheritDoc} */
-	public synchronized T getDefaultValue() {
+	@Override
+    public synchronized T getDefaultValue() {
 		return defaultValue;
 	}
 
+    @Override
     public boolean isCached() {
         return cached;
     }

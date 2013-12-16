@@ -44,6 +44,7 @@ import javax.faces.context.FacesContext;
 public class FeedbackPlugin implements Plugin<ToolbarPluginExecutor>{
 
 
+    @Override
     public void apply(ToolbarPluginExecutor executor) {
         executor.addToolbarSeparatorButton();
         executor.addToolbarButton("*", getGoodFeedbackButton());

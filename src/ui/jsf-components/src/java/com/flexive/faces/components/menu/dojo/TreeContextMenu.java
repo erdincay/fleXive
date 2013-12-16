@@ -78,6 +78,7 @@ public class TreeContextMenu extends UIOutput implements MenuItemContainer<DojoM
     /**
      * {@inheritDoc}
      */
+    @Override
     public void addMenuItem(DojoMenuItemData menuItem) {
         menuItems.add(menuItem);
     }
@@ -85,6 +86,7 @@ public class TreeContextMenu extends UIOutput implements MenuItemContainer<DojoM
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<DojoMenuItemData> getMenuItems() {
         return menuItems;
     }

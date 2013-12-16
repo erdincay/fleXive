@@ -439,6 +439,7 @@ public class OptionWrapper implements Serializable {
     public Map<String, Boolean> getIsAssignmentOptionValidMap() {
         if (assignmentOptionValidMap == null) {
             assignmentOptionValidMap = new HashMap<String, Boolean>() {
+                @Override
                 public Boolean get(Object key) {
                     return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(assignmentOptions, (String) key) > 1
                             || isRedundant((String) key));
@@ -456,6 +457,7 @@ public class OptionWrapper implements Serializable {
     public Map<String, Boolean> getIsAssignmentOptionOverridableMap() {
         if (assignmentOptionOverridableMap == null) {
             assignmentOptionOverridableMap = new HashMap<String, Boolean>() {
+                @Override
                 public Boolean get(Object key) {
                     return mayOverrideOption((String) key, isDerivedAssignment);
                 }
@@ -491,6 +493,7 @@ public class OptionWrapper implements Serializable {
     public Map<String, Boolean> getIsStructureOptionValidMap() {
         if (structureOptionValidMap == null) {
             structureOptionValidMap = new HashMap<String, Boolean>() {
+                @Override
                 public Boolean get(Object key) {
                     return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(structureOptions, (String) key) > 1);
                 }
@@ -507,6 +510,7 @@ public class OptionWrapper implements Serializable {
     public Map<String, Boolean> getIsTypeOptionValidMap() {
         if (typeOptionValidMap == null) {
             typeOptionValidMap = new HashMap<String, Boolean>() {
+                @Override
                 public Boolean get(Object key) {
                     return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(typeOptions, (String) key) > 1);
                 }

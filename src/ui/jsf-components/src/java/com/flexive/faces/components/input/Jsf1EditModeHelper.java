@@ -52,6 +52,7 @@ public class Jsf1EditModeHelper extends AbstractEditModeHelper {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void renderUploadComponent(UIComponent parent, String inputId) {
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(
                 parent, RenderHelperUtils.stripForm(inputId), HtmlInputFileUpload.COMPONENT_TYPE, true

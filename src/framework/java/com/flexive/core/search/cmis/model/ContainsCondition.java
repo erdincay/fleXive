@@ -49,6 +49,7 @@ public class ContainsCondition implements Condition {
         this.tableReference = tableReference;
     }
 
+    @Override
     public Condition getParent() {
         return parent;
     }
@@ -65,6 +66,7 @@ public class ContainsCondition implements Condition {
         return expression;
     }
 
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.visit(this);
     }

@@ -52,10 +52,12 @@ import java.util.Iterator;
 public class FormRowMessageListener implements PhaseListener {
     private static final long serialVersionUID = -2608502593020610438L;
 
+    @Override
     public PhaseId getPhaseId() {
         return PhaseId.RENDER_RESPONSE;
     }
 
+    @Override
     public void beforePhase(PhaseEvent event) {
         final FacesContext context = FacesContext.getCurrentInstance();
         final Iterator<String> idsWithMessages = context.getClientIdsWithMessages();
@@ -75,6 +77,7 @@ public class FormRowMessageListener implements PhaseListener {
         }
     }
 
+    @Override
     public void afterPhase(PhaseEvent event) {
         // do nothing
     }

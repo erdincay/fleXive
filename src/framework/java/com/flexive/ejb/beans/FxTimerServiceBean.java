@@ -85,6 +85,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean install(boolean reinstall) {
         try {
             FxQuartz.startup();
@@ -119,6 +120,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void uninstall() {
         try {
             FxQuartz.shutdown();
@@ -145,6 +147,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @SuppressWarnings("unchecked")
     public boolean isInstalled() {
         return FxQuartz.isInstalled();
@@ -215,6 +218,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void maintenance() {
         try {
@@ -247,6 +251,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      * {@inheritDoc}
      * @since 3.1.2
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void scheduleScript(FxScriptSchedule scriptSchedule) throws FxApplicationException {
          FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
@@ -258,6 +263,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      * {@inheritDoc}
      * @since 3.1.2
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void updateScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
@@ -269,6 +275,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      * {@inheritDoc}
      * @since 3.1.2
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean deleteScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
@@ -280,6 +287,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      * {@inheritDoc}
      * @since 3.1.2
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void parseCronString(String cronString) throws FxInvalidParameterException {
         FxQuartz.parseCronString(cronString);

@@ -52,6 +52,7 @@ public class ACLAssignmentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         writer.startNode(ConversionEngine.KEY_ACLASSIGNMENT);
         ACLAssignment aa = (ACLAssignment) o;
@@ -75,6 +76,7 @@ public class ACLAssignmentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         reader.moveDown();
         long aclId = Long.valueOf(reader.getAttribute("aclId"));
@@ -98,6 +100,7 @@ public class ACLAssignmentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class aClass) {
         return ACLAssignment.class.isAssignableFrom(aClass);
     }

@@ -59,6 +59,7 @@ public class FxQuartzConnectionProviderNonTX implements ConnectionProvider {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Connection getConnection() throws SQLException {
         if(divisionId == -42)
             throw new SQLException("No divisionId configured for "+FxQuartzConnectionProviderNonTX.class.getCanonicalName());
@@ -78,6 +79,7 @@ public class FxQuartzConnectionProviderNonTX implements ConnectionProvider {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void shutdown() throws SQLException {
         //nothing to do for us
     }

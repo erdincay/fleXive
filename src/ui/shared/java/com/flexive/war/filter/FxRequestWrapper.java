@@ -120,6 +120,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      *
      * @return the time the request was started at.
      */
+    @Override
     public long getRequestStartTime() {
         return this.timestamp;
     }
@@ -130,6 +131,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      *
      * @return The ticke of the user
      */
+    @Override
     public UserTicket getUserTicket() {
         return FxContext.getUserTicket();
     }
@@ -139,6 +141,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      *
      * @return the division the request was started in
      */
+    @Override
     public int getDivisionId() {
         return division;
     }
@@ -148,6 +151,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      *
      * @return the request URI without the context.
      */
+    @Override
     public String getRequestURIWithoutContext() {
         return request.getRequestURI().substring(request.getContextPath().length());
     }
@@ -165,6 +169,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      *
      * @return the operating system that generated the request
      */
+    @Override
     public OperatingSystem getOperatingSystem() {
         return getBrowserDetect().getOs();
     }
@@ -174,6 +179,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      *
      * @return the browser that generated the request
      */
+    @Override
     public Browser getBrowser() {
         return getBrowserDetect().getBrowser();
     }
@@ -181,6 +187,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     /**
      * {@inheritDoc}
      */
+    @Override
     public double getBrowserVersion() {
         return getBrowserDetect().getBrowserVersion();
     }
@@ -188,6 +195,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     /**
      * {@inheritDoc} *
      */
+    @Override
     public boolean isDynamicContent() {
         // list only resources that are known to be static, otherwise we'll run into troubles
         // when flexive is integrated in other applications/frameworks (e.g. Seam)

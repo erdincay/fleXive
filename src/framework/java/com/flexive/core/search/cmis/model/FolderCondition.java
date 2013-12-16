@@ -48,10 +48,12 @@ public class FolderCondition implements Condition {
         this.folderId = folderId;
     }
 
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.visit(this);
     }
 
+    @Override
     public Condition getParent() {
         return parent;
     }

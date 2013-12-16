@@ -87,6 +87,7 @@ public class PassiveCallbackHandler implements CallbackHandler {
      * @throws IOException                  if an input or output error occurs.
      * @throws UnsupportedCallbackException if the callback is not an instance of NameCallback or PasswordCallback
      */
+    @Override
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 
         for (Callback callback : callbacks) {

@@ -81,6 +81,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int create(String name, boolean active) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -158,6 +159,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignMetaData(int mandatorId, long contentId) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -197,6 +199,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeMetaData(int mandatorId) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -235,6 +238,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void activate(long mandatorId) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -279,6 +283,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deactivate(long mandatorId) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -325,6 +330,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long mandatorId) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -372,6 +378,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void changeName(long mandatorId, String name) throws FxApplicationException {
         FxSharedUtils.checkParameterEmpty(name, "name");

@@ -46,6 +46,7 @@ public class ResultRowNumber extends AbstractResultColumn<String, ResultRowNumbe
         this.counterVar = counterVar;
     }
 
+    @Override
     public String getAlias() {
         return "rownr";
     }
@@ -55,6 +56,7 @@ public class ResultRowNumber extends AbstractResultColumn<String, ResultRowNumbe
         return this;
     }
 
+    @Override
     public String getSelectedObject() {
         return counterVar;
     }

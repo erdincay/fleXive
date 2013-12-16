@@ -52,6 +52,7 @@ public class FxGroupDataConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxGroupData gd = (FxGroupData) o;
         gd.compact(); //make sure all gaps are closed
@@ -83,6 +84,7 @@ public class FxGroupDataConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         FxContent co = (FxContent)ctx.get(ConversionEngine.KEY_CONTENT);
         String xp = reader.getAttribute("xpath");
@@ -106,6 +108,7 @@ public class FxGroupDataConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class aClass) {
         return FxGroupData.class.isAssignableFrom(aClass);
     }

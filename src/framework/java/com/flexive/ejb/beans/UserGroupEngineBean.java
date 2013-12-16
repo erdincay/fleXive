@@ -75,6 +75,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public UserGroup load(long groupId) throws FxApplicationException {
         Connection con = null;
@@ -114,6 +115,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public UserGroup loadMandatorGroup(long mandatorId) throws FxApplicationException {
         Connection con = null;
@@ -151,6 +153,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<UserGroup> loadAll(long mandatorId) throws FxApplicationException {
         Connection con = null;
@@ -206,6 +209,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, String color, long mandatorId) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -283,6 +287,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(long groupId, String name, String color) throws FxApplicationException {
 
@@ -347,6 +352,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long groupId) throws FxApplicationException {
 
@@ -441,6 +447,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setRoles(long groupId, List<Role> roles) throws FxApplicationException {
         long tmp[] = new long[roles == null ? 0 : roles.size()];
         if (roles != null) {
@@ -455,6 +462,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setRoles(long groupId, long[] roles)
             throws FxApplicationException {
@@ -587,6 +595,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<Role> getRoles(long groupId) throws FxApplicationException {
         Connection con = null;
@@ -628,6 +637,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void rebuildMandatorGroups() throws FxApplicationException {
         Connection con = null;

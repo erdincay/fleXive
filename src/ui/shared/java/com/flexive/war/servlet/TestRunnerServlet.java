@@ -74,6 +74,7 @@ public class TestRunnerServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         this.servletConfig = servletConfig;
     }
@@ -81,6 +82,7 @@ public class TestRunnerServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ServletConfig getServletConfig() {
         return servletConfig;
     }
@@ -88,6 +90,7 @@ public class TestRunnerServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
@@ -147,6 +150,7 @@ public class TestRunnerServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getServletInfo() {
         return this.getClass().getName();
     }
@@ -154,6 +158,7 @@ public class TestRunnerServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void destroy() {
         //nothing to do
     }

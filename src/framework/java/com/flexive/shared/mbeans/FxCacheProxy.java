@@ -70,6 +70,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void create() throws Exception {
         server.invoke(name, "create", new Object[0], new String[0]);
     }
@@ -77,6 +78,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void destroy() throws Exception {
         server.invoke(name, "destroy", new Object[0], new String[0]);
     }
@@ -84,6 +86,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Cache<Object, Object> getCache() throws FxCacheException {
         return getBackingCache().getCache();
     }
@@ -106,6 +109,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object get(String path, Object key) throws FxCacheException {
         try {
             return unmarshal(server.invoke(name, "get", new Object[]{divisionEncodePath(path), key},
@@ -122,6 +126,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void put(String path, Object key, Object value) throws FxCacheException {
         try {
             server.invoke(name, "put", new Object[]{divisionEncodePath(path), key, marshal(value)},
@@ -138,6 +143,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void remove(String path) throws FxCacheException {
         try {
             server.invoke(name, "remove", new Object[]{divisionEncodePath(path)},
@@ -154,6 +160,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void remove(String path, Object key) throws FxCacheException {
         try {
             server.invoke(name, "remove", new Object[]{divisionEncodePath(path), key},
@@ -170,6 +177,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Set getKeys(String path) throws FxCacheException {
         try {
             return (Set) server.invoke(name, "getKeys", new Object[]{divisionEncodePath(path)},
@@ -186,6 +194,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Set globalGetKeys(String path) throws FxCacheException {
         try {
             return (Set) server.invoke(name, "globalGetKeys", new Object[]{globalDivisionEncodePath(path)},
@@ -202,6 +211,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object globalGet(String path, Object key) throws FxCacheException {
         try {
             return unmarshal(server.invoke(name, "globalGet", new Object[]{globalDivisionEncodePath(path), key},
@@ -218,6 +228,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean globalExists(String path, Object key) throws FxCacheException {
         try {
             return (Boolean) server.invoke(name, "globalExists", new Object[]{globalDivisionEncodePath(path), key},
@@ -234,6 +245,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean exists(String path, Object key) throws FxCacheException {
         try {
             return (Boolean) server.invoke(name, "exists", new Object[]{divisionEncodePath(path), key},
@@ -250,6 +262,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void globalPut(String path, Object key, Object value) throws FxCacheException {
         try {
             server.invoke(name, "globalPut", new Object[]{globalDivisionEncodePath(path), key, marshal(value)},
@@ -266,6 +279,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void globalRemove(String path) throws FxCacheException {
         try {
             server.invoke(name, "globalRemove", new Object[]{globalDivisionEncodePath(path)},
@@ -282,6 +296,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void globalRemove(String path, Object key) throws FxCacheException {
         try {
             server.invoke(name, "globalRemove", new Object[]{globalDivisionEncodePath(path), key},
@@ -298,6 +313,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Set getChildrenNames(String path) throws FxCacheException {
         try {
             return (Set) server.invoke(name, "getChildrenNames", new Object[]{divisionEncodePath(path)},
@@ -314,6 +330,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDeploymentId() {
         try {
             return (String) server.getAttribute(name, "DeploymentId");
@@ -332,6 +349,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getSystemStartTime() {
         try {
             return (Long) server.getAttribute(name, "SystemStartTime");
@@ -350,6 +368,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getNodeStartTime() {
         try {
             return (Long) server.getAttribute(name, "NodeStartTime");
@@ -368,6 +387,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void reloadEnvironment(Integer divisionId) throws Exception {
         try {
             server.invoke(name, "reloadEnvironment", new Object[]{divisionId},
@@ -384,6 +404,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle,
                                     Integer timeToLive) {
         try {
@@ -408,6 +429,7 @@ public class FxCacheProxy implements FxCacheMBean {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive, Boolean overwrite) throws FxCacheException {
         try {
             server.invoke(name, "setEvictionStrategy", new Object[]{
@@ -428,6 +450,7 @@ public class FxCacheProxy implements FxCacheMBean {
         }
     }
 
+    @Override
     public void cleanupAfterRequest() throws FxCacheException {
         try {
             server.invoke(name, "cleanupAfterRequest", new Object[0], new String[0]);

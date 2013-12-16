@@ -65,6 +65,7 @@ public class ContentImportBean implements ActionBean, Serializable {
     private long nodeId = -1;
     private String nodePath = "-";
 
+    @Override
     public String getParseRequestParameters() throws FxApplicationException {
         String action = FxJsfUtils.getParameter("action");
         if (StringUtils.isBlank(action)) {

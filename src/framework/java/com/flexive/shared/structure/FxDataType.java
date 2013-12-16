@@ -116,6 +116,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
      *
      * @return internal id
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -125,6 +126,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
      *
      * @return name of this data type
      */
+    @Override
     public String getName() {
         if (!initialized)
             return this.name();

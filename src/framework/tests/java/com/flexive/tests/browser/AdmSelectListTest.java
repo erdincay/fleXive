@@ -73,6 +73,7 @@ public class AdmSelectListTest extends AbstractBackendBrowserTest {
      * only used if selenium browser must be setup for every class
      * @return <code>true</code> if all elements in the skip-array are true
      */
+    @Override
     protected boolean doSkip() {
         for (boolean cur : SKIP_TEST_S) {
             if (!cur) return false;

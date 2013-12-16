@@ -108,6 +108,7 @@ class ObjectParameter<T> extends ParameterImpl<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Parameter<T> copy() {
         return new ObjectParameter<T>(getData(), cls, false, instanceStream);
     }
@@ -117,6 +118,7 @@ class ObjectParameter<T> extends ParameterImpl<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public T getValue(Object dbValue) {
         return dbValue != null
                 ? cls.cast(

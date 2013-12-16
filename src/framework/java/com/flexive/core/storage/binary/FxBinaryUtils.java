@@ -143,6 +143,7 @@ public class FxBinaryUtils {
     public static File getTransitFile(int divisionId, final String handle) {
         File dir = new File(getTransitDirectory() + File.separatorChar + String.valueOf(divisionId) + File.separatorChar);
         File[] result = dir.listFiles(new FilenameFilter() {
+            @Override
             public boolean accept(File dir, String name) {
                 return name.startsWith(handle + "__");
             }
@@ -165,6 +166,7 @@ public class FxBinaryUtils {
         final long now = System.currentTimeMillis();
         int count = 0;
         for (File expired : baseDir.listFiles(new FilenameFilter() {
+            @Override
             public boolean accept(File dir, String name) {
                 try {
                     if (name.endsWith(TRANSIT_EXT) && name.indexOf("__") > 0) {
@@ -283,6 +285,7 @@ public class FxBinaryUtils {
         if (!baseDir.exists())
             return;
         for (File rm : baseDir.listFiles(new FilenameFilter() {
+            @Override
             public boolean accept(File dir, String name) {
                 return name.startsWith(String.valueOf(binaryId) + "_");
             }

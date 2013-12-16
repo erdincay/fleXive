@@ -51,16 +51,19 @@ import java.sql.SQLException;
 public class GenericRowNumber implements ResultColumnMapper<ResultRowNumber> {
     private static final GenericRowNumber INSTANCE = new GenericRowNumber();
 
+    @Override
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultRowNumber rowNum, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         index.increment();
         final String ctr = rowNum.getSelectedObject();
         return "@" + ctr + ":=@" + ctr + "+1 " + (includeResultAlias ? rowNum.getResultSetAlias() : "");
     }
 
+    @Override
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultRowNumber column, long languageId) throws SQLException {
         return rs.getInt(column.getColumnStart());
     }
 
+    @Override
     public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultRowNumber column, FxDataType dataType) {
         return false;
     }

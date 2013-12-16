@@ -89,6 +89,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, String description, Long aclId) throws FxApplicationException {
         return create(name, description, aclId, null);
@@ -97,6 +98,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, String description, Long aclId, LifeCycleInfo forcedLifeCycleInfo) throws FxApplicationException {
         final UserTicket ticket = FxContext.getUserTicket();
@@ -190,6 +192,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void modify(long id, String name, String description, Long aclId) throws FxApplicationException {
 
@@ -251,6 +254,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id) throws FxApplicationException {
         // Lookup the briefcase
@@ -286,6 +290,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Briefcase> loadAll(boolean includeShared) throws FxApplicationException {
         return getList(null, includeShared);
@@ -294,6 +299,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Briefcase load(long id) throws FxApplicationException {
         List<Briefcase> l = getList(id, true);
@@ -307,6 +313,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void clear(long id) throws FxApplicationException {
         Connection con = null;
@@ -333,6 +340,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addItems(long id, Collection<FxPK> contents) throws FxApplicationException {
         Connection con = null;
@@ -377,6 +385,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeItems(long id, Collection<FxPK> contents) throws FxApplicationException {
         if (contents == null || contents.isEmpty()) {
@@ -408,6 +417,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateItems(long id, Collection<FxPK> addContents, Collection<FxPK> removeContents) throws FxApplicationException {
         removeItems(id, removeContents);
@@ -417,6 +427,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setItems(long id, Collection<FxPK> objectIds) throws FxApplicationException {
         clear(id);
@@ -426,6 +437,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void moveItems(long fromId, long toId, Collection<FxPK> objectIds) throws FxApplicationException {
         removeItems(fromId, objectIds);
@@ -435,6 +447,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long[] getItems(long id) throws FxApplicationException {
         Connection con = null;
@@ -461,6 +474,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metadata) throws FxApplicationException {
         checkEditBriefcase(load(id));
@@ -509,6 +523,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void mergeMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metaData) throws FxApplicationException {
         checkEditBriefcase(load(id));
@@ -556,6 +571,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<FxReferenceMetaData<FxPK>> getMetaData(long briefcaseId) throws FxApplicationException {
         load(briefcaseId);   // check read permissions
@@ -574,6 +590,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxReferenceMetaData<FxPK> getMetaData(long briefcaseId, FxPK pk) throws FxApplicationException {
         load(briefcaseId);   // check read permissions
         Connection con = null;
@@ -592,6 +609,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addItemData(long briefcaseId, BriefcaseItemData itemData) throws FxApplicationException {
         if(itemData == null)
@@ -653,6 +671,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addItemData(long briefcaseId, List<BriefcaseItemData> itemDatas) throws FxApplicationException {
         if(itemDatas == null || itemDatas.size() == 0)
@@ -732,6 +751,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeItemData(long briefcaseId, Long itemId) throws FxApplicationException {
         Briefcase br = load(briefcaseId);   // check read permissions
@@ -759,6 +779,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BriefcaseItemData> queryItemData(long briefcaseId, Long itemId, String metaData,
                                                  Integer intFlag1, Integer intFlag2, Integer intFlag3,
                                                  Long longFlag1, Long longFlag2,
@@ -823,6 +844,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     public int queryItemDataCount(long briefcaseId, Long itemId, String metaData,
                                   Integer intFlag1, Integer intFlag2, Integer intFlag3,
                                   Long longFlag1, Long longFlag2) throws FxApplicationException {
@@ -864,6 +886,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateItemData(long briefcaseId, BriefcaseItemData updateData) throws FxApplicationException {
         if (updateData == null)

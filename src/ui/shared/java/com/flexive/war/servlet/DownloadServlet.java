@@ -75,22 +75,27 @@ public class DownloadServlet implements Servlet {
     public final static String BASEURL = "/download/";
     private ServletConfig servletConfig;
 
+    @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         this.servletConfig = servletConfig;
     }
 
+    @Override
     public ServletConfig getServletConfig() {
         return servletConfig;
     }
 
+    @Override
     public String getServletInfo() {
         return this.getClass().getName();
     }
 
+    @Override
     public void destroy() {
         // nothing to do
     }
 
+    @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;

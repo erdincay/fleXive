@@ -64,10 +64,12 @@ public class ApplicationDescriptorBuilderTask extends Task {
         this.destFile = destFile;
     }
 
+    @Override
     public String getTaskName() {
         return "applicationDescriptorBuilder";
     }
 
+    @Override
     public void execute() throws BuildException {
         if (srcFile == null || !(new File(srcFile).exists()))
             throw new BuildException("argument srcFile (" + srcFile + ") does not exist!");

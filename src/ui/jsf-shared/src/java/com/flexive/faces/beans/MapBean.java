@@ -155,6 +155,7 @@ public class MapBean implements Serializable {
     public Map<String, FxType> getTypesByName() {
         if (typesByNameMap == null) {
             typesByNameMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, FxType>() {
+                @Override
                 public FxType get(Object key) {
                     if (key == null) {
                         return null;
@@ -174,6 +175,7 @@ public class MapBean implements Serializable {
     public Map<Long, FxProperty> getProperties() {
         if (propertiesMap == null) {
             propertiesMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxProperty>() {
+                @Override
                 public FxProperty get(Object key) {
                     if (key == null) {
                         return null;
@@ -193,6 +195,7 @@ public class MapBean implements Serializable {
     public Map<String, FxProperty> getPropertiesByName() {
         if (propertiesByNameMap == null) {
             propertiesByNameMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, FxProperty>() {
+                @Override
                 public FxProperty get(Object key) {
                     if (key == null) {
                         return null;
@@ -212,6 +215,7 @@ public class MapBean implements Serializable {
     public Map<Long, FxAssignment> getAssignments() {
         if (assignmentsMap == null) {
             assignmentsMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxAssignment>() {
+                @Override
                 public FxAssignment get(Object key) {
                     if (key == null) {
                         return null;
@@ -232,6 +236,7 @@ public class MapBean implements Serializable {
     public Map<String, FxAssignment> getAssignmentsByXPath() {
         if (assignmentsByXPathMap == null) {
             assignmentsByXPathMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, FxAssignment>() {
+                @Override
                 public FxAssignment get(Object key) {
                     return key != null ? environment.getAssignment((String) key) : null;
                 }
@@ -248,6 +253,7 @@ public class MapBean implements Serializable {
     public Map<Long, FxString> getStep() {
         if (stepNameMap == null) {
             stepNameMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxString>() {
+                @Override
                 public FxString get(Object key) {
                     if (key == null) {
                         return null;
@@ -270,6 +276,7 @@ public class MapBean implements Serializable {
             accountMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Account>() {
                 private Map<Long, Account> cache = new HashMap<Long, Account>(10);
 
+                @Override
                 @SuppressWarnings({"SuspiciousMethodCalls"})
                 public Account get(Object key) {
                     if (key == null || !(key instanceof Long)) {
@@ -299,6 +306,7 @@ public class MapBean implements Serializable {
         if (dateTimeMap == null) {
             dateTimeMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
 
+                @Override
                 public String get(Object key) {
                     if (key == null || !(key instanceof Long)) {
                         return null;
@@ -318,6 +326,7 @@ public class MapBean implements Serializable {
     public Map<Long, FxLanguage> getLanguage() {
         if (languagesMap == null) {
             languagesMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxLanguage>() {
+                @Override
                 public FxLanguage get(Object key) {
                     if (key == null) {
                         return null;
@@ -338,6 +347,7 @@ public class MapBean implements Serializable {
     public Map<Object, FxSelectList> getSelectList() {
         if (selectListMap == null) {
             selectListMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, FxSelectList>() {
+                @Override
                 public FxSelectList get(Object key) {
                     if (key == null) {
                         return null;

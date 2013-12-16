@@ -72,6 +72,7 @@ public class ScriptIndexBuilderTask extends Task {
         this.recursive = recursive;
     }
 
+    @Override
     public String getTaskName() {
         return "scriptIndexBuilder";
     }
@@ -124,6 +125,7 @@ public class ScriptIndexBuilderTask extends Task {
         }
     }
 
+    @Override
     public void execute() throws BuildException {
         if (scriptDir == null || indexFile == null)
             usage();

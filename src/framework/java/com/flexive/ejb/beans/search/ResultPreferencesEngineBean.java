@@ -64,6 +64,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     UserConfigurationEngineLocal userConfiguration;
 
     /** {@inheritDoc} */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ResultPreferences load(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         return loadWithType(typeId, viewType, location).getPreferences();
@@ -115,6 +116,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     /** {@inheritDoc} */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ResultPreferences loadSystemDefault(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         try {
@@ -126,6 +128,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     /** {@inheritDoc} */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public boolean isCustomized(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         try {
@@ -137,6 +140,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     /** {@inheritDoc} */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void save(ResultPreferences preferences, long typeId, ResultViewType viewType,ResultLocation location) throws FxApplicationException {
         if (preferences.getSelectedColumns().isEmpty()) {
@@ -148,6 +152,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveInSource(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         final LoadResult result = loadWithType(typeId, viewType, location);
@@ -156,6 +161,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     /** {@inheritDoc} */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation... locations) throws FxApplicationException {
         if (preferences.getSelectedColumns().isEmpty()) {
@@ -168,6 +174,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     /** {@inheritDoc} */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         configuration.remove(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location));

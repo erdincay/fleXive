@@ -87,6 +87,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query) throws FxApplicationException {
         return search(query, 0, Integer.MAX_VALUE, null);
@@ -95,6 +96,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params)
             throws FxApplicationException {
@@ -104,6 +106,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params, ResultLocation location, ResultViewType viewType) throws FxApplicationException {
         try {
@@ -121,6 +124,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getLastContentChange(boolean live) {
         Connection con = null;
@@ -143,6 +147,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public QueryRootNode load(ResultLocation location, String name) throws FxApplicationException {
         return check(configuration.get(getConfigurationParameter(location), name));
@@ -151,6 +156,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public QueryRootNode loadDefault(ResultLocation location) throws FxApplicationException {
         try {
@@ -166,6 +172,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public QueryRootNode loadSystemDefault(ResultLocation location) throws FxApplicationException {
         try {
@@ -181,6 +188,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Collection<String> loadNames(ResultLocation location) throws FxApplicationException {
         final List<String> names = Lists.newArrayList(
@@ -209,16 +217,19 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
 
         // collect all nodes that are no longer valid
         root.visit(new QueryNodeVisitor() {
+            @Override
             public void visit(QueryOperatorNode operatorNode) {
                 // nop, empty nodes will be removed automatically
             }
 
+            @Override
             public void visit(QueryValueNode valueNode) {
                 if (!valueNode.isValidInEnvironment()) {
                     invalidNodes.add(valueNode);
                 }
             }
 
+            @Override
             public void setCurrentParent(QueryOperatorNode operatorNode) {
                 // nop
             }
@@ -235,6 +246,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void save(QueryRootNode query) throws FxApplicationException {
         save(configuration, query, query.getName());
@@ -243,6 +255,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveDefault(QueryRootNode query) throws FxApplicationException {
         save(configuration, query, DEFAULT_QUERY_NAME);
@@ -251,6 +264,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveSystemDefault(QueryRootNode query) throws FxApplicationException {
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
@@ -262,6 +276,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(ResultLocation location, String name) throws FxApplicationException {
         configuration.remove(getConfigurationParameter(location), name);

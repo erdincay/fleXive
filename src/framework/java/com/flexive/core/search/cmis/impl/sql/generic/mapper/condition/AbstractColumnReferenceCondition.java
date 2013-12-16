@@ -56,6 +56,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 public abstract class AbstractColumnReferenceCondition<T extends Condition> implements ConditionMapper<T> {
     private static final Log LOG = LogFactory.getLog(AbstractColumnReferenceCondition.class);
 
+    @Override
     public String getConditionSql(SqlMapperFactory sqlMapperFactory, T condition, SelectedTableVisitor joinedTables) {
         final ColumnReference ref = getColumnReference(condition);
         final TableReference table = ref.getTableReference();

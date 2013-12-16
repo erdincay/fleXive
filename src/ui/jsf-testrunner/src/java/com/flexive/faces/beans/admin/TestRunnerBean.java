@@ -53,22 +53,27 @@ public class TestRunnerBean implements FxTestRunnerCallback {
     private String outputPath = null;
     protected boolean resultsAvailable = false;
 
+    @Override
     public void started(ITestResult iTestResult) {
         this.currentTest = iTestResult;
     }
 
+    @Override
     public void addFailure(ITestResult iTestResult) {
         testFailure++;
     }
 
+    @Override
     public void addSuccess(ITestResult iTestResult) {
         testSuccess++;
     }
 
+    @Override
     public void addSkipped(ITestResult iTestResult) {
         testSkipped++;
     }
 
+    @Override
     public void setRunning(boolean state) {
         this.running = state;
     }
@@ -77,6 +82,7 @@ public class TestRunnerBean implements FxTestRunnerCallback {
         return currentTest == null ? "-none-" : currentTest.getTestClass().getName() + "." + currentTest.getMethod().getMethodName();
     }
 
+    @Override
     public void resetTestInfo() {
         testSuccess = 0;
         testSkipped = 0;
@@ -115,6 +121,7 @@ public class TestRunnerBean implements FxTestRunnerCallback {
         this.outputPath = outputPath;
     }
 
+    @Override
     public void setResultsAvailable(boolean resultsAvailable) {
         this.resultsAvailable = resultsAvailable;
     }

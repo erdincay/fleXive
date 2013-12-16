@@ -358,6 +358,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMessage(FxLanguage locale) {
         return message.getLocalizedMessage(locale) + evaluateCause(locale);
     }
@@ -365,6 +366,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMessage(long localeId) {
         final FxEnvironment env = CacheAdmin.getEnvironment();
         return message.getLocalizedMessage(env.getLanguage(localeId)) + evaluateCause(env.getLanguage(localeId));
@@ -373,6 +375,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMessage(UserTicket ticket) {
         if (ticket != null)
             return message.getLocalizedMessage(ticket.getLanguage()) + evaluateCause(ticket.getLanguage());
@@ -383,6 +386,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxExceptionMessage getExceptionMessage() {
         return message;
     }

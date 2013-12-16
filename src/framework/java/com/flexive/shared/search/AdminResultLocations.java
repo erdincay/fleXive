@@ -63,6 +63,7 @@ public enum AdminResultLocations implements ResultLocation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }
@@ -70,6 +71,7 @@ public enum AdminResultLocations implements ResultLocation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getName() {
         return getClass().getName() + "." + name();
     }
@@ -77,6 +79,7 @@ public enum AdminResultLocations implements ResultLocation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isCacheInSession() {
         return cacheInSession;
     }

@@ -52,10 +52,12 @@ public enum DateFunction implements FxSQLFunction {
         this.sqlName = sqlName;
     }
 
+    @Override
     public String getSqlName() {
         return sqlName;
     }
 
+    @Override
     public FxDataType getOverrideDataType() {
         return FxDataType.Number;   // all currently supported date functions return integers
     }

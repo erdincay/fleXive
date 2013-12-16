@@ -232,6 +232,7 @@ public class SelectListBean implements Serializable {
      */
     public Map<Long, String> getIdMap() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
+            @Override
             public String get(Object key) {
                 long id = (Long) key;
                 if (id >= 0)
@@ -534,6 +535,7 @@ public class SelectListBean implements Serializable {
      */
     public Map<Long, Boolean> getMayCreateItems() {
         return new HashMap<Long, Boolean>() {
+            @Override
             public Boolean get(Object key) {
                 return FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
                         FxJsfUtils.getRequest().getUserTicket().
@@ -556,6 +558,7 @@ public class SelectListBean implements Serializable {
      */
     public Map<FxSelectListItemEdit, Boolean> getMayEditItem() {
         return new HashMap<FxSelectListItemEdit, Boolean>() {
+            @Override
             public Boolean get(Object key) {
                 try {
                     return FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
@@ -757,6 +760,7 @@ public class SelectListBean implements Serializable {
 
     public Map<String, String> getColor() {
         return new HashMap<String, String>() {
+            @Override
             public String get(Object key) {
                 String RGBCode = null;
                 try {

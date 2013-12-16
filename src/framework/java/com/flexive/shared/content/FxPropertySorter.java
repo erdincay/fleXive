@@ -224,6 +224,7 @@ public class FxPropertySorter {
          * @param data2 The other data element
          * @return The result of the two positions compared
          */
+        @Override
         public int compare(FxData data1, FxData data2) {
             Integer i1, i2;
             i1 = currentOrder.get(data1.getXPath());

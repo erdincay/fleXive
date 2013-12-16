@@ -159,6 +159,7 @@ public abstract class FxAssignmentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxAssignment as = (FxAssignment) o;
         writer.addAttribute("alias", as.getAlias());
@@ -232,6 +233,7 @@ public abstract class FxAssignmentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         AssignmentData data = new AssignmentData();
         //base data

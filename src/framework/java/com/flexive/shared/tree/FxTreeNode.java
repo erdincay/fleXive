@@ -199,6 +199,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -226,6 +227,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      *
      * @return name of this node
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -335,6 +337,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     /**
      * {@inheritDoc}
      */
+    @Override
     public synchronized FxString getLabel() {
         return label;
     }
@@ -585,6 +588,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      *
      * @return an iterator over this node and its children.
      */
+    @Override
     public Iterator<FxTreeNode> iterator() {
         return new NodeIterator();
     }
@@ -594,6 +598,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
         private int index = -1;
         private Iterator<FxTreeNode> childIterator;
 
+        @Override
         public boolean hasNext() {
             return index == -1 ||
                     (index >= 0 && !children.isEmpty() && (
@@ -603,6 +608,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
                     );
         }
 
+        @Override
         public FxTreeNode next() {
             if (index == -1) {
                 index++;
@@ -616,6 +622,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
             }
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

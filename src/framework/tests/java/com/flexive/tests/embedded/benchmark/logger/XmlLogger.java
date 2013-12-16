@@ -73,6 +73,7 @@ public class XmlLogger extends AbstractResultLogger {
     }
 
     /** {@inheritDoc} */
+    @Override
     public synchronized String getOutput() {
         if (active) {
             active = false;

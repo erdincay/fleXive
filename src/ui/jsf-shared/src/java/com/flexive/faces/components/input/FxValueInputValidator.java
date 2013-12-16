@@ -54,6 +54,7 @@ public class FxValueInputValidator implements Validator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
         AbstractFxValueInput input = (AbstractFxValueInput) component;
         if (input.isReadOnly()) {

@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.net.URLEncoder;
+import java.util.Date;
 
 /**
  * Removes an optional flexive version identifier used for creating unique resource URLs from the request.
@@ -39,10 +39,12 @@ public class VersionUrlFilter implements Filter {
         }
     }
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         this.config = filterConfig;
     }
 
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final String requestUri = request.getRequestURI().substring(request.getContextPath().length());
@@ -69,6 +71,7 @@ public class VersionUrlFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
         this.config = null;
     }

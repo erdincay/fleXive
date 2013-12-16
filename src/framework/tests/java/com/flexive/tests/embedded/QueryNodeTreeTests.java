@@ -71,6 +71,7 @@ public class QueryNodeTreeTests {
             this.id = id;
         }
 
+        @Override
         public boolean isValid() {
             return true;
         }
@@ -81,9 +82,11 @@ public class QueryNodeTreeTests {
         }
 
 
+        @Override
         public void buildSqlQuery(SqlQueryBuilder builder) {
         }
 
+        @Override
         public List<PropertyValueComparator> getNodeComparators() {
             return Arrays.asList(PropertyValueComparator.values());
         }
@@ -693,6 +696,7 @@ public class QueryNodeTreeTests {
      * Generates InnerTestNode query nodes.
      */
     public static class InnerNodeGenerator implements QueryNodeGenerator<InnerTestNode> {
+        @Override
         public InnerTestNode createNode(int nodeId) {
             return new InnerTestNode(nodeId);
         }
@@ -708,6 +712,7 @@ public class QueryNodeTreeTests {
             this.value = value;
         }
 
+        @Override
         public AssignmentValueNode createNode(int nodeId) {
             AssignmentValueNode node = new AssignmentValueNode(nodeId, assignment.getId());
             node.setValue(value != null ? value.copy() : null);
@@ -723,14 +728,17 @@ public class QueryNodeTreeTests {
         private int opNodes = 0;
         private int valueNodes = 0;
 
+        @Override
         public void visit(QueryOperatorNode operatorNode) {
             opNodes++;
         }
 
+        @Override
         public void visit(QueryValueNode valueNode) {
             valueNodes++;
         }
 
+        @Override
         public void setCurrentParent(QueryOperatorNode operatorNode) {
             // ignore
         }

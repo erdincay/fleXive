@@ -56,6 +56,7 @@ public class FxTestRunnerListener implements ITestListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onTestStart(ITestResult iTestResult) {
 //        System.out.println("==> Started " + iTestResult.getName() + " [" + iTestResult.getMethod().getMethodName() + "]");
         if (callback != null)
@@ -65,6 +66,7 @@ public class FxTestRunnerListener implements ITestListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onTestSuccess(ITestResult iTestResult) {
 //        System.out.println("==> Success " + iTestResult.getName() + " [" + iTestResult.getMethod().getMethodName() + "]");
         if (callback != null)
@@ -74,6 +76,7 @@ public class FxTestRunnerListener implements ITestListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onTestFailure(ITestResult iTestResult) {
 //        System.out.println("==> Failure " + iTestResult.getName() + " [" + iTestResult.getMethod().getMethodName() + "]");
         if (callback != null)
@@ -83,6 +86,7 @@ public class FxTestRunnerListener implements ITestListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onTestSkipped(ITestResult iTestResult) {
 //        System.out.println("==> Skipped " + iTestResult.getName() + " [" + iTestResult.getMethod().getMethodName() + "]");
         if (callback != null)
@@ -92,18 +96,21 @@ public class FxTestRunnerListener implements ITestListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onTestFailedButWithinSuccessPercentage(ITestResult iTestResult) {
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onStart(ITestContext iTestContext) {
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onFinish(ITestContext iTestContext) {
     }
 }

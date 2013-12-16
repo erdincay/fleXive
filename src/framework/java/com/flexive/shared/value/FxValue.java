@@ -1113,6 +1113,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param o the other object
      * @return see {@link Comparable#compareTo}.
      */
+    @Override
     @SuppressWarnings({"unchecked"})
     public int compareTo(FxValue o) {
         if (o == null) {

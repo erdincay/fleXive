@@ -63,6 +63,7 @@ public class SelectableObjectConverter implements Converter {
      * @param selectableObjectId the class and id of the selectable object as string
      * @return the selectable object, or null if no match was found
      */
+    @Override
     public Object getAsObject(FacesContext facesContext, UIComponent uiComponent, String selectableObjectId) {
 
         if (selectableObjectId == null || selectableObjectId.equals("")) {
@@ -124,6 +125,7 @@ public class SelectableObjectConverter implements Converter {
      *
      * @return the id of the selectabe object as string
      */
+    @Override
     public String getAsString(FacesContext facesContext, UIComponent uiComponent, Object object) {
 
         // Null check

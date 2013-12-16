@@ -43,6 +43,7 @@ import java.io.Serializable;
  * @version $Rev$
  */
 public interface ResultLocation extends ObjectWithLabel, Serializable {
+    @Override
     FxString getLabel();
 
     String getName();

@@ -115,6 +115,7 @@ public enum SystemParameterPaths implements ParameterPath {
      * Returns the contained configuration path.
      * @return  configuration path
      */
+    @Override
     public String getValue() {
 		return value;
 	}
@@ -123,6 +124,7 @@ public enum SystemParameterPaths implements ParameterPath {
      * Returns the scope of the configuration path
      * @return  the scope of the configuration path
      */
+    @Override
     public ParameterScope getScope() {
         return scope;
     }

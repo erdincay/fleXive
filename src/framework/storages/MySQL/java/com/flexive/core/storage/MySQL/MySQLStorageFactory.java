@@ -70,6 +70,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getStorageVendor() {
         return VENDOR;
     }
@@ -77,6 +78,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canHandle(DatabaseMetaData dbm) {
         try {
             return VENDOR.equals(dbm.getDatabaseProductName());
@@ -89,6 +91,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public ContentStorage getContentStorage(TypeStorageMode mode) throws FxNotFoundException {
         if (mode == TypeStorageMode.Hierarchical)
             return MySQLHierarchicalStorage.getInstance();
@@ -98,6 +101,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public EnvironmentLoader getEnvironmentLoader() {
         return MySQLEnvironmentLoader.getInstance();
     }
@@ -105,6 +109,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public SequencerStorage getSequencerStorage() {
         return MySQLSequencerStorage.getInstance();
     }
@@ -112,6 +117,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public TreeStorage getTreeStorage() {
         return MySQLTreeStorage.getInstance();
     }
@@ -119,6 +125,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
         return new MySQLDataSelector(search);
     }
@@ -126,6 +133,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public DataFilter getDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         return new GenericSQLDataFilter(con, search);
     }
@@ -133,6 +141,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
         return new MySqlDialect(environment, contentEngine, query, returnPrimitives);
     }
@@ -140,6 +149,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getIfFunction(String condition, String exprtrue, String exprfalse) {
         return "IF(" + condition + "," + exprtrue + "," + exprfalse + ")";
     }
@@ -147,6 +157,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getRegExpLikeOperator(String column, String regexp) {
         return column + " REGEXP " + regexp;
     }
@@ -154,6 +165,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getReferentialIntegrityChecksStatement(boolean enable) {
         return "SET FOREIGN_KEY_CHECKS=" + (enable ? 1 : 0);
     }
@@ -161,6 +173,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDisableIntegrityTransactional() {
         return true;
     }
@@ -168,6 +181,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSelectListItemReferenceFixStatement() {
         return "UPDATE " + TBL_STRUCT_SELECTLIST_ITEM + " i1, " + TBL_STRUCT_SELECTLIST_ITEM +
                 " i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?";
@@ -176,6 +190,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTimestampFunction() {
         return "UNIX_TIMESTAMP()*1000";
     }
@@ -183,6 +198,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String concat(String... text) {
         if( text.length == 0)
             return "";
@@ -204,6 +220,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String concat_ws(String delimiter, String... text) {
         if( text.length == 0)
             return "";
@@ -220,6 +237,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimit(boolean hasWhereClause, long limit) {
         return " LIMIT " + limit;
     }
@@ -227,6 +245,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
     }
@@ -234,6 +253,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isForeignKeyViolation(Exception exc) {
         final int errorCode = Database.getSqlErrorCode(exc);
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
@@ -243,6 +263,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isQueryTimeout(Exception e) {
         final int errorCode = Database.getSqlErrorCode(e);
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
@@ -253,6 +274,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isRollbackOnConstraintViolation() {
         return false;
     }
@@ -260,6 +282,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isUniqueConstraintViolation(Exception exc) {
         final int sqlErr = Database.getSqlErrorCode(exc);
         //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
@@ -270,6 +293,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDeadlock(Exception exc) {
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
         final int errorCode = Database.getSqlErrorCode(exc);
@@ -280,6 +304,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDuplicateKeyViolation(SQLException exc) {
         return Database.getSqlErrorCode(exc) == 1062; 
     }
@@ -287,6 +312,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean requiresConfigSchema() {
         return false;
     }
@@ -294,6 +320,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
                                     String user, String password, boolean createDB, boolean createSchema,
                                     boolean dropIfExist) throws Exception {
@@ -345,6 +372,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean initConfiguration(Connection con, String schema, boolean dropIfExist) throws Exception {
         Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
         List<String> s = new ArrayList<String>();
@@ -383,6 +411,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean initDivision(Connection con, String schema, boolean dropIfExist) throws Exception {
         Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
         List<String> s = new ArrayList<String>();

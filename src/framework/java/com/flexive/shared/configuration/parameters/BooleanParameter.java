@@ -57,12 +57,14 @@ class BooleanParameter extends ParameterImpl<Boolean> {
 	}
 
     /** {@inheritDoc} */
+    @Override
     public Parameter<Boolean> copy() {
         return new BooleanParameter(getData(), false);
     }
 
     /** {@inheritDoc} */
-	public Boolean getValue(Object dbValue) {
+	@Override
+    public Boolean getValue(Object dbValue) {
 		return dbValue != null ? Boolean.valueOf(dbValue.toString()) : null;
 	}
     

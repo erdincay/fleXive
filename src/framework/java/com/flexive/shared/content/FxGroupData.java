@@ -128,6 +128,7 @@ public class FxGroupData extends FxData {
     private static final RemoveInternalFilter FILTER_REMOVE_INTERNAL = new RemoveInternalFilter();
     
     private static class RemoveInternalFilter implements Predicate<FxData> {
+        @Override
         public boolean apply(FxData t) {
             return t != null && !t.isSystemInternal();
         }

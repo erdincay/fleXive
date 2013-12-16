@@ -74,6 +74,7 @@ public class DistPackageTest {
             this.inputs.addAll(Arrays.asList(inputs));
         }
 
+        @Override
         public void handleInput(InputRequest request) throws BuildException {
             request.setInput(this.inputs.remove());
         }

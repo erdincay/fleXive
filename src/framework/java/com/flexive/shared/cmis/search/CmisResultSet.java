@@ -360,6 +360,7 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
      *
      * @return an {@link Iterator} over the rows of this resultset.
      */
+    @Override
     public Iterator<CmisResultRow> iterator() {
         return new RowIterator();
     }
@@ -367,14 +368,17 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
     private class RowIterator implements Iterator<CmisResultRow> {
         private int index = 0;
 
+        @Override
         public boolean hasNext() {
             return index < rows.size();
         }
 
+        @Override
         public CmisResultRow next() {
             return rows.get(index++);
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

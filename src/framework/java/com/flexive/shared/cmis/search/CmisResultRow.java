@@ -104,6 +104,7 @@ public class CmisResultRow implements Serializable, Iterable<CmisResultValue> {
         return getColumn(getColumnIndex(alias));
     }
 
+    @Override
     public Iterator<CmisResultValue> iterator() {
         return new ColumnIterator();
     }
@@ -171,14 +172,17 @@ public class CmisResultRow implements Serializable, Iterable<CmisResultValue> {
     private class ColumnIterator implements Iterator<CmisResultValue> {
         private int columnIndex = 0;
 
+        @Override
         public boolean hasNext() {
             return columnIndex < columns.length;
         }
 
+        @Override
         public CmisResultValue next() {
             return columns[columnIndex++];
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException("Removal of result column values is not supported");
         }

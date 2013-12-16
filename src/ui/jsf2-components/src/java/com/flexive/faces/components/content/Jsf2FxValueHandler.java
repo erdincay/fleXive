@@ -67,6 +67,7 @@ public class Jsf2FxValueHandler extends TagHandler {
         super(config);
     }
 
+    @Override
     public void apply(FaceletContext ctx, UIComponent parent) throws IOException, FacesException {
         final String var;
         try {

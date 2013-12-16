@@ -84,10 +84,12 @@ public class Briefcase extends AbstractSelectableObjectWithName implements Seria
         return iconId;
     }
 
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public String getName() {
         return name;
     }

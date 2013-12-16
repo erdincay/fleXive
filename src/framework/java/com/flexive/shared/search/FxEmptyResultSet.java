@@ -58,6 +58,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getCreationTime() {
         return creationTime;
     }
@@ -65,6 +66,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getStartIndex() {
         return 0;
     }
@@ -72,6 +74,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getMaxFetchRows() {
         return 0;
     }
@@ -79,6 +82,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getColumnNames() {
         return new String[0];
     }
@@ -86,6 +90,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<Object[]> getRows() {
         return new ArrayList<Object[]>(0);
     }
@@ -93,6 +98,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getColumnLabel(int index) throws ArrayIndexOutOfBoundsException {
         return "";
     }
@@ -100,6 +106,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getColumnLabels() {
         return new String[0];
     }
@@ -107,6 +114,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getColumnName(int pos) throws ArrayIndexOutOfBoundsException {
         return "";
     }
@@ -114,6 +122,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getColumnIndex(String name) {
         return 0;
     }
@@ -121,6 +130,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<String, Integer> getColumnIndexMap() {
         return new HashMap<String, Integer>(0);
     }
@@ -128,6 +138,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getColumnCount() {
         return 0;
     }
@@ -135,6 +146,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getRowCount() {
         return 0;
     }
@@ -142,6 +154,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getTotalRowCount() {
         return 0;
     }
@@ -149,6 +162,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isTruncated() {
         return false;
     }
@@ -156,6 +170,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getObject(int rowIndex, int columnIndex) throws ArrayIndexOutOfBoundsException {
         return null;
     }
@@ -163,6 +178,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getString(int rowIndex, int columnIndex) throws ArrayIndexOutOfBoundsException {
         return "";
     }
@@ -170,6 +186,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getParserExecutionTime() {
         return 0;
     }
@@ -177,6 +194,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getDbSearchTime() {
         return 0;
     }
@@ -184,6 +202,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getFetchTime() {
         return 0;
     }
@@ -191,6 +210,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getTotalTime() {
         return 0;
     }
@@ -198,6 +218,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultLocation getLocation() {
         return AdminResultLocations.DEFAULT;
     }
@@ -205,6 +226,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResultViewType getViewType() {
         return ResultViewType.LIST;
     }
@@ -212,6 +234,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxFoundType> getContentTypes() {
         return new ArrayList<FxFoundType>(0);
     }
@@ -223,6 +246,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public boolean hasNext() {
             return false;
         }
@@ -230,6 +254,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public FxResultRow next() {
             return new FxResultRow(FxEmptyResultSet.this, 0);
         }
@@ -237,6 +262,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void remove() {
             throw new UnsupportedOperationException("Removing rows not supported");
         }
@@ -245,8 +271,10 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Iterable<FxResultRow> getResultRows() {
         return new Iterable<FxResultRow>() {
+            @Override
             public Iterator<FxResultRow> iterator() {
                 return new RowIterator();
             }
@@ -256,6 +284,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxResultRow getResultRow(int index) {
         return new FxResultRow(this, index);
     }
@@ -263,6 +292,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxResultRow getResultRow(FxPK pk) {
         return null;
     }
@@ -270,6 +300,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getCreatedBriefcaseId() {
         return -1;
     }
@@ -277,6 +308,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public <T> List<T> collectColumn(int columnIndex) {
         return new ArrayList<T>(0);
     }
@@ -284,6 +316,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getUserWildcardIndex() {
         return -1;
     }
@@ -291,6 +324,7 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPrimaryKeyIndex() {
         return -1;
     }

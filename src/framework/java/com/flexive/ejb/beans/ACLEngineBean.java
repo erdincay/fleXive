@@ -132,6 +132,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, FxString label, long mandatorId, String color, String description, ACLCategory category)
             throws FxApplicationException {
@@ -213,6 +214,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id)
             throws FxApplicationException {
@@ -280,6 +282,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(long id, String name, FxString label, String color, String description,
                        List<ACLAssignment> assignments)
@@ -438,6 +441,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ACL load(long id) throws FxApplicationException {
         return load(id, false);
     }
@@ -446,6 +450,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ACL load(long id, boolean ignoreSecurity) throws FxApplicationException {
         Connection con = null;
@@ -494,6 +499,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assign(long aclId, long groupId, boolean mayRead, boolean mayEdit,
                        boolean mayRelate, boolean mayRemove, boolean mayExport, boolean mayCreate)
@@ -571,6 +577,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assign(long aclId, long groupId, ACLPermission... permissions) throws FxApplicationException {
         boolean mayRead = false;
@@ -607,6 +614,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<ACLAssignment> loadGroupAssignments(long groupId) throws FxApplicationException {
         return loadAssignments(null, groupId);
@@ -615,6 +623,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<ACLAssignment> loadAssignments(long aclId) throws FxApplicationException {
         return loadAssignments(aclId, null);
@@ -623,6 +632,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void unassign(long aclId, long groupId) throws FxApplicationException {
         Connection con = null;
@@ -688,6 +698,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<ACLAssignment> loadAssignments(Long aclId, Long groupId) throws FxApplicationException {
         Connection con = null;

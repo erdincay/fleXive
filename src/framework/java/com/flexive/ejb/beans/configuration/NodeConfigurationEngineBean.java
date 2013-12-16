@@ -90,6 +90,7 @@ public class NodeConfigurationEngineBean extends CustomDomainConfigurationImpl<S
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getNodeName() {
         return getCurrentDomain();
     }

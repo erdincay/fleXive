@@ -25,6 +25,7 @@ import java.sql.*;
 public class DatabasePatchUtils implements DatabasePatchUtilsLocal {
     private static final Log LOG = LogFactory.getLog(DatabasePatchUtils.class);
 
+    @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void migrateContentDataGroups() throws SQLException {
         final long start = System.currentTimeMillis();

@@ -97,6 +97,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getMaxId() {
         return MAX_ID;
     }
@@ -104,6 +105,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long fetchId(String name, boolean allowRollover) throws FxCreateException {
         Connection con = null;
         PreparedStatement ps = null;
@@ -161,6 +163,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void createSequencer(String name, boolean allowRollover, long startNumber) throws FxApplicationException {
         if (StringUtils.isEmpty(name) || name.toUpperCase().trim().startsWith("SYS_"))
             throw new FxCreateException(LOG, "ex.sequencer.create.invalid.name", name);
@@ -190,6 +193,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeSequencer(String name) throws FxApplicationException {
         if (!sequencerExists(name))
             throw new FxCreateException(LOG, "ex.sequencer.notFound", name);
@@ -212,6 +216,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean sequencerExists(String name) throws FxApplicationException {
         if (StringUtils.isEmpty(name) || name.toUpperCase().trim().startsWith("SYS_"))
             return false;
@@ -233,6 +238,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<CustomSequencer> getCustomSequencers() throws FxApplicationException {
         List<CustomSequencer> res = new ArrayList<CustomSequencer>(20);
         Connection con = null;
@@ -254,9 +260,11 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<String> getCustomSequencerNames() throws FxApplicationException {
         // not performance critical on MySQL
         return Lists.transform(getCustomSequencers(), new Function<CustomSequencer, String>() {
+            @Override
             public String apply(com.flexive.shared.CustomSequencer customSequencer) {
                 return customSequencer.getName();
             }
@@ -266,6 +274,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getCurrentId(FxSystemSequencer sequencer) throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;
@@ -287,6 +296,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setSequencerId(String name, long newId) throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;

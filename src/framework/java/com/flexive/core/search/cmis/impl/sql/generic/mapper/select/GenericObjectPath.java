@@ -56,6 +56,7 @@ import java.sql.SQLException;
 public class GenericObjectPath implements ResultColumnMapper<ResultColumnReference> {
     private static final GenericObjectPath INSTANCE = new GenericObjectPath();
 
+    @Override
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultColumnReference column, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         final TableReference tableRef = column.getSelectedObject().getTableReference();
         final long captionId = sqlMapperFactory.getSqlDialect().getEnvironment().getProperty("CAPTION").getId();
@@ -68,6 +69,7 @@ public class GenericObjectPath implements ResultColumnMapper<ResultColumnReferen
                 + (includeResultAlias ? " AS " + column.getResultSetAlias() : "");
     }
 
+    @Override
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultColumnReference column, long languageId) throws SQLException {
         try {
             final PropertyEntry entry = column.getSelectedObject().getPropertyEntry();
@@ -80,6 +82,7 @@ public class GenericObjectPath implements ResultColumnMapper<ResultColumnReferen
         }
     }
 
+    @Override
     public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultColumnReference column, FxDataType dataType) {
         return false;
     }

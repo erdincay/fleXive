@@ -977,6 +977,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         }
     }
 
+    @Override
     public String getParseRequestParameters() {
         try {
             String action = FxJsfUtils.getParameter("action");
@@ -1540,6 +1541,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         return new HashMap<Long, String>() {
             private static final long serialVersionUID = -1106753357173316138L;
 
+            @Override
             public String get(Object key) {
                 return CacheAdmin.getFilteredEnvironment().getAssignment((Long) key).getXPath();
             }

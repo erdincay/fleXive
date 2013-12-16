@@ -165,6 +165,7 @@ public class DojoTreeRenderer extends Renderer {
         if (StringUtils.isNotBlank(tree.getExtensionPoint())) {
             // execute plugins, populate injectedNodes map
             TreePluginExecutor executor = new TreePluginExecutor() {
+                @Override
                 public void addNode(String parentNode, TreeNodeWriter.Node node) {
                     if (!injectedNodes.containsKey(parentNode)) {
                         injectedNodes.put(parentNode, new ArrayList<TreeNodeWriter.Node>());

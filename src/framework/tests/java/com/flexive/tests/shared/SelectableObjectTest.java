@@ -52,10 +52,12 @@ public class SelectableObjectTest {
             this.name = name;
         }
 
+        @Override
         public long getId() {
             return id;
         }
 
+        @Override
         public String getName() {
             return name;
         }

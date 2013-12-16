@@ -71,6 +71,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getSelect() {
         final List<String> result = new ArrayList<String>(tableAliases.size());
         for (Map.Entry<TableReference, String> entry : tableAliases.entrySet()) {
@@ -80,6 +81,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getSelectForSingleTable(TableReference selectOnlyFrom) {
         final List<String> result = new ArrayList<String>(tableAliases.size());
         for (Map.Entry<TableReference, String> entry : tableAliases.entrySet()) {
@@ -97,6 +99,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getFrom() {
         if (!usesJoins && tableAliases.size() == 1) {
             // only a single table - can select from the main content table to speed up security checks
@@ -120,21 +123,25 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<String> getConditions() {
         return Collections.unmodifiableList(conditions);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Map<TableReference, String> getTableAliases() {
         return Collections.unmodifiableMap(tableAliases);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getTableAliasPrefix() {
         return tableAliasPrefix;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getTableAlias(TableReference table) {
         if (!tableAliases.containsKey(table)) {
             throw new IllegalArgumentException("Unknown table reference: " + table);
@@ -143,6 +150,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String join(String tableAlias, SelectedTableVisitor subtables) {
         assert tableAliases.size() == subtables.getTableAliases().size();
         final List<String> result = new ArrayList<String>(tableAliases.size());
@@ -164,6 +172,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visit(SingleTableReference singleTable) {
         final String alias = tableAliasPrefix + singleTable.getAlias();
         tableAliases.put(singleTable, alias);
@@ -183,6 +192,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void visit(JoinedTableReference joinedTable) {
         usesJoins = true;
         final ColumnReference column1 = joinedTable.getFirstTableColumn();
@@ -217,6 +227,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isUsesJoins() {
         return usesJoins;
     }

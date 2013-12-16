@@ -143,6 +143,7 @@ public class SystemBean implements Serializable {
      */
     public Map<String, Boolean> getContainsErrorId() {
         return new HashMap<String, Boolean>() {
+            @Override
             public Boolean get(Object key) {
                 if (key == null) {
                     return false;
@@ -437,6 +438,7 @@ public class SystemBean implements Serializable {
      */
     public Map<String, UIComponent> getComponent() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, UIComponent>() {
+            @Override
             public UIComponent get(Object key) {
                 return getCurrentInstance().getViewRoot().findComponent((String) key);
             }
@@ -451,6 +453,7 @@ public class SystemBean implements Serializable {
      */
     public Map<String, Object> getComponentValue() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Object>() {
+            @Override
             public Object get(Object key) {
                 final UIInput component = (UIInput) getCurrentInstance().getViewRoot().findComponent((String) key);
                 return component.getSubmittedValue() != null ? component.getSubmittedValue() : component.getValue();
@@ -465,6 +468,7 @@ public class SystemBean implements Serializable {
      */
     public Map<String, Boolean> getIsInRole() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+            @Override
             public Boolean get(Object key) {
                 return getUserTicket().isInRole(Role.valueOf((String) key));
             }
@@ -479,6 +483,7 @@ public class SystemBean implements Serializable {
     public Map<Long, Long> getInstanceCount() {
         if (instanceCountMap == null) {
             FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Long>() {
+                @Override
                 public Long get(Object key) {
                     return EJBLookup.getTypeEngine().getInstanceCount(Long.valueOf(key.toString()));
                 }
@@ -494,6 +499,7 @@ public class SystemBean implements Serializable {
      */
     public Map<String, String> getEscapeForJavaScript() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, String>() {
+            @Override
             public String get(Object key) {
                 return FxFormatUtils.escapeForJavaScript(String.valueOf(key), false, true);
             }
@@ -507,6 +513,7 @@ public class SystemBean implements Serializable {
      */
     public Map<FacesMessage.Severity, String> getSeverityName() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<FacesMessage.Severity, String>() {
+            @Override
             public String get(Object key) {
                 final FacesMessage.Severity severity = (FacesMessage.Severity) key;
                 if (FacesMessage.SEVERITY_ERROR.equals(severity)) {
@@ -542,6 +549,7 @@ public class SystemBean implements Serializable {
     public Map<Object, Integer> getCounter() {
         if (counterMap == null) {
             counterMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, Integer>() {
+                @Override
                 public Integer get(Object key) {
                     if (counters == null) {
                         counters = new HashMap<Object, Integer>();
@@ -563,6 +571,7 @@ public class SystemBean implements Serializable {
     public Map<Object, Integer> getCounterValue() {
         if (counterValueMap == null) {
             counterValueMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, Integer>() {
+                @Override
                 public Integer get(Object key) {
                     if (counters == null) {
                         counters = new HashMap<Object, Integer>();
@@ -621,6 +630,7 @@ public class SystemBean implements Serializable {
     public Map<String, Boolean> getMessageExists() {
         if (messageExistsMap == null) {
             messageExistsMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+                @Override
                 public Boolean get(Object key) {
                     try {
                         MessageBean.getInstance().getResource(String.valueOf(key));
@@ -645,6 +655,7 @@ public class SystemBean implements Serializable {
     public Map<Object, FxContent> getContent() {
         if (contentMap == null) {
             contentMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, FxContent>() {
+                @Override
                 public FxContent get(Object key) {
                     try {
                         return EJBLookup.getContentEngine().load(FxPK.fromObject(key));
@@ -675,6 +686,7 @@ public class SystemBean implements Serializable {
     public Map<Object, FxContent> getExplodedContent() {
         if (explodedContentMap == null) {
             explodedContentMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, FxContent>() {
+                @Override
                 public FxContent get(Object key) {
                     try {
                         final FxContent content = EJBLookup.getContentEngine().load(FxPK.fromObject(key));
@@ -698,6 +710,7 @@ public class SystemBean implements Serializable {
     public Map<String, DataModel> getQuery() {
         if (queries == null) {
             queries = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, DataModel>() {
+                @Override
                 public DataModel get(Object key) {
                     try {
                         final FxResultSet result = EJBLookup.getSearchEngine().search((String) key, 0, -1, null);

@@ -55,6 +55,7 @@ public abstract class AbstractResultColumn<V, T extends AbstractResultColumn<V, 
     protected abstract ResultColumnMapper<T> getSqlMapper(SqlMapperFactory factory);
 
     /** {@inheritDoc} */
+    @Override
     public String selectSql(SqlMapperFactory factory, CmisSqlQuery query, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         // remember positions in JDBC result set
         columnStart = index.getNextIndex();
@@ -69,21 +70,25 @@ public abstract class AbstractResultColumn<V, T extends AbstractResultColumn<V, 
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, long languageId) throws SQLException {
         return getSqlMapper(factory).decodeResultValue(factory, rs, getThis(), languageId);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getColumnStart() {
         return columnStart;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getColumnEnd() {
         return columnEnd;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getResultSetAlias() {
         assert columnStart != -1 : "Start column not set, result set alias not available.";
         return "c" + columnStart + "_" + getEscapedAlias();
@@ -99,6 +104,7 @@ public abstract class AbstractResultColumn<V, T extends AbstractResultColumn<V, 
 
 
     /** {@inheritDoc} */
+    @Override
     public boolean isScore() {
         return false;
     }

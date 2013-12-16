@@ -50,15 +50,18 @@ public class ContentTypeListener implements PhaseListener {
     private static final long serialVersionUID = -4146936347609763113L;
     private static final String CONTENT_TYPE = "text/html";
 
+    @Override
     public PhaseId getPhaseId() {
         return PhaseId.RENDER_RESPONSE;
     }
 
+    @Override
     public void beforePhase(PhaseEvent event) {
         FacesContext.getCurrentInstance().getExternalContext()
                 .getRequestMap().put("facelets.ContentType", CONTENT_TYPE);
     }
 
+    @Override
     public void afterPhase(PhaseEvent event) {
         // nop
     }

@@ -60,6 +60,7 @@ public class LifeCycleInfoConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         LifeCycleInfo li = (LifeCycleInfo) o;
         writer.startNode(ConversionEngine.KEY_LCI);
@@ -78,6 +79,7 @@ public class LifeCycleInfoConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         final AccountEngine acc = EJBLookup.getAccountEngine();
         String convDate = null;
@@ -117,6 +119,7 @@ public class LifeCycleInfoConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class aClass) {
         return LifeCycleInfo.class.isAssignableFrom(aClass);
     }

@@ -98,6 +98,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public TableReference findByAlias(String alias) {
         final TableReference result1 = first.findByAlias(alias);
         if (result1 != null) {
@@ -109,6 +110,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<String> getReferencedAliases() {
         final List<String> result = new ArrayList<String>();
         result.addAll(first.getReferencedAliases());
@@ -119,6 +121,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxType> getReferencedTypes() {
         final List<FxType> result = new ArrayList<FxType>();
         result.addAll(first.getReferencedTypes());
@@ -129,6 +132,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Iterable<TableReference> getLeafTables() {
         return Iterables.concat(first.getLeafTables(), second.getLeafTables());
     }
@@ -136,6 +140,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getAlias() {
         throw new UnsupportedOperationException("A joined table cannot be addressed by a column alias.");
     }
@@ -143,6 +148,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxPropertyAssignment> resolvePropertyAssignment(FxEnvironment environment, String name) {
         throw new UnsupportedOperationException("A joined table cannot be addressed by a column reference.");
     }
@@ -150,6 +156,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getIdFilterColumn() {
         throw new UnsupportedOperationException("A joined table cannot be addressed by a column reference.");
     }
@@ -157,10 +164,12 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getVersionFilterColumn() {
         throw new UnsupportedOperationException("A joined table cannot be addressed by a column reference.");
     }
 
+    @Override
     public String getIdVersionLink(String filterTableAlias, String subSelectTableAlias) {
         throw new UnsupportedOperationException("A joined table cannot be addressed by a column reference.");
     }
@@ -168,6 +177,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isPropertySecurityEnabled() {
         return first.isPropertySecurityEnabled() || second.isPropertySecurityEnabled();
     }
@@ -175,6 +185,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxType getRootType() {
         throw new UnsupportedOperationException("A joined table has no root type.");
     }
@@ -182,6 +193,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void accept(TableReferenceVisitor visitor) {
         visitor.visit(this);
         first.accept(visitor);
@@ -191,6 +203,7 @@ public class JoinedTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<TableReference> getSubTables() {
         return Arrays.asList(first, second);
     }

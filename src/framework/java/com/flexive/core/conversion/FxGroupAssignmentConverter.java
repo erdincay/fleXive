@@ -57,6 +57,7 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         writer.startNode(ConversionEngine.KEY_GROUP_AS);
         FxGroupAssignment grp = (FxGroupAssignment) o;
@@ -85,6 +86,7 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         FxType type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
         GroupMode mode = GroupMode.valueOf(reader.getAttribute("mode"));
@@ -213,6 +215,7 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class type) {
         return FxGroupAssignment.class.isAssignableFrom(type);
     }

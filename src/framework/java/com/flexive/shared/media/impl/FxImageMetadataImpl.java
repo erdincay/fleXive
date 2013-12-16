@@ -111,6 +111,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxMediaType getMediaType() {
         return FxMediaType.Image;
     }
@@ -126,6 +127,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMimeType() {
         return mimeType;
     }
@@ -133,6 +135,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFilename() {
         return filename;
     }
@@ -140,6 +143,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxMetadataItem> getMetadata() {
         return metadata;
     }
@@ -147,6 +151,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getWidth() {
         return width;
     }
@@ -154,6 +159,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getHeight() {
         return height;
     }
@@ -161,6 +167,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFormat() {
         return format;
     }
@@ -168,6 +175,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFormatDescription() {
         return formatDescription;
     }
@@ -175,6 +183,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getCompressionAlgorithm() {
         return compressionAlgorithm;
     }
@@ -182,6 +191,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public double getXResolution() {
         return xResolution;
     }
@@ -189,6 +199,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public double getYResolution() {
         return yResolution;
     }
@@ -196,6 +207,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getColorType() {
         return colorType;
     }
@@ -203,6 +215,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean usePalette() {
         return usePalette;
     }
@@ -210,6 +223,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getBitsPerPixel() {
         return bpp;
     }
@@ -217,6 +231,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isProgressive() {
         return progressive;
     }
@@ -224,6 +239,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isTransparent() {
         return transparent;
     }
@@ -231,6 +247,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasICC_Profile() {
         return icc != null;
     }
@@ -238,6 +255,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ICC_Profile getICC_Profile() {
         return icc;
     }
@@ -245,6 +263,7 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void writeXMLTags(XMLStreamWriter writer) throws XMLStreamException {
         writer.writeStartElement("imageData");
         writeSimpleTag(writer, "width", getWidth(), false);

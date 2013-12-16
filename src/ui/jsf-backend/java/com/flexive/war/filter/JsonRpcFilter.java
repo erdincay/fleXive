@@ -70,18 +70,21 @@ public class JsonRpcFilter implements Filter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void destroy() {
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // set JSON bridge
         getJsonBridge(((HttpServletRequest) servletRequest).getSession());

@@ -66,10 +66,12 @@ public class FxVideoMetaDataImpl extends FxVideoMetadata {
         this.mimeType = mimeType;
     }
 
+    @Override
     public String getLengthAsString() {
         return String.valueOf(length);
     }
 
+    @Override
     public long getLength() {
         return length;
     }
@@ -111,6 +113,7 @@ public class FxVideoMetaDataImpl extends FxVideoMetadata {
         return metadata;
     }
 
+    @Override
     protected void writeXMLTags(XMLStreamWriter writer) throws XMLStreamException {
     }
 }

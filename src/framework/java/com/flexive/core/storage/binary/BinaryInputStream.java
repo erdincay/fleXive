@@ -90,6 +90,7 @@ public class BinaryInputStream extends InputStream {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int read() throws IOException {
         return stream.read();
     }

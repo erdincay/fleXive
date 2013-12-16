@@ -166,6 +166,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      *
      * @return the user name.
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -175,6 +176,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      *
      * @return the unique user id.
      */
+    @Override
     public long getId() {
         return this.id;
     }

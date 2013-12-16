@@ -47,6 +47,7 @@ public class GenericLiteral implements ConditionColumnMapper<Literal> {
     private static final GenericLiteral INSTANCE = new GenericLiteral();
 
     /** {@inheritDoc} */
+    @Override
     public String getConditionColumn(SqlMapperFactory sqlMapperFactory, Literal expression, String tableAlias) {
         return FxFormatUtils.escapeForSql(expression.getValue());
     }

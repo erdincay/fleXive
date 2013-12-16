@@ -59,6 +59,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         writer.startNode(ConversionEngine.KEY_PROPERTY_AS);
         FxPropertyAssignment prop = (FxPropertyAssignment) o;
@@ -111,6 +112,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         FxType type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
         String property = reader.getAttribute(ConversionEngine.KEY_PROPERTY);
@@ -281,6 +283,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class type) {
         return FxPropertyAssignment.class.isAssignableFrom(type);
     }

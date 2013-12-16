@@ -98,21 +98,25 @@ public class FxRuntimeException extends RuntimeException implements FxLocalizedE
 
 
     /** {@inheritDoc} */
+    @Override
     public String getMessage(FxLanguage locale) {
         return converted.getMessage(locale);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getMessage(long localeId) {
         return converted.getMessage(localeId);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getMessage(UserTicket ticket) {
     	return converted.getMessage(ticket);
     }
 
     /** {@inheritDoc} */
+    @Override
     public FxExceptionMessage getExceptionMessage() {
         return converted.getExceptionMessage();
     }

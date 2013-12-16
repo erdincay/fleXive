@@ -99,6 +99,7 @@ public class CmisSqlQuery {
         // select type ID for tables with property permissions
         for (TableReference reference : statement.getTables()) {
             reference.accept(new TableReferenceVisitor() {
+                @Override
                 public void visit(SingleTableReference singleTable) {
                     if (singleTable.isPropertySecurityEnabled() || !returnPrimitiveValues) {
                         // select the TYPEDEF property if property security is enable for this table
@@ -117,6 +118,7 @@ public class CmisSqlQuery {
                     }
                 }
 
+                @Override
                 public void visit(JoinedTableReference joinedTable) {
                     // nop
                 }

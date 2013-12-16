@@ -62,6 +62,7 @@ public class FxContentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxContent co = ((FxContent) o).copy(); //remove/compacts will be performed -> so work on a copy
         FxEnvironment env = CacheAdmin.getEnvironment();
@@ -100,6 +101,7 @@ public class FxContentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         FxEnvironment env = CacheAdmin.getEnvironment();
         FxContent co;
@@ -150,6 +152,7 @@ public class FxContentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canConvert(Class aClass) {
         return FxContent.class.isAssignableFrom(aClass);
     }

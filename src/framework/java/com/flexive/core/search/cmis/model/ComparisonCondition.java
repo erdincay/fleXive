@@ -55,6 +55,7 @@ public class ComparisonCondition implements Condition {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Condition getParent() {
         return parent;
     }
@@ -72,6 +73,7 @@ public class ComparisonCondition implements Condition {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.visit(this);
     }

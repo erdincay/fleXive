@@ -215,6 +215,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      *
      * @return internal id of this assignment
      */
+    @Override
     public long getId() {
         return assignmentId;
     }
@@ -394,6 +395,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      *
      * @return the localized label of this assignment
      */
+    @Override
     public FxString getLabel() {
         return label;
     }
@@ -634,6 +636,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @param o other assignment to compare to
      * @return compare result
      */
+    @Override
     public int compareTo(FxAssignment o) {
         if (this.position < o.position)
             return -1;

@@ -84,6 +84,7 @@ public abstract class FxStructureElement implements Serializable, SelectableObje
      *
      * @return internal id of this element
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -93,6 +94,7 @@ public abstract class FxStructureElement implements Serializable, SelectableObje
      *
      * @return name of this element
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -102,6 +104,7 @@ public abstract class FxStructureElement implements Serializable, SelectableObje
      *
      * @return label of this element
      */
+    @Override
     public FxString getLabel() {
         return label;
     }

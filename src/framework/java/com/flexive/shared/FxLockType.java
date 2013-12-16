@@ -80,6 +80,7 @@ public enum FxLockType implements ObjectWithLabel {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }

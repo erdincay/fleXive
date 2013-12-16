@@ -51,6 +51,7 @@ public class DemoPluginFactory implements PluginFactory {
          *
          * @param executor the tree plugin executor
          */
+        @Override
         public void apply(TreePluginExecutor executor) {
             // add a main menu entry in the "system" folder
             executor.addNode("system", new TreeNodeWriter.Node("demoPluginNode",
@@ -70,11 +71,13 @@ public class DemoPluginFactory implements PluginFactory {
                 .setLabel("Logout from plugin button")
                 .setIcon("cancel");
 
+        @Override
         public void apply(ToolbarPluginExecutor executor) {
             executor.addToolbarButton("main/systemInfo", LOGOUT_BUTTON);
         }
     }
 
+    @Override
     public void initialize(PluginRegistryBean registry) {
 //        registry.registerPlugin(AdmExtensionPoints.ADM_MAIN_NAVIGATION, new MainMenuPlugin());
 //        registry.registerPlugin(AdmExtensionPoints.ADM_TOOLBAR_PLUGINS, new SystemInfoToolbarPlugin());

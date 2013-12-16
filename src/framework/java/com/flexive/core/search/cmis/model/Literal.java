@@ -60,14 +60,17 @@ public class Literal<T> implements ConditionalExpressionPart<Literal> {
 
     }
 
+    @Override
     public ConditionColumnMapper<? super Literal> getConditionColumnMapper(SqlMapperFactory factory) {
         return factory.filterLiteral();
     }
 
+    @Override
     public PropertyResolver.Table getFilterTableType() {
         throw new UnsupportedOperationException("Literal values cannot be selected from a table.");
     }
 
+    @Override
     public String getFilterTableName() {
         throw new UnsupportedOperationException("Literal values cannot be selected from a table.");
     }

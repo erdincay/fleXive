@@ -117,6 +117,7 @@ public class UserGroup extends AbstractSelectableObjectWithName implements Seria
      *
      * @return group id
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -153,6 +154,7 @@ public class UserGroup extends AbstractSelectableObjectWithName implements Seria
      *
      * @return name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -162,6 +164,7 @@ public class UserGroup extends AbstractSelectableObjectWithName implements Seria
      *
      * @return color
      */
+    @Override
     public String getColor() {
         return color;
     }

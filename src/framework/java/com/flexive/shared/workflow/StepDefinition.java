@@ -112,6 +112,7 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
      *
      * @return the label of the step definition.
      */
+    @Override
     public FxString getLabel() {
         return this.label;
     }
@@ -131,6 +132,7 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
      *
      * @return the id of the step definition
      */
+    @Override
     public long getId() {
         return this.id;
     }

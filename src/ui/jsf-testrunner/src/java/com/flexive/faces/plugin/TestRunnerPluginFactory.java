@@ -46,11 +46,13 @@ import org.apache.commons.logging.LogFactory;
 public class TestRunnerPluginFactory implements PluginFactory {
     private static final Log LOG = LogFactory.getLog(TestRunnerPluginFactory.class);
 
+    @Override
     public void initialize(PluginRegistryBean registry) {
         try {
             Class.forName("com.flexive.tests.shared.FxValueTest");
             registry.registerPlugin(AdmExtensionPoints.ADM_MAIN_NAVIGATION,
                     new Plugin<TreePluginExecutor>() {
+                        @Override
                         public void apply(TreePluginExecutor executor) {
                             executor.addNode("system", new TreeNodeWriter.Node("testRunnerNode",
                                     "Test Runner", TreeNodeWriter.Node.TITLE_CLASS_LEAF, "",

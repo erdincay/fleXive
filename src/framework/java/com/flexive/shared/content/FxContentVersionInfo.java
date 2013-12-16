@@ -338,6 +338,7 @@ public class FxContentVersionInfo implements Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public long getCreatorId() {
             return userId;
         }
@@ -345,6 +346,7 @@ public class FxContentVersionInfo implements Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public long getCreationTime() {
             return time;
         }
@@ -352,6 +354,7 @@ public class FxContentVersionInfo implements Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public long getModificatorId() {
             return userId;
         }
@@ -359,6 +362,7 @@ public class FxContentVersionInfo implements Serializable {
         /**
          * {@inheritDoc}
          */
+        @Override
         public long getModificationTime() {
             return time;
         }

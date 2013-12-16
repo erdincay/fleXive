@@ -880,6 +880,7 @@ public class FxJsfUtils {
             this.collator = FxSharedUtils.getCollator();
         }
 
+        @Override
         public int compare(SelectItem o1, SelectItem o2) {
             if (o1.getLabel() == null && o2.getLabel() != null) {
                 return -1;
@@ -903,6 +904,7 @@ public class FxJsfUtils {
             this.collator = FxSharedUtils.getCollator();
         }
 
+        @Override
         public int compare(FxScriptInfo o1, FxScriptInfo o2) {
             return this.collator.compare(o1.getName(), o2.getName());
         }

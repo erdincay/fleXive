@@ -1,22 +1,20 @@
 package com.flexive.faces.components.menu.yui;
 
-import com.flexive.faces.javascript.menu.MenuItemContainer;
-import com.flexive.faces.javascript.yui.menu.YahooMenuWriter;
-import com.flexive.faces.javascript.yui.menu.YahooMenuItemData;
-import com.flexive.faces.javascript.FxJavascriptUtils;
-import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.JsfRelativeUriMapper;
-import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
+import com.flexive.faces.javascript.FxJavascriptUtils;
+import com.flexive.faces.javascript.menu.MenuItemContainer;
+import com.flexive.faces.javascript.yui.menu.YahooMenuItemData;
+import com.flexive.faces.javascript.yui.menu.YahooMenuWriter;
 
+import javax.faces.component.NamingContainer;
+import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
-import javax.faces.component.UIOutput;
-import javax.faces.component.NamingContainer;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
@@ -81,10 +79,12 @@ public class YahooMenu extends UIOutput implements MenuItemContainer<YahooMenuIt
         FxJavascriptUtils.endStyleSheet(writer);
     }
 
+    @Override
     public void addMenuItem(YahooMenuItemData menuItem) {
         menuItems.add(menuItem);
     }
 
+    @Override
     public List<YahooMenuItemData> getMenuItems() {
         return menuItems;
     }

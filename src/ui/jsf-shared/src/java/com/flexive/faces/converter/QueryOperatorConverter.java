@@ -49,6 +49,7 @@ public class QueryOperatorConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getAsObject(FacesContext context, UIComponent component, String value) throws ConverterException {
         return Operator.valueOf(value);
     }
@@ -56,6 +57,7 @@ public class QueryOperatorConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) throws ConverterException {
         return value != null ? ((Operator) value).name() : Operator.AND.name();
 	}

@@ -44,10 +44,12 @@ import javax.faces.convert.Converter;
  * @version $Rev$
  */
 public class FxPkConverter implements Converter {
+    @Override
     public Object getAsObject(FacesContext facesContext, UIComponent uiComponent, String s) {
         return FxPK.fromString(s);
     }
 
+    @Override
     public String getAsString(FacesContext facesContext, UIComponent uiComponent, Object o) {
         return o.toString();
     }

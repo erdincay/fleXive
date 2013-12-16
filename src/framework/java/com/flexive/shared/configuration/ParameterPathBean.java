@@ -47,11 +47,13 @@ public class ParameterPathBean implements ParameterPath {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getValue() {
         return value;
     }
 
     /** {@inheritDoc} */
+    @Override
     public ParameterScope getScope() {
         return scope;
     }

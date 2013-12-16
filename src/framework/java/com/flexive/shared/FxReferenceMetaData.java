@@ -172,50 +172,62 @@ public class FxReferenceMetaData<T extends Serializable> implements Serializable
         return attributes.hashCode();
     }
 
+    @Override
     public int size() {
         return attributes.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return attributes.isEmpty();
     }
 
+    @Override
     public String put(String key, String value) {
         return attributes.put(key, value);
     }
 
+    @Override
     public void putAll(Map<? extends String, ? extends String> m) {
         attributes.putAll(m);
     }
 
+    @Override
     public String get(Object key) {
         return attributes.get(key);
     }
 
+    @Override
     public boolean containsKey(Object key) {
         return attributes.containsKey(key);
     }
 
+    @Override
     public String remove(Object key) {
         return attributes.remove(key);
     }
 
+    @Override
     public void clear() {
         attributes.clear();
     }
 
+    @Override
     public boolean containsValue(Object value) {
         return attributes.containsValue(value);
     }
 
+    @Override
     public Set<String> keySet() {
         return attributes.keySet();
     }
 
+    @Override
     public Collection<String> values() {
         return attributes.values();
     }
 
+    @Override
     public Set<Map.Entry<String, String>> entrySet() {
         return attributes.entrySet();
     }

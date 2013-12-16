@@ -87,6 +87,7 @@ public class FlexiveSelenium extends DefaultSelenium {
         return new ContextMenu(id);
     }
 
+    @Override
     public String getHtmlSource() {
         return getHTMLSource("<table>", "<table ", "</table>", "<tr>", "<tr ", "</tr>", "<td>", "<td ", "</td>", "<div>", "<div ", "</div>", "<input ", "</input>");
     }
@@ -117,6 +118,7 @@ public class FlexiveSelenium extends DefaultSelenium {
         return AbstractBackendBrowserTest.correctHTML(getHtmlSource_(), reps);
     }
 
+    @Override
     public void waitForPageToLoad(String sec) {
         try {
             super.waitForPageToLoad(sec);
@@ -129,6 +131,7 @@ public class FlexiveSelenium extends DefaultSelenium {
         }
     }
 
+    @Override
     public String getEval(String script) {
         try {
             return super.getEval(script);

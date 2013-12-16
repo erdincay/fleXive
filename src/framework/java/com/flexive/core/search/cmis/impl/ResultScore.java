@@ -59,10 +59,12 @@ public class ResultScore extends AbstractResultColumn<Double, ResultScore> {
         return factory.selectScore();
     }
 
+    @Override
     public Double getSelectedObject() {
         return 0.0;
     }
 
+    @Override
     public String getAlias() {
         return function.getAlias();
     }

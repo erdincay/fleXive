@@ -212,11 +212,13 @@ public enum PropertyValueComparator implements ValueComparator {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isNeedsInput() {
 		return needsInput;
 	}
 
     /** {@inheritDoc} */
+    @Override
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }

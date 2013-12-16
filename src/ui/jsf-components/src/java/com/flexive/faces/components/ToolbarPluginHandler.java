@@ -79,6 +79,7 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
             this.uri = uri;
         }
 
+        @Override
         public void addToolbarButton(String target, Button button) {
             final Matcher matcher = Pattern.compile(target.replace("*", ".*")).matcher(uri);
             if (matcher.find()) {
@@ -86,6 +87,7 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
             }
         }
 
+        @Override
         public void addToolbarSeparatorButton() {
             buttons.add(SEPARATOR);
         }
@@ -99,6 +101,7 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
         super(config);
     }
 
+    @Override
     public void apply(FaceletContext ctx, UIComponent parent) throws IOException, FacesException, FaceletException, ELException {
         // run toolbar plugins
         final Executor executor = new Executor(FxJsfUtils.getRequest().getRequestURIWithoutContext());
@@ -138,6 +141,7 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
         }
     }
 
+    @Override
     public boolean apply(FaceletContext ctx, UIComponent parent, String name) throws IOException, FacesException, FaceletException, ELException {
         // ignore template requests from the included COMMAND_TEMPLATE since we don't have a body
         return true;

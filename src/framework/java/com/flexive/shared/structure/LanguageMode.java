@@ -107,6 +107,7 @@ public enum LanguageMode implements Serializable, ObjectWithLabel {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }

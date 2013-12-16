@@ -53,6 +53,7 @@ public class FxNameForXPathValidator implements Validator {
 
     private static Pattern namePattern = Pattern.compile("[a-zA-Z][a-zA-Z_0-9]*");
 
+    @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
         if (value != null) {
             String name = (String) value;

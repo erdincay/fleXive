@@ -44,10 +44,12 @@ public class BriefcaseItemData extends AbstractSelectableObjectWithName implemen
         return new BriefcaseItemData(briefcaseId, itemId, metaData);
     }
 
+    @Override
     public String getName() {
         return metaData;
     }
 
+    @Override
     public long getId() {
         return itemId;
     }

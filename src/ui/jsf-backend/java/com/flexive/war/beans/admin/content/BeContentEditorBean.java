@@ -145,6 +145,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getParseRequestParameters() throws FxApplicationException {
         try {
             String action = FxJsfUtils.getParameter("action");
@@ -424,6 +425,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public Map<FxWrappedContent, String> getExportData() {
         return new HashMap<FxWrappedContent, String>() {
+            @Override
             public String get(Object key) {
                 if ("export".equals(infoPanelState) && key instanceof FxWrappedContent) {
                     FxWrappedContent con = (FxWrappedContent) key;
@@ -566,6 +568,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public Map<Long, String> getTreeLabelPath() {
         if (treeLabelMap == null) {
             treeLabelMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
+                @Override
                 public String get(Object key) {
                     try {
                         long id = (Long) key;
@@ -595,6 +598,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         if (displayTreeLabelMap == null) {
             displayTreeLabelMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
 
+                @Override
                 public String get(Object key) {
                     final int maxLen = 80;
                     final String label = getTreeLabelPath().get((Long) key);
@@ -1200,6 +1204,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     private static class ReferenceValueFormatter implements FxValueFormatter, Serializable {
         private static final long serialVersionUID = 2283199607456062352L;
 
+        @Override
         public String format(FxValue container, Object value, FxLanguage outputLanguage) {
             if (container instanceof FxReference && value instanceof ReferencedContent) {
                 return "<a href=\"adm/content/contentEditor.jsf?action=editInstance&readOnly=true&id="
@@ -1249,6 +1254,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public Map<FxPK, FxContent> getResultRow() {
         return new HashMap<FxPK, FxContent>() {
+            @Override
             public FxContent get(Object key) {
                 FxPK pk = (FxPK) key;
                 try {
@@ -1298,6 +1304,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public Map<FxPK, Integer> getIndex() {
         return new HashMap<FxPK, Integer>() {
+            @Override
             public Integer get(Object key) {
                 Integer tmp = currentIndexCache.get(key);
                 if (tmp == null) {
@@ -1337,6 +1344,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public Map<Integer, FxPK> getPkByIndex() {
         return new HashMap<Integer, FxPK>() {
 
+            @Override
             public FxPK get(Object key) {
                 // avoid JSF integer/long conversion bug
                 int i = Integer.parseInt(key.toString());

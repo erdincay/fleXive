@@ -104,6 +104,7 @@ public class FxFilter implements Filter {
         return FILESYSTEM_WAR_ROOT;
     }
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         this.config = filterConfig;
         // Get the war deployment directory root on the server file system
@@ -119,6 +120,7 @@ public class FxFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
         try {
             // shutdown timer service if it is installed - cannot use EJB call here since we're shutting down
@@ -181,6 +183,7 @@ public class FxFilter implements Filter {
      * @throws IOException
      * @throws ServletException
      */
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         FxRequestUtils.setCharacterEncoding(servletRequest, servletResponse);
 

@@ -323,6 +323,7 @@ public class WorkflowBean implements Serializable {
      */
     public Map<Step, Boolean> getCanRemoveStep() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Step, Boolean>() {
+            @Override
             public Boolean get(Object key) {
                 if (key == null) {
                     return null;

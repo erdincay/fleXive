@@ -132,6 +132,7 @@ public class ThumbnailServlet implements Servlet {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void setMimeType(String mimeType) {
             response.setContentType(mimeType);
         }
@@ -139,6 +140,7 @@ public class ThumbnailServlet implements Servlet {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void setBinarySize(int size) {
             response.setContentLength(size);
         }
@@ -147,6 +149,7 @@ public class ThumbnailServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         this.servletConfig = servletConfig;
     }
@@ -154,6 +157,7 @@ public class ThumbnailServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ServletConfig getServletConfig() {
         return servletConfig;
     }
@@ -161,6 +165,7 @@ public class ThumbnailServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
@@ -339,6 +344,7 @@ public class ThumbnailServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getServletInfo() {
         return getClass().getName();
     }
@@ -346,6 +352,7 @@ public class ThumbnailServlet implements Servlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void destroy() {
 
     }

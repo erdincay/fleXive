@@ -63,6 +63,7 @@ public class Mandator extends AbstractSelectableObjectWithName implements Serial
      *
      * @return Id
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -72,6 +73,7 @@ public class Mandator extends AbstractSelectableObjectWithName implements Serial
      *
      * @return Mandators name
      */
+    @Override
     public String getName() {
         return name;
     }

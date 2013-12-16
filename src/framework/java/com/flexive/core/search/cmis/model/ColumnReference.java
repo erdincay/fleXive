@@ -162,6 +162,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxPropertyAssignment> getReferencedAssignments() {
         return assignments;
     }
@@ -169,6 +170,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxPropertyAssignment getBaseAssignment() {
         return assignments.isEmpty() ? null : assignments.get(0);
     }
@@ -176,6 +178,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public TableReference getTableReference() {
         return tableReference;
     }
@@ -183,6 +186,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConditionColumnMapper<? super ColumnReference> getConditionColumnMapper(SqlMapperFactory factory) {
         return factory.filterColumnReference();
     }
@@ -190,6 +194,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public PropertyResolver.Table getFilterTableType() {
         return propertyEntry.getTableType();
     }
@@ -197,6 +202,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFilterTableName() {
         switch(getFilterTableType()) {
             case T_CONTENT_DATA_FLAT:
@@ -222,6 +228,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMultivalued() {
         return multivalued;
     }

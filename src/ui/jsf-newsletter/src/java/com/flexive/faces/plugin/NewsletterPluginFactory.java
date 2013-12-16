@@ -34,7 +34,6 @@ package com.flexive.faces.plugin;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.PluginRegistryBean;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
-import com.flexive.shared.FxContext;
 
 /**
  * PluginFactory for the Newsletter plugin
@@ -45,6 +44,7 @@ import com.flexive.shared.FxContext;
 public class NewsletterPluginFactory implements PluginFactory {
 
     private static class NavigationMenuPlugin implements Plugin<TreePluginExecutor> {
+        @Override
         public void apply(TreePluginExecutor executor) {
             final TreeNodeWriter.Node root = new TreeNodeWriter.Node(
                     "Newsletter",
@@ -81,6 +81,7 @@ public class NewsletterPluginFactory implements PluginFactory {
         }
     }
 
+    @Override
     public void initialize(PluginRegistryBean registry) {
         registry.registerPlugin(
                 AdmExtensionPoints.ADM_MAIN_NAVIGATION,

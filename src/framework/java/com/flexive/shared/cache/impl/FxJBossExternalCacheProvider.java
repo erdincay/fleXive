@@ -60,6 +60,7 @@ public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<F
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDescription() {
         return getClass().getName();
     }
@@ -67,6 +68,7 @@ public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<F
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init() throws FxCacheException {
         if (cache != null)
             return;
@@ -88,6 +90,7 @@ public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<F
     /**
      * {@inheritDoc}
      */
+    @Override
     public void shutdown() throws FxCacheException {
         //do nothing since we just "use" a cache and dont provide it
     }
@@ -113,6 +116,7 @@ public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<F
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxBackingCache getInstance() throws FxCacheException {
         return cache;
     }

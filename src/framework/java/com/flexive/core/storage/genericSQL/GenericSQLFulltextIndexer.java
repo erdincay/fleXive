@@ -93,6 +93,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(FxPK pk, Connection con) {
         this.pk = pk;
         this.con = con;
@@ -149,6 +150,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void index(FxPropertyData data) {
         initStatements();
         if (pk == null || psi == null || psu == null || psd == null || psd_all == null) {
@@ -184,6 +186,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void index(FxDelta.FxDeltaChange change) {
         initStatements();
         if (pk == null || psi == null || psu == null || psd == null || psd_all == null) {
@@ -269,6 +272,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void remove() {
         if (pk == null) {
             LOG.warn("Tried to remove a fulltext version with no pk provided!");
@@ -294,6 +298,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void remove(long assignmentId) {
         if (pk == null) {
             LOG.warn("Tried to remove a fulltext version with no pk provided!");
@@ -320,6 +325,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeAllVersions() {
         if (pk == null) {
             LOG.warn("Tried to remove all fulltext versions with no pk provided!");
@@ -344,6 +350,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeType(long typeId) {
         PreparedStatement ps = null;
         try {
@@ -364,6 +371,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void changeLanguage(long assignmentId, long oldLanguage, long newLanguage) {
         PreparedStatement ps = null;
         try {
@@ -386,6 +394,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setLanguage(long assignmentId, long lang) {
         PreparedStatement ps = null;
         try {
@@ -407,6 +416,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void commitChanges() throws SQLException {
         //this implementation commits on index(..)
     }
@@ -414,6 +424,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void cleanup() {
         try {
             if (psi != null) psi.close();
@@ -428,6 +439,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void rebuildIndex() {
         removeIndexForProperty(-1);
         rebuildIndexForProperty(-1);
@@ -436,6 +448,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void rebuildIndexForProperty(long propertyId) {
         PreparedStatement ps = null;
         Statement stmtAssignment = null;
@@ -582,6 +595,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeIndexForProperty(long propertyId) {
         PreparedStatement ps = null;
         try {

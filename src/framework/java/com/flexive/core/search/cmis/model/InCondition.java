@@ -52,10 +52,12 @@ public class InCondition implements Condition {
         this.negated = negated;
     }
 
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.visit(this);
     }
 
+    @Override
     public ConditionList getParent() {
         return parent;
     }

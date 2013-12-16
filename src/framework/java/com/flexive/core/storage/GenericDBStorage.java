@@ -67,6 +67,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBooleanExpression(boolean flag) {
         return flag ? TRUE : FALSE;
     }
@@ -74,6 +75,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBooleanTrueExpression() {
         return TRUE;
     }
@@ -81,6 +83,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBooleanFalseExpression() {
         return FALSE;
     }
@@ -88,6 +91,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public LockStorage getLockStorage() {
         return GenericLockStorage.getInstance();
     }
@@ -95,6 +99,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String escapeReservedWords(String query) {
         return query; //nothing to escape
     }
@@ -103,6 +108,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDirectSearchSupported() {
         return true;
     }
@@ -110,6 +116,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String concat(String... text) {
         if (text.length == 0)
             return "";
@@ -127,6 +134,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String concat_ws(String delimiter, String... text) {
         if (text.length == 0)
             return "";
@@ -144,6 +152,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFromDual() {
         return "";
     }
@@ -151,6 +160,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset) {
         return getLimitOffset(hasWhereClause, limit, offset);
     }
@@ -158,6 +168,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLastContentChangeStatement(boolean live) {
         String contentFilter = live ? " WHERE ISLIVE_VER=TRUE " : "";
         return "SELECT MAX(modified_at) FROM\n" +
@@ -171,6 +182,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setBigString(PreparedStatement ps, int pos, String data) throws SQLException {
         //default implementation using PreparedStatement#setString
         ps.setString(pos, data);
@@ -179,6 +191,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String formatDateCondition(java.util.Date date) {
         return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
     }
@@ -186,6 +199,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String escapeFlatStorageColumn(String column) {
         return column;
     }
@@ -193,6 +207,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSelectListItemReferenceFixStatement() {
         return "UPDATE " + TBL_STRUCT_SELECTLIST_ITEM + " SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM " +
                 TBL_STRUCT_SELECTLIST_ITEM + " p WHERE p.LISTID=?)";
@@ -201,6 +216,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void exportDivision(Connection con, OutputStream out) throws FxApplicationException {
         ZipOutputStream zip = new ZipOutputStream(out);
         GenericDivisionExporter exporter = GenericDivisionExporter.getInstance();
@@ -235,6 +251,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void importDivision(Connection _con, ZipFile zip) throws Exception {
         long startTime = System.currentTimeMillis();
         GenericDivisionImporter importer = getDivisionImporter();
@@ -332,6 +349,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxDivisionExportInfo getDivisionExportInfo(ZipFile zip) throws FxApplicationException {
         return getDivisionImporter().getDivisionExportInfo(zip);
     }

@@ -50,10 +50,12 @@ public class TreeCondition implements Condition {
         this.folderInfo = folderInfo;
     }
 
+    @Override
     public void accept(ConditionNodeVisitor visitor) {
         visitor.visit(this);
     }
 
+    @Override
     public Condition getParent() {
         return parent;
     }

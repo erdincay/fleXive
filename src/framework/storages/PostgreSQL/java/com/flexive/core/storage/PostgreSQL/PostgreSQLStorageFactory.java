@@ -68,6 +68,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getStorageVendor() {
         return VENDOR;
     }
@@ -75,6 +76,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canHandle(DatabaseMetaData dbm) {
         try {
             return VENDOR.equals(dbm.getDatabaseProductName());
@@ -87,6 +89,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public ContentStorage getContentStorage(TypeStorageMode mode) throws FxNotFoundException {
         if (mode == TypeStorageMode.Hierarchical)
             return PostgreSQLHierarchicalStorage.getInstance();
@@ -96,6 +99,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public EnvironmentLoader getEnvironmentLoader() {
         return PostgreSQLEnvironmentLoader.getInstance();
     }
@@ -103,6 +107,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public SequencerStorage getSequencerStorage() {
         return PostgreSQLSequencerStorage.getInstance();
     }
@@ -110,6 +115,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public TreeStorage getTreeStorage() {
         return PostgreSQLTreeStorage.getInstance();
     }
@@ -117,6 +123,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
         return new PostgreSQLDataSelector(search);
     }
@@ -124,6 +131,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public DataFilter getDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         return new PostgreSQLDataFilter(con, search);
     }
@@ -131,6 +139,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
         return new PostgreSQLDialect(environment, contentEngine, query, returnPrimitives);
     }
@@ -138,6 +147,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getIfFunction(String condition, String exprtrue, String exprfalse) {
         return "(CASE WHEN(" + condition + ")THEN(" + exprtrue + ")ELSE (" + exprfalse + ")END)";
     }
@@ -145,6 +155,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getRegExpLikeOperator(String column, String regexp) {
         return column + " ~ " + regexp;
     }
@@ -152,6 +163,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getReferentialIntegrityChecksStatement(boolean enable) {
         return "SET CONSTRAINTS ALL " + (enable ? "IMMEDIATE" : "DEFERRED");
     }
@@ -159,6 +171,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDisableIntegrityTransactional() {
         return true;
     }
@@ -166,6 +179,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTimestampFunction() {
         return "TIMEMILLIS(NOW())";
     }
@@ -173,6 +187,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimit(boolean hasWhereClause, long limit) {
         return " LIMIT " + limit;
     }
@@ -180,6 +195,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
     }
@@ -187,6 +203,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isForeignKeyViolation(Exception exc) {
         if (!(exc instanceof SQLException))
             return false;
@@ -197,6 +214,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isQueryTimeout(Exception e) {
         //not supported out of the box. see: http://stackoverflow.com/questions/1175173/jdbc-postgres-query-with-a-timeout
         return false;
@@ -205,6 +223,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isRollbackOnConstraintViolation() {
         return true;
     }
@@ -212,6 +231,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isUniqueConstraintViolation(Exception exc) {
         if (!(exc instanceof SQLException))
             return false;
@@ -222,6 +242,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDeadlock(Exception exc) {
         if (!(exc instanceof SQLException))
             return false;
@@ -232,6 +253,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isDuplicateKeyViolation(SQLException exc) {
         //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
         return "42710".equals(exc.getSQLState()) || "23505".equals(exc.getSQLState());
@@ -240,6 +262,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean requiresConfigSchema() {
         return false;
     }
@@ -247,6 +270,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
                                     String user, String password, boolean createDB, boolean createSchema,
                                     boolean dropIfExist) throws Exception {
@@ -312,6 +336,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean initConfiguration(Connection con, String schema, boolean dropIfExist) throws Exception {
         Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
         List<String> s = new ArrayList<String>();
@@ -351,6 +376,7 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean initDivision(Connection con, String schema, boolean dropIfExist) throws Exception {
         Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
         List<String> s = new ArrayList<String>();

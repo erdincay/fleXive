@@ -101,6 +101,7 @@ public class DojoMenuItem extends UIOutput implements MenuItemContainer<DojoMenu
     /**
      * {@inheritDoc}
      */
+    @Override
     public void addMenuItem(DojoMenuItemData menuItem) {
         menuItems.add(menuItem);
     }
@@ -108,6 +109,7 @@ public class DojoMenuItem extends UIOutput implements MenuItemContainer<DojoMenu
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<DojoMenuItemData> getMenuItems() {
         return menuItems;
     }

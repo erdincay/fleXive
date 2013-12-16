@@ -120,6 +120,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      *
      * @return multiplicity of this assignment
      */
+    @Override
     public FxMultiplicity getMultiplicity() {
         return (getGroup().mayOverrideBaseMultiplicity() ? this.multiplicity : getGroup().getMultiplicity());
     }

@@ -152,6 +152,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
         this.locale = getLocaleFromFxIsoCode(iso2digit);
     }
 
+    @Override
     public long getId() {
         return id;
     }
@@ -177,6 +178,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getName() {
         return name.getDefaultTranslation();
     }
@@ -184,6 +186,7 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return name;
     }

@@ -67,6 +67,7 @@ public class FxValueRendererFactory {
      * FxDate formatter.
      */
     private static class FxDateFormatter implements FxValueFormatter<Date, FxDate> {
+        @Override
         public String format(FxDate value, Date translation, FxLanguage outputLanguage) {
             return translation != null
                     ? getDateFormat(outputLanguage.getLocale()).format(translation)
@@ -78,6 +79,7 @@ public class FxValueRendererFactory {
      * FxDateRange formatter
      */
     private static class FxDateRangeFormatter implements FxValueFormatter<DateRange, FxDateRange> {
+        @Override
         public String format(FxDateRange container, DateRange value, FxLanguage outputLanguage) {
             return value != null
                     ? formatDate(outputLanguage, value.getLower()) + " - " + formatDate(outputLanguage, value.getUpper())
@@ -93,6 +95,7 @@ public class FxValueRendererFactory {
      * FxDateTime formatter.
      */
     private static class FxDateTimeFormatter implements FxValueFormatter<Date, FxDateTime> {
+        @Override
         public String format(FxDateTime container, Date value, FxLanguage outputLanguage) {
             return value != null
                     ? getDateTimeFormat(outputLanguage.getLocale()).format(value)
@@ -104,6 +107,7 @@ public class FxValueRendererFactory {
      * FxDateTimeRange formatter.
      */
     private static class FxDateTimeRangeFormatter implements FxValueFormatter<DateRange, FxDateTimeRange> {
+        @Override
         public String format(FxDateTimeRange container, DateRange value, FxLanguage outputLanguage) {
             return value != null
                     ? formatDateTime(outputLanguage, value.getLower()) + " - " + formatDateTime(outputLanguage, value.getUpper())
@@ -214,6 +218,7 @@ public class FxValueRendererFactory {
      * FxDouble formatter. Prints fraction digits depending on the size of the value.
      */
     private static class FxDoubleFormatter implements FxValueFormatter<Double, FxDouble> {
+        @Override
         public String format(FxDouble value, Double translation, FxLanguage outputLanguage) {
             if (translation != null) {
                 final NumberFormat format = getNumberFormatInstance(outputLanguage.getLocale());
@@ -250,6 +255,7 @@ public class FxValueRendererFactory {
      * FxFloat formatter.
      */
     private static class FxFloatFormatter implements FxValueFormatter<Float, FxFloat> {
+        @Override
         public String format(FxFloat value, Float translation, FxLanguage outputLanguage) {
             if (translation != null) {
                 final NumberFormat format = getNumberFormatInstance(outputLanguage.getLocale());
@@ -284,6 +290,7 @@ public class FxValueRendererFactory {
      * FxSelectOne formatter
      */
     private static class FxSelectOneFormatter implements FxValueFormatter<FxSelectListItem, FxSelectOne> {
+        @Override
         public String format(FxSelectOne value, FxSelectListItem translation, FxLanguage outputLanguage) {
             return translation != null
                     ? translation.getLabelBreadcrumbPath(outputLanguage)
@@ -295,6 +302,7 @@ public class FxValueRendererFactory {
      * FxSelectMany formatter
      */
     private static class FxSelectManyFormatter implements FxValueFormatter<SelectMany, FxSelectMany> {
+        @Override
         public String format(FxSelectMany value, SelectMany translation, FxLanguage outputLanguage) {
             if (translation == null) {
                 return getEmptyMessage(outputLanguage);
@@ -311,6 +319,7 @@ public class FxValueRendererFactory {
      * FxReference formatter
      */
     private static class FxReferenceFormatter implements FxValueFormatter<ReferencedContent, FxReference> {
+        @Override
         public String format(FxReference container, ReferencedContent translation, FxLanguage outputLanguage) {
             if (translation == null) {
                 return getEmptyMessage(outputLanguage);
@@ -320,6 +329,7 @@ public class FxValueRendererFactory {
     }
 
     private static class FxNoAccessFormatter implements FxValueFormatter<Object, FxNoAccess> {
+        @Override
         public String format(FxNoAccess container, Object value, FxLanguage outputLanguage) {
             final UserTicket ticket = FxContext.getUserTicket();
             return FxSharedUtils.getLocalizedMessage(FxSharedUtils.SHARED_BUNDLE, ticket.getLanguage().getId(),
@@ -331,6 +341,7 @@ public class FxValueRendererFactory {
      * Generic object formatter for all types that are not explicitly covered.
      */
     private static class ObjectFormatter implements FxValueFormatter {
+        @Override
         public String format(FxValue value, Object translation, FxLanguage outputLanguage) {
             return translation != null ? translation.toString() : getEmptyMessage(outputLanguage);
         }

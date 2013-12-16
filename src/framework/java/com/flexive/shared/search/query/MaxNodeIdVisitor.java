@@ -41,17 +41,20 @@ public class MaxNodeIdVisitor implements QueryNodeVisitor {
 	private int maxId = -1;
 
 	/** {@inheritDoc} */
-	public void setCurrentParent(QueryOperatorNode operatorNode) {
+	@Override
+    public void setCurrentParent(QueryOperatorNode operatorNode) {
 		// ignore
 	}
 
 	/** {@inheritDoc} */
-	public void visit(QueryOperatorNode operatorNode) {
+	@Override
+    public void visit(QueryOperatorNode operatorNode) {
 		maxId = Math.max(maxId, operatorNode.getId());
 	}
 
 	/** {@inheritDoc} */
-	public void visit(QueryValueNode valueNode) {
+	@Override
+    public void visit(QueryValueNode valueNode) {
 		maxId = Math.max(maxId, valueNode.getId());
 	}
 

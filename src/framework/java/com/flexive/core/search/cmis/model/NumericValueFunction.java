@@ -77,6 +77,7 @@ public class NumericValueFunction extends ValueFunction<NumericValueFunction> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxPropertyAssignment> getReferencedAssignments() {
         return assignments;
     }
@@ -84,6 +85,7 @@ public class NumericValueFunction extends ValueFunction<NumericValueFunction> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxPropertyAssignment getBaseAssignment() {
         return assignments.isEmpty() ? null : assignments.get(0);
     }
@@ -91,10 +93,12 @@ public class NumericValueFunction extends ValueFunction<NumericValueFunction> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public TableReference getTableReference() {
         return null;
     }
 
+    @Override
     public ConditionColumnMapper<? super NumericValueFunction> getConditionColumnMapper(SqlMapperFactory factory) {
         throw new UnsupportedOperationException("Numeric function in conditions are not supported.");
     }
@@ -102,6 +106,7 @@ public class NumericValueFunction extends ValueFunction<NumericValueFunction> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public PropertyResolver.Table getFilterTableType() {
         throw new UnsupportedOperationException("Numeric function in conditions are not supported.");
     }
@@ -109,6 +114,7 @@ public class NumericValueFunction extends ValueFunction<NumericValueFunction> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFilterTableName() {
         throw new UnsupportedOperationException("Numeric function in conditions are not supported.");
     }
@@ -123,6 +129,7 @@ public class NumericValueFunction extends ValueFunction<NumericValueFunction> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMultivalued() {
         return false;
     }

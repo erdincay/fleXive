@@ -224,6 +224,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @return the internal id of this FxType
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -310,6 +311,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @return name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -317,6 +319,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return label;
     }

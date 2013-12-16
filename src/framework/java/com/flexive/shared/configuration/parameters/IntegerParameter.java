@@ -58,12 +58,14 @@ class IntegerParameter extends ParameterImpl<Integer> {
 	}
 
     /** {@inheritDoc} */
+    @Override
     public Parameter<Integer> copy() {
         return new IntegerParameter(getData(), false);
     }
 
     /** {@inheritDoc} */
-	public Integer getValue(Object dbValue) {
+	@Override
+    public Integer getValue(Object dbValue) {
 		return dbValue != null ? Integer.valueOf(dbValue.toString()) : null;
 	}
     

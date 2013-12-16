@@ -430,10 +430,12 @@ public class PropertyEntry {
                 this.username = username;
             }
 
+            @Override
             public FxLock getLock() {
                 return lock;
             }
 
+            @Override
             public String getUsername() {
                 return username;
             }
@@ -562,6 +564,7 @@ public class PropertyEntry {
                         storageCounts.keys().entrySet()
                 );
                 Collections.sort(tables, new Comparator<Multiset.Entry<String>>() {
+                    @Override
                     public int compare(Multiset.Entry<String> o1, Multiset.Entry<String> o2) {
                         return FxSharedUtils.compare(o2.getCount(), o1.getCount());
                     }
@@ -580,6 +583,7 @@ public class PropertyEntry {
                                 "ex.sqlSearch.err.select.propertyWithFlat",
                                 this.property.getName(),
                                 Iterables.filter(assignments, new Predicate<FxPropertyAssignment>() {
+                                    @Override
                                     public boolean apply(FxPropertyAssignment input) {
                                         return input.isFlatStorageEntry();
                                     }

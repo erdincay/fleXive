@@ -102,6 +102,7 @@ public class RssProviderBean implements Serializable {
                     new FxSharedUtils.ParameterMapper<String, List<RssEntry>>() {
                         private static final long serialVersionUID = -3824115213705113244L;
 
+                        @Override
                         public List<RssEntry> get(Object key) {
                             if (key == null) {
                                 return null;

@@ -246,6 +246,7 @@ public class ContentTreeEditor implements Serializable {
     }
 
     private static class PerformLock implements LockOp {
+        @Override
         public boolean perform(FxPK pk) {
             try {
                 getContentEngine().lock(FxLockType.Permanent, pk);
@@ -260,6 +261,7 @@ public class ContentTreeEditor implements Serializable {
     }
     
     private static class PerformUnlock implements LockOp {
+        @Override
         public boolean perform(FxPK pk) {
             try {
                 getContentEngine().unlock(pk);
@@ -315,6 +317,7 @@ public class ContentTreeEditor implements Serializable {
      * Tree move (cut/paste) operation.
      */
     private static class MoveOp implements TreeMoveOp {
+        @Override
         public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
             getTreeEngine().move(treeMode, nodeId, targetId, position);
         }
@@ -324,6 +327,7 @@ public class ContentTreeEditor implements Serializable {
      * Tree copy operation.
      */
     private static class CopyOp implements TreeMoveOp {
+        @Override
         public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
             getTreeEngine().copy(treeMode, nodeId, targetId, position, true);
         }
@@ -333,6 +337,7 @@ public class ContentTreeEditor implements Serializable {
      * Tree 'copy references' (shallow copy) operation.
      */
     private static class CopyReferencesOp implements TreeMoveOp {
+        @Override
         public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
             getTreeEngine().copy(treeMode, nodeId, targetId, position, false);
         }

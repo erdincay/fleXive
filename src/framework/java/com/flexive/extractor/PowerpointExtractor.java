@@ -90,6 +90,7 @@ class PowerpointExtractor implements POIFSReaderListener {
         }
     }
 
+    @Override
     public void processPOIFSReaderEvent(POIFSReaderEvent event) {
         try{
             if(event.getName().equalsIgnoreCase("PowerPoint Document")) {

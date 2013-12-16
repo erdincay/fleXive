@@ -46,10 +46,12 @@ import org.apache.tools.ant.Task;
 public class SubversionVersionTask extends Task {
     String property;
 
+    @Override
     public String getTaskName() {
         return "svnVersion";
     }
 
+    @Override
     public void execute() throws BuildException {
         if (property == null || property.trim().length() == 0) {
             throw new BuildException("property attribute required.");

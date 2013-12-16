@@ -58,6 +58,7 @@ public class FxQuartzConnectionProvider implements ConnectionProvider {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Connection getConnection() throws SQLException {
 //        System.out.println("Quartz requested a TX connection ("+divisionId+") ... Thread: " + Thread.currentThread() + "; I am: " + this);
         if (divisionId == -42) {
@@ -74,6 +75,7 @@ public class FxQuartzConnectionProvider implements ConnectionProvider {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void shutdown() throws SQLException {
         //nothing to do for us
     }

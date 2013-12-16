@@ -51,6 +51,7 @@ public abstract class AbstractResultLogger implements ResultLogger {
     protected abstract void logResult(String name, double value, String measurement, String unit);
 
     /** {@inheritDoc} */
+    @Override
     public synchronized void logTime(String name, long startTimeMillis, int factor, String measurement) {
         logResult(name, getLoggedResult(startTimeMillis, factor), measurement, "ms");
     }

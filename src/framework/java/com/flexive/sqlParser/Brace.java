@@ -60,6 +60,7 @@ public class Brace implements BraceElement{
         this.id=stmt.getNewBraceElementId();
     }
 
+    @Override
     public int getId() {
         return this.id;
     }
@@ -202,6 +203,7 @@ public class Brace implements BraceElement{
         return conditions.size();
     }
     
+    @Override
     public List<BraceElement> getElements() {
         return conditions;
     }

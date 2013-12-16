@@ -40,38 +40,47 @@ package com.flexive.core.search.cmis.model;
  */
 public class NopConditionNodeVisitor implements ConditionNodeVisitor {
 
+    @Override
     public void enterSubCondition(ConditionList.Connective connective) {
         // nop
     }
 
+    @Override
     public void leaveSubCondition() {
         // nop
     }
 
+    @Override
     public void visit(ComparisonCondition comparison) {
         // nop
     }
 
+    @Override
     public void visit(ContainsCondition contains) {
         // nop
     }
 
+    @Override
     public void visit(LikeCondition like) {
         // nop
     }
 
+    @Override
     public void visit(InCondition in) {
         // nop
     }
 
+    @Override
     public void visit(NullCondition nullCondition) {
         // nop
     }
 
+    @Override
     public void visit(FolderCondition folderCondition) {
         // nop
     }
 
+    @Override
     public void visit(TreeCondition treeCondition) {
         // nop
     }

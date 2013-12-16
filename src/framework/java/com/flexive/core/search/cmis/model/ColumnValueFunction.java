@@ -58,6 +58,7 @@ public abstract class ColumnValueFunction<T extends ColumnValueFunction> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<FxPropertyAssignment> getReferencedAssignments() {
         return columnReference.getReferencedAssignments();
     }
@@ -65,6 +66,7 @@ public abstract class ColumnValueFunction<T extends ColumnValueFunction> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxPropertyAssignment getBaseAssignment() {
         return columnReference.getBaseAssignment();
     }
@@ -72,6 +74,7 @@ public abstract class ColumnValueFunction<T extends ColumnValueFunction> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public TableReference getTableReference() {
         return columnReference.getTableReference();
     }
@@ -79,6 +82,7 @@ public abstract class ColumnValueFunction<T extends ColumnValueFunction> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public PropertyResolver.Table getFilterTableType() {
         return columnReference.getPropertyEntry().getTableType();
     }
@@ -86,6 +90,7 @@ public abstract class ColumnValueFunction<T extends ColumnValueFunction> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFilterTableName() {
         return columnReference.getFilterTableName();
     }
@@ -93,6 +98,7 @@ public abstract class ColumnValueFunction<T extends ColumnValueFunction> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMultivalued() {
         return columnReference.isMultivalued();
     }

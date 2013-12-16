@@ -72,6 +72,7 @@ public class StructureImportBean implements ActionBean, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getParseRequestParameters() throws FxApplicationException {
         String action = FxJsfUtils.getParameter("action");
         if (StringUtils.isBlank(action)) {

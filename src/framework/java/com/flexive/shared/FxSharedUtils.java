@@ -452,6 +452,7 @@ public final class FxSharedUtils {
 
         // sort lexically
         Collections.sort(apps, new Comparator<FxDropApplication>() {
+            @Override
             public int compare(FxDropApplication o1, FxDropApplication o2) {
                 return o1.getName().compareTo(o2.getName());
             }
@@ -1715,6 +1716,7 @@ public final class FxSharedUtils {
     public static class AssignmentPositionSorter implements Comparator<FxAssignment>, Serializable {
         private static final long serialVersionUID = 9197582519027523108L;
 
+        @Override
         public int compare(FxAssignment o1, FxAssignment o2) {
             return FxSharedUtils.compare(o1.getPosition(), o2.getPosition());
         }
@@ -1726,6 +1728,7 @@ public final class FxSharedUtils {
     public static class SelectableObjectSorter implements Comparator<SelectableObject>, Serializable {
         private static final long serialVersionUID = -1786371691872260074L;
 
+        @Override
         public int compare(SelectableObject o1, SelectableObject o2) {
             return FxSharedUtils.compare(o1.getId(), o2.getId());
         }
@@ -1737,6 +1740,7 @@ public final class FxSharedUtils {
     public static class SelectableObjectWithNameSorter implements Comparator<SelectableObjectWithName>, Serializable {
         private static final long serialVersionUID = -1786371691872260074L;
 
+        @Override
         public int compare(SelectableObjectWithName o1, SelectableObjectWithName o2) {
             return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
         }
@@ -1746,6 +1750,7 @@ public final class FxSharedUtils {
      * Comparator for sorting {@link SelectableObjectWithLabel} instances by label.
      */
     public static class SelectableObjectWithLabelSorter implements Comparator<SelectableObjectWithLabel>, Serializable {
+        @Override
         public int compare(SelectableObjectWithLabel o1, SelectableObjectWithLabel o2) {
             return o1.getLabel().getBestTranslation().toLowerCase().compareTo(o2.getLabel().getBestTranslation().toLowerCase());
         }
@@ -1757,6 +1762,7 @@ public final class FxSharedUtils {
     public static class ItemPositionSorter implements Comparator<FxSelectListItem>, Serializable {
         private static final long serialVersionUID = 3366660003069358959L;
 
+        @Override
         public int compare(FxSelectListItem i1, FxSelectListItem i2) {
             return FxSharedUtils.compare(i1.getPosition(), i2.getPosition());
         }
@@ -1785,6 +1791,7 @@ public final class FxSharedUtils {
         /**
          * {@inheritDoc}
          */
+        @Override
         public int compare(FxSelectListItem i1, FxSelectListItem i2) {
             final String label1 = i1.getLabel().getBestTranslation(language);
             final String label2 = i2.getLabel().getBestTranslation(language);

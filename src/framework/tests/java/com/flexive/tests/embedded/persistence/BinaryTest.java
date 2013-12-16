@@ -205,6 +205,7 @@ public class BinaryTest {
                 File transStore = new File(FxBinaryUtils.getTransitDirectory() + File.separatorChar + String.valueOf(divisionId));
                 Assert.assertTrue(transStore.exists() && transStore.isDirectory(), "transit directory [" + transStore.getAbsolutePath() + "] does not exist!");
                 File[] found = transStore.listFiles(new FilenameFilter() {
+                    @Override
                     public boolean accept(File dir, String name) {
                         return name.startsWith(handle + "__");
                     }

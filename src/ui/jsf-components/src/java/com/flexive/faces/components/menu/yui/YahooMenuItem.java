@@ -1,16 +1,16 @@
 package com.flexive.faces.components.menu.yui;
 
-import com.flexive.faces.javascript.menu.MenuItemContainer;
-import com.flexive.faces.javascript.yui.menu.YahooMenuItemData;
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.javascript.menu.MenuItemContainer;
+import com.flexive.faces.javascript.yui.menu.YahooMenuItemData;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Daniel Lichtenberger, UCS
@@ -48,10 +48,12 @@ public class YahooMenuItem extends UIOutput implements MenuItemContainer<YahooMe
         container.addMenuItem(menuItem);
     }
 
+    @Override
     public void addMenuItem(YahooMenuItemData menuItem) {
         menuItems.add(menuItem);
     }
 
+    @Override
     public List<YahooMenuItemData> getMenuItems() {
         return menuItems;
     }

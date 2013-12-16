@@ -99,6 +99,7 @@ public enum TypeState implements Serializable, ObjectWithLabel {
     /**
      * {@inheritDoc}
      */
+    @Override
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }

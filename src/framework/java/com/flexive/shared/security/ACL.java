@@ -126,6 +126,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      *
      * @return the unique id of the ACL
      */
+    @Override
     public long getId() {
         return this.id;
     }
@@ -135,6 +136,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      *
      * @return the unique name of the ACL.
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -155,6 +157,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      *
      * @return the color of the ACL
      */
+    @Override
     public String getColor() {
         return this.color;
     }
@@ -209,6 +212,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      *
      * @return display label
      */
+    @Override
     public FxString getLabel() {
         return label;
     }

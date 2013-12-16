@@ -69,14 +69,17 @@ public class MySqlDialect extends GenericSqlDialect {
      */
     private static final Capabilities CAPABILITIES = new Capabilities() {
 
+        @Override
         public boolean supportsFulltextScoring() {
             return true;
         }
 
+        @Override
         public boolean normalizedFulltextScore() {
             return false;
         }
 
+        @Override
         public boolean supportsPaging() {
             return true;
         }

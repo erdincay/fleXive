@@ -245,6 +245,7 @@ public class FxSummaryInformation implements Serializable {
              *
              * @param event the summary section event.
              */
+            @Override
             public void processPOIFSReaderEvent(POIFSReaderEvent event) {
                 try {
                     SummaryInformation si = (SummaryInformation) PropertySetFactory.create(event.getStream());

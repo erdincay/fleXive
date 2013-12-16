@@ -65,6 +65,7 @@ public class H2HierarchicalStorage extends GenericHierarchicalStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
         //do nothing for H2 since we rely on MVCC
     }

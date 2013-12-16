@@ -48,6 +48,7 @@ public class RequestRelativeUriMapper implements RelativeUriMapper {
         this.request = request;
     }
 
+    @Override
     public String getAbsoluteUri(String uri) {
         return request.getContextPath() + "/" + uri;
     }

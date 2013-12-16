@@ -52,6 +52,7 @@ public abstract class GenericSequencerStorage implements SequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getId(FxSystemSequencer type) throws FxApplicationException {
         return fetchId(type.getSequencerName(), type.isAllowRollover());
     }
@@ -59,6 +60,7 @@ public abstract class GenericSequencerStorage implements SequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getId(String sequencer) throws FxApplicationException {
         if (StringUtils.isEmpty(sequencer) || sequencer.toUpperCase().trim().startsWith("SYS_"))
             throw new FxCreateException(LOG, "ex.sequencer.fetch.invalid", sequencer);
@@ -68,6 +70,7 @@ public abstract class GenericSequencerStorage implements SequencerStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getCurrentId(String sequencer) throws FxApplicationException {
         for (CustomSequencer cs : getCustomSequencers())
             if (cs.getName().equalsIgnoreCase(sequencer))

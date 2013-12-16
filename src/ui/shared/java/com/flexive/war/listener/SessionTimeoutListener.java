@@ -55,12 +55,14 @@ import javax.servlet.http.HttpSessionListener;
 public class SessionTimeoutListener implements HttpSessionListener {
     private static final Log LOG = LogFactory.getLog(SessionTimeoutListener.class);
 
+    @Override
     public void sessionCreated(HttpSessionEvent event) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Session created: " + event.getSession().getId());
         }
     }
 
+    @Override
     public void sessionDestroyed(HttpSessionEvent event) {
         final HttpSession session = event.getSession();
         if (LOG.isDebugEnabled()) {

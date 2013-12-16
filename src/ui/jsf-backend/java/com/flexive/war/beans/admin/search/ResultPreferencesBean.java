@@ -474,6 +474,7 @@ public class ResultPreferencesBean implements Serializable {
             Collections.sort(
                     types,
                     new Comparator<FxType>() {
+                        @Override
                         public int compare(FxType o1, FxType o2) {
                             return o1.getParent() == null ? 1 : o1.getParent().equals(o2) ? -1 : 0;
                         }
@@ -601,6 +602,7 @@ public class ResultPreferencesBean implements Serializable {
                 private static final long serialVersionUID = -1140857482270400036L;
                 private FxEnvironment environment = CacheAdmin.getFilteredEnvironment();
 
+                @Override
                 public String get(Object key) {
                     if (key == null) {
                         return null;

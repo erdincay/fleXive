@@ -50,6 +50,7 @@ public class AdmMandatorTest extends AbstractBackendBrowserTest {
 
     private final static String [] MANDATORS = {"mand01", "mand02", "mand03"};
 
+    @Override
     protected boolean doSkip() {
         return SKIP_CLASS;
     }

@@ -42,6 +42,7 @@ public class FxJBossTreeCacheWrapper extends AbstractJBossTreeCacheWrapper {
 
     private Cache<Object, Object> cache;
 
+    @Override
     public Cache<Object, Object> getCache() {
         return cache;
     }

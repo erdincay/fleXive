@@ -55,10 +55,12 @@ public class JsfPhaseListener implements PhaseListener {
         }
     };
 
+    @Override
     public PhaseId getPhaseId() {
         return PhaseId.ANY_PHASE;
     }
 
+    @Override
     public void beforePhase(PhaseEvent e) {
         currentPhase.set(e.getPhaseId());
         // reset system bean
@@ -67,6 +69,7 @@ public class JsfPhaseListener implements PhaseListener {
         PageBean.getInstance();
     }
 
+    @Override
     public void afterPhase(PhaseEvent e) {
         currentPhase.set(null);
     }
