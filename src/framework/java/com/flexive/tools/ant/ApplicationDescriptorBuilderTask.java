@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.tools.ant;
 
+import com.google.common.base.Charsets;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
@@ -132,7 +133,7 @@ public class ApplicationDescriptorBuilderTask extends Task {
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(file);
-            out.write(contents.getBytes("UTF-8"));
+            out.write(contents.getBytes(Charsets.UTF_8));
             out.flush();
             out.close();
             return true;

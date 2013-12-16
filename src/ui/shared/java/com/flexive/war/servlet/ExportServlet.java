@@ -41,6 +41,7 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.google.common.base.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -164,7 +165,7 @@ public class ExportServlet implements Servlet {
         final String fileName = "xmlExport";
         response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xml\";");
         try {
-            response.getOutputStream().write(xml.getBytes("UTF-8"));
+            response.getOutputStream().write(xml.getBytes(Charsets.UTF_8));
         } finally {
             response.getOutputStream().close();
         }
@@ -184,7 +185,7 @@ public class ExportServlet implements Servlet {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".groovy;");
         try {
-            response.getOutputStream().write(groovyCode.getBytes("UTF-8"));
+            response.getOutputStream().write(groovyCode.getBytes(Charsets.UTF_8));
         } finally {
             response.getOutputStream().close();
         }
@@ -218,7 +219,7 @@ public class ExportServlet implements Servlet {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"content_" + pk + ".xml\";");
         try {
-            response.getOutputStream().write(xml.getBytes("UTF-8"));
+            response.getOutputStream().write(xml.getBytes(Charsets.UTF_8));
         } finally {
             response.getOutputStream().close();
         }

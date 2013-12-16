@@ -47,6 +47,7 @@ import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.TestUsers;
+import com.google.common.base.Charsets;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,7 +105,7 @@ public class BinaryTest {
     public void binaryFromStream() throws Exception {
         final String CONTENT = "test document content";
         final String MIME_TYPE = "text/plain";
-        BinaryDescriptor bin = new BinaryDescriptor("test document.txt", MIME_TYPE, new ByteArrayInputStream(CONTENT.getBytes("UTF-8")));
+        BinaryDescriptor bin = new BinaryDescriptor("test document.txt", MIME_TYPE, new ByteArrayInputStream(CONTENT.getBytes(Charsets.UTF_8)));
         FxType docType = CacheAdmin.getEnvironment().getType(DOCUMENT_TYPE);
         FxContent doc = co.initialize(docType.getId());
         doc.setValue("/FILE", new FxBinary(false, bin));

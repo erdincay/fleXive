@@ -42,6 +42,7 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
+import com.google.common.base.Charsets;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -168,12 +169,8 @@ public class FxValueConverter implements Converter {
                 if (StringUtils.isEmpty(content) || "EMPTY".equalsIgnoreCase(content)) {
                     binary = new BinaryDescriptor();
                 } else if ("Base64".equals(content)) {
-                    try {
-                        binary = new BinaryDescriptor(fileName, size, new ByteArrayInputStream(Base64.decodeBase64(reader.getValue().getBytes("UTF-8"))));
-                        if( binaryId != -100 ) binary.setId(binaryId);
-                    } catch (UnsupportedEncodingException e) {
-                        //can not happen really ...
-                    }
+                    binary = new BinaryDescriptor(fileName, size, new ByteArrayInputStream(Base64.decodeBase64(reader.getValue().getBytes(Charsets.UTF_8))));
+                    if( binaryId != -100 ) binary.setId(binaryId);
                 } else if ("URL".equals(content)) {
                     try {
                         URL url = new URL(reader.getValue());

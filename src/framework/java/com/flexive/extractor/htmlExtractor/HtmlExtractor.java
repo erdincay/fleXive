@@ -32,6 +32,7 @@
 package com.flexive.extractor.htmlExtractor;
 
 import com.flexive.shared.FxFormatUtils;
+import com.google.common.base.Charsets;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -141,7 +142,7 @@ public class HtmlExtractor {
         this.result = new StringBuffer(html.length()/5);
         this.tagText = new StringBuffer(1024);
         try {
-            ByteArrayInputStream byis = new ByteArrayInputStream(html.getBytes("UTF-8"));
+            ByteArrayInputStream byis = new ByteArrayInputStream(html.getBytes(Charsets.UTF_8));
             new HtmlExtractorParser(byis,"UTF-8").extract(this);
         } catch (Exception exc) {
             exc.printStackTrace();

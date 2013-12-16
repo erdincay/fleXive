@@ -130,17 +130,6 @@ public final class FxSharedUtils {
     private static String NODE_ID;
 
     static {
-        int major = -1, minor = -1;
-        try {
-            String[] ver = System.getProperty("java.specification.version").split("\\.");
-            if (ver.length >= 2) {
-                major = Integer.parseInt(ver[0]);
-                minor = Integer.parseInt(ver[1]);
-            }
-        } catch (Exception e) {
-            LOG.error(e);
-        }
-
         try {
             PropertyResourceBundle bundle = (PropertyResourceBundle) PropertyResourceBundle.getBundle("flexive");
             fxVersion = bundle.getString("flexive.version");
@@ -1560,14 +1549,7 @@ public final class FxSharedUtils {
      * @return the UTF-8 byte representation of the given string
      */
     public static byte[] getBytes(String s) {
-        try {
-            return s.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Failed to decode UTF-8 string: " + e.getMessage(), e);
-            }
-            return s.getBytes();
-        }
+        return s.getBytes(Charsets.UTF_8);
     }
 
     /**

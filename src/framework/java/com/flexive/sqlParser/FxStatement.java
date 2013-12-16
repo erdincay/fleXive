@@ -34,6 +34,7 @@ package com.flexive.sqlParser;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.query.VersionFilter;
+import com.google.common.base.Charsets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -309,7 +310,7 @@ public class FxStatement {
         try {
             long startTime = System.currentTimeMillis();
             query = cleanupQueryString(query);
-            ByteArrayInputStream byis = new ByteArrayInputStream(query.getBytes("UTF-8"));
+            ByteArrayInputStream byis = new ByteArrayInputStream(query.getBytes(Charsets.UTF_8));
             FxStatement stmt = new SQL(byis, "UTF-8").statement();
             byis.close();
             stmt.setParserExecutionTime((int) (System.currentTimeMillis() - startTime));

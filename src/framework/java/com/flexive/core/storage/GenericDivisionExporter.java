@@ -39,6 +39,7 @@ import com.flexive.core.storage.binary.FxBinaryUtils;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.impex.FxImportExportConstants;
+import com.google.common.base.Charsets;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -103,7 +104,7 @@ con.close()
      * @throws IOException on errors
      */
     private void write(OutputStream out, StringBuilder sb) throws IOException {
-        out.write(sb.toString().getBytes("UTF-8"));
+        out.write(sb.toString().getBytes(Charsets.UTF_8));
         sb.setLength(0);
     }
 
@@ -114,7 +115,7 @@ con.close()
      * @throws IOException on errors
      */
     private void writeHeader(OutputStream out) throws IOException {
-        out.write(FxXMLUtils.XML_HEADER.getBytes("UTF-8"));
+        out.write(FxXMLUtils.XML_HEADER.getBytes(Charsets.UTF_8));
     }
 
     /**
