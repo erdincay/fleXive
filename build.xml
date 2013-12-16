@@ -56,8 +56,8 @@
 	<property name="compiler.deprecation" value="on"/>
 	<property name="compiler.optimize" value="on"/>
 	<property name="compiler.debug" value="on"/>
-	<property name="compiler.source" value="1.5"/>
-	<property name="compiler.target" value="1.5"/>
+	<property name="compiler.source" value="1.6"/>
+	<property name="compiler.target" value="1.6"/>
     <property name="compiler.fork" value="false"/>
 
 
@@ -467,7 +467,7 @@
 	</target>
 
     <target name="compile.framework"
-            depends="prepare, check.parsers, compile.framework.parsers, compile.framework.main, compile.framework.jdk6"
+            depends="prepare, check.parsers, compile.framework.parsers, compile.framework.main"
             description="Compile the complete core framework"/>
 
     <target name="compile.framework.main">
@@ -477,15 +477,6 @@
                 excludes="**/sqlParser/**,**/extractor/**">
             <classpath refid="classpath.build.framework"/>
         </javac-call>
-    </target>
-
-    <target name="compile.framework.jdk6" if="isJDK6">
-        <echo message="Compiling Java 6+ sources ..."/>
-        <javac-call
-                srcdir="${flexive.src.jdk6.framework.dir}"
-                destdir="${build.framework.classes.dir}">
-			<classpath refid="classpath.build.framework"/>
-		</javac-call>
     </target>
 
     <target name="compile.framework.parsers" description="Compiles the parsers embedded in the core framework">

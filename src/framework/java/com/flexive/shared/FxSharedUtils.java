@@ -118,10 +118,6 @@ public final class FxSharedUtils {
     private static List<String> drops;
     private static List<FxDropApplication> dropApplications;
 
-    /**
-     * Are JDK 6+ extensions allowed to be run on the current VM?
-     */
-    public static final boolean USE_JDK6_EXTENSION;
     public static final boolean WINDOWS = System.getProperty("os.name").contains("Windows");
     public static final String FLEXIVE_DROP_PROPERTIES = "flexive-application.properties";
     public static final String FLEXIVE_STORAGE_PROPERTIES = "flexive-storage.properties";
@@ -144,7 +140,6 @@ public final class FxSharedUtils {
         } catch (Exception e) {
             LOG.error(e);
         }
-        USE_JDK6_EXTENSION = major > 1 || (major == 1 && minor >= 6);
 
         try {
             PropertyResourceBundle bundle = (PropertyResourceBundle) PropertyResourceBundle.getBundle("flexive");

@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
+import com.flexive.core.JDK6Scripting;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.FxEnvironmentImpl;
@@ -153,11 +154,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 name = "unknown";
             if (name.indexOf('.') < 0)
                 throw new FxInvalidParameterException(name, "ex.general.scripting.noExtension", name);
-            if (!FxSharedUtils.isGroovyScript(name) && FxSharedUtils.USE_JDK6_EXTENSION) {
+            if (!FxSharedUtils.isGroovyScript(name)) {
                 try {
-                    return (FxScriptResult) Class.forName("com.flexive.core.JDK6Scripting").
-                            getMethod("runScript", new Class[]{String.class, FxScriptBinding.class, String.class}).
-                            invoke(null, name, binding, code);
+                    return JDK6Scripting.runScript(name, binding, code);
                 } catch (Throwable t) {
                     if (name.endsWith(".class")) {
                         // probable cause: compiled script files (or stubs) ended up in the scripts folder
@@ -1215,19 +1214,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<String[]> getAvailableScriptEngines() throws FxApplicationException {
-        List<String[]> ret = null;
-        if (FxSharedUtils.USE_JDK6_EXTENSION) {
-            try {
-                //noinspection unchecked
-                ret = (List<String[]>) Class.forName("com.flexive.core.JDK6Scripting").
-                        getMethod("getAvailableScriptEngines", new Class[0]).
-                        invoke(null);
-            } catch (Exception e) {
-                LOG.error(e);
-            }
-        }
-        if (ret == null)
-            ret = new ArrayList<String[]>(2);
+        final List<String[]> ret = JDK6Scripting.getAvailableScriptEngines();
         // Add gy extension f. Groovy
         ret.add(0, new String[]{"gy", "gy: Groovy v" + FxSharedUtils.getBundledGroovyVersion() + " (Bundled GroovyShell v" + FxSharedUtils.getBundledGroovyVersion() + ")"});
         return ret;
