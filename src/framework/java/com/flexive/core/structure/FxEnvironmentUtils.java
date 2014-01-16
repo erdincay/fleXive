@@ -37,6 +37,7 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoadException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -136,13 +137,16 @@ final public class FxEnvironmentUtils {
             boolean isSet = isCacheEnvironmentRequestOnly();
             FxContext.get().setAttribute(ATTR_ENV_REQUEST_ONLY, Boolean.FALSE);
             try {
-                final Object env = FxContext.get().getAttribute(CacheAdmin.ATTR_ENVIRONMENT);
-                if (isSet && env != null) {
-                    cachePut(FxContext.get().getDivisionId(), CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, env);
+                if (isSet) {
+                    // reset cached environment, force reload
+                    CacheAdmin.environmentChanged();
+                    StructureLoader.load(FxContext.get().getDivisionId(), true, null);
                 }
             } catch (FxCacheException e) {
                 //noinspection ThrowableInstanceNeverThrown
                 throw new FxApplicationException(e).asRuntimeException();
+            } catch (FxLoadException e) {
+                throw e.asRuntimeException();
             }
         }
     }
