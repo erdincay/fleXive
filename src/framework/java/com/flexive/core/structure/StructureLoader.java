@@ -123,7 +123,9 @@ public final class StructureLoader {
             environment.setSelectLists(loader.loadSelectLists(con, environment));
             environment.setTypes(loader.loadTypes(con, environment));
             environment.setProperties(loader.loadProperties(con, environment));
+            environment.initPropertyLookupTables();
             environment.setAssignments(loader.loadAssignments(con, environment));
+            environment.initAssignmentLookupTables();
             environment.setScripts(loader.loadScripts(con));
             environment.setScriptMappings(loader.loadScriptMapping(con, environment));
             environment.setScriptSchedules(loader.loadScriptSchedules(con, environment));
@@ -282,7 +284,9 @@ public final class StructureLoader {
 
             environment.setGroups(loader.loadGroups(con));
             environment.setProperties(loader.loadProperties(con, environment));
+            environment.initPropertyLookupTables();
             environment.setAssignments(loader.loadAssignments(con, environment));
+            environment.initAssignmentLookupTables();
             environment.resolveDependencies();
 
             environment.updateTimeStamp();

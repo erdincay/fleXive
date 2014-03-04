@@ -34,7 +34,6 @@ package com.flexive.core.structure;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.media.impl.FxMimeType;
 import com.flexive.shared.scripting.FxScriptInfo;
@@ -47,9 +46,14 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.*;
+
+import static com.google.common.collect.ImmutableList.Builder;
 
 /**
  * Runtime object for environment metadata held in the cache.
@@ -60,35 +64,39 @@ import java.util.*;
 public final class FxEnvironmentImpl implements FxEnvironment {
     private static final long serialVersionUID = 7107237825721203341L;
 
-    private List<FxDataType> dataTypes;
-    private List<ACL> acls;
-    private List<Workflow> workflows;
-    private List<FxSelectList> selectLists;
-    private List<FxGroup> groups;
-    private Map<Long, FxProperty> properties;
-    private Map<String, Long> propertyNameLookup;
-    private List<FxPropertyAssignment> propertyAssignmentsEnabled;
-    private List<FxPropertyAssignment> propertyAssignmentsAll;
-    private List<FxPropertyAssignment> propertyAssignmentsSystemInternalRoot;
-    private List<FxGroupAssignment> groupAssignmentsEnabled;
-    private List<FxGroupAssignment> groupAssignmentsAll;
-    private List<FxType> types;
-    private Mandator[] mandators;
+    private ImmutableList<FxDataType> dataTypes;
+    private ImmutableList<ACL> acls;
+    private ImmutableList<Workflow> workflows;
+    private ImmutableList<FxSelectList> selectLists;
+    private ImmutableList<FxGroup> groups;
+    private ImmutableList<FxProperty> properties;
+    private ImmutableList<FxType> types;
+    private ImmutableList<Mandator> mandators;
     private String inactiveMandators = null;
     private String deactivatedTypes = null;
-    private Map<Long, FxAssignment> assignments;
-    private Map<String, Long> assignmentXPathLookup;
-    private List<StepDefinition> stepDefinitions;
-    private List<Step> steps;
-    private List<FxScriptInfo> scripts;
-    private List<FxScriptMapping> scriptMappings;
-    private List<FxScriptSchedule> scriptSchedules;
-    private List<FxLanguage> languages;
-    private List<UserGroup> userGroups;
+    private ImmutableList<FxAssignment> assignments;
+    private ImmutableList<StepDefinition> stepDefinitions;
+    private ImmutableList<Step> steps;
+    private ImmutableList<FxScriptInfo> scripts;
+    private ImmutableList<FxScriptMapping> scriptMappings;
+    private ImmutableList<FxScriptSchedule> scriptSchedules;
+    private ImmutableList<FxLanguage> languages;
+    private ImmutableList<UserGroup> userGroups;
     private FxLanguage systemInternalLanguage;
     private long timeStamp = 0;
     //storage-type-level-mapping
     private Map<String, Map<Long, Map<Integer, List<FxFlatStorageMapping>>>> flatMappings;
+
+    // cached lookup tables and lists
+    private transient ImmutableList<FxPropertyAssignment> propertyAssignmentsEnabled;
+    private transient ImmutableList<FxGroupAssignment> groupAssignmentsEnabled;
+    private transient ImmutableMap<Long, FxAssignment> assignmentLookup;
+    private transient ImmutableMap<String, FxAssignment> assignmentXPathLookup;
+    private transient ImmutableMap<Long, FxProperty> propertyLookup;
+    private transient ImmutableMap<String, FxProperty> propertyNameLookup;
+    private transient ImmutableList<FxPropertyAssignment> propertyAssignmentsAll;
+    private transient ImmutableList<FxPropertyAssignment> propertyAssignmentsSystemInternalRoot;
+    private transient ImmutableList<FxGroupAssignment> groupAssignmentsAll;
 
     public FxEnvironmentImpl() {
     }
@@ -99,34 +107,45 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param e source
      */
     private FxEnvironmentImpl(FxEnvironmentImpl e) {
-        this.dataTypes = new ArrayList<FxDataType>(e.dataTypes);
-        this.acls = new ArrayList<ACL>(e.acls);
-        this.workflows = new ArrayList<Workflow>(e.workflows);
-        this.groups = new ArrayList<FxGroup>(e.groups);
-        this.properties = new HashMap<Long, FxProperty>(e.properties);
-        this.propertyNameLookup = new HashMap<String, Long>(e.propertyNameLookup);
-        this.propertyAssignmentsEnabled = new ArrayList<FxPropertyAssignment>(e.propertyAssignmentsEnabled);
-        this.propertyAssignmentsAll = new ArrayList<FxPropertyAssignment>(e.propertyAssignmentsAll);
-        this.propertyAssignmentsSystemInternalRoot = new ArrayList<FxPropertyAssignment>(e.propertyAssignmentsSystemInternalRoot);
-        this.groupAssignmentsEnabled = new ArrayList<FxGroupAssignment>(e.groupAssignmentsEnabled);
-        this.groupAssignmentsAll = new ArrayList<FxGroupAssignment>(e.groupAssignmentsAll);
-        this.types = new ArrayList<FxType>(e.types);
-        this.mandators = new Mandator[e.mandators.length];
-        System.arraycopy(e.mandators, 0, this.mandators, 0, mandators.length);
-        this.assignments = new HashMap<Long, FxAssignment>(e.assignments);
-        this.assignmentXPathLookup = new HashMap<String, Long>(e.assignmentXPathLookup);
-        this.stepDefinitions = new ArrayList<StepDefinition>(e.stepDefinitions);
-        this.steps = new ArrayList<Step>(e.steps);
+        this.dataTypes = e.dataTypes;
+        this.acls = e.acls;
+        this.workflows = e.workflows;
+        this.groups = e.groups;
+        this.properties = e.properties;
+        this.types = e.types;
+        this.mandators = e.mandators;
+        this.assignments = e.assignments;
+        this.stepDefinitions = e.stepDefinitions;
+        this.steps = e.steps;
         if (e.scripts != null) {
-            this.scripts = new ArrayList<FxScriptInfo>(e.scripts);
-            this.scriptMappings = new ArrayList<FxScriptMapping>(e.scriptMappings);
-            this.scriptSchedules = new ArrayList<FxScriptSchedule>(e.scriptSchedules);
+            this.scripts = e.scripts;
+            this.scriptMappings = e.scriptMappings;
+            this.scriptSchedules = e.scriptSchedules;
         }
-        this.selectLists = new ArrayList<FxSelectList>(e.selectLists);
-        this.languages = new ArrayList<FxLanguage>(e.languages);
+        this.selectLists = e.selectLists;
+        this.languages = e.languages;
         this.timeStamp = e.timeStamp;
-        this.userGroups = new ArrayList<UserGroup>(e.userGroups);
+        this.userGroups = e.userGroups;
+
+        // immutable lookup tables can also be shared
+        this.propertyAssignmentsEnabled = e.propertyAssignmentsEnabled;
+        this.groupAssignmentsEnabled = e.groupAssignmentsEnabled;
+        this.assignmentLookup = e.assignmentLookup;
+        this.assignmentXPathLookup = e.assignmentXPathLookup;
+        this.propertyLookup = e.propertyLookup;
+        this.propertyNameLookup = e.propertyNameLookup;
+        this.propertyAssignmentsAll = e.propertyAssignmentsAll;
+        this.propertyAssignmentsSystemInternalRoot = e.propertyAssignmentsSystemInternalRoot;
+        this.groupAssignmentsAll = e.groupAssignmentsAll;
+
         this.resolveFlatMappings();
+    }
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+
+        initLookupTables();
     }
 
     /**
@@ -135,7 +154,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param dataTypes all known data types
      */
     protected void setDataTypes(List<FxDataType> dataTypes) {
-        this.dataTypes = dataTypes;
+        this.dataTypes = ImmutableList.copyOf(dataTypes);
     }
 
     /**
@@ -144,7 +163,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param acls all defined ALC's
      */
     protected void setAcls(List<ACL> acls) {
-        this.acls = acls;
+        this.acls = ImmutableList.copyOf(acls);
     }
 
     /**
@@ -153,7 +172,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param stepDefinitions all step definitions
      */
     protected void setStepDefinitions(List<StepDefinition> stepDefinitions) {
-        this.stepDefinitions = stepDefinitions;
+        this.stepDefinitions = ImmutableList.copyOf(stepDefinitions);
     }
 
     /**
@@ -161,7 +180,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<StepDefinition> getStepDefinitions() {
-        return Collections.unmodifiableList(stepDefinitions);
+        return stepDefinitions;
     }
 
     /**
@@ -212,7 +231,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         for (Step step : steps)
             if (step.getStepDefinitionId() == stepDefinitionId)
                 list.add(step);
-        return Collections.unmodifiableList(list);
+        return list;
     }
 
     /**
@@ -256,7 +275,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param steps all steps
      */
     protected void setSteps(List<Step> steps) {
-        this.steps = steps;
+        this.steps = ImmutableList.copyOf(steps);
     }
 
     /**
@@ -264,11 +283,11 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<Step> getSteps() {
-        return Collections.unmodifiableList(steps);
+        return steps;
     }
 
     protected void setWorkflows(List<Workflow> workflows) {
-        this.workflows = workflows;
+        this.workflows = ImmutableList.copyOf(workflows);
     }
 
     /**
@@ -277,7 +296,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param mandators all defined mandators
      */
     public void setMandators(Mandator[] mandators) {
-        this.mandators = mandators.clone();
+        this.mandators = ImmutableList.copyOf(mandators);
     }
 
     /**
@@ -286,7 +305,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param lists select lists
      */
     public void setSelectLists(List<FxSelectList> lists) {
-        this.selectLists = lists;
+        this.selectLists = ImmutableList.copyOf(lists);
     }
 
     /**
@@ -295,7 +314,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param groups all defined groups
      */
     protected void setGroups(List<FxGroup> groups) {
-        this.groups = groups;
+        this.groups = ImmutableList.copyOf(groups);
     }
 
     /**
@@ -304,16 +323,67 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param properties all defined properties
      */
     protected void setProperties(List<FxProperty> properties) {
-        this.properties = new HashMap<Long, FxProperty>(properties.size());
-        this.propertyNameLookup = new HashMap<String, Long>(properties.size());
+        this.properties = ImmutableList.copyOf(properties);
+    }
+
+    void initLookupTables() {
+        initPropertyLookupTables();
+
+        initAssignmentLookupTables();
+    }
+
+    void initPropertyLookupTables() {
+        final ImmutableMap.Builder<Long, FxProperty> propLookupBuilder = ImmutableMap.builder();
+        final ImmutableMap.Builder<String, FxProperty> nameLookupBuilder = ImmutableMap.builder();
         for (FxProperty property : properties) {
-            final Long key = property.getId();
-            this.properties.put(key, property);
-            this.propertyNameLookup.put(
-                    property.getName().toUpperCase(),
-                    key
-            );
+            propLookupBuilder.put(property.getId(), property);
+            nameLookupBuilder.put(property.getName().toUpperCase(), property);
         }
+        this.propertyLookup = propLookupBuilder.build();
+        this.propertyNameLookup = nameLookupBuilder.build();
+    }
+
+    void initAssignmentLookupTables() {
+        final ImmutableMap.Builder<Long, FxAssignment> assignmentLookup = ImmutableMap.builder();
+        final ImmutableMap.Builder<String, FxAssignment> assignmentXPathLookup = ImmutableMap.builder();
+        final Builder<FxPropertyAssignment> propertyAssignmentsEnabled = ImmutableList.builder();
+        final Builder<FxGroupAssignment> groupAssignmentsEnabled = ImmutableList.builder();
+
+        final Builder<FxPropertyAssignment> propertyAssignmentsAll = ImmutableList.builder();
+        final List<FxPropertyAssignment> propertyAssignmentsSystemInternalRoot = new ArrayList<FxPropertyAssignment>();
+        final Builder<FxGroupAssignment> groupAssignmentsAll = ImmutableList.builder();
+        
+        for (FxAssignment assignment : assignments) {
+            assignmentXPathLookup.put(assignment.getXPath().toUpperCase(), assignment);
+            assignmentLookup.put(assignment.getId(), assignment);
+            if (assignment.isEnabled()) {
+                if (assignment instanceof FxPropertyAssignment) {
+                    propertyAssignmentsEnabled.add((FxPropertyAssignment) assignment);
+                } else {
+                    groupAssignmentsEnabled.add((FxGroupAssignment) assignment);
+                }
+            }
+            
+            if (assignment instanceof FxPropertyAssignment) {
+                propertyAssignmentsAll.add((FxPropertyAssignment) assignment);
+                if (((FxPropertyAssignment) assignment).getProperty().isSystemInternal() && assignment.getAssignedTypeId() == 0)
+                    propertyAssignmentsSystemInternalRoot.add((FxPropertyAssignment) assignment);
+            } else if (assignment instanceof FxGroupAssignment) {
+                groupAssignmentsAll.add((FxGroupAssignment) assignment);
+            }
+        }
+
+        Collections.sort(propertyAssignmentsSystemInternalRoot);
+
+        this.groupAssignmentsEnabled = groupAssignmentsEnabled.build();
+
+        this.propertyAssignmentsEnabled = propertyAssignmentsEnabled.build();
+        this.assignmentLookup = assignmentLookup.build();
+        this.assignmentXPathLookup = assignmentXPathLookup.build();
+
+        this.propertyAssignmentsAll = propertyAssignmentsAll.build();
+        this.propertyAssignmentsSystemInternalRoot = ImmutableList.copyOf(propertyAssignmentsSystemInternalRoot);
+        this.groupAssignmentsAll = groupAssignmentsAll.build();
     }
 
     /**
@@ -322,7 +392,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param fxTypes all defined types
      */
     protected void setTypes(List<FxType> fxTypes) {
-        this.types = fxTypes;
+        this.types = ImmutableList.copyOf(fxTypes);
     }
 
     /**
@@ -331,51 +401,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param assignments all assignments (mixed groups/properties)
      */
     protected void setAssignments(List<FxAssignment> assignments) {
-        this.assignments = new HashMap<Long, FxAssignment>(assignments.size());
-        this.assignmentXPathLookup = new HashMap<String, Long>(assignments.size());
-        for (FxAssignment assignment : assignments) {
-            final Long key = assignment.getId();
-            this.assignments.put(key, assignment);
-            this.assignmentXPathLookup.put(assignment.getXPath().toUpperCase(), key);
-        }
-        if (propertyAssignmentsAll != null)
-            propertyAssignmentsAll.clear();
-        else
-            propertyAssignmentsAll = new ArrayList<FxPropertyAssignment>(assignments.size() / 2);
-        if (propertyAssignmentsEnabled != null)
-            propertyAssignmentsEnabled.clear();
-        else
-            propertyAssignmentsEnabled = new ArrayList<FxPropertyAssignment>(assignments.size() / 2);
-        if (propertyAssignmentsSystemInternalRoot != null)
-            propertyAssignmentsSystemInternalRoot.clear();
-        else
-            propertyAssignmentsSystemInternalRoot = new ArrayList<FxPropertyAssignment>(25);
-        if (groupAssignmentsAll != null)
-            groupAssignmentsAll.clear();
-        else
-            groupAssignmentsAll = new ArrayList<FxGroupAssignment>(assignments.size() / 2);
-        if (groupAssignmentsEnabled != null)
-            groupAssignmentsEnabled.clear();
-        else
-            groupAssignmentsEnabled = new ArrayList<FxGroupAssignment>(assignments.size() / 2);
-
-        for (FxAssignment curr : assignments) {
-            if (curr instanceof FxPropertyAssignment) {
-                propertyAssignmentsAll.add((FxPropertyAssignment) curr);
-                if (curr.isEnabled())
-                    propertyAssignmentsEnabled.add((FxPropertyAssignment) curr);
-                if (((FxPropertyAssignment) curr).getProperty().isSystemInternal() && curr.getAssignedTypeId() == 0)
-                    propertyAssignmentsSystemInternalRoot.add((FxPropertyAssignment) curr);
-            } else if (curr instanceof FxGroupAssignment) {
-                groupAssignmentsAll.add((FxGroupAssignment) curr);
-                if (curr.isEnabled())
-                    groupAssignmentsEnabled.add((FxGroupAssignment) curr);
-            } else {
-//                LOG.error("Unknown assignment class: " + curr.getClass());
-                //TODO: throw exception
-            }
-        }
-        Collections.sort(propertyAssignmentsSystemInternalRoot);
+        this.assignments = ImmutableList.copyOf(assignments);
     }
 
     /**
@@ -384,7 +410,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param scripts all scripts
      */
     public void setScripts(List<FxScriptInfo> scripts) {
-        this.scripts = scripts;
+        this.scripts = ImmutableList.copyOf(scripts);
     }
 
     /**
@@ -393,7 +419,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param scriptMappings all mappings
      */
     public void setScriptMappings(List<FxScriptMapping> scriptMappings) {
-        this.scriptMappings = scriptMappings;
+        this.scriptMappings = ImmutableList.copyOf(scriptMappings);
     }
 
     /**
@@ -402,7 +428,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param scriptSchedules all script schedules
      */
     public void setScriptSchedules(List<FxScriptSchedule> scriptSchedules) {
-        this.scriptSchedules = scriptSchedules;
+        this.scriptSchedules = ImmutableList.copyOf(scriptSchedules);
     }
 
     /**
@@ -412,7 +438,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @since 3.1
      */
     public void setLanguages(List<FxLanguage> languages) {
-        this.languages = Collections.unmodifiableList(languages);
+        this.languages = ImmutableList.copyOf(languages);
     }
 
     /**
@@ -420,7 +446,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<FxDataType> getDataTypes() {
-        return Collections.unmodifiableList(dataTypes);
+        return dataTypes;
     }
 
     /**
@@ -473,7 +499,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<ACL> getACLs() {
-        return Collections.unmodifiableList(acls);
+        return acls;
     }
 
 
@@ -488,7 +514,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 result.add(acl);
             }
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -522,7 +548,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             }
         }
         Collections.sort(result, new FxSharedUtils.SelectableObjectWithNameSorter());
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -560,7 +586,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<Workflow> getWorkflows() {
-        return Collections.unmodifiableList(workflows);
+        return workflows;
     }
 
     /**
@@ -606,7 +632,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
 
             }
         }
-        return Collections.unmodifiableList(mand);
+        return mand;
     }
 
     /**
@@ -616,7 +642,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     public List<FxGroup> getGroups(boolean returnReferenced, boolean returnUnreferenced,
                                    boolean returnRootGroups, boolean returnSubGroups) {
         if (returnReferenced && returnUnreferenced && returnRootGroups && returnSubGroups) {
-            return Collections.unmodifiableList(groups);
+            return groups;
         }
         ArrayList<FxGroup> result = new ArrayList<FxGroup>(groups.size());
         boolean add;
@@ -646,7 +672,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (add)
                 result.add(group);
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -677,15 +703,15 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     @Override
     public List<FxProperty> getProperties(boolean returnReferenced, boolean returnUnreferenced) {
         if (returnReferenced && returnUnreferenced)
-            return Collections.unmodifiableList(Lists.newArrayList(properties.values()));
+            return properties;
         ArrayList<FxProperty> result = new ArrayList<FxProperty>(properties.size());
-        for (FxProperty prop : properties.values()) {
+        for (FxProperty prop : properties) {
             if (returnReferenced && prop.isReferenced())
                 result.add(prop);
             if (returnUnreferenced && !prop.isReferenced())
                 result.add(prop);
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -693,7 +719,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public FxProperty getProperty(long id) {
-        final FxProperty result = properties.get(id);
+        final FxProperty result = propertyLookup.get(id);
         if (result != null) {
             return result;
         }
@@ -705,9 +731,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public FxProperty getProperty(String name) {
-        final Long id = propertyNameLookup.get(name.toUpperCase());
-        if (id != null) {
-            return properties.get(id);
+        final FxProperty property = propertyNameLookup.get(name.toUpperCase());
+        if (property != null) {
+            return property;
         }
         throw new FxNotFoundException("ex.structure.property.notFound.name", name).asRuntimeException();
     }
@@ -797,11 +823,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<FxPropertyAssignment> getSystemInternalRootPropertyAssignments() {
-        /*if (this.propertyAssignmentsSystemInternalRoot == null) {
-            System.out.println("Null assignments!");
-            new Throwable().printStackTrace();
-        }*/
-        return Collections.unmodifiableList(propertyAssignmentsSystemInternalRoot);
+        return propertyAssignmentsSystemInternalRoot;
     }
 
     /**
@@ -809,7 +831,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<FxPropertyAssignment> getPropertyAssignments(boolean includeDisabled) {
-        return Collections.unmodifiableList(includeDisabled ? propertyAssignmentsAll : propertyAssignmentsEnabled);
+        return includeDisabled ? propertyAssignmentsAll : propertyAssignmentsEnabled;
     }
 
     /**
@@ -824,7 +846,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 result.add(assignment);
             }
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -840,7 +862,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<FxGroupAssignment> getGroupAssignments(boolean includeDisabled) {
-        return Collections.unmodifiableList(includeDisabled ? groupAssignmentsAll : groupAssignmentsEnabled);
+        return includeDisabled ? groupAssignmentsAll : groupAssignmentsEnabled;
     }
 
     /**
@@ -855,7 +877,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 result.add(assignment);
             }
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -872,7 +894,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     @Override
     public List<FxType> getTypes(boolean returnBaseTypes, boolean returnDerivedTypes,
                                  boolean returnTypes, boolean returnRelations) {
-        return Collections.unmodifiableList(_getTypes(returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations));
+        return _getTypes(returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations);
     }
 
     /**
@@ -890,7 +912,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 }
             }
         }
-        return Collections.unmodifiableList(relTypes);
+        return relTypes;
     }
 
     /**
@@ -930,9 +952,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (xPath != null && xPath.trim().length() > 0) {
             xPath = XPathElement.toXPathNoMult(xPath);
             // XPath is already in upper case
-            final Long id = assignmentXPathLookup.get(xPath);
-            if (id != null) {
-                return assignments.get(id);
+            final FxAssignment assignment = assignmentXPathLookup.get(xPath);
+            if (assignment != null) {
+                return assignment;
             }
         }
         throw new FxNotFoundException("ex.structure.assignment.notFound.xpath", xPath).asRuntimeException();
@@ -971,7 +993,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public FxAssignment getAssignment(long assignmentId) {
-        final FxAssignment result = assignments.get(assignmentId);
+        final FxAssignment result = assignmentLookup.get(assignmentId);
         if (result != null) {
             return result;
         }
@@ -984,7 +1006,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     @Override
     public List<FxAssignment> getDerivedAssignments(long assignmentId) {
         List<FxAssignment> ret = null;
-        for (FxAssignment as : assignments.values())
+        for (FxAssignment as : assignments)
             if (as.getBaseAssignmentId() == assignmentId) {
                 if (ret == null)
                     ret = new ArrayList<FxAssignment>(5);
@@ -1063,7 +1085,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 continue;
             ret.add(as.getAssignedType());
         }
-        return Collections.unmodifiableList(ret);
+        return ret;
     }
 
     /**
@@ -1140,7 +1162,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 return mapping;
         getScript(scriptId); //make sure the script exists
         FxScriptMapping mapping = new FxScriptMapping(scriptId, new ArrayList<FxScriptMappingEntry>(0), new ArrayList<FxScriptMappingEntry>(0));
-        scriptMappings.add(mapping);
+        scriptMappings = updateOrAdd(scriptMappings, mapping);
         return mapping;
     }
 
@@ -1151,7 +1173,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<FxScriptSchedule> getScriptSchedules() {
-        return Collections.unmodifiableList(this.scriptSchedules);
+        return this.scriptSchedules;
     }
 
     /**
@@ -1178,7 +1200,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         for (FxScriptSchedule ss : this.scriptSchedules)
             if (ss.getScriptId() == scriptId)
                 result.add(ss);
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -1192,7 +1214,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         //calculate if properties and groups are referenced
         boolean ref;
         if (properties != null)
-            for (FxProperty prop : properties.values()) {
+            for (FxProperty prop : properties) {
                 ref = false;
                 for (FxPropertyAssignment as : this.propertyAssignmentsAll)
                     if (as.getProperty().getId() == prop.getId()) {
@@ -1252,13 +1274,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param _acl ACL to update/add
      */
     protected void updateACL(ACL _acl) {
-        for (int i = 0; i < acls.size(); i++)
-            if (acls.get(i).getId() == _acl.getId()) {
-                acls.remove(i);
-                acls.add(_acl);
-                return;
-            }
-        acls.add(_acl); //add new one
+        this.acls = updateOrAdd(this.acls, _acl);
     }
 
     /**
@@ -1267,11 +1283,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param id ACL to remove
      */
     protected void removeACL(long id) {
-        for (int i = 0; i < acls.size(); i++)
-            if (acls.get(i).getId() == id) {
-                acls.remove(i);
-                return;
-            }
+        this.acls = remove(this.acls, getACL(id));
     }
 
     /**
@@ -1281,13 +1293,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @throws FxNotFoundException on dependency errors
      */
     public void updateType(FxType type) throws FxNotFoundException {
-        try {
-            FxType org = getType(type.getId());
-            types.set(types.indexOf(org), type);
-        } catch (FxRuntimeException e) {
-            //new type
-            types.add(type);
-        }
+        this.types = updateOrAdd(this.types, type);
         resolveDependencies();
     }
 
@@ -1297,7 +1303,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param mandator mandator
      */
     protected void addMandator(Mandator mandator) {
-        mandators = FxArrayUtils.addElement(mandators, mandator, true);
+        this.mandators = updateOrAdd(this.mandators, mandator);
+        this.inactiveMandators = null;
     }
 
     /**
@@ -1306,13 +1313,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param mandator mandator
      */
     public void updateMandator(Mandator mandator) {
-        for (int i = 0; i < mandators.length; i++) {
-            if (mandators[i].getId() == mandator.getId()) {
-                mandators[i] = mandator;
-                return;
-            }
-        }
-        inactiveMandators = null;
+        this.mandators = updateOrAdd(this.mandators, mandator);
+        this.inactiveMandators = null;
     }
 
     /**
@@ -1321,12 +1323,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param mandatorId mandator id to remove
      */
     public void removeMandator(long mandatorId) {
-        ArrayList<Mandator> al = new ArrayList<Mandator>(mandators.length - 1);
-        for (Mandator mandator : mandators) {
-            if (mandator.getId() != mandatorId)
-                al.add(mandator);
-        }
-        mandators = al.toArray(new Mandator[al.size()]);
+        this.mandators = remove(this.mandators, getMandator(mandatorId));
+        this.inactiveMandators = null;
     }
 
     /**
@@ -1338,9 +1336,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @throws FxNotFoundException if dependencies can not be resolved
      */
     public void updateScripting(List<FxScriptInfo> scripts, List<FxScriptMapping> scriptMapping, List<FxScriptSchedule> scriptSchedules) throws FxNotFoundException {
-        this.scripts = scripts;
-        this.scriptMappings = scriptMapping;
-        this.scriptSchedules = scriptSchedules;
+        this.scripts = ImmutableList.copyOf(scripts);
+        this.scriptMappings = ImmutableList.copyOf(scriptMapping);
+        this.scriptSchedules = ImmutableList.copyOf(scriptSchedules);
         resolveDependencies();
     }
 
@@ -1373,7 +1371,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public List<FxSelectList> getSelectLists() {
-        return Collections.unmodifiableList(this.selectLists);
+        return this.selectLists;
     }
 
     /**
@@ -1474,7 +1472,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     public List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level) {
         try {
             final List<FxFlatStorageMapping> mappings = flatMappings.get(storage).get(typeId).get(level);
-            return mappings != null ? mappings : Collections.<FxFlatStorageMapping>emptyList();
+            return mappings != null ? Collections.unmodifiableList(mappings) : Collections.<FxFlatStorageMapping>emptyList();
         } catch (Exception e) {
             return Collections.emptyList();
         }
@@ -1643,6 +1641,34 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @since 3.1.4
      */
     protected void setUserGroups(List<UserGroup> userGroups) {
-        this.userGroups = userGroups;
+        this.userGroups = ImmutableList.copyOf(userGroups);
+    }
+
+    private <T extends SelectableObject> ImmutableList<T> updateOrAdd(List<T> values, T updatedValue) {
+        final Builder<T> result = ImmutableList.builder();
+        boolean found = false;
+        for (T value : values) {
+            if (value.getId() == updatedValue.getId()) {
+                result.add(updatedValue);
+                found = true;
+            } else {
+                result.add(value);
+            }
+        }
+        if (!found) {
+            // add new element
+            result.add(updatedValue);
+        }
+        return result.build();
+    }
+
+    private <T extends SelectableObject> ImmutableList<T> remove(List<T> values, T removeValue) {
+        final Builder<T> result = ImmutableList.builder();
+        for (T value : values) {
+            if (value.getId() != removeValue.getId()) {
+                result.add(value);
+            }
+        }
+        return result.build();
     }
 }

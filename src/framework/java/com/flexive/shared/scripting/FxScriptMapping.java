@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.scripting;
 
+import com.flexive.shared.SelectableObject;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -39,7 +41,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxScriptMapping implements Serializable {
+public class FxScriptMapping implements Serializable, SelectableObject {
     private static final long serialVersionUID = -3109571015814480974L;
     long scriptId;
     List<FxScriptMappingEntry> mappedTypes;
@@ -64,6 +66,11 @@ public class FxScriptMapping implements Serializable {
      * @return script id
      */
     public long getScriptId() {
+        return scriptId;
+    }
+
+    @Override
+    public long getId() {
         return scriptId;
     }
 

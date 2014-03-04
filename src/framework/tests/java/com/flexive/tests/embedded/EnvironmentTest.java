@@ -43,6 +43,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
+import com.google.common.collect.ImmutableList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -63,45 +64,39 @@ public class EnvironmentTest {
     @Test(groups = {"ejb", "environment"})
     public void testGetDataTypes() {
         List<FxDataType> dataTypes = getEnvironment().getDataTypes();
-        testUnmodifiableList("environment.getDataTypes()", dataTypes, FxDataType.String1024);
-        Assert.assertTrue(dataTypes.equals(getEnvironment().getDataTypes()), "Environment list modified.");
+        tryModifyList("environment.getDataTypes()", dataTypes);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetACLs() {
         List<ACL> acls = getEnvironment().getACLs();
-        testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACLCategory.INSTANCE, null));
-        Assert.assertTrue(acls.equals(getEnvironment().getACLs()));
+        tryModifyList("environment.getACLs()", acls);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetACLsByCategory() {
         for (ACLCategory category : ACLCategory.values()) {
             List<ACL> acls = getEnvironment().getACLs(category);
-            testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACLCategory.INSTANCE, null));
-            Assert.assertTrue(acls.equals(getEnvironment().getACLs(category)));
+            tryModifyList("environment.getACLs()", acls);
         }
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetWorkflows() {
         List<Workflow> workflows = getEnvironment().getWorkflows();
-        testUnmodifiableList("environment.getWorkflows()", workflows, new Workflow(-1, "test", null, null, null));
-        Assert.assertTrue(workflows.equals(getEnvironment().getWorkflows()));
+        tryModifyList("environment.getWorkflows()", workflows);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetSteps() {
         List<Step> steps = getEnvironment().getSteps();
-        testUnmodifiableList("environment.getSteps()", steps, new Step(-1, -1, -1, -1));
-        Assert.assertTrue(steps.equals(getEnvironment().getSteps()));
+        tryModifyList("environment.getSteps()", steps);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetStepDefinitions() {
         List<StepDefinition> stepDefinitions = getEnvironment().getStepDefinitions();
-        testUnmodifiableList("environment.getStepDefinitions()", stepDefinitions, new StepDefinition(-1, null, null, -1));
-        Assert.assertTrue(stepDefinitions.equals(getEnvironment().getStepDefinitions()));
+        tryModifyList("environment.getStepDefinitions()", stepDefinitions);
     }
 
     public void testGetStepsByDefinition() {
@@ -116,8 +111,7 @@ public class EnvironmentTest {
     @Test(groups = {"ejb", "environment"})
     public void testGetMandators() {
         List<Mandator> mandators = getEnvironment().getMandators(true, true);
-        testUnmodifiableList("environment.getMandators()", mandators, new Mandator(-1, "test", -1, true, null));
-        Assert.assertTrue(mandators.equals(getEnvironment().getMandators(true, true)));
+        tryModifyList("environment.getMandators()", mandators);
     }
 
 
@@ -125,47 +119,39 @@ public class EnvironmentTest {
     public void testGetGroups() {
         for (int i = 0; i < 16; i++) {
             List<FxGroup> groups = getEnvironment().getGroups((i & 1) > 0, (i & 2) > 0, (i & 4) > 0, (i & 8) > 0);
-            testUnmodifiableList("environment.getGroups()", groups, new FxGroup(1, "test", null, null, true, null, null));
-            Assert.assertTrue(groups.equals(getEnvironment().getGroups((i & 1) > 0, (i & 2) > 0, (i & 4) > 0, (i & 8) > 0)));
+            tryModifyList("environment.getGroups()", groups);
         }
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetProperties() {
         List<FxProperty> properties = getEnvironment().getProperties(true, true);
-        testUnmodifiableList("environment.getProperties()", properties, new FxProperty(-1, "test", null, null, null));
-        Assert.assertTrue(properties.equals(getEnvironment().getProperties(true, true)));
+        tryModifyList("environment.getProperties()", properties);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetPropertyAssignments() {
         List<FxPropertyAssignment> assignments = getEnvironment().getPropertyAssignments();
-        testUnmodifiableList("environment.getPropertyAssignments()", assignments, null);
-        Assert.assertTrue(assignments.equals(getEnvironment().getPropertyAssignments()));
+        tryModifyList("environment.getPropertyAssignments()", assignments);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetPropertyAssignments2() {
         List<FxPropertyAssignment> assignments = getEnvironment().getPropertyAssignments(true);
-        testUnmodifiableList("environment.getPropertyAssignments(true)", assignments, null);
-        Assert.assertTrue(assignments.equals(getEnvironment().getPropertyAssignments(true)));
+        tryModifyList("environment.getPropertyAssignments(true)", assignments);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetGroupAssignments() {
         List<FxGroupAssignment> assignments = getEnvironment().getGroupAssignments();
-        testUnmodifiableList("environment.getGroupAssignments()", assignments, new FxGroupAssignment(-1, false, null, "test", null, -1,
-                new FxMultiplicity(0, 1), 0, null, -1,
-                null, null, null, GroupMode.AnyOf, null));
-        Assert.assertTrue(assignments.equals(getEnvironment().getGroupAssignments()));
+        tryModifyList("environment.getGroupAssignments()", assignments);
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetTypes() {
         for (int i = 0; i < 16; i++) {
             List<FxType> types = getEnvironment().getTypes((i & 1) > 0, (i & 2) > 0, (i & 4) > 0, (i & 8) > 0);
-            testUnmodifiableList("environment.getTypes(...)", types, null);
-            Assert.assertTrue(types.equals(getEnvironment().getTypes((i & 1) > 0, (i & 2) > 0, (i & 4) > 0, (i & 8) > 0)));
+            tryModifyList("environment.getTypes(...)", types);
         }
     }
 
@@ -199,26 +185,17 @@ public class EnvironmentTest {
         }
     }
 
-    private <T> void testUnmodifiableList(String source, List<T> list, T dummyInstance) {
+    private <T> void tryModifyList(String source, List<T> list) {
+        final List<T> referenceList = ImmutableList.copyOf(list);
         try {
-            list.clear();
-            Assert.fail("List can be cleared: " + source);
+            //noinspection unchecked
+            ((List) list).add(new Object());    // add garbage
+
+            // continue - test will check whether the original list is still untouched
+            Assert.assertFalse(list.equals(referenceList), "Environment list modified: " + source);
         } catch (UnsupportedOperationException e) {
-            // continue
-        }
-        try {
-            list.add(dummyInstance);
-            Assert.fail("List can be extended: " + source);
-        } catch (UnsupportedOperationException e) {
-            // continue
-        }
-        try {
-            if (list.size() > 0) {
-                list.remove(0);
-                Assert.fail("List elements can be removed: " + source);
-            }
-        } catch (UnsupportedOperationException e) {
-            // continue
+            // modification not possible - also OK
+            Assert.assertTrue(list.equals(referenceList));
         }
     }
 

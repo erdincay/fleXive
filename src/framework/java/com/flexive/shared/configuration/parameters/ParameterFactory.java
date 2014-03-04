@@ -201,6 +201,7 @@ public final class ParameterFactory {
      * @param data      the parameter data bean
      * @param instance  XStream instance to use for object parameters
      * @return Parameter
+     * @since 3.2.0
      */
     @SuppressWarnings({"unchecked"})
     public static Parameter newXStreamInstance(String className, ParameterData data, XStream instance) {
@@ -263,7 +264,6 @@ public final class ParameterFactory {
         } else {
             // handle all non-primitive objects with generical xml-based parameters
             return new ObjectParameter<T>(null, cls, false);
-            //throw new FxNotFoundException("ex.configuration.parameter.impl.notFound", cls).asRuntimeException();
         }
     }
 }
