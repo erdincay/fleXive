@@ -140,7 +140,6 @@ public final class FxEnvironmentImpl implements FxEnvironment {
 
         this.resolveFlatMappings();
     }
-    }
 
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
