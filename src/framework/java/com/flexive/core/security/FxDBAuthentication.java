@@ -39,6 +39,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.AuthenticationSource;
 import com.flexive.shared.security.UserTicket;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -84,6 +85,11 @@ public final class FxDBAuthentication {
         if (password == null) password = "";
         if (loginname == null) loginname = "";
 
+        final String applicationId = StringUtils.defaultString(inf.getApplicationId());
+        if (StringUtils.isBlank(applicationId)) {
+            LOG.warn("Login: application ID is not set");
+        }
+
         String curSql;
         PreparedStatement ps = null;
         Connection con = null;
@@ -97,7 +103,7 @@ public final class FxDBAuthentication {
                     " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
                     " WHERE APPLICATION=? ORDER BY LAST_LOGIN DESC) d ON a.ID=d.ID WHERE UPPER(a.LOGIN_NAME)=UPPER(?)";
             ps = con.prepareStatement(curSql);
-            ps.setString(1, inf.getApplicationId());
+            ps.setString(1, applicationId);
             ps.setString(2, loginname);
             final ResultSet rs = ps.executeQuery();
 
@@ -175,7 +181,7 @@ public final class FxDBAuthentication {
             ps.close();
             ps = con.prepareStatement(curSql);
             ps.setLong(1, id);
-            ps.setString(2, inf.getApplicationId());
+            ps.setString(2, applicationId);
             ps.executeUpdate();
 
             // Mark user as active in the database
@@ -186,7 +192,7 @@ public final class FxDBAuthentication {
             ps.close();
             ps = con.prepareStatement(curSql);
             ps.setLong(1, id);
-            ps.setString(2, inf.getApplicationId());
+            ps.setString(2, applicationId);
             ps.setBoolean(3, true);
             ps.setLong(4, System.currentTimeMillis());
             ps.setString(5, inf.getRemoteHost());
