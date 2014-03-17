@@ -401,6 +401,19 @@ public interface PhraseEngine {
     public FxPhraseTreeNode loadPhraseTreeNode(int category, long nodeId, long mandatorId, boolean mandator2top, long... mandators) throws FxNotFoundException;
 
     /**
+     * Load a tree nodes without its children
+     *
+     * @param category     phrase category
+     * @param nodeId       node id
+     * @param mandatorId   mandator id
+     * @return phrase node
+     * @throws FxNotFoundException if no node with the requested id/mandator exists
+     * @since 3.2.1
+     */
+    public FxPhraseTreeNode loadPhraseTreeNodeOnly(int category, long nodeId, long mandatorId) throws FxNotFoundException;
+
+
+    /**
      * Move a tree node delta positions (within its own mandator)
      *
      * @param nodeId     node id

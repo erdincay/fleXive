@@ -1272,6 +1272,23 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
         return loadPhraseTreeNode(FxPhraseCategorySelection.CATEGORY_DEFAULT, nodeId, mandatorId, mandator2top, _mandators);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FxPhraseTreeNode loadPhraseTreeNodeOnly(int category, long nodeId, long mandatorId) throws FxNotFoundException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            return loadPhraseTreeNode(con, false, category, nodeId, mandatorId, false);
+        } catch (SQLException exc) {
+            EJBUtils.rollback(ctx);
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(PhraseEngineBean.class, con, null);
+        }
+    }
+
     private FxPhraseTreeNode loadPhraseTreeNode(Connection _con, boolean loadChildren, int category, long nodeId, long mandatorId, boolean mandator2top, long... _mandators) throws FxNotFoundException {
         PreparedStatement ps = null;
         PreparedStatement psPhrase = null;
