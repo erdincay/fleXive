@@ -46,7 +46,7 @@ public class Table {
 
     public enum TYPE { CONTENT }
 
-    private static final Pattern PAT_LANGUAGE_VARIANT = Pattern.compile("[e|d|z][0-9]"); // workaround for additional languages (e1, d1, ...)
+    private static final Pattern PAT_LANGUAGE_VARIANT = Pattern.compile("[e|d|z|p][0-9]"); // workaround for additional languages (e1, d1, ...)
 
     private String sAlias;
     private TYPE tType;

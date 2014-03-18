@@ -176,6 +176,8 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
             return Locale.TRADITIONAL_CHINESE;
         else if("z2".equals(iso2digit))
             return Locale.SIMPLIFIED_CHINESE;
+        else if("p1".equals(iso2digit))
+            return new Locale("pt", "br");
         return new Locale(iso2digit);
     }
 
