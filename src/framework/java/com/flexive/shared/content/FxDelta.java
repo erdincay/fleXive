@@ -602,9 +602,16 @@ public class FxDelta implements Serializable {
                 removes = new ArrayList<FxDeltaChange>(10);
             if (xp.endsWith("/")) {
                 xp = xp.substring(0, xp.length() - 1);
-                removes.add(new FxDeltaChange(FxDeltaChange.ChangeType.Remove, xp, original.getGroupData(xp), null));
-            } else
-                removes.add(new FxDeltaChange(FxDeltaChange.ChangeType.Remove, xp, original.getPropertyData(xp), null));
+                final FxGroupData groupData = original.getGroupData(xp);
+                if (!groupData.isEmpty()) {
+                    removes.add(new FxDeltaChange(FxDeltaChange.ChangeType.Remove, xp, groupData, null));
+                }
+            } else {
+                final FxPropertyData propertyData = original.getPropertyData(xp);
+                if (!propertyData.isEmpty()) {
+                    removes.add(new FxDeltaChange(FxDeltaChange.ChangeType.Remove, xp, propertyData, null));
+                }
+            }
         }
         return new FxDelta(updates, adds, removes);
     }
