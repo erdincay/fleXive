@@ -91,7 +91,7 @@ public class H2SequencerStorage extends GenericSequencerStorage {
      */
     @Override
     public long getMaxId() {
-        return Long.MAX_VALUE;
+        return Integer.MAX_VALUE;
     }
 
     /**

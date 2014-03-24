@@ -850,7 +850,7 @@ public class PropertyEntry {
                         // no value data in other tables
                         valueData = null;
                 }
-                result.setValueData(valueData);
+                result.setValueData(languageId, valueData);
             }
 
             return result;

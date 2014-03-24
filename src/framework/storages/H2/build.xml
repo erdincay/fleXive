@@ -40,7 +40,7 @@ To use the web interface call target 'h2.web'".
 
     <target name="h2.stop" description="Stop the H2 database">
         <java classname="org.h2.tools.Server"
-              classpath="${flexive.lib.dir}/h2.jar" fork="true">
+              classpath="${flexive.lib.dir}/flexive-h2.jar:${flexive.lib.dir}/h2.jar" fork="true">
             <arg line="-tcpShutdown tcp://localhost:9092"/>
         </java>
     </target>
@@ -48,7 +48,7 @@ To use the web interface call target 'h2.web'".
     <target name="h2.web" description="Start the web interface for the H2 database">
         <echo taskname="H2" message="Starting H2 web server and opening browser. Use &lt;Ctrl&gt;-&lt;C&gt; in this console when done."/>
         <java classname="org.h2.tools.Server"
-              classpath="${flexive.lib.dir}/h2.jar" fork="true">
+              classpath="${flexive.lib.dir}/flexive-h2.jar:${flexive.lib.dir}/h2.jar" fork="true">
             <arg line="-web -browser"/>
         </java>
     </target>

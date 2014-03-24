@@ -1285,16 +1285,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //Data types that just use one db row can be handled in a very similar way
             Object translatedValue;
             GregorianCalendar gc = null;
-            for (int i = 0; i < value.getTranslatedLanguages().length; i++) {
-                translatedValue = value.getTranslation(value.getTranslatedLanguages()[i]);
+            final long[] translatedLanguages = value.getTranslatedLanguages();
+            for (long translatedLanguage : translatedLanguages) {
+                translatedValue = value.getTranslation(translatedLanguage);
                 if (translatedValue == null) {
                     LOG.warn("Translation for " + data.getXPath() + " is null!");
                 }
-                ps.setLong(pos_lang, value.getTranslatedLanguages()[i]);
+                ps.setLong(pos_lang, translatedLanguage);
                 if (!value.isMultiLanguage())
                     ps.setBoolean(pos_isdef_lang, true);
                 else
-                    ps.setBoolean(pos_isdef_lang, value.isDefaultLanguage(value.getTranslatedLanguages()[i]));
+                    ps.setBoolean(pos_isdef_lang, value.isDefaultLanguage(translatedLanguage));
                 if (upperColumnPos != -1)
                     ps.setString(upperColumnPos, translatedValue.toString().toUpperCase());
                 int[] pos = insert ? getColumnPosInsert(prop) : getColumnPosUpdate(prop);
@@ -1342,7 +1343,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     case Date:
                         checkDataType(FxDate.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
-                        gc.setTime((java.util.Date) translatedValue);
+                        gc.setTime((Date) translatedValue);
                         //strip all time information, this might not be necessary since ps.setDate() strips them
                         //for most databases but won't hurt either ;)
                         gc.set(GregorianCalendar.HOUR, 0);
@@ -1354,7 +1355,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     case DateTime:
                         checkDataType(FxDateTime.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
-                        gc.setTime((java.util.Date) translatedValue);
+                        gc.setTime((Date) translatedValue);
                         ps.setTimestamp(pos[0], new Timestamp(gc.getTimeInMillis()));
                         break;
                     case DateRange:
@@ -1438,9 +1439,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
                 int valueDataPos = insert ? getValueDataInsertPos(prop.getDataType()) : getValueDataUpdatePos(prop.getDataType());
                 if (value.hasValueData()) {
-                    ps.setInt(valueDataPos, value.getValueDataRaw());
+                    ps.setInt(valueDataPos, value.getValueDataRaw(translatedLanguage));
                 } else
-                    ps.setNull(valueDataPos, java.sql.Types.NUMERIC);
+                    ps.setNull(valueDataPos, Types.NUMERIC);
                 if (batchContentDataChanges())
                     ps.addBatch();
                 else {
@@ -1890,7 +1891,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         if (rs.wasNull())
                             currValue.clearValueData();
                         else
-                            currValue.setValueData(valueData);
+                            currValue.setValueData(currLang, valueData);
                     }
                     if (isMLDef)
                         defLang = currLang;
