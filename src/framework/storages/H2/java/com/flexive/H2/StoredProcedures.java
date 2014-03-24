@@ -52,7 +52,6 @@ import java.sql.*;
  * CREATE ALIAS IF NOT EXISTS TREE_CAPTIONPATHTOID FOR "com.flexive.h2.StoredProcedures.tree_captionPathToID";
  * CREATE ALIAS IF NOT EXISTS TREE_NODEINDEX FOR "com.flexive.h2.StoredProcedures.tree_nodeIndex";
  * CREATE ALIAS IF NOT EXISTS TREE_GETPOSITION FOR "com.flexive.h2.StoredProcedures.tree_getPosition";
- * CREATE ALIAS IF NOT EXISTS CONCAT_WS FOR "com.flexive.h2.StoredProcedures.concat_ws";
  * <p/>
  * Examples:
  * SELECT TIMEMILLIS(NOW());
@@ -694,23 +693,5 @@ public class StoredProcedures {
         } finally {
             ps.close();
         }
-    }
-
-    /**
-     * Concatenate with separator (mimics MySQL CONCAT_WS function)
-     *
-     * @param separator separator to use
-     * @param args      arguments to concatenate
-     * @return concatenated arguments using the separator
-     * @see http://dev.mysql.com/doc/refman/5.0/en/string-functions.html#function_concat-ws
-     */
-    public static String concat_ws(String separator, String... args) {
-        StringBuilder ret = new StringBuilder(500);
-        for (String arg : args) {
-            if (ret.length() > 0)
-                ret.append(separator);
-            ret.append(arg);
-        }
-        return ret.toString();
     }
 }
