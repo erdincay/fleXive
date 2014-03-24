@@ -15,7 +15,7 @@ DROP ALIAS TREE_FTEXT1024_PATHS;
 DROP ALIAS TREE_CAPTIONPATHTOID;
 DROP ALIAS TREE_NODEINDEX;
 DROP ALIAS TREE_GETPOSITION;
-DROP ALIAS CONCAT_WS;
+-- DROP ALIAS CONCAT_WS;
 
 CREATE ALIAS TIMEMILLIS FOR "com.flexive.H2.StoredProcedures.getTimeMillis";
 CREATE ALIAS TOTIMESTAMP FOR "com.flexive.H2.StoredProcedures.toTimestamp";
@@ -32,4 +32,4 @@ CREATE ALIAS TREE_FTEXT1024_PATHS FOR "com.flexive.H2.StoredProcedures.tree_FTEX
 CREATE ALIAS TREE_CAPTIONPATHTOID FOR "com.flexive.H2.StoredProcedures.tree_captionPathToID";
 CREATE ALIAS TREE_NODEINDEX FOR "com.flexive.H2.StoredProcedures.tree_nodeIndex";
 CREATE ALIAS TREE_GETPOSITION FOR "com.flexive.H2.StoredProcedures.tree_getPosition";
-CREATE ALIAS CONCAT_WS FOR "com.flexive.H2.StoredProcedures.concat_ws";
+-- CREATE ALIAS CONCAT_WS FOR "com.flexive.H2.StoredProcedures.concat_ws";
