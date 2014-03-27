@@ -162,6 +162,7 @@ public class FxSQLSearchParams implements Serializable {
     private boolean hintNoResultInfo = false;
     private boolean hintSelectData = false;
     private boolean noInternalSort = false;
+    private boolean ignoreResultPreferences = false;
     private long treeRootId = FxTreeNode.ROOT_NODE;
     private FxTreeMode treeMode = FxTreeMode.Edit;
 
@@ -451,5 +452,23 @@ public class FxSQLSearchParams implements Serializable {
      */
     public void setTreeMode(FxTreeMode treeMode) {
         this.treeMode = treeMode;
+    }
+
+    /**
+     * @return  if true, any {@link com.flexive.shared.search.ResultPreferences} stored by the current user are ignored
+     * @since 3.2.1
+     */
+    public boolean isIgnoreResultPreferences() {
+        return ignoreResultPreferences;
+    }
+
+    /**
+     * Disable any {@link com.flexive.shared.search.ResultPreferences} that might be stored for the current user for this query.
+     *
+     * @param ignoreResultPreferences    when true, no result preferences are used
+     * @since 3.2.1
+     */
+    public void setIgnoreResultPreferences(boolean ignoreResultPreferences) {
+        this.ignoreResultPreferences = ignoreResultPreferences;
     }
 }

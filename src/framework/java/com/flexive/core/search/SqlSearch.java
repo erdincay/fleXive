@@ -43,6 +43,7 @@ import com.flexive.shared.interfaces.ResultPreferencesEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.search.*;
+import com.flexive.shared.search.Table;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
@@ -61,6 +62,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -247,7 +249,13 @@ public class SqlSearch {
             replaceWildcard(df);
             if (statement.getOrderByValues().isEmpty()) {
                 // add user-defined order by
-                for (ResultOrderByInfo column : getResultPreferences(df).getOrderByColumns()) {
+                final List<ResultOrderByInfo> orderByColumns;
+                if (getParams().isIgnoreResultPreferences()) {
+                    orderByColumns = Arrays.asList(new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.ASCENDING));
+                } else {
+                    orderByColumns = getResultPreferences(df).getOrderByColumns();
+                }
+                for (ResultOrderByInfo column : orderByColumns) {
                     try {
                         statement.addOrderByValue(new OrderByValue(column.getColumnName(),
                                 column.getDirection().equals(SortDirection.ASCENDING)));
