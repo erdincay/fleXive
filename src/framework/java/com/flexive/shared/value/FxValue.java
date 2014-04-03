@@ -1175,7 +1175,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if(multiLanguage) {
             if(multiLangData == null || multiLangData.isEmpty())
                 return VALUE_NODATA;
-            //fall back to the first avaulable entry
+            //fall back to the first available entry
             return multiLangData.values().iterator().next();
         }
         return valueData;
@@ -1234,6 +1234,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             multiLangData.put(language, valueData);
         } else
             this.valueData = valueData;
+        //noinspection unchecked
         return (TDerived) this;
     }
 
@@ -1254,6 +1255,16 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     public boolean hasValueData() {
         return this.multiLanguage ? multiLangData != null && multiLangData.size() > 0 : this.valueData != null;
+    }
+
+    /**
+     * Are additional value data set for this value instance in the requested language?
+     *
+     * @return value data set
+     * @since 3.2
+     */
+    public boolean hasValueData(long language) {
+        return this.multiLanguage ? multiLangData != null && multiLangData.containsKey(language) : this.valueData != null;
     }
 
     /**

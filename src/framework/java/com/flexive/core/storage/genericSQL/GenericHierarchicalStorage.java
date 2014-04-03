@@ -1438,7 +1438,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         throw new FxDbException(LOG, "ex.db.notImplemented.store", prop.getDataType().getName());
                 }
                 int valueDataPos = insert ? getValueDataInsertPos(prop.getDataType()) : getValueDataUpdatePos(prop.getDataType());
-                if (value.hasValueData()) {
+                if (value.hasValueData(translatedLanguage)) {
                     ps.setInt(valueDataPos, value.getValueDataRaw(translatedLanguage));
                 } else
                     ps.setNull(valueDataPos, Types.NUMERIC);
