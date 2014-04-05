@@ -1248,6 +1248,20 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     }
 
     /**
+     * Unset value data for a language
+     * @param language language to clear value data for
+     * @since 3.2
+     */
+    public void clearValueData(long language) {
+        this.valueData = VALUE_NODATA;
+        if(multiLangData != null)
+            multiLangData.put(language, VALUE_NODATA);
+        else
+            this.multiLangData = null;
+    }
+
+
+    /**
      * Are additional value data set for this value instance?
      *
      * @return value data set

@@ -1889,7 +1889,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     if (currValue != null) {
                         int valueData = rs.getInt(getValueDataLoadPos(dataType));
                         if (rs.wasNull())
-                            currValue.clearValueData();
+                            currValue.clearValueData(currLang);
                         else
                             currValue.setValueData(currLang, valueData);
                     }

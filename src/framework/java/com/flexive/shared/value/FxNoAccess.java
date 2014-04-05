@@ -227,6 +227,14 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public void clearValueData(long langage) {
+        //not allowed
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
     @Override
     public boolean equals(Object other) {
