@@ -1085,9 +1085,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (this.getClass() != other.getClass()) return false;
         FxValue<?, ?> otherValue = (FxValue<?, ?>) other;
         if (this.isEmpty() != otherValue.isEmpty()) return false;
-        final int thisData = this.hasValueData() ? this.getValueDataRaw() : 0;
-        final int otherData = otherValue.hasValueData() ? otherValue.getValueDataRaw() : 0;
-        if (thisData != otherData)
+        if (!equalsValueData(otherValue))
             return false;
         if (this.isMultiLanguage() != otherValue.isMultiLanguage()) return false;
         if (multiLanguage) {
@@ -1095,6 +1093,31 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         } else {
             if (!this.isEmpty())
                 if (!this.singleValue.equals(otherValue.singleValue)) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Compare value data with another FxValue for equality
+     *
+     * @param otherValue other FxValue to compare
+     * @return equal
+     */
+    private boolean equalsValueData(FxValue<?, ?> otherValue) {
+        if(hasValueData() != otherValue.hasValueData())
+            return false;
+        if (isMultiLanguage() != otherValue.isMultiLanguage())
+            return false;
+        if(!hasValueData())
+            return true;
+        if(!isMultiLanguage())
+            return valueData.equals(otherValue.valueData);
+        else {
+            if(this.multiLangData.size() != otherValue.multiLangData.size())
+                return false;
+            for(long lang: multiLangData.keySet())
+                if(!multiLangData.get(lang).equals(otherValue.multiLangData.get(lang)))
+                    return false;
         }
         return true;
     }
