@@ -1115,9 +1115,13 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         else {
             if(this.multiLangData.size() != otherValue.multiLangData.size())
                 return false;
-            for(long lang: multiLangData.keySet())
-                if(!multiLangData.get(lang).equals(otherValue.multiLangData.get(lang)))
+            for (long lang : multiLangData.keySet()) {
+                if (multiLangData.get(lang) == null) {
+                    if (otherValue.multiLangData.get(lang) != null)
+                        return false;
+                } else if (!multiLangData.get(lang).equals(otherValue.multiLangData.get(lang)))
                     return false;
+            }
         }
         return true;
     }
