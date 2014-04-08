@@ -1305,7 +1305,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @since 3.2
      */
     public boolean hasValueData(long language) {
-        return this.multiLanguage ? multiLangData != null && multiLangData.containsKey(language) : this.valueData != null;
+        return multiLanguage
+                ? multiLangData != null && multiLangData.containsKey(language) && multiLangData.get(language) != null
+                : valueData != null;
     }
 
     /**
