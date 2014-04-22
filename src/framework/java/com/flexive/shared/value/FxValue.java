@@ -39,12 +39,14 @@ import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.ArrayUtils;
+import com.google.common.primitives.Longs;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -73,16 +75,18 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
 
     private final static long[] SYSTEM_LANG_ARRAY = new long[]{FxLanguage.SYSTEM_ID};
 
+    private static final EmptyTranslation EMPTY_TRANSLATION = new EmptyTranslation();
+
     /**
      * Data if <code>multiLanguage</code> is enabled
      */
     protected Map<Long, T> translations;
-    protected Map<Long, Boolean> emptyTranslations;
+    
     /**
      * Value data for each language
      */
     protected Map<Long, Integer> multiLangData = null;
-
+     
     /**
      * Data if <code>multiLanguage</code> is disabled
      */
@@ -106,10 +110,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             if (translations == null) {
                 //valid to pass null, create an empty one
                 this.translations = new HashMap<Long, T>(4);
-                this.emptyTranslations = new HashMap<Long, Boolean>(4);
             } else {
                 this.translations = new HashMap<Long, T>(translations);
-                this.emptyTranslations = new HashMap<Long, Boolean>(translations.size());
             }
             if (this.defaultLanguage < 0) {
                 this.defaultLanguage = FxLanguage.SYSTEM_ID;
@@ -122,12 +124,10 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                         }
             } else
                 this.selectedLanguage = this.defaultLanguage;
-            for (Long lang : this.translations.keySet())
-                emptyTranslations.put(lang, this.translations.get(lang) == null);
         } else {
             if (translations != null && !translations.isEmpty()) {
                 //a translation is provided, use the defaultLanguage element or very first element if not present
-                singleValue = translations.get(defaultLanguage);
+                singleValue = removeEmptyMark(translations.get(defaultLanguage));
                 if (singleValue == null)
                     singleValue = translations.values().iterator().next();
             }
@@ -151,14 +151,11 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         this.readOnly = false;
         if (this.multiLanguage) {
             this.translations = new HashMap<Long, T>(4);
-            this.emptyTranslations = new HashMap<Long, Boolean>(4);
             if (this.defaultLanguage < 0) {
                 this.defaultLanguage = FxLanguage.SYSTEM_ID;
                 this.selectedLanguage = FxLanguage.SYSTEM_ID;
             } else
                 this.selectedLanguage = this.defaultLanguage;
-            for (Long lang : this.translations.keySet())
-                emptyTranslations.put(lang, this.translations.get(lang) == null);
         } else {
             this.defaultLanguage = FxLanguage.SYSTEM_ID;
             this.selectedLanguage = FxLanguage.SYSTEM_ID;
@@ -211,7 +208,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                 if (e.getValue()[pos] != null)
                     this.translations.put(e.getKey(), e.getValue()[pos]);
                 else
-                    this.emptyTranslations.put(e.getKey(), Boolean.TRUE);
+                    this.translations.put(e.getKey(), null);
         } else {
             this.singleValue = (translations == null || translations.isEmpty() ? null : translations.values().iterator().next()[pos]);
             if( this.singleValue == null )
@@ -231,7 +228,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         this(multiLanguage, defaultLanguage, (Map<Long, T>) null);
         if (value == null) {
             if(multiLanguage)
-                this.emptyTranslations.put(defaultLanguage, Boolean.TRUE);
+                markEmpty(defaultLanguage);
             else
                 this.singleValueEmpty = true;
         } else {
@@ -290,7 +287,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             if (multiLanguage) {
                 // clone only hashmap
                 this.translations = new HashMap(clone.translations);
-                this.emptyTranslations = new HashMap(clone.emptyTranslations);
             } else {
                 this.singleValue = clone.singleValue;
                 this.singleValueEmpty = clone.singleValueEmpty;
@@ -298,10 +294,13 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         } else {
             if (multiLanguage) {
                 for (long k : clone.translations.keySet()) {
-                    T t = clone.translations.get(k);
-                    this.translations.put(k, t == null ? null : copyValue(t));
+                    T t = removeEmptyMark(clone.translations.get(k));
+                    if (t == null) {
+                        this.translations.put(k, null);
+                    } else {
+                        this.translations.put(k, t == null ? null : copyValue(t));
+                    }
                 }
-                this.emptyTranslations = new HashMap(clone.emptyTranslations);
             } else {
                 this.singleValue = clone.singleValue == null ? null : copyValue(clone.singleValue);
                 this.singleValueEmpty = clone.singleValueEmpty;
@@ -382,10 +381,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     @SuppressWarnings("unchecked")
     public TDerived setEmpty() {
         if (this.multiLanguage) {
-            if (this.emptyTranslations == null)
-                this.emptyTranslations = new HashMap<Long, Boolean>(this.translations.size());
             for (Long lang : this.translations.keySet())
-                this.emptyTranslations.put(lang, true);
+                markEmpty(lang);
         } else {
             this.singleValueEmpty = true;
         }
@@ -402,11 +399,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     public void setEmpty(long language) {
         if (this.multiLanguage) {
-            if (this.emptyTranslations == null)
-                this.emptyTranslations = new HashMap<Long, Boolean>(this.translations.size());
-            else
-                syncEmptyTranslations();
-            this.emptyTranslations.put(language, true);
+            markEmpty(language);
         } else {
             this.singleValueEmpty = true;
         }
@@ -616,7 +609,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (def != null)
             return def;
         if (translations.size() > 0)
-            return translations.values().iterator().next(); //first available translation if default does not exist
+            return removeEmptyMark(translations.values().iterator().next()); //first available translation if default does not exist
         return null; //empty as last fallback
     }
 
@@ -627,7 +620,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return translation or an empty String if it does not exist
      */
     public T getTranslation(long lang) {
-        return (multiLanguage ? translations.get(lang) : singleValue);
+        return (multiLanguage ? removeEmptyMark(translations.get(lang)) : singleValue);
     }
 
     /**
@@ -708,7 +701,17 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return languages for which translations exist
      */
     public long[] getTranslatedLanguages() {
-        return (multiLanguage ? ArrayUtils.toPrimitive(translations.keySet().toArray(new Long[translations.keySet().size()])) : SYSTEM_LANG_ARRAY.clone());
+        if (multiLanguage) {
+            final List<Long> languages = Lists.newArrayListWithCapacity(translations.size());
+            for (Entry<Long, T> entry : translations.entrySet()) {
+                if (!valueEmpty(entry.getValue())) {
+                    languages.add(entry.getKey());
+                }
+            }
+            return Longs.toArray(languages);
+        } else {
+            return SYSTEM_LANG_ARRAY.clone();
+        }
     }
 
     /**
@@ -718,7 +721,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return translation exists
      */
     public boolean translationExists(long languageId) {
-        return !multiLanguage || translations.get(languageId) != null;
+        return !multiLanguage || (translations.get(languageId) != null && !isMarkedEmpty(languageId));
     }
 
     /**
@@ -738,9 +741,14 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public boolean isEmpty() {
         if (multiLanguage) {
             syncEmptyTranslations();
-            for (boolean check : emptyTranslations.values())
-                if (!check)
+            if (translations.isEmpty()) {
+                return true;
+            }
+            for (Long lang : translations.keySet()) {
+                if (!isMarkedEmpty(lang)) {
                     return false;
+                }
+            }
             return true;
         } else
             return singleValueEmpty;
@@ -766,7 +774,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (!multiLanguage)
             return singleValueEmpty;
         syncEmptyTranslations();
-        return !emptyTranslations.containsKey(lang) || emptyTranslations.get(lang);
+        return isMarkedEmpty(lang);
     }
 
     /**
@@ -775,14 +783,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     private void syncEmptyTranslations() {
         if (!multiLanguage)
             return;
-        if (emptyTranslations == null)
-            emptyTranslations = new HashMap<Long, Boolean>(translations.size());
-        if (emptyTranslations.size() != translations.size()) {
-            //resync
-            for (Long _lang : translations.keySet()) {
-                if (!emptyTranslations.containsKey(_lang))
-                    emptyTranslations.put(_lang, translations.get(_lang) == null);
-            }
+        for (Long _lang : translations.keySet()) {
+            if (translations.get(_lang) == null)
+                markEmpty(_lang);
         }
     }
 
@@ -867,7 +870,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (translations == null) {
             //create an empty one, not yet initialized
             this.translations = new HashMap<Long, T>(4);
-            this.emptyTranslations = new HashMap<Long, Boolean>(4);
         }
         if (language == FxLanguage.SYSTEM_ID)
             throw new FxInvalidParameterException("language", "ex.content.value.invalid.multilanguage.sys").asRuntimeException();
@@ -882,12 +884,10 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         boolean wasEmpty = this.changeListener != null && isEmpty(); //only evaluate if we have a change listener attached
         if (value == null) {
             translations.remove(language);
-            emptyTranslations.remove(language);
         } else {
             if (!value.equals(translations.get(language))) {
                 translations.put(language, value);
             }
-            emptyTranslations.put(language, false);
         }
         if (StringUtils.isNotBlank(xpath) && this.changeListener != null && value == null && !wasEmpty && isEmpty()) {
             change = FxValueChangeListener.ChangeType.Remove;
@@ -1026,7 +1026,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             singleValue = getEmptyValue();
         } else {
             translations.remove(language);
-            emptyTranslations.remove(language);
         }
     }
 
@@ -1089,7 +1088,24 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             return false;
         if (this.isMultiLanguage() != otherValue.isMultiLanguage()) return false;
         if (multiLanguage) {
-            return this.translations.equals(otherValue.translations) && this.defaultLanguage == otherValue.defaultLanguage;
+            for (Entry<Long, T> entry : this.translations.entrySet()) {
+                final Long key = entry.getKey();
+                if (valueEmpty(entry.getValue())) {
+                    if (!valueEmpty(otherValue.translations.get(key))) {
+                        return false;
+                    }
+                } else {
+                    final T value = entry.getValue();
+                    if (!value.equals(otherValue.translations.get(key))) {
+                        return false;
+                    }
+                }
+            }
+            for (Entry<Long, ?> otherEntry : otherValue.translations.entrySet()) {
+                if (!valueEmpty(otherEntry.getValue()) && isTranslationEmpty(otherEntry.getKey())) {
+                    return false;
+                }
+            }
         } else {
             if (!this.isEmpty())
                 if (!this.singleValue.equals(otherValue.singleValue)) return false;
@@ -1252,7 +1268,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param language language to attach data for
      * @param valueData value data to attach
      * @return this
-     * @since 3.2
+     * @since 3.2.1
      */
     public TDerived setValueData(long language, Integer valueData) {
         if(this.multiLanguage) {
@@ -1318,6 +1334,28 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     public void setChangeListener(FxValueChangeListener changeListener) {
         this.changeListener = changeListener;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void markEmpty(Long language) {
+        ((Map) translations).put(language, EMPTY_TRANSLATION);
+    }
+
+    private boolean isMarkedEmpty(Long language) {
+        final Object value = ((Map) translations).get(language);
+        return valueEmpty(value);
+    }
+
+    private boolean valueEmpty(Object value) {
+        return value == null || value instanceof EmptyTranslation;
+    }
+
+    @SuppressWarnings("unchecked")
+    private T removeEmptyMark(Object value) {
+        return value instanceof EmptyTranslation ? null : (T) value;
+    }
+
+    private static class EmptyTranslation implements Serializable {
     }
 }
 

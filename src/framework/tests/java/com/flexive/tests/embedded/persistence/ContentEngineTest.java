@@ -181,23 +181,23 @@ public class ContentEngineTest {
             FxString desc = new FxString("Test data structure");
             desc.setTranslation(FxLanguage.GERMAN, "Testdaten Strukturen");
             FxString hint = new FxString("Hint text ...");
-            FxGroupEdit ge = FxGroupEdit.createNew(TEST_GROUP, desc, hint, true, new FxMultiplicity(0, 1));
+            FxGroupEdit ge = FxGroupEdit.createNew(TEST_GROUP, desc, hint, true, FxMultiplicity.of(0, 1));
             ass.createGroup(ge, "/");
-            FxPropertyEdit pe = FxPropertyEdit.createNew("TestProperty1", desc, hint, true, new FxMultiplicity(0, 1),
+            FxPropertyEdit pe = FxPropertyEdit.createNew("TestProperty1", desc, hint, true, FxMultiplicity.of(0, 1),
                     true, structACL, FxDataType.String1024, null,
                     true, null, null, null).setMultiLang(true).setOverrideMultiLang(true);
             pe.setAutoUniquePropertyName(true);
             ass.createProperty(pe, "/" + TEST_GROUP);
             pe.setName("TestProperty2");
             pe.setDataType(FxDataType.String1024);
-            pe.setMultiplicity(new FxMultiplicity(1, 1));
+            pe.setMultiplicity(FxMultiplicity.of(1, 1));
             ass.createProperty(pe, "/" + TEST_GROUP);
             pe.setName("TestProperty3");
             pe.setDataType(FxDataType.String1024);
-            pe.setMultiplicity(new FxMultiplicity(0, 5));
+            pe.setMultiplicity(FxMultiplicity.of(0, 5));
             ass.createProperty(pe, "/" + TEST_GROUP);
             pe.setName("TestProperty4");
-            pe.setMultiplicity(new FxMultiplicity(1, FxMultiplicity.N));
+            pe.setMultiplicity(FxMultiplicity.of(1, FxMultiplicity.N));
             ass.createProperty(pe, "/" + TEST_GROUP);
             pe.setName("TestProperty5");
             pe.setMultiplicity(FxMultiplicity.MULT_0_1);
@@ -206,47 +206,47 @@ public class ContentEngineTest {
             ass.createProperty(pe, "/" + TEST_GROUP);
             pe.setDefaultValue(orgDefault);
             ge.setName("TestGroup1");
-            ge.setMultiplicity(new FxMultiplicity(0, 2));
+            ge.setMultiplicity(FxMultiplicity.of(0, 2));
             ass.createGroup(ge, "/" + TEST_GROUP);
             pe.setName("TestProperty1_1");
-            pe.setMultiplicity(new FxMultiplicity(0, 1));
+            pe.setMultiplicity(FxMultiplicity.of(0, 1));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1");
             pe.setName("TestProperty1_2");
-            pe.setMultiplicity(new FxMultiplicity(1, 1));
+            pe.setMultiplicity(FxMultiplicity.of(1, 1));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1");
             pe.setName("TestProperty1_3");
-            pe.setMultiplicity(new FxMultiplicity(1, FxMultiplicity.N));
+            pe.setMultiplicity(FxMultiplicity.of(1, FxMultiplicity.N));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1");
             ge.setName("TestGroup1_1");
-            ge.setMultiplicity(new FxMultiplicity(1, 1));
+            ge.setMultiplicity(FxMultiplicity.of(1, 1));
             ass.createGroup(ge, "/" + TEST_GROUP + "/TestGroup1");
             pe.setName("TestProperty1_1_1");
-            pe.setMultiplicity(new FxMultiplicity(0, 1));
+            pe.setMultiplicity(FxMultiplicity.of(0, 1));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1/TestGroup1_1");
             ge.setName("TestGroup1_2");
-            ge.setMultiplicity(new FxMultiplicity(0, FxMultiplicity.N));
+            ge.setMultiplicity(FxMultiplicity.of(0, FxMultiplicity.N));
             ass.createGroup(ge, "/" + TEST_GROUP + "/TestGroup1");
             pe.setName("TestProperty1_2_1");
-            pe.setMultiplicity(new FxMultiplicity(1, 1));
+            pe.setMultiplicity(FxMultiplicity.of(1, 1));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1/TestGroup1_2");
             pe.setName("TestProperty1_2_2");
-            pe.setMultiplicity(new FxMultiplicity(0, 5));
+            pe.setMultiplicity(FxMultiplicity.of(0, 5));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1/TestGroup1_2");
             ge.setName("TestGroup1_2_1");
-            ge.setMultiplicity(new FxMultiplicity(1, 2));
+            ge.setMultiplicity(FxMultiplicity.of(1, 2));
             ass.createGroup(ge, "/" + TEST_GROUP + "/TestGroup1/TestGroup1_2");
             pe.setName("TestProperty1_2_1_1");
-            pe.setMultiplicity(new FxMultiplicity(0, 2));
+            pe.setMultiplicity(FxMultiplicity.of(0, 2));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1/TestGroup1_2/TestGroup1_2_1");
             ge.setName("TestGroup1_3");
-            ge.setMultiplicity(new FxMultiplicity(1, 2));
+            ge.setMultiplicity(FxMultiplicity.of(1, 2));
             ass.createGroup(ge, "/" + TEST_GROUP + "/TestGroup1");
             pe.setName("TestProperty1_3_1");
-            pe.setMultiplicity(new FxMultiplicity(0, 1));
+            pe.setMultiplicity(FxMultiplicity.of(0, 1));
             ass.createProperty(pe, "/" + TEST_GROUP + "/TestGroup1/TestGroup1_3");
             pe.setName("TestNumber");
             pe.setDataType(FxDataType.Number);
-            pe.setMultiplicity(new FxMultiplicity(0, 2));
+            pe.setMultiplicity(FxMultiplicity.of(0, 2));
             ass.createProperty(pe, "/" + TEST_GROUP);
             pe.setName("TestNumberSL");
             pe.setDataType(FxDataType.Number);
@@ -255,23 +255,23 @@ public class ContentEngineTest {
             pe.setMultiLang(true);
             pe.setName("TestFloat");
             pe.setDataType(FxDataType.Float);
-            pe.setMultiplicity(new FxMultiplicity(0, 2));
+            pe.setMultiplicity(FxMultiplicity.of(0, 2));
             ass.createProperty(pe, "/" + TEST_GROUP);
 
-            ge = FxGroupEdit.createNew(MULTI_GROUP, desc, hint, true, new FxMultiplicity(0, 1));
+            ge = FxGroupEdit.createNew(MULTI_GROUP, desc, hint, true, FxMultiplicity.of(0, 1));
             ass.createGroup(ge, "/");
-            pe = FxPropertyEdit.createNew("TestProperty101", desc, hint, true, new FxMultiplicity(MIN_MULTIPLICITY, MAX_MULTIPLICITY),
+            pe = FxPropertyEdit.createNew("TestProperty101", desc, hint, true, FxMultiplicity.of(MIN_MULTIPLICITY, MAX_MULTIPLICITY),
                     true, structACL, FxDataType.String1024, null,
                     true, null, null, null).setMultiLang(true).setOverrideMultiLang(true);
             pe.setAutoUniquePropertyName(true);
             ass.createProperty(pe, "/" + MULTI_GROUP);
             pe.setName("TestProperty102");
             pe.setDataType(FxDataType.String1024);
-            pe.setMultiplicity(new FxMultiplicity(1, 1));
+            pe.setMultiplicity(FxMultiplicity.of(1, 1));
             ass.createProperty(pe, "/" + MULTI_GROUP);
             pe.setName("TestProperty103");
             pe.setDataType(FxDataType.String1024);
-            pe.setMultiplicity(new FxMultiplicity(0, 5));
+            pe.setMultiplicity(FxMultiplicity.of(0, 5));
             ass.createProperty(pe, "/" + MULTI_GROUP);
 
             te.save(FxTypeEdit.createNew(MULTI_TYPE, new FxString("Test data multi"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
@@ -281,14 +281,14 @@ public class ContentEngineTest {
         }
         //create article te
         FxPropertyEdit pe = FxPropertyEdit.createNew("MyTitle", new FxString("Description"), new FxString("Hint"),
-                true, new FxMultiplicity(0, 1),
+                true, FxMultiplicity.of(0, 1),
                 true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                 true, null, null, null).setAutoUniquePropertyName(true).setMultiLang(true).setOverrideMultiLang(true);
         long articleId = te.save(FxTypeEdit.createNew(TYPE_ARTICLE, new FxString("Article test type"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
         ass.createProperty(articleId, pe, "/");
         pe.setName("Text");
         pe.setDataType(FxDataType.Text);
-        pe.setMultiplicity(new FxMultiplicity(0, 2));
+        pe.setMultiplicity(FxMultiplicity.of(0, 2));
         ass.createProperty(articleId, pe, "/");
 
         long testDataId = te.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
@@ -504,7 +504,7 @@ public class ContentEngineTest {
         assertTrue(p.isProperty());
         assertTrue("TESTPROPERTY1_2_1_1".equals(p.getAlias()));
         assertTrue("TESTGROUP1_2_1".equals(p.getParent().getAlias()));
-        assertTrue(p.getAssignmentMultiplicity().equals(new FxMultiplicity(0, 2)));
+        assertTrue(p.getAssignmentMultiplicity().equals(FxMultiplicity.of(0, 2)));
         assertTrue(4 == p.getIndices().length);
         //check required with empty values
         try {

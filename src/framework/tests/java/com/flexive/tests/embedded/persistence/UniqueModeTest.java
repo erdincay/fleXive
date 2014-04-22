@@ -97,7 +97,7 @@ public class UniqueModeTest extends StructureTestBase {
         ass.createProperty(
                 typeId,
                 FxPropertyEdit.createNew(name, new FxString("UniqueMode." + mode + " UnitTest property " + name),
-                        new FxString("hint..."), new FxMultiplicity(1, maxMultiplicity), acl, FxDataType.String1024).setUniqueMode(mode),
+                        new FxString("hint..."), FxMultiplicity.of(1, maxMultiplicity), acl, FxDataType.String1024).setUniqueMode(mode),
                 XPath);
     }
 

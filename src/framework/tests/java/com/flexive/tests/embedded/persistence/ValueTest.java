@@ -128,7 +128,7 @@ public class ValueTest {
     private void createProperty(FxDataType dataType) throws FxApplicationException {
         FxPropertyEdit prop = FxPropertyEdit.createNew("VTS" + dataType.name(),
                 new FxString("UnitTest for " + dataType.name()),
-                new FxString("hint..."), new FxMultiplicity(1, 1),
+                new FxString("hint..."), FxMultiplicity.of(1, 1),
                 aclStructure, dataType).setMultiLang(false).setOverrideMultiLang(true);
         switch (dataType) {
             case Reference:

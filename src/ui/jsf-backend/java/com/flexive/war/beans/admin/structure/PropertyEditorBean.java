@@ -1291,7 +1291,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
                 || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
             if (isOverrideMultiplicity() && getProperty().mayOverrideBaseMultiplicity()) {
                 FxJsfUtils.checkMultiplicity(min, max);
-                assignment.setMultiplicity(new FxMultiplicity(min, max));
+                assignment.setMultiplicity(FxMultiplicity.of(min, max));
             }
             assignment.setDefaultMultiplicity(this.defaultMultiplicity);
 
@@ -1364,7 +1364,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         }
 
         if (!isSystemInternal() || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
-            property.setMultiplicity(new FxMultiplicity(min, max));
+            property.setMultiplicity(FxMultiplicity.of(min, max));
         }
     }
 

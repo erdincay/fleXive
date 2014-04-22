@@ -480,7 +480,7 @@ public class StructureExporterTest {
 
             // change the assignment's multiplicity
             FxPropertyAssignmentEdit ed = ((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment("DERIVEDTYPE01/PROP1")).asEditable();
-            ed.setMultiplicity(new FxMultiplicity(0, 3));
+            ed.setMultiplicity(FxMultiplicity.of(0, 3));
             ae.save(ed, false);
 
             final StructureExporterCallback callback = StructureExporter.newInstance(derived.getId(), false);

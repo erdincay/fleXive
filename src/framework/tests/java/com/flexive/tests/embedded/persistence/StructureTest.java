@@ -119,7 +119,7 @@ public class StructureTest {
             FxString desc = new FxString("Test data structure");
             desc.setTranslation(FxLanguage.GERMAN, "Testdaten Strukturen");
             FxString hint = new FxString("Hint text ...");
-            FxGroupEdit ge = FxGroupEdit.createNew("TEST_DIRECT_DATA", desc, hint, true, new FxMultiplicity(0, 1));
+            FxGroupEdit ge = FxGroupEdit.createNew("TEST_DIRECT_DATA", desc, hint, true, FxMultiplicity.of(0, 1));
             ae.createGroup(testId, ge, "/");
             ACL structACL = null;
             for (ACL a : env().getACLs())
@@ -128,17 +128,17 @@ public class StructureTest {
                     break;
                 }
             assertTrue(structACL != null, "No available ACL for structure found!");
-            FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, new FxMultiplicity(0, 1),
+            FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, FxMultiplicity.of(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
             ae.createProperty(testId, pe, "/");
             pe.setName("TestDirectProperty2");
             pe.setDataType(FxDataType.String1024);
-            pe.setMultiplicity(new FxMultiplicity(1, 1));
+            pe.setMultiplicity(FxMultiplicity.of(1, 1));
             ae.createProperty(testId, pe, "/");
             pe.setName("TestDirectProperty3");
             pe.setDataType(FxDataType.String1024);
-            pe.setMultiplicity(new FxMultiplicity(0, 5));
+            pe.setMultiplicity(FxMultiplicity.of(0, 5));
             ae.createProperty(testId, pe, "/");
         } catch (FxApplicationException e) {
             Assert.fail(e.getMessage());
@@ -200,14 +200,14 @@ public class StructureTest {
                     break;
                 }
             assertTrue(structACL != null, "No available ACL for structure found!");
-            FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, new FxMultiplicity(0, 1),
+            FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, FxMultiplicity.of(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
             ae.createProperty(testId, pe, "/");
-            FxGroupEdit ge = FxGroupEdit.createNew("TestGroup", desc, hint, true, new FxMultiplicity(0, 1));
+            FxGroupEdit ge = FxGroupEdit.createNew("TestGroup", desc, hint, true, FxMultiplicity.of(0, 1));
             ae.createGroup(testId, ge, "/");
             pe.setName("TestDirectProperty2");
-            pe.setMultiplicity(new FxMultiplicity(0, 1));
+            pe.setMultiplicity(FxMultiplicity.of(0, 1));
             ae.createProperty(testId, pe, "/TestGroup");
         } catch (FxApplicationException e) {
             Assert.fail(e.getMessage());
@@ -287,7 +287,7 @@ public class StructureTest {
         FxString desc = new FxString("Template for contact data");
         desc.setTranslation(FxLanguage.GERMAN, "Kontaktdaten Vorlage");
         FxString hint = new FxString("");
-        FxGroupEdit ge = FxGroupEdit.createNew("CONTACT_DATA", desc, hint, true, new FxMultiplicity(0, FxMultiplicity.N));
+        FxGroupEdit ge = FxGroupEdit.createNew("CONTACT_DATA", desc, hint, true, FxMultiplicity.of(0, FxMultiplicity.N));
         ae.createGroup(ge, "/");
         ge.setName("ADDRESS");
         desc.setTranslation(FxLanguage.ENGLISH, "Address");
@@ -298,7 +298,7 @@ public class StructureTest {
         desc.setTranslation(FxLanguage.GERMAN, "Nachname");
         hint.setTranslation(FxLanguage.ENGLISH, "Surname of the person");
         hint.setTranslation(FxLanguage.GERMAN, "Nachname der Person");
-        FxPropertyEdit pe = FxPropertyEdit.createNew("SURNAME", desc, hint, new FxMultiplicity(1, 1),
+        FxPropertyEdit pe = FxPropertyEdit.createNew("SURNAME", desc, hint, FxMultiplicity.of(1, 1),
                 contactACL, FxDataType.String1024).setAutoUniquePropertyName(true);
         ae.createProperty(pe, "/CONTACT_DATA");
         desc.setTranslation(FxLanguage.ENGLISH, "Name");
@@ -350,7 +350,7 @@ public class StructureTest {
         FxString desc = new FxString("group description...");
         desc.setTranslation(2, "gruppen beschreibung");
         final String GROUPNAME = "GROUPTEST"+RandomStringUtils.randomNumeric(5);
-        FxGroupEdit ge = FxGroupEdit.createNew(GROUPNAME, desc, new FxString("hint..."), true, new FxMultiplicity(0, FxMultiplicity.N));
+        FxGroupEdit ge = FxGroupEdit.createNew(GROUPNAME, desc, new FxString("hint..."), true, FxMultiplicity.of(0, FxMultiplicity.N));
         ae.createGroup(ge, "/");
         ge.setName("subgroup");
         ae.createGroup(ge, "/" + GROUPNAME);
@@ -358,7 +358,7 @@ public class StructureTest {
         ae.createGroup(ge, "/" + GROUPNAME + "/SUBGROUP");
         desc.setTranslation(1, "property description...");
         desc.setTranslation(2, "attribut beschreibung...");
-        FxPropertyEdit pe = FxPropertyEdit.createNew("testproperty", desc, new FxString("property hint"), true, new FxMultiplicity(1, 1),
+        FxPropertyEdit pe = FxPropertyEdit.createNew("testproperty", desc, new FxString("property hint"), true, FxMultiplicity.of(1, 1),
                 true, env().getACL(1), FxDataType.Number, new FxString("123"),
                 true, null, null, null);
         ae.createProperty(pe, "/" + GROUPNAME + "/SUBGROUP");
@@ -384,7 +384,7 @@ public class StructureTest {
                     break;
                 }
             assertTrue(structACL != null, "No available ACL for structure found!");
-            FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, new FxMultiplicity(0, 1),
+            FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, FxMultiplicity.of(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
             ae.createProperty(testId, pe, "/");
@@ -420,7 +420,7 @@ public class StructureTest {
         assertTrue(env().getSystemInternalRootPropertyAssignments().size() == env().getType(testId).getAssignedProperties().size(), "Expected to have " + env().getSystemInternalRootPropertyAssignments().size() + " assignments to the type!");
 
         //recreate
-        FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, new FxMultiplicity(0, 1),
+        FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, FxMultiplicity.of(0, 1),
                 true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                 true, null, null, null);
         long id1 = ae.createProperty(testId, pe, "/");
@@ -443,10 +443,10 @@ public class StructureTest {
         // dereferenced from base assignments if parent group is removed
 
         //create base group with assignment
-        FxGroupEdit ge = FxGroupEdit.createNew("TestRemoveGroupBase", desc, hint, true, new FxMultiplicity(0, 1));
+        FxGroupEdit ge = FxGroupEdit.createNew("TestRemoveGroupBase", desc, hint, true, FxMultiplicity.of(0, 1));
         long baseGrpId = ae.createGroup(testId, ge, "/");
         FxGroupAssignment baseGrp = (FxGroupAssignment) env().getAssignment(baseGrpId);
-        FxPropertyEdit basePe = FxPropertyEdit.createNew("TestRemoveGroupBaseProperty", desc, hint, true, new FxMultiplicity(0, 1),
+        FxPropertyEdit basePe = FxPropertyEdit.createNew("TestRemoveGroupBaseProperty", desc, hint, true, FxMultiplicity.of(0, 1),
                 true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                 true, null, null, null);
         long baseAssId = ae.createProperty(testId, basePe, baseGrp.getXPath());
@@ -639,7 +639,7 @@ public class StructureTest {
             // alter the multiplicity to 0..2 and set some other properties
             FxPropertyEdit pEdit = p.asEditable();
             pEdit.setOverrideMultiplicity(false);
-            pEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 2));
             boolean isFulltextIndexed = pEdit.isFulltextIndexed();
             if (isFulltextIndexed) {
                 pEdit.setFulltextIndexed(false);
@@ -664,7 +664,7 @@ public class StructureTest {
 
             // modify the property and implicitly fire #getInstanceMultiplicity via #save
             pEdit = p.asEditable();
-            pEdit.setMultiplicity(new FxMultiplicity(2, 2));
+            pEdit.setMultiplicity(FxMultiplicity.of(2, 2));
             pEdit.setOverrideMultiplicity(false);
             try {
                 ae.save(pEdit);
@@ -674,10 +674,10 @@ public class StructureTest {
             }
 
             pEdit.setOverrideMultiplicity(true); // reset
-            pEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 2));
             ae.save(pEdit);
             assEdit = ((FxPropertyAssignment) env().getAssignment(TYPE_NAME + "/TESTPROP")).asEditable();
-            assEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            assEdit.setMultiplicity(FxMultiplicity.of(0, 2));
             ae.save(assEdit, false);
             // create an additional content instance for the same assignment
             FxContent co = ce.load(contentPK2);
@@ -686,7 +686,7 @@ public class StructureTest {
 
             pEdit = env().getProperty("TESTPROP").asEditable();
             pEdit.setOverrideMultiplicity(false);
-            pEdit.setMultiplicity(new FxMultiplicity(0, 1));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 1));
             try {
                 ae.save(pEdit);
                 Assert.fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
@@ -694,7 +694,7 @@ public class StructureTest {
                 // expected
             }
 
-            pEdit.setMultiplicity(new FxMultiplicity(3, 3));
+            pEdit.setMultiplicity(FxMultiplicity.of(3, 3));
             try {
                 ae.save(pEdit);
                 Assert.fail("Changing the minimum property multiplicity for assignment counts > new set minimum should have failed");
@@ -704,7 +704,7 @@ public class StructureTest {
 
             // add another content instance
             pEdit.setOverrideMultiplicity(false);
-            pEdit.setMultiplicity(new FxMultiplicity(0, 3));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 3));
             ae.save(pEdit);
             co = ce.load(contentPK2);
             co.setValue("/TESTPROP[3]", new FxString(false, "Testdata 2.3"));
@@ -712,7 +712,7 @@ public class StructureTest {
 
             pEdit = env().getProperty("TESTPROP").asEditable();
             pEdit.setOverrideMultiplicity(false);
-            pEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 2));
             try {
                 ae.save(pEdit);
                 Assert.fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
@@ -721,11 +721,11 @@ public class StructureTest {
             }
 
             pEdit.setOverrideMultiplicity(false); // reset
-            pEdit.setMultiplicity(new FxMultiplicity(0, 3));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 3));
             ae.save(pEdit);
 
             // test multiplicity assignment via #save(FxAssignment)
-            assEdit.setMultiplicity(new FxMultiplicity(0, 5));
+            assEdit.setMultiplicity(FxMultiplicity.of(0, 5));
             try {
                 ae.save(assEdit, false);
                 Assert.fail("Overriding the base multiplicity should have failed due to setOverrideMultiplicity(false)");
@@ -733,10 +733,10 @@ public class StructureTest {
                 // expected
             }
             pEdit.setOverrideMultiplicity(true); // reset
-            pEdit.setMultiplicity(new FxMultiplicity(0, 3));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 3));
             ae.save(pEdit);
 
-            assEdit.setMultiplicity(new FxMultiplicity(0, 5));
+            assEdit.setMultiplicity(FxMultiplicity.of(0, 5));
             ae.save(assEdit, false);
 
 
@@ -744,7 +744,7 @@ public class StructureTest {
             assertEquals(assEdit.getMultiplicity().getMin(), 0);
             assertEquals(assEdit.getMultiplicity().getMax(), 5);
 
-            assEdit.setMultiplicity(new FxMultiplicity(4, 4));
+            assEdit.setMultiplicity(FxMultiplicity.of(4, 4));
             try {
                 ae.save(assEdit, false);
                 Assert.fail("Assignment of an invalid minimum FxMultiplicity of a property assignment for which content exists should have failed");
@@ -754,7 +754,7 @@ public class StructureTest {
 
             // call the #save function again w/ changes to the property's attributes
             pEdit.setLabel(new FxString(true, FxLanguage.DEFAULT.getId(), "TESTPROP new label"));
-            pEdit.setMultiplicity(new FxMultiplicity(0, 5));
+            pEdit.setMultiplicity(FxMultiplicity.of(0, 5));
             pEdit.setOverrideMultiplicity(true);
             pEdit.setHint(new FxString(true, FxLanguage.DEFAULT.getId(), "TESTPROP hint"));
             ae.save(pEdit);
@@ -784,13 +784,13 @@ public class StructureTest {
     public void groupAssignmentTests() throws FxApplicationException {
         long typeId = createTestTypeAndProp("STRUCTTESTTYPE", "TESTPROP", true);
         // assign the group to our given type and also create a property for the group
-        FxGroupEdit ge = FxGroupEdit.createNew("STRUCTTESTGROUP", new FxString(true, "GROUPDESCR"), new FxString(true, "GROUPHINT"), false, new FxMultiplicity(0, 1));
+        FxGroupEdit ge = FxGroupEdit.createNew("STRUCTTESTGROUP", new FxString(true, "GROUPDESCR"), new FxString(true, "GROUPHINT"), false, FxMultiplicity.of(0, 1));
         ge.setAssignmentGroupMode(GroupMode.OneOf);
         ae.createGroup(typeId, ge, "/");
 
         ae.createProperty(typeId, FxPropertyEdit.createNew(
                 "TESTGROUPPROP", new FxString(true, FxLanguage.ENGLISH, "TESTGROUPPROP"), new FxString(true, FxLanguage.ENGLISH, "TESTPROP"),
-                new FxMultiplicity(0, 1), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 1), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024).setMultiLang(false), "/STRUCTTESTGROUP");
         // create two content instances for our group (within the same assignment)
         FxPK contentPK = createTestContent(typeId, "/STRUCTTESTGROUP/TESTGROUPPROP", "Testdata 111");
@@ -803,7 +803,7 @@ public class StructureTest {
 
             // make changes to the group and assert them
             ge.setOverrideMultiplicity(true);
-            ge.setMultiplicity(new FxMultiplicity(0, 2));
+            ge.setMultiplicity(FxMultiplicity.of(0, 2));
             ge.setHint(new FxString(true, "GROUPHINT_NEW"));
             ge.setLabel(new FxString(true, "GROUPDESCR_NEW"));
             ge.setName("STRUCTTESTGROUP_NEW");
@@ -819,7 +819,7 @@ public class StructureTest {
             // increase multiplicity of assignment as well in order to be able to add more content
             FxGroupAssignmentEdit assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP")).asEditable();
             assEdit.getGroupEdit().setOverrideMultiplicity(true);
-            assEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            assEdit.setMultiplicity(FxMultiplicity.of(0, 2));
             ae.save(assEdit, false);
 
             assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP")).asEditable();
@@ -833,7 +833,7 @@ public class StructureTest {
             ce.save(co);
             ge = env().getGroup("STRUCTTESTGROUP_NEW").asEditable();
             ge.setOverrideMultiplicity(false);
-            ge.setMultiplicity(new FxMultiplicity(0, 1));
+            ge.setMultiplicity(FxMultiplicity.of(0, 1));
             try {
                 ae.save(ge);
                 Assert.fail("Setting the override mult. flag and the maximum group multiplicity to a value less than the number of given content instances should have failed");
@@ -841,7 +841,7 @@ public class StructureTest {
                 // expected
             }
             ge.setOverrideMultiplicity(false);
-            ge.setMultiplicity(new FxMultiplicity(3, 3));
+            ge.setMultiplicity(FxMultiplicity.of(3, 3));
             try {
                 ae.save(ge);
                 Assert.fail("Setting the override mult. flag and the minimum group multiplicity to a value greater than the number of given content instances should have failed");
@@ -851,14 +851,14 @@ public class StructureTest {
 
             // test multiplicity setting failure code blocks
             ge.setOverrideMultiplicity(false); // reset
-            ge.setMultiplicity(new FxMultiplicity(0, 3));
+            ge.setMultiplicity(FxMultiplicity.of(0, 3));
             ae.save(ge);
             co = ce.load(contentPK);
             co.setValue("/STRUCTTESTGROUP[3]/TESTGROUPPROP[1]", new FxString(false, "Testdata 333"));
             ce.save(co);
 
             ge = env().getGroup("STRUCTTESTGROUP_NEW").asEditable();
-            ge.setMultiplicity(new FxMultiplicity(4, 4));
+            ge.setMultiplicity(FxMultiplicity.of(4, 4));
             try {
                 ae.save(ge);
                 Assert.fail("Setting the min. group multiplicity to a value > the current # of the assignment's content instances should have failed");
@@ -866,7 +866,7 @@ public class StructureTest {
                 // expected
             }
 
-            ge.setMultiplicity(new FxMultiplicity(0, 2));
+            ge.setMultiplicity(FxMultiplicity.of(0, 2));
             try {
                 ae.save(ge);
                 Assert.fail("Setting the max. group multiplicity to a value < the current # of the assignment's content instances should have failed");
@@ -874,7 +874,7 @@ public class StructureTest {
                 // expected
             }
 
-            ge.setMultiplicity(new FxMultiplicity(0, 3)); // reset
+            ge.setMultiplicity(FxMultiplicity.of(0, 3)); // reset
             ge.setOverrideMultiplicity(true);
             ae.save(ge);
 
@@ -942,11 +942,11 @@ public class StructureTest {
         // create properties
         ae.createProperty(typeId1, FxPropertyEdit.createNew( // for type1
                 "REMOVETESTPROP1", new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP1"), new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP1"),
-                new FxMultiplicity(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024).setMultiLang(false), "/");
         ae.createProperty(typeId1, FxPropertyEdit.createNew( // for type1
                 "REMOVETESTPROP2", new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP2"), new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP2"),
-                new FxMultiplicity(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024).setMultiLang(false), "/");
         // create derived assignments
         ae.save(FxPropertyAssignmentEdit.reuse("REMOVALTEST1/REMOVETESTPROP1", "REMOVALTEST2", "/", "REMOVETESTPROP1_ALIAS"), false); // type2
@@ -1036,9 +1036,9 @@ public class StructureTest {
 
         // create groups
         ae.createGroup(t1.getId(), FxGroupEdit.createNew("REMOVETESTGROUP1", new FxString(true, FxLanguage.ENGLISH, "REMOVETESTGROUP1"),
-                new FxString(true, FxLanguage.ENGLISH, "HINT1"), true, new FxMultiplicity(0, 2)), "/");
+                new FxString(true, FxLanguage.ENGLISH, "HINT1"), true, FxMultiplicity.of(0, 2)), "/");
         ae.createGroup(t1.getId(), FxGroupEdit.createNew("REMOVETESTGROUP2", new FxString(true, FxLanguage.ENGLISH, "REMOVETESTGROUP2"),
-                new FxString(true, FxLanguage.ENGLISH, "HINT2"), true, new FxMultiplicity(0, 2)), "/");
+                new FxString(true, FxLanguage.ENGLISH, "HINT2"), true, FxMultiplicity.of(0, 2)), "/");
 
         g1 = env().getGroup("REMOVETESTGROUP1");
         g2 = env().getGroup("REMOVETESTGROUP2");
@@ -1046,11 +1046,11 @@ public class StructureTest {
         // create properties
         ae.createProperty(t1.getId(), FxPropertyEdit.createNew( // for type1
                 "REMOVETESTPROP1", new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP1"), new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP1"),
-                new FxMultiplicity(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024).setMultiLang(false), "/REMOVETESTGROUP1");
         ae.createProperty(t1.getId(), FxPropertyEdit.createNew( // for type1
                 "REMOVETESTPROP2", new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP2"), new FxString(true, FxLanguage.ENGLISH, "REMOVETESTPROP2"),
-                new FxMultiplicity(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 2), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024).setMultiLang(false), "/REMOVETESTGROUP2");
 
         p1 = env().getProperty("REMOVETESTPROP1");
@@ -1166,11 +1166,11 @@ public class StructureTest {
     public void propertyAliasChangeTest() throws FxApplicationException {
         long typeId = createTestTypeAndProp("ALIASTEST", "", false);
         // add properties
-        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), new FxMultiplicity(0, 5),
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), FxMultiplicity.of(0, 5),
                 env().getACL("Default Structure ACL"), FxDataType.String1024), "/");
-        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP2", new FxString(true, "PROP2"), new FxString(true, ""), new FxMultiplicity(0, 5),
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP2", new FxString(true, "PROP2"), new FxString(true, ""), FxMultiplicity.of(0, 5),
                 env().getACL("Default Structure ACL"), FxDataType.String1024), "/");
-        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP3", new FxString(true, "PROP3"), new FxString(true, ""), new FxMultiplicity(0, 5),
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP3", new FxString(true, "PROP3"), new FxString(true, ""), FxMultiplicity.of(0, 5),
                 env().getACL("Default Structure ACL"), FxDataType.String1024), "/");
 
         // create content
@@ -1266,13 +1266,13 @@ public class StructureTest {
 
         long typeId = createTestTypeAndProp("ALIASTEST", "", false);
         // add more properties
-        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), new FxMultiplicity(0, 5),
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), FxMultiplicity.of(0, 5),
                 env().getACL("Default Structure ACL"), FxDataType.String1024), "/");
-        ae.createGroup(typeId, FxGroupEdit.createNew("GROUP1", new FxString(true, "GROUP1"), new FxString(true, ""), true, new FxMultiplicity(0, 2)), "/");
-        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP2", new FxString(true, "PROP2"), new FxString(true, ""), new FxMultiplicity(0, 2),
+        ae.createGroup(typeId, FxGroupEdit.createNew("GROUP1", new FxString(true, "GROUP1"), new FxString(true, ""), true, FxMultiplicity.of(0, 2)), "/");
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP2", new FxString(true, "PROP2"), new FxString(true, ""), FxMultiplicity.of(0, 2),
                 env().getACL("Default Structure ACL"), FxDataType.String1024), "/GROUP1");
-        ae.createGroup(typeId, FxGroupEdit.createNew("GROUP2", new FxString(true, "GROUP2"), new FxString(true, ""), true, new FxMultiplicity(0, 2)), "/GROUP1");
-        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP3", new FxString(true, "PROP3"), new FxString(true, ""), new FxMultiplicity(0, 2),
+        ae.createGroup(typeId, FxGroupEdit.createNew("GROUP2", new FxString(true, "GROUP2"), new FxString(true, ""), true, FxMultiplicity.of(0, 2)), "/GROUP1");
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP3", new FxString(true, "PROP3"), new FxString(true, ""), FxMultiplicity.of(0, 2),
                 env().getACL("Default Structure ACL"), FxDataType.String1024), "/GROUP1/GROUP2");
 
         // create content
@@ -1374,9 +1374,9 @@ public class StructureTest {
     public void createAliasedElementsTest() throws FxApplicationException {
         long typeId = createTestTypeAndProp("ALIASASSIGN", "", false);
         // add a prop and groups
-        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), new FxMultiplicity(0, 5),
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), FxMultiplicity.of(0, 5),
                 env().getACL("Default Structure ACL"), FxDataType.String1024), "/", "prop1alias");
-        ae.createGroup(typeId, FxGroupEdit.createNew("GROUP1", new FxString(true, "GROUP1"), new FxString(true, ""), true, new FxMultiplicity(0, 2)),
+        ae.createGroup(typeId, FxGroupEdit.createNew("GROUP1", new FxString(true, "GROUP1"), new FxString(true, ""), true, FxMultiplicity.of(0, 2)),
                 "/", "group1alias");
 
         try {
@@ -1386,7 +1386,7 @@ public class StructureTest {
             assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1"));
 
             // create aliased sub-group
-            ae.createGroup(typeId, FxGroupEdit.createNew("GROUP2", new FxString(true, "group2"), new FxString(true, ""), true, new FxMultiplicity(0, 2)),
+            ae.createGroup(typeId, FxGroupEdit.createNew("GROUP2", new FxString(true, "group2"), new FxString(true, ""), true, FxMultiplicity.of(0, 2)),
                     "/group1alias", "group2alias");
 
             assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2ALIAS"));
@@ -1405,13 +1405,13 @@ public class StructureTest {
     @Test(groups = {"ejb", "structure"})
     public void testGenericStructureOptions() throws FxApplicationException {
         long typeId = createTestTypeAndProp("OPTTEST", "", false);
-        FxPropertyEdit pEd = FxPropertyEdit.createNew("PROP1OPTTEST", new FxString(true, "PROP1"), new FxString(true, ""), new FxMultiplicity(0, 5),
+        FxPropertyEdit pEd = FxPropertyEdit.createNew("PROP1OPTTEST", new FxString(true, "PROP1"), new FxString(true, ""), FxMultiplicity.of(0, 5),
                 env().getACL("Default Structure ACL"), FxDataType.String1024);
         pEd.setOption("OPT.1P", false, "OPT 1 value");
         pEd.setOption("OPT.2P", true, false);
         ae.createProperty(typeId, pEd, "/");
 
-        FxGroupEdit gEd = FxGroupEdit.createNew("GROUP1OPTTEST", new FxString(true, "GROUP1"), new FxString(true, ""), true, new FxMultiplicity(0, 2));
+        FxGroupEdit gEd = FxGroupEdit.createNew("GROUP1OPTTEST", new FxString(true, "GROUP1"), new FxString(true, ""), true, FxMultiplicity.of(0, 2));
         gEd.setOption("OPT.1G", false, "OPT 1 value");
         gEd.setOption("OPT.2G", true, false);
         ae.createGroup(typeId, gEd, "/");
@@ -1919,7 +1919,7 @@ public class StructureTest {
         if (createProp) {
             ae.createProperty(typeId, FxPropertyEdit.createNew(
                     propertyName, new FxString(true, FxLanguage.ENGLISH, propertyName), new FxString(true, FxLanguage.ENGLISH, "TESTPROP"),
-                    new FxMultiplicity(0, 1), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                    FxMultiplicity.of(0, 1), env().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                     FxDataType.String1024).setMultiLang(false), "/");
         }
         return typeId;

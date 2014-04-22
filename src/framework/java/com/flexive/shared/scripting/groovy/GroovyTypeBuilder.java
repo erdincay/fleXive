@@ -1099,7 +1099,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 final String mult = (String) attributes.get("multiplicity");
                 int min = Integer.parseInt(StringUtils.strip(mult.substring(0, mult.indexOf(","))));
                 int max = Integer.parseInt(StringUtils.strip(mult.substring(mult.indexOf(",") + 1, mult.length())));
-                multiplicity = new FxMultiplicity(min, max);
+                multiplicity = FxMultiplicity.of(min, max);
             }
             // elementName will be reassigned to "alias" if no alias is given
             elementName = (String) FxSharedUtils.get(attributes, "name", StringUtils.capitalize(structureName));

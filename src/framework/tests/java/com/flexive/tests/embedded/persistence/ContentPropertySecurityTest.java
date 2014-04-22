@@ -134,12 +134,12 @@ public class ContentPropertySecurityTest {
         ass.createProperty(
                 typeId,
                 FxPropertyEdit.createNew(PROP1_NAME, new FxString("Security UnitTest"), new FxString("hint..."),
-                        new FxMultiplicity(1, 2), CacheAdmin.getEnvironment().getACL(prop1ACL),
+                        FxMultiplicity.of(1, 2), CacheAdmin.getEnvironment().getACL(prop1ACL),
                         FxDataType.String1024), "/");
         ass.createProperty(
                 typeId,
                 FxPropertyEdit.createNew(PROP2_NAME, new FxString("Security UnitTest"), new FxString("hint..."),
-                        new FxMultiplicity(1, 2), CacheAdmin.getEnvironment().getACL(prop2ACL),
+                        FxMultiplicity.of(1, 2), CacheAdmin.getEnvironment().getACL(prop2ACL),
                         FxDataType.String1024), "/");
         //get first possible step (steps aint subject of the tests here...)
         stepId = CacheAdmin.getEnvironment().getType(typeId).getWorkflow().getSteps().get(0).getId();

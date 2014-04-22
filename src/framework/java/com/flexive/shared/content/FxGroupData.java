@@ -210,7 +210,7 @@ public class FxGroupData extends FxData {
     public static FxGroupData createVirtualRootGroup(String xpPrefix) throws FxInvalidParameterException {
         // note: multiplicity and other settings are no longer used by FxGroupData, they are supplied
         // by the virtual root assignment created in FxData#getAssignment
-        return new FxGroupData(xpPrefix, "", 1, "/", "/", new int[0], -1, new FxMultiplicity(1, 1), -1, null, new ArrayList<FxData>(), false);
+        return new FxGroupData(xpPrefix, "", 1, "/", "/", new int[0], -1, FxMultiplicity.of(1, 1), -1, null, new ArrayList<FxData>(), false);
     }
 
     /**

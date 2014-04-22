@@ -48,6 +48,7 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -90,13 +91,13 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     // cached lookup tables and lists
     private transient ImmutableList<FxPropertyAssignment> propertyAssignmentsEnabled;
     private transient ImmutableList<FxGroupAssignment> groupAssignmentsEnabled;
-    private transient ImmutableMap<Long, FxAssignment> assignmentLookup;
     private transient ImmutableMap<String, FxAssignment> assignmentXPathLookup;
-    private transient ImmutableMap<Long, FxProperty> propertyLookup;
     private transient ImmutableMap<String, FxProperty> propertyNameLookup;
     private transient ImmutableList<FxPropertyAssignment> propertyAssignmentsAll;
     private transient ImmutableList<FxPropertyAssignment> propertyAssignmentsSystemInternalRoot;
     private transient ImmutableList<FxGroupAssignment> groupAssignmentsAll;
+    private transient long[] assignmentIds;
+    private transient long[] propertyIds;
 
     public FxEnvironmentImpl() {
     }
@@ -130,13 +131,14 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         // immutable lookup tables can also be shared
         this.propertyAssignmentsEnabled = e.propertyAssignmentsEnabled;
         this.groupAssignmentsEnabled = e.groupAssignmentsEnabled;
-        this.assignmentLookup = e.assignmentLookup;
         this.assignmentXPathLookup = e.assignmentXPathLookup;
-        this.propertyLookup = e.propertyLookup;
         this.propertyNameLookup = e.propertyNameLookup;
         this.propertyAssignmentsAll = e.propertyAssignmentsAll;
         this.propertyAssignmentsSystemInternalRoot = e.propertyAssignmentsSystemInternalRoot;
         this.groupAssignmentsAll = e.groupAssignmentsAll;
+
+        this.assignmentIds = e.assignmentIds;   // read-only arrays
+        this.propertyIds = e.propertyIds;
 
         this.resolveFlatMappings();
     }
@@ -322,7 +324,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param properties all defined properties
      */
     protected void setProperties(List<FxProperty> properties) {
-        this.properties = ImmutableList.copyOf(properties);
+        // sort by ID to allow binary search for IDs
+        this.properties = sortById(properties);
     }
 
     void initLookupTables() {
@@ -332,13 +335,12 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     }
 
     void initPropertyLookupTables() {
-        final ImmutableMap.Builder<Long, FxProperty> propLookupBuilder = ImmutableMap.builder();
         final ImmutableMap.Builder<String, FxProperty> nameLookupBuilder = ImmutableMap.builder();
         for (FxProperty property : properties) {
-            propLookupBuilder.put(property.getId(), property);
             nameLookupBuilder.put(property.getName().toUpperCase(), property);
         }
-        this.propertyLookup = propLookupBuilder.build();
+
+        this.propertyIds = FxSharedUtils.getSelectableObjectIdArray(properties);
         this.propertyNameLookup = nameLookupBuilder.build();
     }
 
@@ -353,7 +355,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         final Builder<FxGroupAssignment> groupAssignmentsAll = ImmutableList.builder();
         
         for (FxAssignment assignment : assignments) {
-            assignmentXPathLookup.put(assignment.getXPath().toUpperCase(), assignment);
+            assignmentXPathLookup.put(XPathElement.xpToUpperCase(assignment.getXPath()), assignment);
             assignmentLookup.put(assignment.getId(), assignment);
             if (assignment.isEnabled()) {
                 if (assignment instanceof FxPropertyAssignment) {
@@ -376,8 +378,10 @@ public final class FxEnvironmentImpl implements FxEnvironment {
 
         this.groupAssignmentsEnabled = groupAssignmentsEnabled.build();
 
+        // sort by ID to allow binary search in ID array
+        this.assignmentIds = FxSharedUtils.getSelectableObjectIdArray(assignments);
+
         this.propertyAssignmentsEnabled = propertyAssignmentsEnabled.build();
-        this.assignmentLookup = assignmentLookup.build();
         this.assignmentXPathLookup = assignmentXPathLookup.build();
 
         this.propertyAssignmentsAll = propertyAssignmentsAll.build();
@@ -400,7 +404,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param assignments all assignments (mixed groups/properties)
      */
     protected void setAssignments(List<FxAssignment> assignments) {
-        this.assignments = ImmutableList.copyOf(assignments);
+        // sort by ID to allow binary search for IDs
+        this.assignments = sortById(assignments);
     }
 
     /**
@@ -718,11 +723,11 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public FxProperty getProperty(long id) {
-        final FxProperty result = propertyLookup.get(id);
-        if (result != null) {
-            return result;
+        final int index = Arrays.binarySearch(propertyIds, id);
+        if (index == -1) {
+            throw new FxNotFoundException("ex.structure.property.notFound.id", id).asRuntimeException();
         }
-        throw new FxNotFoundException("ex.structure.property.notFound.id", id).asRuntimeException();
+        return properties.get(index);
     }
 
     /**
@@ -992,11 +997,11 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     @Override
     public FxAssignment getAssignment(long assignmentId) {
-        final FxAssignment result = assignmentLookup.get(assignmentId);
-        if (result != null) {
-            return result;
+        final int index = Arrays.binarySearch(assignmentIds, assignmentId);
+        if (index == -1) {
+            throw new FxNotFoundException("ex.structure.assignment.notFound.id", assignmentId).asRuntimeException();
         }
-        throw new FxNotFoundException("ex.structure.assignment.notFound.id", assignmentId).asRuntimeException();
+        return assignments.get(index);
     }
 
     /**
@@ -1670,4 +1675,11 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         }
         return result.build();
     }
+
+    private <T extends SelectableObject> ImmutableList<T> sortById(List<T> properties) {
+        final List<T> sorted = Lists.newArrayList(properties);
+        Collections.sort(sorted, new FxSharedUtils.SelectableObjectSorter());
+        return ImmutableList.copyOf(sorted);
+    }
+
 }

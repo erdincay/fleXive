@@ -150,7 +150,7 @@ public class FormatUtilTest {
                 FxMultiplicity.MULT_0_N,
                 FxMultiplicity.MULT_1_1,
                 FxMultiplicity.MULT_1_N,
-                new FxMultiplicity(3, 6)
+                FxMultiplicity.of(3, 6)
         };
         for (FxMultiplicity test : TEST)
             Assert.assertEquals(test, FxMultiplicity.fromString(test.toString()));

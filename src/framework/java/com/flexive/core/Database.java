@@ -698,10 +698,6 @@ public final class Database {
                 FxString[] entry = result.get(id);
                 if (entry == null) {
                     entry = new FxString[columns.length];
-                    /*for (int i = 0; i < entry.length; i++) {
-                        entry[i] = new FxString(true, "");
-                    }
-                    result.put(id, entry);*/
                 }
                 for (int i = 0; i < columns.length; i++) {
                     final String value = rs.getString(startIndex + i * (hasDefLang ? 1 : 2));
@@ -722,6 +718,19 @@ public final class Database {
                         entry[i].setDefaultLanguage(lang);
                 }
                 result.put(id, entry);
+            }
+
+            // canonicalize FxStrings (some tables, especially assignments, contain a lot of 100% identical labels for different IDs)
+            final Map<FxString, FxString> fxCache = Maps.newHashMapWithExpectedSize(result.size() * 2);
+            for (FxString[] values : result.values()) {
+                for (int i = 0; i < values.length; i++) {
+                    final FxString value = values[i];
+                    if (fxCache.containsKey(value)) {
+                        values[i] = fxCache.get(value);
+                    } else {
+                        fxCache.put(value, value);
+                    }
+                }
             }
         } finally {
             closeObjects(Database.class, null, stmt);

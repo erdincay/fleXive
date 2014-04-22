@@ -101,7 +101,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             while (rs != null && rs.next()) {
                 final long id = rs.getLong(1);
                 result.add(new ACL(id, rs.getString(2),
-                        getTranslation(labels, id, 0),
+                        getTranslation(labels, id, 0, false),
                         rs.getInt(6), rs.getString(7), rs.getString(4), rs.getString(5), ACLCategory.getById(rs.getInt(3)),
                         LifeCycleInfoImpl.load(rs, 8, 9, 10, 11)));
             }
@@ -219,7 +219,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     hint = new FxString("");
                 }
                 alRet.add(new FxGroup(id, rs.getString(2), label, hint, rs.getBoolean(5),
-                        new FxMultiplicity(rs.getInt(3), rs.getInt(4)),
+                        FxMultiplicity.of(rs.getInt(3), rs.getInt(4)),
                         FxSharedUtils.get(groupOptions, id, new ArrayList<FxStructureOption>(0))));
             }
             return alRet;
@@ -312,7 +312,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 
                 alRet.add(new FxProperty(id, name, label,
                         hint, systemInternal, mayOverrideMult,
-                        new FxMultiplicity(minMult, maxMult), mayOverrideACL, acl, dataType,
+                        FxMultiplicity.of(minMult, maxMult), mayOverrideACL, acl, dataType,
                         defaultValue,
                         fulltextIndexed, (refTypeId == -1 ? null : environment.getType(refTypeId)),
                         (refListId == -1 ? null : environment.getSelectList(refListId)), uniqueMode,
@@ -480,7 +480,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         defaultInstanceACL = null;
                     FxType _type = new FxType(id, environment.getACL(rs.getInt(19)), defaultInstanceACL,
                             environment.getWorkflow(rs.getInt(20)), rs.getString(2),
-                            getTranslation(labels, id, 0),
+                            getTranslation(labels, id, 0, false),
                             parentType, TypeStorageMode.getById(rs.getInt(4)),
                             TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
@@ -541,12 +541,12 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                             break;
                         FxGroupAssignment ga = new FxGroupAssignment(rs.getLong(1), rs.getBoolean(3), environment.getType(rs.getLong(4)),
                                 rs.getString(9), rs.getString(8), rs.getInt(7),
-                                new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
+                                FxMultiplicity.of(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
                                 new FxPreloadGroupAssignment(rs.getLong(10)),
-                                rs.getLong(14), getTranslation(translations, id, 0),
-                                getTranslation(translations, id, 1),
+                                rs.getLong(14), getTranslation(translations, id, 0, false),
+                                getTranslation(translations, id, 1, true),
                                 environment.getGroup(rs.getLong(11)), GroupMode.getById(rs.getInt(17)),
-                                FxSharedUtils.get(groupAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)));
+                                FxSharedUtils.get(groupAssignmentOptions, rs.getLong(1), null));
                         if (rs.getBoolean(16))
                             ga._setSystemInternal();
                         result.add(ga);
@@ -567,15 +567,15 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         }
                         FxPropertyAssignment pa = new FxPropertyAssignment(rs.getLong(1), rs.getBoolean(3), environment.getType(rs.getLong(4)),
                                 rs.getString(9), rs.getString(8), rs.getInt(7),
-                                new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
+                                FxMultiplicity.of(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
                                 new FxPreloadGroupAssignment(rs.getLong(10)),
                                 rs.getLong(14),
-                                getTranslation(translations, id, 0),
-                                getTranslation(translations, id, 1),
+                                getTranslation(translations, id, 0, false),
+                                getTranslation(translations, id, 1, true),
                                 defaultValue,
                                 environment.getProperty(rs.getLong(12)),
                                 environment.getACL(rs.getInt(13)), rs.getInt(15),
-                                FxSharedUtils.get(propertyAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)),
+                                FxSharedUtils.get(propertyAssignmentOptions, rs.getLong(1), null),
                                 flatStorageEntries.get(rs.getLong(1)));
                         if (rs.getBoolean(16))
                             pa._setSystemInternal();
@@ -655,7 +655,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 if (rs.wasNull()) {
                     uniqueTargetId = -1;
                 }
-                StepDefinition aStepDef = new StepDefinition(id, getTranslation(labels, id, 0), name, uniqueTargetId);
+                StepDefinition aStepDef = new StepDefinition(id, getTranslation(labels, id, 0, false), name, uniqueTargetId);
                 tmp.add(aStepDef);
             }
             return tmp;
@@ -904,8 +904,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 if (rs.wasNull())
                     sort = false;
                 lists.add(new FxSelectList(id, parent, rs.getString(3),
-                        getTranslation(translations, id, 0),
-                        getTranslation(translations, id, 1),
+                        getTranslation(translations, id, 0, false),
+                        getTranslation(translations, id, 1, false),
                         rs.getBoolean(4), environment.getACL(rs.getLong(5)), environment.getACL(rs.getLong(6)),
                         rs.getLong(7), bcSep, sameLvl, sort));
             }
@@ -924,7 +924,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     if (rs.wasNull())
                         parent = -1;
                     new FxSelectListItem(id, rs.getString(2), environment.getACL(rs.getLong(3)), list, parent,
-                            getTranslation(itemTranslations, id, 0),
+                            getTranslation(itemTranslations, id, 0, false),
                             rs.getString(5), rs.getString(6), rs.getLong(11), rs.getInt(12), rs.getInt(13),
                             LifeCycleInfoImpl.load(rs, 7, 8, 9, 10), pos++);
                 }
@@ -937,12 +937,13 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         return lists;
     }
 
-    private FxString getTranslation(final Map<Long, FxString[]> translations, final long id, final int index) {
+    private FxString getTranslation(final Map<Long, FxString[]> translations, final long id, final int index, boolean emptyToNull) {
         final FxString[] values = translations.get(id);
         if (values == null) {
-            return new FxString("").setEmpty();
+            return emptyToNull ? null : new FxString("").setEmpty();
         }
-        return values[index];
+        final FxString value = values[index];
+        return emptyToNull && value.isEmpty() ? null : value;
     }
     
     private String cachedString(Map<String, String> cache, String value) {

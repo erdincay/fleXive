@@ -64,7 +64,7 @@ public class UpdateTest extends StructureTestBase {
         ass.createProperty(
                 typeId,
                 FxPropertyEdit.createNew(name, new FxString("UpdateTest UnitTest property " + name),
-                        new FxString("hint..."), new FxMultiplicity(0, 5), acl, FxDataType.String1024).
+                        new FxString("hint..."), FxMultiplicity.of(0, 5), acl, FxDataType.String1024).
                         setMultiLang(true).setAutoUniquePropertyName(true),
                 XPath);
     }

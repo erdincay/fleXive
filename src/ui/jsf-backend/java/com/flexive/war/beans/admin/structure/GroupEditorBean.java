@@ -522,7 +522,7 @@ public class GroupEditorBean implements Serializable {
                 || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
             if (group.mayOverrideBaseMultiplicity()) {
                 FxJsfUtils.checkMultiplicity(min, max);
-                assignment.setMultiplicity(new FxMultiplicity(min, max));
+                assignment.setMultiplicity(FxMultiplicity.of(min, max));
             }
             assignment.setDefaultMultiplicity(this.defaultMultiplicity);
             EJBLookup.getAssignmentEngine().save(assignment, false);
@@ -539,8 +539,7 @@ public class GroupEditorBean implements Serializable {
         if (group.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
-        FxMultiplicity grpMul = new FxMultiplicity(FxMultiplicity.getStringToInt(groupMinMul, false),
-                FxMultiplicity.getStringToInt(groupMaxMul, true));
+        FxMultiplicity grpMul = FxMultiplicity.of(FxMultiplicity.getStringToInt(groupMinMul, false), FxMultiplicity.getStringToInt(groupMaxMul, true));
 
         FxJsfUtils.checkMultiplicity(grpMul.getMin(),grpMul.getMax());
 

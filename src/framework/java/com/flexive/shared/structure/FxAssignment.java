@@ -41,6 +41,7 @@ import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.value.FxString;
+import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.*;
@@ -156,7 +157,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     protected Map<FxScriptEvent, long[]> scriptMapping;
 
     private boolean systemInternal;
-    List<FxStructureOption> options;
+    protected List<FxStructureOption> options;
     protected int defaultMultCalc = -1; //cache for performance
 
     /**
@@ -193,9 +194,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
         this.label = label;
         this.hint = hint;
         this.systemInternal = false;
-        this.options = options;
-        if (this.options == null)
-            this.options = FxStructureOption.getEmptyOptionList(2);
+        this.options = options != null ? options : Collections.<FxStructureOption>emptyList();
     }
 
     /**
@@ -455,7 +454,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @return hint
      */
     public FxString getHint() {
-        return hint;
+        return hint != null ? hint : new FxString("").setEmpty();
     }
 
     /**
@@ -612,20 +611,21 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
                 }
             }
         }
-        if (this.scriptMapping != null)
-            this.scriptMapping.clear();
-        else
-            this.scriptMapping = new HashMap<FxScriptEvent, long[]>(5);
-        for (long scriptId : scripts) {
-            FxScriptEvent event = environment.getScript(scriptId).getEvent();
-            if (this.scriptMapping.get(event) == null)
-                this.scriptMapping.put(event, new long[]{scriptId});
-            else {
-                long[] types = this.scriptMapping.get(event);
-                long[] ntypes = new long[types.length + 1];
-                System.arraycopy(types, 0, ntypes, 0, types.length);
-                ntypes[ntypes.length - 1] = scriptId;
-                this.scriptMapping.put(event, ntypes);
+        if (scripts.isEmpty()) {
+            this.scriptMapping = Collections.emptyMap();
+        } else {
+            this.scriptMapping = Maps.newHashMapWithExpectedSize(scripts.size());
+            for (long scriptId : scripts) {
+                FxScriptEvent event = environment.getScript(scriptId).getEvent();
+                if (this.scriptMapping.get(event) == null) {
+                    this.scriptMapping.put(event, new long[]{scriptId});
+                } else {
+                    long[] types = this.scriptMapping.get(event);
+                    long[] ntypes = new long[types.length + 1];
+                    System.arraycopy(types, 0, ntypes, 0, types.length);
+                    ntypes[ntypes.length - 1] = scriptId;
+                    this.scriptMapping.put(event, ntypes);
+                }
             }
         }
     }

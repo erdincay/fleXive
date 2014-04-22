@@ -62,12 +62,12 @@ public class FxMultiplicity implements Serializable {
     /**
      * minimum multiplicity
      */
-    private int min;
+    private final int min;
 
     /**
      * maximum multiplicity, Integer.MAX_VALUE if unlimited
      */
-    private int max;
+    private final int max;
 
     /**
      * Symbol used to display unlimited
@@ -175,7 +175,7 @@ public class FxMultiplicity implements Serializable {
      */
     public static FxMultiplicity fromString(String s) {
         String[] range = s.split("\\.\\.");
-        return new FxMultiplicity(getStringToInt(range[0], false), getStringToInt(range[1], true));
+        return FxMultiplicity.of(getStringToInt(range[0], false), getStringToInt(range[1], true));
     }
 
 
@@ -300,5 +300,37 @@ public class FxMultiplicity implements Serializable {
         else
             mul =String.valueOf(m);
         return mul;
+    }
+
+    /**
+     * Return a multiplicity instance for the given min/max parameters.
+     *
+     * @param min    minimum multiplicity
+     * @param max    maximum multiplicity, Integer.MAX_VALUE if unlimited
+     * @return  the multiplicity instance
+     * @since 3.2.1
+     */
+    public static FxMultiplicity of(int min, int max) {
+        switch (min) {
+            case 0:
+                switch (max) {
+                    case 1:
+                        return MULT_0_1;
+                    case N:
+                        return MULT_0_N;
+                    default:
+                        return new FxMultiplicity(min, max);
+                }
+            case 1:
+                switch (max) {
+                    case 1:
+                        return MULT_1_1;
+                    case N:
+                        return MULT_1_N;
+                    default:
+                        return new FxMultiplicity(min, max);
+                }
+        }
+        return new FxMultiplicity(min, max);
     }
 }

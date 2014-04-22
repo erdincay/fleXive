@@ -1584,6 +1584,22 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Extract the unique IDs of the given {@link com.flexive.shared.SelectableObject} collection into an array.
+     *
+     * @param values    the input values
+     * @return          the IDs of the input values
+     * @since 3.2.1
+     */
+    public static long[] getSelectableObjectIdArray(List<? extends SelectableObject> values) {
+        final long[] result = new long[values.size()];
+        int i = 0;
+        for (SelectableObject value : values) {
+            result[i++] = value.getId();
+        }
+        return result;
+    }
+
+    /**
      * Extract the unique names of the given {@link SelectableObject} collection.
      *
      * @param values the input values

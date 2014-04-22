@@ -184,6 +184,15 @@ public class FxValueTest {
         assertEquals(val.getBestTranslation(), "en");
     }
 
+    @Test
+    public void emptyValueEqualsTest() {
+        final FxString val = new FxString(true, FxLanguage.ENGLISH, "en");
+        final FxString val2 = val.copy();
+        assertEquals(val, val2);
+        val2.setEmpty(FxLanguage.GERMAN);
+        assertEquals(val, val2);
+    }
+
     @DataProvider(name = "testInstances")
     private Object[][] getTestInstances() {
         return testInstances;

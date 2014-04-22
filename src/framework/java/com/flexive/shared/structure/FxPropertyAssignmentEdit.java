@@ -117,7 +117,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      */
     public FxPropertyAssignmentEdit(FxProperty property, FxType type, String alias, String parentXPath) {
         super(-1, true, type, alias, XPathElement.buildXPath(false, parentXPath, alias), 0, property.getMultiplicity(), 1,
-                null, FxAssignment.NO_BASE, property.getLabel(), property.getHint(), null, property, property.getACL(),
+                null, FxAssignment.NO_BASE, property.getLabel().copy(), property.getHint().copy(), null, property, property.getACL(),
                 property.getLabel().getDefaultLanguage(), FxStructureOption.cloneOptions(property.options), null);
         this.flatStorageMapping = null;
         isNew = true;

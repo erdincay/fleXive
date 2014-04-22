@@ -124,7 +124,7 @@ public class FlatStorageTest {
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.Text), "/");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty3", new FxString(true, "TestProperty3"), hint,
-                new FxMultiplicity(0, 5), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 5), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024), "/");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty4", new FxString(true, "TestProperty4"), hint,
                 FxMultiplicity.MULT_0_N, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
@@ -139,7 +139,7 @@ public class FlatStorageTest {
                 FxMultiplicity.MULT_1_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.Text), "/");
         ass.createGroup(typeId, FxGroupEdit.createNew("TestGroup1", new FxString(true, "TestGroup1"), hint, false,
-                new FxMultiplicity(0, 2)), "/");
+                FxMultiplicity.of(0, 2)), "/");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty1_1", new FxString(true, "TestProperty1_1"), hint,
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024), "/TestGroup1");
@@ -149,7 +149,7 @@ public class FlatStorageTest {
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.Boolean), "/TestGroup2");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty2_2", new FxString(true, "TestProperty2_2"), hint,
-                new FxMultiplicity(0, 2), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 2), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024), "/TestGroup2");
 
     }

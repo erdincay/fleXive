@@ -197,7 +197,7 @@ public class ScriptingTest {
                         "A",
                         new FxString(true, FxLanguage.ENGLISH, "A"),
                         new FxString(true, FxLanguage.ENGLISH, "A"),
-                        new FxMultiplicity(0, 5),
+                        FxMultiplicity.of(0, 5),
                         CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                         FxDataType.String1024).setMultiLang(false),
                 "/");
@@ -207,7 +207,7 @@ public class ScriptingTest {
                         "B",
                         new FxString(true, FxLanguage.ENGLISH, "B"),
                         new FxString(true, FxLanguage.ENGLISH, "B"),
-                        new FxMultiplicity(0, 5),
+                        FxMultiplicity.of(0, 5),
                         CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                         FxDataType.String1024).setMultiLang(false),
                 "/");
@@ -217,7 +217,7 @@ public class ScriptingTest {
                         "C",
                         new FxString(true, FxLanguage.ENGLISH, "C"),
                         new FxString(true, FxLanguage.ENGLISH, "C"),
-                        new FxMultiplicity(0, 5),
+                        FxMultiplicity.of(0, 5),
                         CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                         FxDataType.String1024).setMultiLang(false),
                 "/");
@@ -427,7 +427,7 @@ public class ScriptingTest {
 
         EJBLookup.getAssignmentEngine().createProperty(typeId, FxPropertyEdit.createNew(
                 "A123321", new FxString(true, FxLanguage.ENGLISH, "A123321"), new FxString(true, FxLanguage.ENGLISH, "A"),
-                new FxMultiplicity(0, 5), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxMultiplicity.of(0, 5), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.String1024).setMultiLang(false), "/");
 
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
