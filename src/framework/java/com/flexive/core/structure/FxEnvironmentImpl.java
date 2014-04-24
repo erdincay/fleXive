@@ -724,7 +724,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     @Override
     public FxProperty getProperty(long id) {
         final int index = Arrays.binarySearch(propertyIds, id);
-        if (index == -1) {
+        if (index < 0) {
             throw new FxNotFoundException("ex.structure.property.notFound.id", id).asRuntimeException();
         }
         return properties.get(index);
@@ -998,7 +998,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     @Override
     public FxAssignment getAssignment(long assignmentId) {
         final int index = Arrays.binarySearch(assignmentIds, assignmentId);
-        if (index == -1) {
+        if (index < 0) {
             throw new FxNotFoundException("ex.structure.assignment.notFound.id", assignmentId).asRuntimeException();
         }
         return assignments.get(index);
