@@ -68,6 +68,8 @@ public class NewsletterProcessor implements Serializable {
 
     private static final Log LOG = LogFactory.getLog(NewsletterProcessor.class);
 
+    public static final String TYPE_SUBSCRIBER = "NEWSLETTER_SUBSCRIBER";
+
     public static List<NewsletterInfo> getNewsletters() throws FxApplicationException {
         FxResultSet rs = EJBLookup.getSearchEngine().search("SELECT @pk, #Newsletter/Name, #Newsletter/Description FILTER VERSION=MAX, type='Newsletter'");
         List<NewsletterInfo> result = new ArrayList<NewsletterInfo>(rs.getRowCount());
@@ -101,7 +103,7 @@ public class NewsletterProcessor implements Serializable {
         }
     }
 
-    public static FxPK subscribe(String salutation, String name, String surname, String email,
+    public static synchronized FxPK subscribe(String salutation, String name, String surname, String email,
                                  boolean sendPlain, boolean sendHTML, FxPK newsletterPK) throws FxApplicationException {
         if (StringUtils.isEmpty(surname))
             throw new FxApplicationException("ex.newsletter.subscriber.missing.surname");
@@ -113,7 +115,10 @@ public class NewsletterProcessor implements Serializable {
         FxContext.get().runAsSystem();
         FxContent newsletter = EJBLookup.getContentEngine().load(newsletterPK);
         try {
-            FxResultSet rs = EJBLookup.getSearchEngine().search("SELECT @pk FILTER VERSION=MAX, type='Newsletter_Subscriber' WHERE #Newsletter_Subscriber/EMAIL='" + email + "'");
+            FxResultSet rs = new SqlQueryBuilder()
+                    .select("@pk")
+                    .condition('#' + TYPE_SUBSCRIBER + "/EMAIL", PropertyValueComparator.EQ, email)
+                    .getResult();
             if (rs.getRowCount() > 0) {
                 FxPK foundPK = (FxPK) rs.getObject(1, 1);
                 System.out.println("found subscriber with pk " + foundPK);
@@ -132,7 +137,7 @@ public class NewsletterProcessor implements Serializable {
                 }
                 return foundPK;
             } else {
-                FxContent co = EJBLookup.getContentEngine().initialize("NEWSLETTER_SUBSCRIBER");
+                FxContent co = EJBLookup.getContentEngine().initialize(TYPE_SUBSCRIBER);
                 if (!StringUtils.isEmpty(salutation))
                     co.setValue("/SALUTATION", new FxString(false, salutation));
                 if (!StringUtils.isEmpty(name))
