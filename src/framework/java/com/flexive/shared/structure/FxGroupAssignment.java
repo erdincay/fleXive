@@ -268,7 +268,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                         continue;
                     if (onlySystemInternal && !as.isSystemInternal()) 
                         continue;
-                    if (onlyRequiredGroups && (as instanceof FxPropertyAssignment || !as.getMultiplicity().isRequired()) && !as.isSystemInternal())
+                    if (onlyRequiredGroups && (as instanceof FxPropertyAssignment || as.getMultiplicity().isOptional()) && !as.isSystemInternal())
                         continue;
                     if (as.getMultiplicity().isRequired()) {
                         if (hasRequired)
@@ -289,6 +289,8 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                             ticket != null && !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
                     if (onlySystemInternal && !as.isSystemInternal()) 
+                        continue;
+                    if (onlyRequiredGroups && (as instanceof FxPropertyAssignment || as.getMultiplicity().isOptional()) && !as.isSystemInternal())
                         continue;
                     if (as.getMultiplicity().isOptional())
                         thisGroup.getChildren().add(as.createEmptyData(thisGroup, 1));
