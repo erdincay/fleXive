@@ -326,7 +326,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @since 3.1.4
      */
     @Override
-    public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal) {
+    public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal, boolean onlyRequiredGroups) {
         String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias();
         String XPath = XPathElement.stripType(getXPath());
         final FxMultiplicity fxMultiplicity = this.getMultiplicity();

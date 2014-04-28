@@ -842,10 +842,8 @@ public class FxGroupData extends FxData {
             } else {
                 FxGroupAssignment gaNew = (FxGroupAssignment) fxGroupAssignment.getAssignedType().getAssignment(XPathElement.buildXPath(true, currGroup.getXPath(), curr.getAlias()));
                 final boolean finalGroup = addy.equals(curr);
-                FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex(), gaNew.getPosition(),
-                        finalGroup || options.middleGroupOptions == null
-                                ? options.onlySystemInternal
-                                : options.middleGroupOptions.onlySystemInternal);
+                final AddGroupOptions addOptions = finalGroup || options.middleGroupOptions == null ? options : options.middleGroupOptions;
+                FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex(), gaNew.getPosition(), addOptions.onlySystemInternal, addOptions.onlyRequiredGroups);
                 if (finalGroup) {
                     gdNew.setPos(pos);
                 }
@@ -1142,7 +1140,16 @@ public class FxGroupData extends FxData {
      */
     public static class AddGroupOptions {
         private boolean onlySystemInternal = false;
+        private boolean onlyRequiredGroups = false;
         private AddGroupOptions middleGroupOptions;
+
+        /**
+         * @return  a new options instance
+         * @since   3.2.1
+         */
+        public static AddGroupOptions create() {
+            return new AddGroupOptions();
+        }
 
         /**
          * Only system-internal groups or properties are added.
@@ -1151,6 +1158,17 @@ public class FxGroupData extends FxData {
          */
         public AddGroupOptions onlySystemInternal() {
             this.onlySystemInternal = true;
+            return this;
+        }
+
+        /**
+         * Only required groups (and system-internal properties) are added.
+         *
+         * @return  this
+         * @since 3.2.1
+         */
+        public AddGroupOptions onlyRequiredGroups() {
+            this.onlyRequiredGroups = true;
             return this;
         }
 

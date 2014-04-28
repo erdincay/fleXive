@@ -242,11 +242,10 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
 
     /**
      * {@inheritDoc}
-     * @since 3.1.4
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     @Override
-    public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal) {
+    public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal, boolean onlyRequiredGroups) {
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.get().getRunAsSystem() ? null : FxContext.getUserTicket();
@@ -268,6 +267,8 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                             ticket != null && !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
                     if (onlySystemInternal && !as.isSystemInternal()) 
+                        continue;
+                    if (onlyRequiredGroups && (as instanceof FxPropertyAssignment || !as.getMultiplicity().isRequired()) && !as.isSystemInternal())
                         continue;
                     if (as.getMultiplicity().isRequired()) {
                         if (hasRequired)

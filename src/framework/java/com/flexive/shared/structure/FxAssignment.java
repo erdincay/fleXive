@@ -551,10 +551,27 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @param position the position to use (to avoid puting multiple elemtns of the same type on the same position)
      * @param onlySystemInternal    when true, only system-internal groups or properties are added
      * @return FxData
-     * @throws FxCreateException on errors
+     * @throws com.flexive.shared.exceptions.FxCreateException on errors
      * @since 3.2.0
      */
-    public abstract FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal);
+    public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal) {
+        return createEmptyData(parent, index, position, onlySystemInternal, false);
+    }
+
+    /**
+     * Create an empty FxData entry for this assignment
+     *
+     *
+     * @param parent   the parent group
+     * @param index    the index of the new entry
+     * @param position the position to use (to avoid puting multiple elemtns of the same type on the same position)
+     * @param onlySystemInternal    when true, only system-internal groups or properties are added
+     * @param onlyRequiredGroups    when true, only required groups (and system-internal properties) are added
+     * @return FxData
+     * @throws FxCreateException on errors
+     * @since 3.2.1
+     */
+    public abstract FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal, boolean onlyRequiredGroups);
 
     /**
      * Create a random FxData entry for this assignment
