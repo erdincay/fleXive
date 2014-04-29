@@ -1281,6 +1281,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         }
         int pos_lang = insert ? INSERT_LANG_POS : UPDATE_ID_POS + 2;
         int pos_isdef_lang = insert ? INSERT_ISDEF_LANG_POS : UPDATE_MLDEF_POS;
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         if (prop.getDataType().isSingleRowStorage()) {
             //Data types that just use one db row can be handled in a very similar way
             Object translatedValue;
@@ -1296,8 +1297,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     ps.setBoolean(pos_isdef_lang, true);
                 else
                     ps.setBoolean(pos_isdef_lang, value.isDefaultLanguage(translatedLanguage));
-                if (upperColumnPos != -1)
-                    ps.setString(upperColumnPos, translatedValue.toString().toUpperCase());
+                if (upperColumnPos != -1) {
+                    final Locale locale = value.isMultiLanguage()
+                            ? env.getLanguage(translatedLanguage).getLocale()
+                            : Locale.getDefault();
+                    ps.setString(upperColumnPos, translatedValue.toString().toUpperCase(locale));
+                }
                 int[] pos = insert ? getColumnPosInsert(prop) : getColumnPosUpdate(prop);
                 switch (prop.getDataType()) {
                     case Double:

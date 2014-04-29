@@ -1147,7 +1147,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
     private String getConditionValue(FxStatement stmt, Pair<String, String> select, Constant constant) {
         return constant.getFunctionsStart()
-                + (stmt.getIgnoreCase() ? select.getSecond().toUpperCase() : select.getSecond())
+                + (stmt.getIgnoreCase() ? select.getSecond().toUpperCase(search.getLanguage().getLocale()) : select.getSecond())
                 + constant.getFunctionsEnd();
     }
 
