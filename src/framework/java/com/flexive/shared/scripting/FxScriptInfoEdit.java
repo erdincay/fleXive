@@ -114,7 +114,7 @@ public class FxScriptInfoEdit extends FxScriptInfo {
         this.name = si.name;
         this.event = si.event;
         this.description = si.description;
-        this.code = si.getId() != 0 ? EJBLookup.getScriptingEngine().loadScriptCode(si.getId()) : "";
+        this.code = si.getId() > 0 ? EJBLookup.getScriptingEngine().loadScriptCode(si.getId()) : "";
         this.active = si.active;
         this.cached = si.cached;
     }
