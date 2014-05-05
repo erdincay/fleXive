@@ -32,6 +32,7 @@
 package com.flexive.core.search;
 
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.search.FxSQLFunctions;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.sqlParser.Property;
@@ -175,7 +176,14 @@ public class SubSelectValues {
     protected void applyWrapper(Value prop) throws FxSqlSearchException {
 
         // anything to apply?
-        if (prop.getFunctionsStart().length() == 0 && prop.getFunctionsEnd().length() == 0) return;
+        if (prop.getFunctionsStart().length() == 0 && prop.getFunctionsEnd().length() == 0) {
+            return;
+        }
+
+        // no further processing for custom SQL selects
+        if (prop.getFunctions().size() == 1 && FxSQLFunctions.FUNCTION_CUSTOM_SELECT.equals(prop.getFunctions().get(0).getSqlName())) {
+            return;
+        }
 
         if (isMultivalue()) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.function.multipleColumns",

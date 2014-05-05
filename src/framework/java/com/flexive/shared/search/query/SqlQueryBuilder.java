@@ -521,6 +521,14 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     /**
+     * @return  direct access to the selected columns
+     * @since 3.2.1
+     */
+    protected List<String> getSelectColumns() {
+        return selectColumns;
+    }
+
+    /**
      * Select one or more columns.
      *
      * @param columns   columns to be selected

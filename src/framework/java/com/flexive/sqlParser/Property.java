@@ -175,4 +175,7 @@ public class Property extends Value {
         return SearchEngine.PROP_USERWILDCARD.equals(this.property);
     }
 
+    public boolean isCustomSql() {
+        return SearchEngine.PROP_CUSTOM_SQL.equals(this.property);
+    }
 }

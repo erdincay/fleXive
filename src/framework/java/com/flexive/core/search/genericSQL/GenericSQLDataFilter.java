@@ -41,6 +41,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
 import com.flexive.shared.search.FxFoundType;
+import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxEnvironment;
@@ -96,6 +97,7 @@ public class GenericSQLDataFilter extends DataFilter {
      * slow, it will timeout anyway.
      */
     private static final int SUBQUERY_LIMIT = -1;
+    private static final ConditionTableInfo INTERNAL_CONDITION_INFO = new ConditionTableInfo(false, false, -1, -1);
 
     private final String tableMain;
     private final String tableContentData;
@@ -796,18 +798,20 @@ public class GenericSQLDataFilter extends DataFilter {
         if (prop == null) {
             // insert dummy entry that will prevent any table-level optimizations
             // because this condition is not mapped to a content table (e.g. tree ops)
-            cti = Pair.newPair("null table", new ConditionTableInfo(false, false, -1, -1));
+            cti = Pair.newPair("null table", INTERNAL_CONDITION_INFO);
         } else if (prop.isWildcard() || prop.isUserPropsWildcard()) {
-            cti = Pair.newPair("wildcard property", new ConditionTableInfo(false, false, -1, -1));
+            cti = Pair.newPair("wildcard property", INTERNAL_CONDITION_INFO);
+        } else if (prop.isCustomSql()) {
+            cti = Pair.newPair("custom sql", INTERNAL_CONDITION_INFO);
         } else if (cond.isNullCondition()) {
             // "IS NULL" is a special case that cannot be optimized like other statements
             // (since it checks for the absence of data and needs specialized queries)
-            cti = Pair.newPair("notNull condition", new ConditionTableInfo(false, false, -1, -1));
+            cti = Pair.newPair("notNull condition", INTERNAL_CONDITION_INFO);
         } else {
             final PropertyEntry entry = getPropertyResolver().get(getStatement(), prop);
             if (entry.getProperty() == null) {
                 // insert dummy entry to prevent table-level optimizations
-                cti = Pair.newPair("virtual property", new ConditionTableInfo(false, false, -1, -1));
+                cti = Pair.newPair("virtual property", INTERNAL_CONDITION_INFO);
             } else {
                 if (entry.getAssignment() != null && entry.getAssignment().isFlatStorageEntry()) {
                     final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
@@ -971,6 +975,14 @@ public class GenericSQLDataFilter extends DataFilter {
                 Property _prop = new Property(prop.getTableAlias(),fx_prop.getName(),prop.getField());
                 return buildPropertyCondition(stmt,cond,_prop,(FxPropertyAssignment)fx_ass);
             */
+        } else if (prop.isCustomSql()) {
+            final String queryId = FxSharedUtils.stripQuotes(cond.getConstant().getValue(), '\'');
+            final String sql = search.getParams().getCustomSqlQueries().get(queryId);
+            if (StringUtils.isBlank(sql)) {
+                throw new FxSqlSearchException("ex.sqlSearch.query.unknownCustomSql", queryId);
+            }
+            final String processedSql = sql.replace(FxSQLSearchParams.CUSTOM_SQL_EMPTY_LANGUAGE, getEmptyLanguage() + " AS lang");
+            return '(' + processedSql + ')';
         } else {
             return buildPropertyCondition(stmt, cond, cond.getProperty(), false, false);
         }

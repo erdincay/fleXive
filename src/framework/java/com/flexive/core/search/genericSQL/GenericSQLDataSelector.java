@@ -33,11 +33,9 @@ package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
-import com.flexive.shared.FxArrayUtils;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.Pair;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.search.FxSQLFunctions;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxDataType;
@@ -157,10 +155,13 @@ public class GenericSQLDataSelector extends DataSelector {
             // Prepare all values
             final Value value = selectedValue.getValue();
             PropertyEntry entry = null;
+            final PropertyResolver pr = search.getPropertyResolver();
             if (value instanceof Property) {
-                final PropertyResolver pr = search.getPropertyResolver();
                 entry = pr.get(search.getFxStatement(), (Property) value);
                 pr.addResultSetColumn(search, entry);
+            } else {
+                // everything else is treated as custom SQL select (including constants)
+                pr.addCustomResultSetColumn();
             }
             values[pos] = selectFromTbl(entry, value, pos);
             pos++;
@@ -310,14 +311,27 @@ public class GenericSQLDataSelector extends DataSelector {
         final SubSelectValues result = new SubSelectValues(resultPos, sortInfo.getFirst(), sortInfo.getSecond());
 
         // disable XPath processing if corresponding hint is set
-        entry.setProcessXPath(!FxContext.getUserTicket().isGlobalSupervisor() && !search.getParams().isHintIgnoreXPath());
+        if (entry != null) {
+            entry.setProcessXPath(!FxContext.getUserTicket().isGlobalSupervisor() && !search.getParams().isHintIgnoreXPath());
 
-        entry.setProcessData(search.getParams().isHintSelectData());
+            entry.setProcessData(search.getParams().isHintSelectData());
+        }
 
         final FxTreeMode treeMode = search.getParams() != null ? search.getParams().getTreeMode() : FxTreeMode.Edit;
 
         if (prop instanceof Constant || entry == null) {
-            result.addItem(prop.getValue().toString(), resultPos, false);
+            if (prop.getFunctions().size() == 1 && FxSQLFunctions.FUNCTION_CUSTOM_SELECT.equals(prop.getFunctions().get(0).getSqlName())) {
+                String customSelect = search.getParams().getCustomSqlSelects().get(
+                        FxFormatUtils.unquote(prop.getValue().toString())
+                );
+                if (StringUtils.isBlank(customSelect)) {
+                    throw new FxSqlSearchException("ex.sqlSearch.query.unknownCustomSqlSelect", customSelect);
+                }
+                customSelect = customSelect.trim();
+                result.addItem(customSelect.charAt(0) == '(' ? customSelect : '(' + customSelect + ')', resultPos, false);
+            } else {
+                result.addItem(prop.getValue().toString(), resultPos, false);
+            }
         } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
 
             long root = search.getParams() != null ? search.getParams().getTreeRootId() :  FxTreeNode.ROOT_NODE;

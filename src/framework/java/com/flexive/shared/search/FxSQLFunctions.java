@@ -32,6 +32,7 @@
 package com.flexive.shared.search;
 
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.structure.FxDataType;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -43,6 +44,8 @@ import java.util.*;
  * @version $Rev$
  */
 public final class FxSQLFunctions {
+    public static final String FUNCTION_CUSTOM_SELECT = "CUSTOM_SELECT";
+
     private static final Map<String, FxSQLFunction> FUNCTIONS = new HashMap<String, FxSQLFunction>();
     static {
         for (FxSQLFunction[] values: Arrays.asList(new FxSQLFunction[][] {
@@ -54,6 +57,17 @@ public final class FxSQLFunctions {
                 }
             }
         }
+        FUNCTIONS.put(FUNCTION_CUSTOM_SELECT.toLowerCase(), new FxSQLFunction() {
+            @Override
+            public String getSqlName() {
+                return FUNCTION_CUSTOM_SELECT;
+            }
+
+            @Override
+            public FxDataType getOverrideDataType() {
+                return FxDataType.Text;
+            }
+        });
     }
 
     /**

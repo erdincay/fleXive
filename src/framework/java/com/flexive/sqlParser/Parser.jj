@@ -114,7 +114,7 @@ TOKEN [IGNORE_CASE] :
 | < RELATION    : "RELATION" >
 | < RECURSIVE    : "RECURSIVE" >
 | < END_STMT  : ";"([" ","\n"])* >
-| < FUNCTION  : (["a"-"z","A"-"Z"])+"(">
+| < FUNCTION  : (["a"-"z","A"-"Z","_"])+"(">
 | < WILDCARD  : "*" >
 | < USERWILDCARD : "@*" >
 | < INTEGER   : ("-"|"")["0"-"9"] (["0"-"9"])* >

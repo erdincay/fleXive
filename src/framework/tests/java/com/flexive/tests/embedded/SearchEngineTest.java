@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.core.DatabaseConst;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -2036,6 +2037,45 @@ public class SearchEngineTest {
             }
         }
 
+    }
+
+    @Test
+    public void customSqlQueryTest() throws FxApplicationException {
+        // a custom SQL query that selects the most recent flexive content (based on the ID column)
+        final String customSql =
+                "SELECT c.id, c.ver, #empty_language# FROM " + DatabaseConst.TBL_CONTENT + " c " +
+                "WHERE c.id = (SELECT MAX(id) FROM " + DatabaseConst.TBL_CONTENT +  ")";
+
+        // a FxSQL query that uses this condition to look up some properties of the instance that matches the custom SQL query
+        final String fxSql = "SELECT @pk, caption WHERE @custom_sql = 'max_id'";
+
+        final FxSQLSearchParams params = new FxSQLSearchParams();
+        params.addCustomSqlQuery("max_id", customSql);
+
+        FxContext.startRunningAsSystem();
+        try {
+            final FxResultSet result = EJBLookup.getSearchEngine().search(fxSql, 0, 100, params);
+            assertEquals(result.getRowCount(), 1);
+        } finally {
+            FxContext.stopRunningAsSystem();
+        }
+    }
+
+    @Test
+    public void customSqlSelectTest() throws FxApplicationException {
+        // dummy select statement that just selects back the ID of the row
+        final String customSelect =
+                "SELECT id FROM " + DatabaseConst.TBL_CONTENT + " c WHERE c.id=filter.id AND c.ver=filter.ver";
+
+        final String fxSql = "SELECT @pk, custom_select('my_id')";
+
+        final FxSQLSearchParams params = new FxSQLSearchParams();
+        params.addCustomSqlSelect("my_id", customSelect);
+
+        final FxResultSet result = EJBLookup.getSearchEngine().search(fxSql, 0, 100, params);
+        for (FxResultRow row : result.getResultRows()) {
+            assertEquals(row.getPk(1).getId(), row.getLong(2));
+        }
     }
 
     private void queryForCaption(String name) throws FxApplicationException {

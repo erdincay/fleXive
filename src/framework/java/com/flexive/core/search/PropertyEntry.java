@@ -136,7 +136,15 @@ public class PropertyEntry {
          * Lock of a content.
          * @since 3.1
          */
-        LOCK("@lock");
+        LOCK("@lock"),
+
+        /**
+         * A custom SQL query that can be used in the WHERE clause, e.g. <code>WHERE @custom_sql = 'my_query_id'</code>.
+         * The query {@code my_query_id} has to be supplied via {@link com.flexive.shared.search.FxSQLSearchParams}.
+         *
+         * @since 3.2.1
+         */
+        CUSTOM_SQL("@custom_sql");
 
         private final String propertyName;
 
@@ -191,8 +199,10 @@ public class PropertyEntry {
                 case PROPERTY_REF:
                     //noinspection ThrowableInstanceNeverThrown
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.entry.virtual").asRuntimeException();
+                case CUSTOM_SQL:
+                    return new CustomSqlEntry();
                 default:
-                    throw new IllegalStateException();
+                    throw new IllegalStateException("Cannot create a new property of type " + name());
             }
         }
 
@@ -479,6 +489,22 @@ public class PropertyEntry {
 
         private int getIndex(String name) {
             return ArrayUtils.indexOf(READ_COLUMNS, name);
+        }
+    }
+
+
+    private static class CustomSqlEntry extends PropertyEntry {
+        private CustomSqlEntry() {
+            super(Type.CUSTOM_SQL, null, null, null, false, null);
+        }
+
+        @Override
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
+            try {
+                return rs.getObject(positionInResultSet);
+            } catch (SQLException e) {
+                throw new FxSqlSearchException(e);
+            }
         }
     }
 

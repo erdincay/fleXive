@@ -54,6 +54,12 @@ public interface SearchEngine {
      */
     String PROP_USERWILDCARD = "@*";
     /**
+     * A custom query property.
+     * @since 3.2.1
+     * @see com.flexive.shared.search.FxSQLSearchParams#addCustomSqlQuery(String, String)
+     */
+    String PROP_CUSTOM_SQL = "@CUSTOM_SQL";
+    /**
      * The default query timeout in seconds.
      * @since 3.1
      */

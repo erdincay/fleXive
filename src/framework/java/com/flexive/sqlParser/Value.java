@@ -142,7 +142,7 @@ public class Value {
      */
     public List<FxSQLFunction> getFunctions() {
         if (functions == null) {
-            return new ArrayList<FxSQLFunction>(0);
+            return Collections.emptyList();
         }
         return Collections.unmodifiableList(functions);
     }

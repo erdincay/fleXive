@@ -41,10 +41,13 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Search parameters
@@ -53,6 +56,7 @@ import java.util.List;
  */
 public class FxSQLSearchParams implements Serializable {
     private static final long serialVersionUID = -3154811997979332790L;
+    public static final String CUSTOM_SQL_EMPTY_LANGUAGE = "#empty_language#";
 
     /**
      * The cache modes of the search.
@@ -165,6 +169,8 @@ public class FxSQLSearchParams implements Serializable {
     private boolean ignoreResultPreferences = false;
     private long treeRootId = FxTreeNode.ROOT_NODE;
     private FxTreeMode treeMode = FxTreeMode.Edit;
+    private Map<String, String> customSqlQueries;
+    private Map<String, String> customSqlSelects;
 
     /**
      * Constructor.
@@ -470,5 +476,81 @@ public class FxSQLSearchParams implements Serializable {
      */
     public void setIgnoreResultPreferences(boolean ignoreResultPreferences) {
         this.ignoreResultPreferences = ignoreResultPreferences;
+    }
+
+    /**
+     * @return  custom SQL queries that can be used in the WHERE clause
+     * @since 3.2.1
+     */
+    public Map<String, String> getCustomSqlQueries() {
+        return customSqlQueries != null ? customSqlQueries : Collections.<String, String>emptyMap();
+    }
+
+    /**
+     * Add a custom SQL query that can be referenced in the FxSQL WHERE clause:
+     *
+     * <code>WHERE @custom_query = 'my_query_id'</code>
+     *
+     * <p>
+     *     The query needs to return exactly the following columns:
+     *     <table>
+     *         <tr>
+     *             <th>id</th>
+     *             <td>A content ID</td>
+     *         </tr>
+     *         <tr>
+     *             <th>ver</th>
+     *             <td>A content version</td>
+     *         </tr>
+     *         <tr>
+     *             <th>lang</th>
+     *             <td>A language ID, or the token {@link #CUSTOM_SQL_EMPTY_LANGUAGE} if no language is available.</td>
+     *         </tr>
+     *     </table>
+     * </p>
+     *
+     * <p>
+     *     <strong>Use with care!</strong> This is intended as an "escape hatch" when integrating external tables and complex conditions
+     *     into FxSQL queries, but it reduces portability and can introduce SQL injection vulnerabilities.
+     * </p>
+     *
+     * @param queryId   the query ID for referencing in the WHERE clause
+     * @param query     the SQL query
+     * @since 3.2.1
+     */
+    public void addCustomSqlQuery(String queryId, String query) {
+        if (customSqlQueries == null) {
+            customSqlQueries = Maps.newHashMap();
+        }
+        customSqlQueries.put(queryId, query);
+    }
+
+    /**
+     * @return custom SQL select queries that can be used in the SELECT clause
+     * @since 3.2.1
+     */
+    public Map<String, String> getCustomSqlSelects() {
+        return customSqlSelects != null ? customSqlSelects : Collections.<String, String>emptyMap();
+    }
+
+    /**
+     * Define a custom SQL query that can be used to select data back from a query into the result set:
+     *
+     * <code>SELECT custom_select('my_select_id')</code>
+     *
+     * <p>
+     *     The query needs to return a single row, and a single column only.
+     * </p>
+     *
+     * @param selectId    the select query ID for referencing in the SELECT clause
+     * @param query       the SQL query
+     * @see #addCustomSqlQuery(String, String)
+     * @since 3.2.1
+     */
+    public void addCustomSqlSelect(String selectId, String query) {
+        if (customSqlSelects == null) {
+            customSqlSelects = Maps.newHashMap();
+        }
+        customSqlSelects.put(selectId, query);
     }
 }

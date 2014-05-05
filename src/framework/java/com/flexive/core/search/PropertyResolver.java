@@ -108,7 +108,7 @@ public class PropertyResolver {
     }
 
     public void addResultSetColumn(SqlSearch search, PropertyEntry e) {
-        // Store actuall resultset position
+        // Store actual resultset position
         e.setPositionInResultSet(resultSetPos);
         this.resultSetColumns.add(e);
         // compute next position to use
@@ -123,6 +123,14 @@ public class PropertyResolver {
         }
         // compute total result set columns
         resultSetColumnCount += e.getReadColumns().length;
+    }
+
+    public void addCustomResultSetColumn() {
+        final PropertyEntry entry = PropertyEntry.Type.CUSTOM_SQL.createEntry();
+        entry.setPositionInResultSet(resultSetPos);
+        this.resultSetColumns.add(entry);
+        resultSetPos++;
+        resultSetColumnCount++;
     }
 
 
