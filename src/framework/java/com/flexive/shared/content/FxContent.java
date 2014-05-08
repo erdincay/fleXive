@@ -1854,6 +1854,7 @@ public class FxContent implements Serializable {
      *
      * @param xpath the xpath to replace the data for
      * @param con other content to take data from
+     * @since 3.1.6
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void replaceData(String xpath, FxContent con) {
@@ -1875,6 +1876,7 @@ public class FxContent implements Serializable {
                 } else
                     currData.getParent().removeChild(data);
             }
+            return;
         }
         FxData orgData = isPropertyXPath(xpath) ? con.getPropertyData(xpath) : con.getGroupData(xpath);
         FxGroupData parent = this.getGroupData(orgData.getParent().getXPathFull());
