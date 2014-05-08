@@ -196,10 +196,13 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
         }
         switch (this) {
             case String1024:
-                final FxString fxString = (FxString) value;
-                final String defaultTrans = fxString.getDefaultTranslation();
-                return value instanceof FxString &&
-                        (fxString.isEmpty() || (defaultTrans != null && defaultTrans.length() <= 1024));
+                if (value instanceof FxString) {
+                    final FxString fxString = (FxString) value;
+                    final String defaultTrans = fxString.getDefaultTranslation();
+                    return fxString.isEmpty() || defaultTrans == null || defaultTrans.length() <= 1024;
+                } else {
+                    return false;
+                }
             case Binary:
                 return value instanceof FxBinary;
             case Boolean:

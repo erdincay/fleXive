@@ -1801,12 +1801,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         case Text:
                             if (currValue == null) {
                                 currValue = new FxString(multiLang, currLang, rs.getString(columns[0]));
-                                if (propAssignment.hasMaxLength()) {
-                                    currValue.setMaxInputLength(propAssignment.getMaxLength());
-                                    if (dataType == FxDataType.String1024 && currValue.getMaxInputLength() > 1024)
-                                        currValue.setMaxInputLength(1024);
-                                } else if (dataType == FxDataType.String1024)
-                                    currValue.setMaxInputLength(1024);
                             } else
                                 currValue.setTranslation(currLang, rs.getString(columns[0]));
                             break;

@@ -36,8 +36,10 @@ import com.flexive.shared.content.FxValueChangeListener;
 import com.flexive.shared.content.FxValueChangeListener.ChangeType;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
-import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -70,8 +72,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     private static final EmptyTranslation EMPTY_TRANSLATION = new EmptyTranslation();
 
     protected long defaultLanguage = FxLanguage.SYSTEM_ID;
-    private long selectedLanguage;
-    private int maxInputLength;
     private String XPath = "", xpathPrefix = "";
     private Integer valueData = VALUE_NODATA;
     private FxValueChangeListener changeListener = null;
@@ -103,7 +103,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     protected FxValue(boolean multiLanguage, long defaultLanguage, Map<Long, T> translations) {
         this.defaultLanguage = defaultLanguage;
-        this.maxInputLength = -1;
         this.readOnly = false;
         if (multiLanguage) {
             if (translations == null) {
@@ -114,15 +113,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             }
             if (this.defaultLanguage < 0) {
                 this.defaultLanguage = FxLanguage.SYSTEM_ID;
-                this.selectedLanguage = FxLanguage.SYSTEM_ID;
-                if (translations != null && !translations.entrySet().isEmpty())
-                    for (Entry<Long, T> e : translations.entrySet())
-                        if (e.getValue() != null) {
-                            this.selectedLanguage = e.getKey();
-                            break;
-                        }
-            } else
-                this.selectedLanguage = this.defaultLanguage;
+            }
         } else {
             if (translations != null && !translations.isEmpty()) {
                 //a translation is provided, use the defaultLanguage element or very first element if not present
@@ -131,7 +122,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                     singleValue = translations.values().iterator().next();
             }
             this.defaultLanguage = FxLanguage.SYSTEM_ID;
-            this.selectedLanguage = FxLanguage.SYSTEM_ID;
             this.translations = null;
             this.singleValueEmpty = false;
         }
@@ -145,18 +135,14 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     protected FxValue(long defaultLanguage, boolean multiLanguage) {
         this.defaultLanguage = defaultLanguage;
-        this.maxInputLength = -1;
         this.readOnly = false;
         if (multiLanguage) {
             this.translations = new HashMap<Long, T>(4);
             if (this.defaultLanguage < 0) {
                 this.defaultLanguage = FxLanguage.SYSTEM_ID;
-                this.selectedLanguage = FxLanguage.SYSTEM_ID;
-            } else
-                this.selectedLanguage = this.defaultLanguage;
+            }
         } else {
             this.defaultLanguage = FxLanguage.SYSTEM_ID;
-            this.selectedLanguage = FxLanguage.SYSTEM_ID;
             this.translations = null;
             this.singleValueEmpty = false;
         }
@@ -270,7 +256,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         this(clone.isMultiLanguage(), clone.getDefaultLanguage(), new HashMap<Long, T>((clone.translations != null ? clone.translations.size() : 1)));
         this.XPath = clone.XPath;
         this.xpathPrefix = clone.xpathPrefix;
-        this.maxInputLength = clone.maxInputLength;
         this.valueData = clone.valueData;
         if(clone.multiLangData != null)
             this.multiLangData = Maps.newHashMap(clone.multiLangData);
@@ -766,32 +751,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     }
 
     /**
-     * Get the language selected in user interfaces
-     *
-     * @return selected language
-     */
-    public long getSelectedLanguage() {
-        return selectedLanguage;
-    }
-
-    /**
-     * Set the user selected language
-     *
-     * @param selectedLanguage selected language ID
-     * @return self
-     * @throws FxNoAccessException if the selected Language is not contained
-     */
-    public FxValue setSelectedLanguage(long selectedLanguage) throws FxNoAccessException {
-        if (selectedLanguage < 0 || !isMultiLanguage())
-            return this;
-        //throw exception if selectedLanguage is not contained!
-        if (!translations.containsKey(selectedLanguage))
-            throw new FxNoAccessException("ex.content.value.invalid.language", selectedLanguage);
-        this.selectedLanguage = selectedLanguage;
-        return this;
-    }
-
-    /**
      * Set the translation for a language or override the single language value if
      * this value is not flagged as multi language enabled. This method cannot be
      * overridden since it not only accepts parameters of type T, but also of type
@@ -926,18 +885,23 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return the maximum input length an input field should have for this value
      */
     public int getMaxInputLength() {
-        return maxInputLength;
+        final String xp = getXPath();
+        if (StringUtils.isBlank(xp)) {
+            return -1;
+        } else {
+            try {
+                final FxPropertyAssignment pa = CacheAdmin.getEnvironment().getPropertyAssignment(xp);
+                if (pa.getMaxLength() > 0) {
+                    return pa.getMaxLength();
+                }
+                final FxDataType dataType = pa.getProperty().getDataType();
+                return dataType == FxDataType.String1024 ? 1024 : -1;
+            } catch (FxRuntimeException e) {
+                return -1;
+            }
+        }
     }
 
-
-    /**
-     * Set the maximum input length for this value (-1 for unlimited length).
-     *
-     * @param maxInputLength the maximum input length for this value (-1 for unlimited length).
-     */
-    public void setMaxInputLength(int maxInputLength) {
-        this.maxInputLength = maxInputLength;
-    }
 
     /**
      * Set the default language.

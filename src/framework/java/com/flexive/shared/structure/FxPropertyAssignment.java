@@ -301,12 +301,6 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
             value = this.getProperty().getEmptyValue(this.isMultiLang()).setXPath(getXPath());
         if (this.getDefaultValue() != null && value.isMultiLanguage() == this.getDefaultValue().isMultiLanguage() && !this.getDefaultValue().isEmpty())
             value = this.getDefaultValue().copy();
-        if (this.hasMaxLength()) {
-            value.setMaxInputLength(this.getMaxLength());
-            if (this.getProperty().getDataType() == FxDataType.String1024 && value.getMaxInputLength() > 1024)
-                value.setMaxInputLength(1024);
-        } else if (this.getProperty().getDataType() == FxDataType.String1024)
-            value.setMaxInputLength(1024);
         property.updateEnvironmentData(value);
         return value;
     }
