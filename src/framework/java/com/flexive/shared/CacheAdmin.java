@@ -64,7 +64,7 @@ public class CacheAdmin {
     public static final String ROOT_USERTICKETSTORE = "/UserTicketStore";
     public static final String ROOT_WEBDAV_USERTICKETSTORE = "/WebdavUserTicketStore";
     public static final String CACHE_SERVICE_NAME = "flexive:service=FxCache";
-    public static final String LANGUAGES_ID = "/FxLang/Id";
+    public static final String LANGUAGES_ID = "/FxLang/FxId";
     public static final String LANGUAGES_ISO = "/FxLang/ISO";
     public static final String LANGUAGES_ALL = "/FxLang/ISO";
     public static final String ENVIRONMENT_BASE = "/FxEnvironment";

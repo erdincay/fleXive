@@ -73,6 +73,7 @@ import static com.flexive.core.DatabaseConst.*;
 public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
 
     private static final Log LOG = LogFactory.getLog(LanguageBean.class);
+    private final static String CACHE_KEY_ALL_LANG_IDS = "@ID@";
 
     /**
      * All tables that have references to languages and the referencing column
@@ -153,10 +154,10 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxLanguage> loadAvailable() throws FxApplicationException {
         try {
-            List<FxLanguage> available = (List<FxLanguage>) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, "id");
+            List<FxLanguage> available = (List<FxLanguage>) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, CACHE_KEY_ALL_LANG_IDS);
             if (available == null) {
                 loadAll(true, true);
-                available = (List<FxLanguage>) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, "id");
+                available = (List<FxLanguage>) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, CACHE_KEY_ALL_LANG_IDS);
                 if (available == null)
                     throw new FxInvalidLanguageException("ex.language.loadFailed");
             }
@@ -256,7 +257,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                 alLang.add(lang);
             }
             if (add2cache && used) {
-                cache.put(CacheAdmin.LANGUAGES_ALL, "id", alLang);
+                cache.put(CacheAdmin.LANGUAGES_ALL, CACHE_KEY_ALL_LANG_IDS, alLang);
             }
         } catch (SQLException e) {
             LOG.error(e, e);
