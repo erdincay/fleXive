@@ -251,7 +251,9 @@ public class SearchUtils {
         return contentFilterWithPrivate(
                 ticket,
                 tableAlias,
-                tableAlias + "." + column + " IN (" + StringUtils.join(readableIds, ',') + ")",
+                readableIds.isEmpty()
+                        ? null
+                        : tableAlias + "." + column + " IN (" + StringUtils.join(readableIds, ',') + ")",
                 privateReadableIds.isEmpty() ? null :
                         tableAlias + "." + column + " IN (" + StringUtils.join(privateReadableIds, ',') + ")"
         );
@@ -260,8 +262,13 @@ public class SearchUtils {
     private static String contentFilterWithPrivate(UserTicket ticket, String contentTableAlias, String readableFilter, String privateReadableFilter) {
         final String result;
         if (isBlank(privateReadableFilter)) {
-            // no private permissions have to be checked
-            result = readableFilter;
+            if (isBlank(readableFilter)) {
+                // no readable content instances
+                result = "1=0";
+            } else {
+                // no private permissions have to be checked
+                result = readableFilter;
+            }
         } else {
             // must match readable column OR owner and private readable column
             result = "(" + readableFilter + " OR ("
