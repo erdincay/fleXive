@@ -42,6 +42,7 @@ import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
@@ -64,6 +65,14 @@ public class SqlQueryBuilder implements Serializable {
 
     private static final String[] BASIC_SELECTS = new String[]{"@pk", "mandator",
             "created_by", "acl", "step", SearchEngine.PROP_USERWILDCARD};
+
+    private static final Function<String, String> FN_ADD_QUOTES = new Function<String, String>() {
+        @Override
+        public String apply(String input) {
+            return input == null ? null : '\'' + input + '\'';
+        }
+    };
+
     /**
      * Start column for user defined properties
      */
@@ -610,7 +619,7 @@ public class SqlQueryBuilder implements Serializable {
         for (FxLanguage language : languages) {
             isoCodes.add(language.getIso2digit());
         }
-        return uniqueFilter("SEARCH_LANGUAGES", StringUtils.join(isoCodes, "|"));
+        return uniqueFilter("SEARCH_LANGUAGES", StringUtils.join(Lists.transform(isoCodes, FN_ADD_QUOTES), "|"));
     }
 
     private SqlQueryBuilder setTypeFilter(Object value) {
