@@ -335,7 +335,7 @@ public class SqlQueryBuilderTest {
         final FxEnvironment env = CacheAdmin.getEnvironment();
         final List<FxLanguage> languages = Arrays.asList(env.getLanguage("en"), env.getLanguage("de"));
         final String query = new SqlQueryBuilder().select("@pk").searchLanguages(languages).getQuery();
-        assertTrue(query.contains("SEARCH_LANGUAGES=en|de"), "Search language filter not found in: " + query);
+        assertTrue(query.contains("SEARCH_LANGUAGES='en'|'de'"), "Search language filter not found in: " + query);
     }
 
     private void checkInCondition(SqlQueryBuilder sqlQueryBuilder) {
