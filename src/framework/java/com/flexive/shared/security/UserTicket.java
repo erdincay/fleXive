@@ -195,6 +195,11 @@ public interface UserTicket extends Serializable {
      */
     long getCreationTime();
 
+    /**
+     * @return remote host the user logged in from (if available and applicable)
+     */
+    String getRemoteHost();
+
 
     /**
      * Returns true if the user may read objects using the given ACL.

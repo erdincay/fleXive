@@ -76,6 +76,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     private ACLAssignment[] assignments;
     private long creationTime;
     private FxPK contactData;
+    private String remoteHost;
 
     private static volatile long STRUCTURE_TIMESTAMP = -1;
     private static ACLAssignment[] guestACLAssignments = null;
@@ -428,6 +429,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
 
         this.dirty = false;
         this.creationTime = System.currentTimeMillis();
+        this.remoteHost = FxContext.get().getRemoteHost();
 
         // Check ACL assignments
         if (assignments == null) {
@@ -503,6 +505,16 @@ public class UserTicketImpl implements UserTicket, Serializable {
     @Override
     public long getCreationTime() {
         return this.creationTime;
+    }
+
+    /**
+     * @return remote host the user logged in from (if available and applicable)
+     */
+    @Override
+    public String getRemoteHost() {
+        if(remoteHost == null)
+            return "unknown";
+        return remoteHost;
     }
 
     /**
