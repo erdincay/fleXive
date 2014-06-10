@@ -126,6 +126,7 @@ public class FxValueHandler extends TagHandler {
             assignAttribute(ctx, mapper, "decorate", Boolean.class);
             assignAttribute(ctx, mapper, "filter", Boolean.class);
             assignAttribute(ctx, mapper, "forceLineInput", Boolean.class);
+            assignAttribute(ctx, mapper, "newLine", Boolean.class);
             assignAttribute(ctx, mapper, "valueFormatter", FxValueFormatter.class);
             assignAttribute(ctx, mapper, "containerDivClass", String.class);
             assignAttribute(ctx, mapper, "autocompleteHandler", String.class);

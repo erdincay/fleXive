@@ -2,11 +2,7 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
       xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
-      xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:fx="http://www.flexive.com/jsf/core">
 
 Description:
@@ -49,7 +45,7 @@ disableLytebox = Set this property to true if the Lytebox  javascript library us
     </c:if>
     <c:set var="inputId" value="#{id}"/>
     <c:if test="#{decorate}">
-        <fx:formRow id="#{id}_input_" label="#{label}">
+        <fx:formRow id="#{id}_input_" label="#{label}" newLine="#{newLine}">
             <fx:fxValueInput id="#{inputId}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"
                     forceLineInput="#{forceLineInput}" valueFormatter="#{valueFormatter}" containerDivClass="#{containerDivClass}"
                     autocompleteHandler="#{autocompleteHandler}" disableMultiLanguage="#{disableMultiLanguage}" disableLytebox="#{disableLytebox}"/>
