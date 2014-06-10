@@ -152,7 +152,7 @@ public class FxContext implements Serializable {
      */
     public void setTreeWasModified() {
         this.treeWasModified = true;
-        if (info.get() != null) {
+        if (info.get() != null && info.get().getDivisionId() != -1) {
             // play safe, cannot access cache when we don't have an active context
             CacheAdmin.setTreeWasModified();
         }
