@@ -102,6 +102,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>keytool-maven-plugin</artifactId>
+                <version>1.5</version>
                 <executions>
                     <execution>
                         <phase>generate-resources</phase>
@@ -114,13 +115,13 @@
                         <phase>generate-resources</phase>
                         <id>genkey</id>
                         <goals>
-                            <goal>genkey</goal>
+                            <goal>generateKeyPair</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
                     <keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
-                    <dname>cn=www.mrhaki.com</dname>
+                    <dname>cn=localhost</dname>
                     <keypass>jetty6</keypass>
                     <storepass>jetty6</storepass>
                     <alias>jetty6</alias>
