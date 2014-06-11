@@ -66,11 +66,11 @@ public class ResultPreferences implements Serializable {
     }
 
     public List<ResultColumnInfo> getSelectedColumns() {
-        return Collections.unmodifiableList(selectedColumns);
+        return selectedColumns == null ? Collections.<ResultColumnInfo>emptyList() : Collections.unmodifiableList(selectedColumns);
     }
 
     public List<ResultOrderByInfo> getOrderByColumns() {
-        return Collections.unmodifiableList(orderByColumns);
+        return orderByColumns == null ? Collections.<ResultOrderByInfo>emptyList() : Collections.unmodifiableList(orderByColumns);
     }
 
     public int getRowsPerPage() {

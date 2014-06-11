@@ -292,7 +292,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return XPath (optional! can be an empty String)
      */
     public String getXPath() {
-        return xpathPrefix.length() == 0 ? XPath : xpathPrefix + XPath;
+        return xpathPrefix == null || xpathPrefix.length() == 0 ? XPath : xpathPrefix + XPath;
     }
 
     /**

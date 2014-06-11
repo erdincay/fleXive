@@ -42,6 +42,7 @@ import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.value.FxLargeNumber;
 import com.flexive.tests.shared.TestParameters;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -539,6 +540,27 @@ public class ConfigurationTest {
     @Test
     public void putInForeignNode() throws FxApplicationException {
         foreignDomainTest(getNodeConfigurationEngine(), "mynode");
+    }
+
+    @Test
+    public void testLegacyFxValueParameters() {
+        // test deserialization of FxValue instances with different class layouts
+        final String xml = "      <value class=\"com.flexive.shared.value.FxLargeNumber\">\n" +
+                "        <multiLanguage>false</multiLanguage>\n" +
+                "        <defaultLanguage>0</defaultLanguage>\n" +
+                "        <selectedLanguage>0</selectedLanguage>\n" +
+                "        <maxInputLength>-1</maxInputLength>\n" +
+                "        <XPath/>\n" +
+                "        <singleValue class=\"long\">5</singleValue>\n" +
+                "        <singleValueEmpty>false</singleValueEmpty>\n" +
+                "        <readOnly>false</readOnly>\n" +
+                "      </value>\n";
+
+        final Parameter<FxLargeNumber> param = ParameterFactory.newInstance(FxLargeNumber.class, "/", ParameterScope.USER, null);
+
+        final FxLargeNumber value = param.getValue(xml);
+
+        assertEquals(value.getBestTranslation(), (Long) 5L);
     }
 
     private <T extends Serializable> void foreignDomainTest(CustomDomainConfigurationEngine<T> dce, T otherDomainValue) throws FxApplicationException {

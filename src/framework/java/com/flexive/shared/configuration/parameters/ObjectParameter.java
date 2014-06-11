@@ -38,7 +38,12 @@ import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.AssignmentValueNode;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.QueryRootNode;
+import com.flexive.shared.value.FxValue;
+import com.google.common.collect.ImmutableSet;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.mapper.MapperWrapper;
+
+import java.util.Set;
 
 /**
  * Generic Object parameter wrapper. Takes any java object, serializes
@@ -64,7 +69,23 @@ class ObjectParameter<T> extends ParameterImpl<T> {
     private static final XStream xStream;
 
     static {
-    	xStream = new XStream();
+    	xStream = new XStream() {
+            @Override
+            protected MapperWrapper wrapMapper(MapperWrapper next) {
+                // ignore removed FxValue fields (some old flexive backend parameters serialized whole FxValue instances)
+                return new MapperWrapper(next) {
+                    final Set<String> ignoredFxValueFields = ImmutableSet.of("multiLanguage", "selectedLanguage", "maxInputLength");
+
+                    @Override
+                    public boolean shouldSerializeMember(Class definedIn, String fieldName) {
+                        if (FxValue.class.isAssignableFrom(definedIn)) {
+                            return !ignoredFxValueFields.contains(fieldName);
+                        }
+                        return super.shouldSerializeMember(definedIn, fieldName);
+                    }
+                };
+            }
+        };
     	
     	// query node classes aliases
     	xStream.alias("queryOperatorNode", QueryOperatorNode.class);

@@ -71,10 +71,18 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     private LoadResult loadWithType(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
-        ResultPreferences preferences;
+        ResultPreferences preferences = null;
+        boolean reset = false;
         try {
             preferences = configuration.get(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location));
         } catch (FxNotFoundException e) {
+            if (typeId < -1) {
+                // unknown type
+                throw e;
+            }
+            reset = true;
+        }
+        if (reset || (preferences != null && preferences.getSelectedColumns().isEmpty())) {
             if (typeId >= 0) {
                 final FxType type = CacheAdmin.getEnvironment().getType(typeId);
                 // use parent type or global default (FX-482)
@@ -91,10 +99,9 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
                 ), Arrays.asList(
                         new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.ASCENDING)
                 ), 25, 100);
-            } else {
-                throw e;
             }
         }
+
         final ResultPreferences checkedPreferences = checkProperties(preferences);
         if (checkedPreferences != null) {
             // check performed, store new version in configuration
