@@ -1654,7 +1654,8 @@
                             <term>disableDefaultValidator</term>
                             <listitem>
                                 <para>
-                                    When true, the default FxValueInputValidator is disabled.
+                                    When true, the default FxValueInputValidator is disabled
+                                    (since &flexive; 3.2.1)
                                 </para>
                             </listitem>
                         </varlistentry>
