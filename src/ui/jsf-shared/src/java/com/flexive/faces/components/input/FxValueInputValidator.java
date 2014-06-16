@@ -50,12 +50,16 @@ import javax.faces.validator.ValidatorException;
  * @version $Rev$
  */
 public class FxValueInputValidator implements Validator {
+    private boolean enabled = true;
     
     /**
      * {@inheritDoc}
      */
     @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
+        if (!enabled) {
+            return;
+        }
         AbstractFxValueInput input = (AbstractFxValueInput) component;
         if (input.isReadOnly()) {
             return; // nothing to validate
@@ -102,5 +106,13 @@ public class FxValueInputValidator implements Validator {
         if (StringUtils.isEmpty(fxValue.getXPath()))
             return "?";
         return XPathElement.stripType(fxValue.getXPath());
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
