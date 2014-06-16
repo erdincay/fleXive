@@ -651,6 +651,12 @@
             <rtexprvalue>true</rtexprvalue>
             <description>A JSF listener that is invoked when the component value changes.</description>
         </attribute>
+        <attribute>
+            <name>disableDefaultValidator</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>When true, the default FxValueInputValidator is disabled</description>
+        </attribute>
     </tag>
     <tag>
         <name>value</name>

@@ -1650,6 +1650,15 @@
                             </listitem>
                         </varlistentry>
 
+                        <varlistentry>
+                            <term>disableDefaultValidator</term>
+                            <listitem>
+                                <para>
+                                    When true, the default FxValueInputValidator is disabled.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
                     </variablelist>
                 </section>
 

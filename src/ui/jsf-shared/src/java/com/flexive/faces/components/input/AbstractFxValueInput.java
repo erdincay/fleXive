@@ -97,6 +97,8 @@ public abstract class AbstractFxValueInput extends UIInput {
     private Boolean disableLytebox;
     private String downloadServletPath;
 
+    private final FxValueInputValidator defaultValidator = new FxValueInputValidator();
+
     private int configurationMask = -1;
 
     /**
@@ -105,7 +107,7 @@ public abstract class AbstractFxValueInput extends UIInput {
     protected AbstractFxValueInput() {
         setRendererType(COMPONENT_TYPE);
         applyComponentId();
-        addValidator(new FxValueInputValidator());
+        addValidator(defaultValidator);
     }
 
     /**
@@ -188,6 +190,10 @@ public abstract class AbstractFxValueInput extends UIInput {
 
     public void setReadOnlyShowTranslations(boolean readOnlyShowTranslations) {
         this.readOnlyShowTranslations = readOnlyShowTranslations;
+    }
+
+    public void setDisableDefaultValidator(boolean disable) {
+        defaultValidator.setEnabled(!disable);
     }
 
     /**
