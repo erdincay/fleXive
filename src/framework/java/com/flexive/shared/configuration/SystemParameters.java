@@ -185,4 +185,13 @@ public class SystemParameters {
      * User specific flag if to use the grouping separator
      */
     public static final Parameter<Boolean> USER_USEGROUPINGSEPARATOR = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.USER_CONFIG_ONLY, "useGrpSep", null);
+
+    /**
+     * When enabled, the storage engine does not overwrite the creation date (and creator) when creating new content versions.
+     * Thus the creation lifecycle data always refers to the very first version of a content, even when the first
+     * version is removed from the system (default: false, which is also the behaviour of flexive versions before 3.2.1).
+     *
+     * @since 3.2.1
+     */
+    public static final Parameter<Boolean> STORAGE_KEEP_CREATION_DATES = ParameterFactory.newInstance(Boolean.class, DIVISION_CONFIG, "contentVersionKeepCreate", true, false);
 }

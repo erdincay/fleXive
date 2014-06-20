@@ -558,7 +558,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
 
-        FxPK pk = createMainEntry(con, newId, version, content);
+        FxPK pk = createMainEntry(con, newId, version, content, false);
         FxType type = env.getType(content.getTypeId());
         PreparedStatement ps = null;
         FulltextIndexer ft = getFulltextIndexer(pk, con);
@@ -766,7 +766,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
             final boolean stepsUpdated = updateStepDependencies(con, content.getPk().getId(), new_version, env, env.getType(content.getTypeId()), content.getStepId());
-            pk = createMainEntry(con, content.getPk().getId(), new_version, content);
+            final boolean keepCreatedLCI = EJBLookup.getConfigurationEngine().get(SystemParameters.STORAGE_KEEP_CREATION_DATES);
+
+            pk = createMainEntry(con, content.getPk().getId(), new_version, content, keepCreatedLCI);
+
             ft = getFulltextIndexer(pk, con);
             if (sql == null)
                 sql = new StringBuilder(2000);
@@ -924,7 +927,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @return primary key of the created content
      * @throws FxCreateException on errors
      */
-    protected FxPK createMainEntry(Connection con, long newId, int version, FxContent content) throws FxCreateException {
+    protected FxPK createMainEntry(Connection con, long newId, int version, FxContent content, boolean keepCreationLCI) throws FxCreateException {
         PreparedStatement ps = null;
         FxPK pk = new FxPK(newId, version);
         try {
@@ -959,8 +962,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (!content.isForceLifeCycle()) {
                 final long userId = FxContext.getUserTicket().getUserId();
                 final long now = System.currentTimeMillis();
-                ps.setLong(18, userId);
-                ps.setLong(19, now);
+                if (keepCreationLCI) {
+                    // keep created_at of existing content
+                    ps.setLong(18, content.getValue(FxLargeNumber.class, "/CREATED_BY").getBestTranslation());
+                    ps.setLong(19, content.getValue(FxDateTime.class, "/CREATED_AT").getBestTranslation().getTime());
+                } else {
+                    ps.setLong(18, userId);
+                    ps.setLong(19, now);
+                }
                 ps.setLong(20, userId);
                 ps.setLong(21, now);
             } else {
