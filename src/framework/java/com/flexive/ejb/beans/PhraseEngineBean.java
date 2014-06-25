@@ -2173,7 +2173,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             String sub_restriction = "";
             if (query.isValueMatchRestricted()) {
                 sub_restriction = " AND s.SVAL";
-                String saveVal = query.getValueQuery().replaceAll("['\"\\\\]", "\\\\$0").toUpperCase();
+                String saveVal = query.getValueQueryNormalized().replaceAll("['\"\\\\]", "\\\\$0").toUpperCase();
                 switch (query.getValueMatchMode()) {
                     case CONTAINS:
                         sub_restriction = sub_restriction + " LIKE '%" + saveVal + "%'";
@@ -2309,7 +2309,12 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 } else {
                     sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(").
                             append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).append(")");
-                    ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=?");
+                    String cr;
+                    if (query.getCategories().isSingleCategory())
+                        cr = "CAT=" + query.getCategories().getSingleCategory();
+                    else
+                        cr = "CAT IN(" + categoriesList(query.getCategories()) + ")";
+                    ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=? AND " + cr);
                     sql.append("AND(1=2 ");
                     buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
                     sql.append(")");
@@ -2564,7 +2569,13 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 } else {
                     sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(").
                             append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).append(")");
-                    ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=?");
+                    String cr;
+                    if (query.getCategories().isSingleCategory())
+                        cr = "CAT=" + query.getCategories().getSingleCategory();
+                    else
+                        cr = "CAT IN(" + categoriesList(query.getCategories()) + ")";
+
+                    ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=? AND " + cr);
                     sql.append("AND(1=2 ");
                     buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
                     sql.append(")");
@@ -2699,7 +2710,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             if (query.isTagMatchRestricted())
                 setQueryParam(ps, queryParam++, query.getTagMatchMode(), query.getTagQuery());
             if (query.isValueMatchRestricted())
-                setQueryParam(ps, queryParam, query.getValueMatchMode(), query.getValueQuery());
+                setQueryParam(ps, queryParam, query.getValueMatchMode(), query.getValueQueryNormalized());
             ResultSet rs = ps.executeQuery();
             int startRow = pageSize * (page - 1);
             int endRow = pageSize * page;

@@ -88,6 +88,8 @@ public class FxPhraseQuery implements Serializable {
     private boolean includeHidden;
     //categories to search in
     private FxPhraseCategorySelection categories;
+    //Converter to normalize search requests for value queries
+    private FxPhraseSearchValueConverter converter;
 
     public FxPhraseQuery() {
         reset();
@@ -148,6 +150,14 @@ public class FxPhraseQuery implements Serializable {
         return this.resultLanguage != null;
     }
 
+    public FxPhraseSearchValueConverter getConverter() {
+        return converter;
+    }
+
+    public void setConverter(FxPhraseSearchValueConverter converter) {
+        this.converter = converter;
+    }
+
     public String getTagQuery() {
         return this.tagQuery;
     }
@@ -190,6 +200,10 @@ public class FxPhraseQuery implements Serializable {
 
     public String getValueQuery() {
         return this.valueQuery;
+    }
+
+    public String getValueQueryNormalized() {
+        return this.converter != null ? converter.convert(getValueQuery(), getSearchLanguage() == null ? FxLanguage.ENGLISH : getSearchLanguage()) : getValueQuery();
     }
 
     public void setValueQuery(String valueQuery) {
