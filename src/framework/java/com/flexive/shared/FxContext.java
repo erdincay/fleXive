@@ -33,6 +33,7 @@ package com.flexive.shared;
 
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.content.FxData;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
@@ -775,6 +776,9 @@ public class FxContext implements Serializable {
                 LOG.warn("Failed to clean up cache context: " + ex.getMessage(), ex);
             }
         }
+
+        // clear request-only XPath cache
+        FxData.clearXPathCache();
 
         // remove FxContext threadlocal
         if (info.get() != null) {

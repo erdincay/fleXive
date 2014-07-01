@@ -126,7 +126,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         }
         AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
         String parentXPath;
-        List<XPathElement> xpe = XPathElement.split(data.getXpath());
+        List<XPathElement> xpe = XPathElement.splitNew(data.getXpath());
         if (xpe.size() > 0)
             xpe.remove(xpe.size() - 1);
         parentXPath = XPathElement.toXPathNoMult(xpe);

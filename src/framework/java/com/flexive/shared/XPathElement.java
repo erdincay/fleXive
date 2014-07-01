@@ -33,12 +33,14 @@ package com.flexive.shared;
 
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.lang.ref.WeakReference;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,9 +62,23 @@ public class XPathElement implements Serializable {
     private static final Pattern doubleSlashPattern = Pattern.compile("/{2,}");
     private static final List<XPathElement> EMPTY = Collections.unmodifiableList(new ArrayList<XPathElement>(0));
 
-    private String alias;
+    // lookup cache for read-only XPath element mappings (thread-local cache)
+    private static final ThreadLocal<Map<String, ImmutableList<XPathElement>>> CACHED_SPLIT_PATHS =
+            new ThreadLocal<Map<String, ImmutableList<XPathElement>>>() {
+                @Override
+                protected Map<String, ImmutableList<XPathElement>> initialValue() {
+                    return Maps.newHashMapWithExpectedSize(500);
+                }
+            };
+
+    // shared canonical lookup cache
+    private static final WeakHashMap<String, ImmutableList<XPathElement>> SHARED_SPLIT_PATHS = new WeakHashMap<String, ImmutableList<XPathElement>>(500);
+    private static final WeakHashMap<XPathElement, WeakReference<XPathElement>> SHARED_ELEMENTS = new WeakHashMap<XPathElement, WeakReference<XPathElement>>(1000);
+
+    private final String alias;
     private int index;
-    private boolean indexDefined;
+    private final boolean indexDefined;
+    private final boolean immutable;
 
     /**
      * Ctor
@@ -72,9 +88,14 @@ public class XPathElement implements Serializable {
      * @param indexDefined was the multiplicity explicitly defined?
      */
     public XPathElement(String alias, int index, boolean indexDefined) {
+        this(alias, index, indexDefined, false);
+    }
+
+    public XPathElement(String alias, int index, boolean indexDefined, boolean immutable) {
         this.alias = alias;
         this.index = index;
         this.indexDefined = indexDefined;
+        this.immutable = immutable;
     }
 
     /**
@@ -101,6 +122,9 @@ public class XPathElement implements Serializable {
      * @param index the multiplicity to apply
      */
     public void setIndex(int index) {
+        if (immutable) {
+            throw new IllegalStateException("This XPathElement may not be modified");
+        }
         this.index = index;
     }
 
@@ -129,15 +153,29 @@ public class XPathElement implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof XPathElement && ((XPathElement) obj).getAlias().equals(this.getAlias()) && ((XPathElement) obj).getIndex() == this.getIndex();
+        if (!(obj instanceof XPathElement)) {
+            return false;
+        }
+        final XPathElement other = (XPathElement) obj;
+        return equalData(other) && indexDefined == other.indexDefined;
     }
 
     /**
-     * {@inheritDoc}
+     * Compare alias and index to another XPath element.
+     *
+     * @param other    the other XPath element
+     * @return         true when alias and index are equal (ignoring whether the index was defined explicitly)
      */
+    public boolean equalData(XPathElement other) {
+        return alias.equals(other.alias) && index == other.index;
+    }
+
     @Override
     public int hashCode() {
-        return this.getAlias().hashCode() + this.getIndex();
+        int result = alias.hashCode();
+        result = 31 * result + index;
+        result = 31 * result + (indexDefined ? 1 : 0);
+        return result;
     }
 
     /**
@@ -148,21 +186,67 @@ public class XPathElement implements Serializable {
      * @param XPath the XPath
      * @return XPathElement array
      */
-    public static List<XPathElement> split(String XPath) {
+    public static List<XPathElement> split(final String XPath) {
         if (StringUtils.isEmpty(XPath))
             return EMPTY;
-        if (XPath.charAt(0) != '/' && XPath.indexOf('/') > 0) {
-            //we have a full qualified XPath with type name that needs to be stripped
-            XPath = XPath.substring(XPath.indexOf('/'));
+
+        // get thread-local cache instance
+        final Map<String, ImmutableList<XPathElement>> cache = CACHED_SPLIT_PATHS.get();
+
+        ImmutableList<XPathElement> elements = cache.get(XPath);
+        if (elements == null) {
+            synchronized (XPathElement.class) {
+                elements = SHARED_SPLIT_PATHS.get(XPath);
+
+                if (elements == null) {
+                    final int length = XPath.length();
+                    List<XPathElement> values = new ArrayList<XPathElement>(10);
+                    int pos = XPath.indexOf('/') + 1;    //skip first '/' to avoid empty entries
+                    if (pos == 0) {
+                        throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
+                    }
+                    while (pos < length) {
+                        int nextPos = XPath.indexOf('/', pos);
+                        if (nextPos == -1) {
+                            nextPos = length;
+                        }
+                        values.add(toElementImmutable(XPath, pos, nextPos));
+                        pos = nextPos + 1;
+                    }
+
+                    elements = ImmutableList.copyOf(values);
+
+                    if (!SHARED_SPLIT_PATHS.containsKey(XPath)) {
+                        SHARED_SPLIT_PATHS.put(XPath, elements);
+                    }
+                }
+            }
+
+            // cache in current thread
+            cache.put(XPath, elements);
         }
-        if (!isValidXPath(XPath))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
-        String[] xp = StringUtils.split(XPath.substring(1), '/'); //skip first '/' to avoid empty entries
-        List<XPathElement> elements = new ArrayList<XPathElement>(xp.length);
-        for (String xpcurr : xp) {
-            elements.add(toElement(XPath, xpcurr));
-        }
+
         return elements;
+    }
+
+    /**
+     * Split an XPath into its elements and return new XPathElements (for updating the index).
+     * Usually the faster {@link #split(String)} method should be used, which caches access to frequently
+     * used XPaths, but returns immutable instances.
+     *
+     * <p>For performance reasons, this method expects that the xPath is already in upper case form.</p>
+     *
+     * @param XPath the XPath
+     * @return XPathElement array
+     * @since 3.2.1
+     */
+    public static List<XPathElement> splitNew(String XPath) {
+        final List<XPathElement> elements = split(XPath);
+        final List<XPathElement> result = Lists.newArrayListWithCapacity(elements.size());
+        for (XPathElement element : elements) {
+            result.add(new XPathElement(element.getAlias(), element.getIndex(), element.isIndexDefined()));
+        }
+        return result;
     }
 
     /**
@@ -180,7 +264,9 @@ public class XPathElement implements Serializable {
     }
 
     /**
-     * Convert an alias of an XPath to an element
+     * Convert an alias of an XPath to an element.
+     *
+     * <p>For performance reasons, this method expects that the xPath is already in upper case form.</p>
      *
      * @param XPath full XPath, only used if exception is thrown
      * @param alias alias to convert to an XPathElement
@@ -190,38 +276,34 @@ public class XPathElement implements Serializable {
         if (StringUtils.isEmpty(alias) || alias.indexOf('/') >= 0)
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath).asRuntimeException();
         try {
-            StringBuilder sbAlias = new StringBuilder(alias.length());
-            int index = 0;
-            boolean inIdx = false;
-            byte mult = 0;
-            for (int i = 0; i < alias.length(); i++) {
-                char c = alias.charAt(i);
-                switch (c) {
-                    case '[':
-                        inIdx = true;
-                        break;
-                    case ']':
-                        inIdx = false;
-                        break;
-                    default:
-                        if (inIdx) {
-                            if (c < '0' || c > '9')
-                                continue;
-                            if (mult++ > 0)
-                                index *= 10;
-                            index += c - '0';
-                        } else {
-                            if (c >= 'a' && c <= 'z')
-                                sbAlias.append((char) (c - 32));
-                            else
-                                sbAlias.append(c);
-                        }
-                }
+            final int indexPos = alias.indexOf('[');
+            if (indexPos == -1) {
+                return new XPathElement(alias, 1, false);
             }
-            return new XPathElement(sbAlias.toString(), index == 0 ? 1 : index, index > 0);
+            final int index = Integer.parseInt(alias.substring(indexPos + 1, alias.length() - 1));
+            return new XPathElement(alias.substring(0, indexPos), index, true);
         } catch (Exception e) {
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath).asRuntimeException();
         }
+    }
+
+    private static XPathElement toElementImmutable(String xpath, int elemStart, int elemEnd) {
+        final int indexPos = xpath.indexOf('[', elemStart);
+        final XPathElement elem;
+        if (indexPos == -1 || indexPos > elemEnd) {
+            elem = new XPathElement(xpath.substring(elemStart, elemEnd), 1, false, true);
+        } else {
+            final int index = Integer.parseInt(xpath.substring(indexPos + 1, elemEnd - 1));
+            elem = new XPathElement(xpath.substring(elemStart, indexPos), index, true);
+        }
+        // use canonical instances (xpath elements of nested types contain a lot of duplication)
+        final WeakReference<XPathElement> ref = SHARED_ELEMENTS.get(elem);
+        XPathElement cachedElem = ref != null ? ref.get() : null;
+        if (ref == null || cachedElem == null) {
+            SHARED_ELEMENTS.put(elem, new WeakReference<XPathElement>(elem));
+            cachedElem = elem;
+        }
+        return cachedElem;
     }
 
     /**
@@ -238,29 +320,31 @@ public class XPathElement implements Serializable {
 //            return "/".equals(XPath) || !StringUtils.isEmpty(XPath) && XPathPattern.matcher(XPath).matches();
             if (XPath == null)
                 return false;
-            char[] xp = XPath.toCharArray();
-            if (xp.length == 1 && xp[0] == '/')
+            if (XPath.length() == 1&& XPath.charAt(0) == '/')
                 return true;
+            final char[] xp = XPath.toCharArray();
             int pos = -1;
+            final int length = xp.length;
             if (xp[0] != '/') {
                 //check for correct type
                 boolean inBr = false; //in bracket
                 boolean hadBr = false; //already had a bracket
-                while (++pos < xp.length) {
-                    if (xp[pos] == '/')
+                while (++pos < length) {
+                    final char ch = xp[pos];
+                    if (ch == '/')
                         break;//end of type
-                    if (xp[pos] >= '0' && xp[pos] <= '9' && pos > 1 && !inBr) //first letter must not be a number
+                    if (ch >= '0' && ch <= '9' && pos > 1 && !inBr) //first letter must not be a number
                         continue;
-                    if (((xp[pos] >= 'A' && xp[pos] <= 'Z') || xp[pos] == '_' || xp[pos] == ' ') && !inBr) //only A-Z, underscore and space allowed in name
+                    if (((ch >= 'A' && ch <= 'Z') || ch == '_' || ch == ' ') && !inBr) //only A-Z, underscore and space allowed in name
                         continue;
-                    if (xp[pos] == '[') {
+                    if (ch == '[') {
                         if (inBr || hadBr || xp[pos + 1] != '@') //in type bracket has to be followed by "@"
                             return false;
                         inBr = true;
                         hadBr = true;
                         continue;
                     }
-                    if (xp[pos] == '@') {
+                    if (ch == '@') {
                         switch (xp[++pos]) {
                             case 'p':
                             case 'P':
@@ -308,7 +392,7 @@ public class XPathElement implements Serializable {
                         }
                         return false;
                     }
-                    if (xp[pos] == ']') {
+                    if (ch == ']') {
                         if (!inBr)
                             return false;
                         inBr = false;
@@ -321,23 +405,25 @@ public class XPathElement implements Serializable {
                 pos--;
             } else //end type check
                 pos = -1;
-            if ((pos + 1) == xp.length) //empty or name only is not valid
+            if ((pos + 1) == length) //empty or name only is not valid
                 return false;
-            while (++pos < xp.length) {
+            while (++pos < length) {
                 if (xp[pos] == '/') { //element start
-                    if (pos == xp.length)
+                    if (pos == length)
                         return false; //may not end with '/'
                     if (!(xp[pos + 1] >= 'A' && xp[pos + 1] <= 'Z'))
                         return false; //element must start with A-Z
                     pos++;
-                    while ((xp[pos] >= 'A' && xp[pos] <= 'Z') || (xp[pos] >= '0' && xp[pos] <= '9') || xp[pos] == '_') {
-                        if ((pos + 1) == xp.length)
+                    char ch = xp[pos];
+                    while ((ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_') {
+                        if ((pos + 1) == length)
                             return true;
                         pos++;
+                        ch = xp[pos];
                     }
-                    if (pos == xp.length)
+                    if (pos == length)
                         return true;
-                    if (xp[pos] == '[') { //index is optional and may only exist here
+                    if (ch == '[') { //index is optional and may only exist here
                         boolean hasNum = false;
                         //@pk=<number>.
                         while (xp[++pos] >= '0' && xp[pos] <= '9') {

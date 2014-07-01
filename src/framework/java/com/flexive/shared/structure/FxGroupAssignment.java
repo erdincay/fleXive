@@ -364,15 +364,15 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      * @throws FxNotFoundException if no assignment was found
      */
     public FxAssignment getAssignment(List<XPathElement> XPath, String fullXPath) throws FxNotFoundException {
-        XPathElement curr = XPath.remove(0); //consume 'us'
-        if (curr.getAlias().equals(this.getAlias()) && XPath.size() == 0)
+        XPathElement curr = XPath.get(0);
+        if (curr.getAlias().equals(this.getAlias()) && XPath.size() == 1)
             return this; //ok, its us
-        if (XPath.size() > 0) {
-            curr = XPath.get(0);
+        if (XPath.size() > 1) {
+            curr = XPath.get(1);
             for (FxAssignment as : assignments)
                 if (as.getAlias().equals(curr.getAlias())) {
                     if (as instanceof FxGroupAssignment)
-                        return ((FxGroupAssignment) as).getAssignment(XPath, fullXPath);
+                        return ((FxGroupAssignment) as).getAssignment(XPath.subList(1, XPath.size()), fullXPath);
                     else
                         return as;
                 }

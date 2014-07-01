@@ -317,6 +317,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         mainColumnHash.put(20L, array("CAPTION"));
     }
 
+    private static final AddGroupOptions GROUPS_ONLY_SYS_INTERNAL = new AddGroupOptions().onlySystemInternal();
+
     protected BinaryStorage binaryStorage;
 
     protected GenericHierarchicalStorage(BinaryStorage binaryStorage) {
@@ -1924,7 +1926,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     if (!existingMults.contains(xmult) && groupAssignment.getMultiplicity().isRequired()) {
                         // add (empty) group
                         root.addGroup(XPathElement.toXPathMult(groupAssignment.getXPath(), xmult.replace('/', ',')),
-                                groupAssignment, position.getValue(), new AddGroupOptions().onlySystemInternal());
+                                groupAssignment, position.getValue(), GROUPS_ONLY_SYS_INTERNAL);
                     }
                 }
             }
@@ -2126,7 +2128,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (!assignment.isEnabled())
             return;
         if (assignment instanceof FxGroupAssignment) {
-            root.addGroup(xPath, (FxGroupAssignment) assignment, pos, new AddGroupOptions().onlySystemInternal());
+            root.addGroup(xPath, (FxGroupAssignment) assignment, pos, GROUPS_ONLY_SYS_INTERNAL);
         } else {
             final FxGroupAssignment parentAssignment = assignment.getParentGroupAssignment();
             if (parentAssignment != null) {
@@ -2136,15 +2138,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 for (int i = 0; i < split.size() - 1; i++) {
                     groupXPath.append('/').append(split.get(i).toString());
                     final String currXPath = groupXPath.toString();
-                    try {
-                        root.getGroup(currXPath);
-                    } catch (FxRuntimeException e) {
-                        final int[] parentXMult = new int[i + 1];
-                        for (int j = 0; j <= i; j++) {
-                            parentXMult[j] = split.get(j).getIndex();
-                        }
-                        final FxGroupAssignment currGroup = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentAssignment.getAssignedType().getName() + currXPath);
-                        root.addGroup(currXPath, currGroup, Integer.MAX_VALUE, new AddGroupOptions().onlySystemInternal());
+                    if (root.findGroup(currXPath) == null) {
+                        final FxGroupAssignment currGroup = parentAssignment.getAssignedType().getGroupAssignment(currXPath);
+                        root.addGroup(currXPath, currGroup, Integer.MAX_VALUE, GROUPS_ONLY_SYS_INTERNAL);
                     }
                 }
             }

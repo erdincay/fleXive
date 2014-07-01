@@ -1192,10 +1192,13 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public TDerived setValueData(Integer valueData) {
         if (isMultiLanguage()) {
             if (translations != null) {
-                if (multiLangData == null)
-                    multiLangData = Maps.newHashMap();
-                for (long lang : translations.keySet())
-                    multiLangData.put(lang, valueData);
+                if (valueData == null) {
+                    multiLangData = null;
+                } else {
+                    multiLangData = Maps.newHashMapWithExpectedSize(translations.size());
+                    for (long lang : translations.keySet())
+                        multiLangData.put(lang, valueData);
+                }
             }
         } else
             this.valueData = valueData;

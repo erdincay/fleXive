@@ -234,7 +234,7 @@ public class FxGroupData extends FxData {
                 topSysInternalPos = child.getPos();
             if (!aliases.contains(child.getAlias()))
                 aliases.add(child.getAlias());
-            if (child.getXPathElement().equals(xp)) {
+            if (child.equalToXPathElement(xp)) {
                 currPos = i;
                 break;
             }
@@ -386,6 +386,7 @@ public class FxGroupData extends FxData {
             List<XPathElement> elements = XPathElement.split(this.getXPathFull());
             if (elements.get(elements.size() - 1).getIndex() == this.getIndex())
                 return;
+            elements = XPathElement.splitNew(this.getXPathFull());
             int pos = elements.size() - 1;
             elements.get(pos).setIndex(this.getIndex());
             setXPathFull(XPathElement.toXPath(elements));
@@ -655,6 +656,21 @@ public class FxGroupData extends FxData {
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupData getGroup(String xPath) {
+        final FxGroupData groupData = findGroup(xPath);
+        if (groupData == null) {
+            throw new FxNotFoundException("ex.content.xpath.notFound", xPath).asRuntimeException();
+        }
+        return groupData;
+    }
+
+    /**
+     * Search for a group with the given XPath, return null if it doesn't exist.
+     *
+     * @param xPath    the XPath
+     * @return         the group data, or null if it doesn't exist
+     * @since 3.2.1
+     */
+    public FxGroupData findGroup(String xPath) {
         FxGroupData root = getRootGroup();
         if ("/".equals(xPath))
             return root;
@@ -665,17 +681,15 @@ public class FxGroupData extends FxData {
         for (XPathElement e : elements) {
             found = null;
             for (FxData curr : currGroup) {
-                if (curr instanceof FxGroupData && curr.getXPathElement().equals(e)) {
+                if (curr instanceof FxGroupData && curr.equalToXPathElement(e)) {
                     found = (FxGroupData) curr;
                     currGroup = found.getChildren();
                     break;
                 }
             }
             if (found == null)
-                throw new FxNotFoundException("ex.content.xpath.notFound", xPath).asRuntimeException();
+                return null;
         }
-        if (found == null)
-            throw new FxNotFoundException("ex.content.xpath.notFound", xPath).asRuntimeException();
         return found;
     }
 
@@ -784,7 +798,7 @@ public class FxGroupData extends FxData {
      */
     public FxData containsChild(XPathElement check) {
         for (FxData curr : getChildren()) {
-            if (curr.getXPathElement().equals(check))
+            if (curr.equalToXPathElement(check))
                 return curr;
         }
         return null;
@@ -792,7 +806,7 @@ public class FxGroupData extends FxData {
 
     public void replaceChild(XPathElement xpath, FxData data) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getXPathElement().equals(xpath)) {
+            if (this.data.get(i).equalToXPathElement(xpath)) {
                 this.data.set(i, data);
                 valueChanged(data.getXPathFull(), FxValueChangeListener.ChangeType.Update);
                 return;
@@ -841,7 +855,7 @@ public class FxGroupData extends FxData {
                 currGroup = tmp;
             } else {
                 FxGroupAssignment gaNew = (FxGroupAssignment) fxGroupAssignment.getAssignedType().getAssignment(XPathElement.buildXPath(true, currGroup.getXPath(), curr.getAlias()));
-                final boolean finalGroup = addy.equals(curr);
+                final boolean finalGroup = addy.equalData(curr);
                 final AddGroupOptions addOptions = finalGroup || options.middleGroupOptions == null ? options : options.middleGroupOptions;
                 FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex(), gaNew.getPosition(), addOptions.onlySystemInternal, addOptions.onlyRequiredGroups);
                 if (finalGroup) {

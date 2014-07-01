@@ -94,7 +94,7 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
         FxEnvironment env = CacheAdmin.getEnvironment();
         boolean isDerived = data.getParentAssignment() != null;
         String parentXPath;
-        List<XPathElement> xpe = XPathElement.split(data.getXpath());
+        List<XPathElement> xpe = XPathElement.splitNew(data.getXpath());
         if (xpe.size() > 0)
             xpe.remove(xpe.size() - 1);
         parentXPath = XPathElement.toXPathNoMult(xpe);

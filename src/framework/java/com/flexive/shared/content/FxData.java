@@ -227,6 +227,10 @@ public abstract class FxData implements Serializable {
         return new XPathElement(xpAlias, xpIndex, true);
     }
 
+    public boolean equalToXPathElement(XPathElement elem) {
+        return elem != null && elem.getAlias().equals(xpAlias) && elem.getIndex() == xpIndex;
+    }
+
     /**
      * Get this FxData's XPath with all indices
      *
@@ -538,6 +542,15 @@ public abstract class FxData implements Serializable {
             XP_CACHE.put(xpath, new WeakReference<String>(xpath));
         }
         return xpath;
+    }
+
+    /**
+     * Remove all cached XPaths.
+     */
+    public static void clearXPathCache() {
+        synchronized (XP_LOCK) {
+            XP_CACHE.clear();
+        }
     }
 
     private static final Object XP_LOCK = new Object();

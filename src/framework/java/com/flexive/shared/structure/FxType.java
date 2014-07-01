@@ -1000,11 +1000,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             List<XPathElement> xpe = XPathElement.split(parentXPath.toUpperCase());
             if (xpe.size() == 0)
                 return null; //play safe, but should not happen
+            // search for the base alias
+            final String rootAlias = xpe.get(0).getAlias();
             for (FxGroupAssignment rga : assignedGroups)
-                if (rga.getAlias().equals(xpe.get(0).getAlias()))
+                if (rga.getAlias().equals(rootAlias))
                     return rga.getAssignment(xpe, parentXPath);
             for (FxPropertyAssignment rpa : assignedProperties)
-                if (rpa.getAlias().equals(xpe.get(0).getAlias()))
+                if (rpa.getAlias().equals(rootAlias))
                     return rpa;
         } catch (FxNotFoundException e) {
             throw e.asRuntimeException();

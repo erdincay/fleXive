@@ -224,8 +224,9 @@ public class FxPropertyData extends FxData {
      */
     @Override
     protected void applyIndices() {
-        final List<XPathElement> elements = XPathElement.split(this.getXPathFull());
+        List<XPathElement> elements = XPathElement.split(this.getXPathFull());
         if (elements.get(elements.size() - 1).getIndex() != this.getIndex()) {
+            elements = XPathElement.splitNew(this.getXPathFull());
             elements.get(elements.size() - 1).setIndex(this.getIndex());
             setXPathFull(XPathElement.toXPath(elements));
         }

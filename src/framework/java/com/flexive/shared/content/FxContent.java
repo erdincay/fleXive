@@ -546,7 +546,7 @@ public class FxContent implements Serializable {
         for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
             found = false;
             for (FxData curr : ret) {
-                if (curr.getXPathElement().equals(xpe)) {
+                if (curr.equalToXPathElement(xpe)) {
                     if (curr.isProperty()) {
                         ret = new ArrayList<FxData>(1);
                         ret.add(curr);
@@ -611,7 +611,7 @@ public class FxContent implements Serializable {
         for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
             found = false;
             for (FxData curr : currChildren) {
-                if (curr.getXPathElement().equals(xpe)) {
+                if (curr.equalToXPathElement(xpe)) {
                     if (curr.isProperty()) {
                         throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath).asRuntimeException();
                     } else {
@@ -670,9 +670,9 @@ public class FxContent implements Serializable {
             return 0;
         int max = 0;
         for (FxData data : getData(xp)) {
-            if (data.getXPathElement().getAlias().equals(last.getAlias())) {
-                if (max < data.getXPathElement().getIndex())
-                    max = data.getXPathElement().getIndex();
+            if (data.getAlias().equals(last.getAlias())) {
+                if (max < data.getIndex())
+                    max = data.getIndex();
             }
         }
         return max;
@@ -920,7 +920,7 @@ public class FxContent implements Serializable {
                 missing.add(new XPathElement(elements.get(i).getAlias(), m, true));
             for (FxData currData : currGroup.getChildren()) {
                 final XPathElement xp = currData.getXPathElement();
-                if (xp.equals(elements.get(i))) {
+                if (xp.equalData(elements.get(i))) {
                     if (currData instanceof FxPropertyData) {
                         if(currGroup.hasChangeListener()) //ensure a change listener is attached
                             ((FxPropertyData) currData).getValue().setChangeListener(currGroup.getChangeListener());
@@ -1099,7 +1099,7 @@ public class FxContent implements Serializable {
         for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
             boolean found = false;
             for (FxData curr : currentChildren) {
-                if (curr.getXPathElement().equals(xpe)) {
+                if (curr.equalToXPathElement(xpe)) {
                     if (curr.isProperty()) {
                         return true;
                     } else {

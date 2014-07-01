@@ -177,7 +177,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
         //only react to alias changes
         if (!this.alias.trim().toUpperCase().equals(alias.trim().toUpperCase())) {
             this.alias = alias.trim().toUpperCase();
-            List<XPathElement> xpe = XPathElement.split(this.XPath);
+            List<XPathElement> xpe = XPathElement.splitNew(this.XPath);
             xpe.set(xpe.size() - 1, new XPathElement(this.alias, 1, true));
             this.XPath = XPathElement.toXPathNoMult(xpe);
         }
