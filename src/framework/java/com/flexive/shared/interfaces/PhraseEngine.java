@@ -39,6 +39,8 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.FxString;
 
 import javax.ejb.Remote;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import java.util.List;
 
 /**
@@ -520,6 +522,15 @@ public interface PhraseEngine {
      * @throws FxApplicationException on errors
      */
     public void assignPhrases(long position, long assignmentOwner, long nodeId, long nodeMandator, FxPhrase[] phrases) throws FxApplicationException;
+
+
+    /**
+     * Build the indirect child mappings for a category and mandator
+     *
+     * @param mandator mandator
+     * @param category category
+     */
+    public void buildPhraseChildMapping(long mandator, int category);
 
     /**
      * "Move" the position of an assignment
