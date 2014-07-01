@@ -686,6 +686,29 @@ public class ContentEngineTest {
     }
 
     @Test(groups = {"ejb", "content"})
+    public void replaceData() throws FxApplicationException {
+        FxType testType = CacheAdmin.getEnvironment().getType("SearchTest");
+        FxContent test = ce.initialize(testType.getId());
+        final FxContent orig = test.copy();
+
+        testRevertToEmpty(test, orig);
+
+        // retry with a compacted original content
+        orig.getRootGroup().removeEmptyEntries();
+
+        testRevertToEmpty(test, orig);
+    }
+
+    private void testRevertToEmpty(FxContent test, FxContent orig) {
+        test.setValue("/multiSearchProp[1]", "first");
+        test.setValue("/multiSearchProp[2]", "second");
+
+        test.replaceData("/multiSearchProp", orig);
+
+        assertFalse(test.containsValue("/multiSearchProp"));
+    }
+
+    @Test(groups = {"ejb", "content"})
     public void contentInitialize() throws Exception {
         try {
             FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);

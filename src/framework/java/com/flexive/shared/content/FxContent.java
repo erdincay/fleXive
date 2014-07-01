@@ -1874,7 +1874,7 @@ public class FxContent implements Serializable {
                     //replace with empty data
                     currData.setEmpty();
                 } else
-                    currData.getParent().removeChild(data);
+                    currData.getParent().removeChild(currData);
             }
             return;
         }
