@@ -701,10 +701,8 @@ public final class Database {
                 }
                 for (int i = 0; i < columns.length; i++) {
                     final String value = rs.getString(startIndex + i * (hasDefLang ? 1 : 2));
-                    final String translation;
-                    if (cache.containsKey(value)) {
-                        translation = cache.get(value); // return cached string instance
-                    } else {
+                    String translation = cache.get(value);  // return cached string instance
+                    if (translation == null) {
                         translation = value;
                         cache.put(value, value);
                     }
@@ -725,8 +723,9 @@ public final class Database {
             for (FxString[] values : result.values()) {
                 for (int i = 0; i < values.length; i++) {
                     final FxString value = values[i];
-                    if (fxCache.containsKey(value)) {
-                        values[i] = fxCache.get(value);
+                    FxString cached = fxCache.get(value);
+                    if (cached != null) {
+                        values[i] = cached;
                     } else {
                         fxCache.put(value, value);
                     }

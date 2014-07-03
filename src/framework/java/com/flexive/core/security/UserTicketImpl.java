@@ -106,7 +106,6 @@ public class UserTicketImpl implements UserTicket, Serializable {
             if (environment.getTimeStamp() != STRUCTURE_TIMESTAMP) {
                 synchronized (UserTicketImpl.class) {
                     if (environment.getTimeStamp() != STRUCTURE_TIMESTAMP) {
-                        STRUCTURE_TIMESTAMP = environment.getTimeStamp();
                         reloadGuestTicketAssignments(false);
                     }
                 }
@@ -142,6 +141,9 @@ public class UserTicketImpl implements UserTicket, Serializable {
             guestContactData = accountInterface.load(Account.USER_GUEST).getContactData();
             if (flagDirty)
                 UserTicketStore.flagDirtyHavingUserId(Account.USER_GUEST);
+            if (CacheAdmin.isEnvironmentLoaded()) {
+                STRUCTURE_TIMESTAMP = CacheAdmin.getEnvironment().getTimeStamp();
+            }
         } catch (FxApplicationException e) {
             guestACLAssignments = null;
             LOG.error(e);

@@ -142,7 +142,7 @@ public final class StructureLoader {
                 //put a dummy cached entry to create the path to avoid cache warnings if the content cache is
                 //accessed and it does not exist because its empty
                 CacheAdmin.getInstance().put(CacheAdmin.CONTENTCACHE_BASE, -1, null);
-                UserTicketImpl.reloadGuestTicketAssignments(true);
+                UserTicketImpl.reloadGuestTicketAssignments(!bootstrap);
                 if (bootstrap) {
                     //have to reload since default values require a present environment
                     environment.setProperties(loader.loadProperties(con, environment));
