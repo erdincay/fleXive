@@ -131,6 +131,9 @@ public class UserTicketImpl implements UserTicket, Serializable {
      */
     public static synchronized void reloadGuestTicketAssignments(boolean flagDirty) {
         try {
+            if (CacheAdmin.isEnvironmentLoaded()) {
+                STRUCTURE_TIMESTAMP = CacheAdmin.getEnvironment().getTimeStamp();
+            }
             AccountEngine accountInterface = EJBLookup.getAccountEngine();
             final List<ACLAssignment> assignmentList = accountInterface.loadAccountAssignments(Account.USER_GUEST);
             guestACLAssignments = assignmentList.toArray(new ACLAssignment[assignmentList.size()]);
@@ -141,9 +144,6 @@ public class UserTicketImpl implements UserTicket, Serializable {
             guestContactData = accountInterface.load(Account.USER_GUEST).getContactData();
             if (flagDirty)
                 UserTicketStore.flagDirtyHavingUserId(Account.USER_GUEST);
-            if (CacheAdmin.isEnvironmentLoaded()) {
-                STRUCTURE_TIMESTAMP = CacheAdmin.getEnvironment().getTimeStamp();
-            }
         } catch (FxApplicationException e) {
             guestACLAssignments = null;
             LOG.error(e);
