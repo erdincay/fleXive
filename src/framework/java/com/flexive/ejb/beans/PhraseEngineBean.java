@@ -1607,7 +1607,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     removeNodeSequencer(mandatorId, cat);
             } else {
                 final String cat = categoriesList(categories);
-                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE (MANDATOR=? OR NODEMANDATOR=? OR PMANDATOR=?) AND NODEID IN(SELECT DISTINCT ID FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=? AND CAT IN(" + cat + ") AND CAT IN(" + cat + "))");
+                ps = con.prepareStatement("DELETE FROM " + TBL_PHRASE_MAP + " WHERE (MANDATOR=? OR NODEMANDATOR=? OR PMANDATOR=?) AND NODEID IN(SELECT DISTINCT ID FROM " + TBL_PHRASE_TREE + " WHERE MANDATOR=? AND CAT IN(" + cat + ")) AND CAT IN(" + cat + ")");
                 ps.setLong(1, mandatorId);
                 ps.setLong(2, mandatorId);
                 ps.setLong(3, mandatorId);
@@ -1732,8 +1732,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     long _pos = rs.getLong(1);
                     long _phraseId = rs.getLong(2);
                     long _phraseMandatorId = rs.getLong(3);
-                    if (phraseId == _phraseId && phraseMandator == _phraseMandatorId)
-                        continue;
+//                    if (phraseId == _phraseId && phraseMandator == _phraseMandatorId)
+//                        continue;
                     currPos++;
                     if (currPos == pos)
                         continue;
@@ -1912,6 +1912,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
     }
 
     private void rebuildPhraseChildMapping(Connection _con, long mandator, int category, long phraseId, long phraseMandator) {
+        if(FxContext.preventPhraseTreeRebuild())
+            return;
         /*
         - delete all non-direct mappings for mandator and category
         - for all direct nodes of mandator fetch:
@@ -2219,9 +2221,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             final String mandatorQuery = mandators.length == 1 ? "=" + mandators[0] : " IN(" + FxArrayUtils.toStringArray(mandators, ',') + ")";
             ps = con.prepareStatement("SELECT m.NODEID,m.NODEMANDATOR,m.POS FROM " + TBL_PHRASE_MAP +
                     " m," + TBL_PHRASE + " p WHERE p.PKEY=? AND p.MANDATOR" + mandatorQuery +
-                    " AND p.CAT=? AND m.PHRASEID=p.ID AND m.CAT=p.CAT AND m.MANDATOR" + mandatorQuery + " ORDER BY m.NODEMANDATOR,m.NODEID,m.POS");
+                    " AND p.CAT=? AND m.PHRASEID=p.ID AND m.CAT=p.CAT AND m.DIRECT=? AND m.MANDATOR" + mandatorQuery + " ORDER BY m.NODEMANDATOR,m.NODEID,m.POS");
             ps.setString(1, phraseKey);
             ps.setInt(2, category);
+            ps.setBoolean(3, true);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 try {

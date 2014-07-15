@@ -86,6 +86,11 @@ public class FxContext implements Serializable {
      */
     private final static String PREVENT_AUTOVERSIONING = "$flexive_prevAutoVers$";
 
+    /**
+     * Prevent phrase tree rebuilds attribute
+     */
+    private final static String PREVENT_PHRASE_TREE_REBUILD = "$flexive_prevPTreeReb$";
+
     private static final Log LOG = LogFactory.getLog(FxContext.class);
     private static final ThreadLocal<FxContext> info = new ThreadLocal<FxContext>();
     private static boolean MANUAL_INIT_CALLED = false;
@@ -1204,5 +1209,23 @@ public class FxContext implements Serializable {
      */
     public static void setPreventAutoVersioning(boolean flag) {
         get().setAttribute(PREVENT_AUTOVERSIONING, flag ? Boolean.TRUE : null);
+    }
+
+    /**
+     * Should phrase tree rebuilding be prevented for this context?
+     *
+     * @return prevent phrase tree rebuilding
+     */
+    public static boolean preventPhraseTreeRebuild() {
+        return Boolean.TRUE.equals(get().getAttribute(PREVENT_PHRASE_TREE_REBUILD));
+    }
+
+    /**
+     * Set phrase tree rebuilding prevention flag
+     *
+     * @param flag phrase tree rebuilding prevention flag
+     */
+    public static void setPreventPhraseTreeRebuild(boolean flag) {
+        get().setAttribute(PREVENT_PHRASE_TREE_REBUILD, flag ? Boolean.TRUE : null);
     }
 }
