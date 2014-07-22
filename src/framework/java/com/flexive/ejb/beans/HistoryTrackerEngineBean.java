@@ -61,6 +61,7 @@ import static com.flexive.core.DatabaseConst.TBL_HISTORY;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
+@SuppressWarnings("UnusedDeclaration")
 @Stateless(name = "HistoryTrackerEngine", mappedName = "HistoryTrackerEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTrackerEngineLocal {
@@ -104,6 +105,58 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void track(FxType type, String key, Object... args) {
         track(type, null, null, key, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public void track(String typeName, String loginname, String application, String session, String remoteHost,
+                      String message, String data, String key, Object... args) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            final UserTicket ticket = FxContext.getUserTicket();
+            con = Database.getDbConnection();
+            ps = con.prepareStatement(StorageManager.escapeReservedWords(HISTORY_INSERT));
+            ps.setLong(1, ticket.getUserId());
+            ps.setString(2, StringUtils.isBlank(loginname) ? ticket.getLoginName() : loginname);
+
+            ps.setLong(3, System.currentTimeMillis());
+            ps.setString(4, key);
+            StorageManager.setBigString(ps, 5, StringUtils.join(args, '|'));
+            try {
+                if(StringUtils.isNotBlank(message))
+                    ps.setString(6, message);
+                else
+                    ps.setString(6, FxSharedUtils.getLocalizedMessage("History", FxLanguage.ENGLISH, "en", key, args));
+            } catch (Exception e) {
+                ps.setString(6, key);
+            }
+            FxContext si = FxContext.get();
+            ps.setString(7, StringUtils.isNotBlank(session) ? session : (si.getSessionId() == null ? "<unknown>" : si.getSessionId()));
+            ps.setString(8, StringUtils.isNotBlank(application) ? application : (si.getApplicationId() == null ? "<unknown>" : si.getApplicationId()));
+            ps.setString(9, StringUtils.isNotBlank(remoteHost) ? remoteHost : (si.getRemoteHost() == null ? "<unknown>" : si.getRemoteHost()));
+            if (StringUtils.isNotBlank(typeName)) {
+                ps.setNull(10, java.sql.Types.NUMERIC);
+                ps.setString(11, typeName);
+            } else {
+                ps.setNull(10, java.sql.Types.NUMERIC);
+                ps.setNull(11, java.sql.Types.VARCHAR);
+            }
+            ps.setNull(12, java.sql.Types.NUMERIC);
+            ps.setNull(13, java.sql.Types.NUMERIC);
+            if (StringUtils.isNotBlank(data))
+                StorageManager.setBigString(ps, 14, data);
+            else
+                ps.setNull(14, java.sql.Types.VARCHAR);
+            ps.executeUpdate();
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage());
+        } finally {
+            Database.closeObjects(HistoryTrackerEngineBean.class, con, ps);
+        }
     }
 
     /**

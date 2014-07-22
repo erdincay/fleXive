@@ -74,6 +74,22 @@ public interface HistoryTrackerEngine {
     void track(FxType type, String key, Object... args);
 
     /**
+     * Write a history entry with the option to override specific attributes.
+     * Blank or <code>null</code> arguments will be replaced by defaults if not set.
+     *
+     * @param typeName type name
+     * @param loginname login name
+     * @param application application name
+     * @param session session id
+     * @param remoteHost remote host
+     * @param message message text
+     * @param data data
+     * @param key message key
+     * @param args message arguments
+     */
+    void track(String typeName, String loginname, String application, String session, String remoteHost, String message, String data, String key, Object... args);
+
+    /**
      * Write a history entry for a content instance
      *
      * @param type affected type
