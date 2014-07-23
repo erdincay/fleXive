@@ -75,6 +75,13 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             "TYPEID,TYPENAME,PKID,PKVER,DATA)VALUES" +
             "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+    private static final String HISTORY_INSERT_MANDATOR = "INSERT INTO " + TBL_HISTORY +
+            //1       2         3       4          5           6          7       8           9
+            "(ACCOUNT,LOGINNAME,TIMESTP,ACTION_KEY,ACTION_ARGS,EN_MESSAGE,SESSION,APPLICATION,REMOTEHOST," +
+            //10    11       12   13    14   15
+            "TYPEID,TYPENAME,PKID,PKVER,DATA,MANDATOR)VALUES" +
+            "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
     //                                                   1       2         3       4          5           6
     private static final String HISTORY_SELECT = "SELECT ACCOUNT,LOGINNAME,TIMESTP,ACTION_KEY,ACTION_ARGS,APPLICATION," +
             //7         8      9    10    11   12
@@ -112,14 +119,15 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
      */
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public void track(String typeName, String loginname, String application, String session, String remoteHost,
+    public void track(Long mandator, String typeName, String loginname, String application, String session, String remoteHost,
                       String message, String data, String key, Object... args) {
         Connection con = null;
         PreparedStatement ps = null;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
             con = Database.getDbConnection();
-            ps = con.prepareStatement(StorageManager.escapeReservedWords(HISTORY_INSERT));
+            boolean hasMandator = mandator != null;
+            ps = con.prepareStatement(StorageManager.escapeReservedWords(hasMandator ? HISTORY_INSERT_MANDATOR : HISTORY_INSERT));
             ps.setLong(1, ticket.getUserId());
             ps.setString(2, StringUtils.isBlank(loginname) ? ticket.getLoginName() : loginname);
 
@@ -127,7 +135,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             ps.setString(4, key);
             StorageManager.setBigString(ps, 5, StringUtils.join(args, '|'));
             try {
-                if(StringUtils.isNotBlank(message))
+                if (StringUtils.isNotBlank(message))
                     ps.setString(6, message);
                 else
                     ps.setString(6, FxSharedUtils.getLocalizedMessage("History", FxLanguage.ENGLISH, "en", key, args));
@@ -151,6 +159,8 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
                 StorageManager.setBigString(ps, 14, data);
             else
                 ps.setNull(14, java.sql.Types.VARCHAR);
+            if (hasMandator)
+                ps.setLong(15, mandator);
             ps.executeUpdate();
         } catch (Exception ex) {
             LOG.error(ex.getMessage());

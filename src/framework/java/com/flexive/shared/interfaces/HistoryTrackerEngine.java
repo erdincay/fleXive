@@ -77,6 +77,7 @@ public interface HistoryTrackerEngine {
      * Write a history entry with the option to override specific attributes.
      * Blank or <code>null</code> arguments will be replaced by defaults if not set.
      *
+     * @param mandator mandator
      * @param typeName type name
      * @param loginname login name
      * @param application application name
@@ -87,7 +88,7 @@ public interface HistoryTrackerEngine {
      * @param key message key
      * @param args message arguments
      */
-    void track(String typeName, String loginname, String application, String session, String remoteHost, String message, String data, String key, Object... args);
+    void track(Long mandator, String typeName, String loginname, String application, String session, String remoteHost, String message, String data, String key, Object... args);
 
     /**
      * Write a history entry for a content instance
