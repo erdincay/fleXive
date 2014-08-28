@@ -212,7 +212,9 @@ public class FxStructureOption implements Serializable {
      * @return value as integer
      */
     public int getIntValue() {
-        String value = getValue();
+        if (!set) {
+            return 0;
+        }
         try {
             return Integer.parseInt(value);
         } catch (Exception e) {
