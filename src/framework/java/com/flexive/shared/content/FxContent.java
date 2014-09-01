@@ -543,14 +543,20 @@ public class FxContent implements Serializable {
         }
         List<FxData> ret = base;
         boolean found;
-        for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
+        final List<XPathElement> elems = XPathElement.split(XPathElement.xpToUpperCase(XPath));
+        for (int i = 0; i < elems.size(); i++) {
+            XPathElement xpe = elems.get(i);
             found = false;
             for (FxData curr : ret) {
                 if (curr.equalToXPathElement(xpe)) {
                     if (curr.isProperty()) {
-                        ret = new ArrayList<FxData>(1);
-                        ret.add(curr);
-                        return ret;
+                        if (i == elems.size() - 1) {
+                            ret = new ArrayList<FxData>(1);
+                            ret.add(curr);
+                            return ret;
+                        } else {
+                            return null;
+                        }
                     } else {
                         ret = ((FxGroupData) curr).getChildren();
                         found = true;

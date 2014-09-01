@@ -42,6 +42,12 @@ public interface FxValueChangeListener {
         Add,
         Remove,
         Update,
+
+        /**
+         * Change of a child's position.
+         *
+         * @see com.flexive.shared.content.FxData#getPos()
+         */
         Move
     }
 
@@ -50,5 +56,36 @@ public interface FxValueChangeListener {
      * @param xpath affected xpath
      * @param changeType type of change
      */
-    public void onValueChanged(String xpath, ChangeType changeType);
+    void onValueChanged(String xpath, ChangeType changeType);
+
+    /**
+     * An arbitrary change of an element's XPath (e.g. because the index was changed).
+     *
+     * @param xpathFrom    the previous XPath
+     * @param xpathTo      the new XPath
+     *
+     * @since 3.2.1
+     * @see com.flexive.shared.content.FxData#getXPathFull()
+     */
+    void onXPathChanged(String xpathFrom, String xpathTo);
+
+    /**
+     * Triggered when a call to {@link com.flexive.shared.content.FxContent#compact()} or
+     * {@link com.flexive.shared.content.FxData#compact()} was started. This may be necessary
+     * for syncing external data structures that are based on XPaths that may be changed by compact.
+     * Since compacting groups is recursive, a single #compact call generally leads to multiple nested
+     * start/complete events.
+     *
+     * @since 3.2.1
+     */
+    void onCompactStarted();
+
+    /**
+     * Triggered when a call to {@link com.flexive.shared.content.FxContent#compact()} or
+     * {@link com.flexive.shared.content.FxData#compact()} was completed. This may be necessary
+     * for syncing external data structures that are based on XPaths that may be changed by compact.
+     *
+     * @since 3.2.1
+     */
+    void onCompactCompleted();
 }

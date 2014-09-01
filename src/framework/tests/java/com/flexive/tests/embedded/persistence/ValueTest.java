@@ -49,6 +49,8 @@ import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -69,6 +71,7 @@ import static com.flexive.tests.embedded.FxTestUtils.logout;
  */
 @Test(groups = {"ejb", "valuetest"})
 public class ValueTest {
+    private static final Log LOG = LogFactory.getLog(ValueTest.class);
 
     private ContentEngine co;
     private TypeEngine type;
@@ -414,7 +417,11 @@ public class ValueTest {
                 sbErr.append("Failed DataType: [").append(test.dataType.name()).append("] with: ").append(e.getMessage()).append("\n");
                 e.printStackTrace();
             } finally {
-                removeProperty(test.dataType);
+                try {
+                    removeProperty(test.dataType);
+                } catch (Exception e) {
+                    LOG.warn("Failed to remove property", e);
+                }
             }
         }
         if (sbErr.length() > 0)

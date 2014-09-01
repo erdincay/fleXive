@@ -405,9 +405,27 @@ public class FxGroupData extends FxData {
         if (xpathFull.equals(this.XPathFull)) {
             return;
         }
+        if (changeListener != null) {
+            changeListener.onXPathChanged(this.XPathFull, xpathFull);
+        }
         this.XPathFull = xpCached(xpathFull);
     }
 
+    @Override
+    public void compact() {
+        try {
+            if (changeListener != null) {
+                changeListener.onCompactStarted();
+            }
+
+            super.compact();
+
+        } finally {
+            if (changeListener != null) {
+                changeListener.onCompactCompleted();
+            }
+        }
+    }
 
     /**
      * 'Fix' the indices of children after they have been added to reflect the parent groups index in

@@ -435,29 +435,31 @@ public class FxContentView extends UIOutput {
         public Object get(Object key) {
             try {
                 String path = getCanonicalPath((String) key);
-                if (path.indexOf('$') != -1) {
+                final int suffixPos = path.indexOf('$');
+                if (suffixPos != -1) {
+                    final String xpath = path.substring(0, suffixPos);
                     if (isListRequest(path)) {
-                        return getList(path, false);
+                        return getList(xpath, false);
                     } else if (isListAllRequest(path)) {
-                        return getList(path, true);
+                        return getList(xpath, true);
                     } else if (isLabelRequest(path)) {
-                        return getLabel(path);
+                        return getLabel(xpath);
                     } else if (isHintRequest(path)) {
-                        return getHint(path);
+                        return getHint(xpath);
                     } else if (isNewValueRequest(path)) {
-                        return getNewValue(path);
+                        return getNewValue(xpath);
                     } else if (isResolveReferenceRequest(path)) {
-                        return getResolvedReference(path);
+                        return getResolvedReference(xpath);
                     } else if (isXPathRequest(path)) {
-                        return getXPath(path);
+                        return getXPath(xpath);
                     } else if (isMayCreateMoreRequest(path)) {
-                        return getMayCreateMore(path);
+                        return getMayCreateMore(xpath);
                     } else if (isXPathValidRequest(path)) {
-                        return getXPathValid(path);
+                        return getXPathValid(xpath);
                     } else if (isDataRequest(path)) {
                         return getData();
                     } else if (isMaxIndexRequest(path)) {
-                        return getMaxIndex(path);
+                        return getMaxIndex(xpath);
                     }
                 }
                 if (content.isGroupXPath(path)) {
@@ -473,7 +475,7 @@ public class FxContentView extends UIOutput {
         }
 
         private String getCanonicalPath(String path) {
-            return prefix + (path.startsWith("/") ? path : "/" + path);
+            return prefix + (path.startsWith("/") ? path : '/' + path);
         }
 
         private boolean isLabelRequest(String path) {
@@ -522,7 +524,7 @@ public class FxContentView extends UIOutput {
         }
 
         private FxString getLabel(String path) throws FxNotFoundException, FxInvalidParameterException {
-            return getAssignment(StringUtils.replace(path, "$label", "")).getDisplayLabel();
+            return getAssignment(path).getDisplayLabel();
         }
 
         private FxAssignment getAssignment(String xPath) {
@@ -532,11 +534,10 @@ public class FxContentView extends UIOutput {
         }
 
         private FxString getHint(String path) throws FxNotFoundException, FxInvalidParameterException {
-            return getAssignment(StringUtils.replace(path, "$hint", "")).getHint();
+            return getAssignment(path).getHint();
         }
 
         private List<?> getList(String path, boolean includeEmpty) {
-            path = StringUtils.replace(StringUtils.replace(path, "$listAll", ""), "$list", "");
             try {
                 final FxEnvironment env = CacheAdmin.getEnvironment();
                 // use faster direct assignment lookup in the environment
@@ -569,7 +570,6 @@ public class FxContentView extends UIOutput {
         }
 
         private FxValue getNewValue(String path) {
-            path = StringUtils.replace(path, "$new", "");
             try {
                 /*final FxPropertyData data = content.getPropertyData(path);
                 if (data.getAssignmentMultiplicity().getMax() > 1 && data.getCreateableElements() > 0) {
@@ -624,7 +624,6 @@ public class FxContentView extends UIOutput {
         }
 
         private ContentMap getResolvedReference(String path) {
-            path = path.substring(0, path.length() - 1);    // strip trailing $
             // resolve referenced object
             try {
                 final FxPK pk = ((FxReference) content.getValue(path)).getDefaultTranslation();
@@ -643,12 +642,10 @@ public class FxContentView extends UIOutput {
         }
 
         private String getXPath(String path) {
-            final String xpath = StringUtils.replace(path, "$xpath", "").toUpperCase();
-            return xpath.endsWith("/") ? xpath.substring(0, xpath.length() - 1) : xpath;
+            return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
         }
 
         private boolean getMayCreateMore(String path) {
-            path = StringUtils.replace(path, "$mayCreateMore", "");
             try {
                 getNewValue(path);
                 return true;
@@ -662,12 +659,10 @@ public class FxContentView extends UIOutput {
         }
 
         private boolean getXPathValid(String path) {
-            path = StringUtils.replace(path, "$valid", "");
             return content.isPropertyXPath(path);
         }
 
         private int getMaxIndex(String path) {
-            path = StringUtils.replace(path, "$maxIndex", "");
             return content.getMaxIndex(path);
         }
 

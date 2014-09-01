@@ -240,6 +240,9 @@ public class FxPropertyData extends FxData {
         if (xpathFull.equals(this.XPathFull)) {
             return; // nop
         }
+        if (parent.getChangeListener() != null) {
+            parent.getChangeListener().onXPathChanged(this.XPathFull, xpathFull);
+        }
         this.XPathFull = xpCached(xpathFull);
         if (this.value != null) {
             // apply updated XPath to FxValue (FX-920)

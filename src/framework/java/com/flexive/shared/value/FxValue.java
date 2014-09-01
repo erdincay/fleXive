@@ -41,6 +41,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Longs;
@@ -891,8 +892,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         } else {
             try {
                 final FxPropertyAssignment pa = CacheAdmin.getEnvironment().getPropertyAssignment(xp);
-                if (pa.getMaxLength() > 0) {
-                    return pa.getMaxLength();
+                final int maxLength = pa.getMaxLength();
+                if (maxLength > 0) {
+                    return maxLength;
                 }
                 final FxDataType dataType = pa.getProperty().getDataType();
                 return dataType == FxDataType.String1024 ? 1024 : -1;
@@ -1069,17 +1071,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if(!isMultiLanguage())
             return valueData.equals(otherValue.valueData);
         else {
-            if(this.multiLangData.size() != otherValue.multiLangData.size())
-                return false;
-            for (long lang : multiLangData.keySet()) {
-                if (multiLangData.get(lang) == null) {
-                    if (otherValue.multiLangData.get(lang) != null)
-                        return false;
-                } else if (!multiLangData.get(lang).equals(otherValue.multiLangData.get(lang)))
-                    return false;
-            }
+            return Objects.equal(valueData, otherValue.valueData)
+                    && Objects.equal(multiLangData, otherValue.multiLangData);
         }
-        return true;
     }
 
     /**
@@ -1157,7 +1151,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public Integer getValueDataRaw() {
         if(isMultiLanguage()) {
             if(multiLangData == null || multiLangData.isEmpty())
-                return VALUE_NODATA;
+                return valueData;
             //fall back to the first available entry
             return multiLangData.values().iterator().next();
         }
@@ -1175,7 +1169,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public Integer getValueDataRaw(long language) {
         if(isMultiLanguage()) {
             if(multiLangData == null || !multiLangData.containsKey(language))
-                return VALUE_NODATA;
+                return valueData;
             return multiLangData.get(language);
         } else
             return valueData;
@@ -1191,13 +1185,19 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     @SuppressWarnings({"unchecked"})
     public TDerived setValueData(Integer valueData) {
         if (isMultiLanguage()) {
-            if (translations != null) {
+            if (this.translations != null) {
+                // keep "global" flag for languages that may be added in the future
+                this.valueData = valueData;
                 if (valueData == null) {
-                    multiLangData = null;
+                    this.multiLangData = null;
                 } else {
-                    multiLangData = Maps.newHashMapWithExpectedSize(translations.size());
-                    for (long lang : translations.keySet())
-                        multiLangData.put(lang, valueData);
+                    if (this.multiLangData != null) {
+                        // replace existing "custom" values
+                        for (Entry<Long, Integer> entry : multiLangData.entrySet()) {
+                            entry.setValue(valueData);
+                        }
+                    }
+
                 }
             }
         } else
@@ -1215,9 +1215,15 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     public TDerived setValueData(long language, Integer valueData) {
         if(isMultiLanguage()) {
-            if(multiLangData == null)
-                multiLangData = Maps.newHashMap();
-            multiLangData.put(language, valueData);
+            if (this.valueData == null) {
+                this.valueData = valueData;
+            }
+            if (valueData != null && !valueData.equals(this.valueData)) {
+                // store only "non-default" flags in the hashmap
+                if (multiLangData == null)
+                    multiLangData = Maps.newHashMap();
+                multiLangData.put(language, valueData);
+            }
         } else
             this.valueData = valueData;
         //noinspection unchecked
@@ -1254,7 +1260,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @since 3.1.4
      */
     public boolean hasValueData() {
-        return isMultiLanguage() ? multiLangData != null && multiLangData.size() > 0 : this.valueData != null;
+        return this.valueData != null || (isMultiLanguage() && multiLangData != null && !multiLangData.isEmpty());
     }
 
     /**
@@ -1265,7 +1271,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     public boolean hasValueData(long language) {
         return isMultiLanguage()
-                ? multiLangData != null && multiLangData.containsKey(language) && multiLangData.get(language) != null
+                ? valueData != null || (multiLangData != null && multiLangData.containsKey(language) && multiLangData.get(language) != null)
                 : valueData != null;
     }
 
