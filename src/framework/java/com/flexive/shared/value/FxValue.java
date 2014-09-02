@@ -343,6 +343,23 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         }
         return (TDerived) this;
     }
+
+    /**
+     * Copy the internal "meta" properties associated with a value into this instance (XPath, value data).
+     *
+     * @param other    the instance to copy the data from
+     * @since 3.2.1
+     */
+    @SuppressWarnings("unchecked")
+    public void setInternalProperties(FxValue other) {
+        this.valueData = other.valueData;
+        this.multiLangData = other.multiLangData == null ? null : Maps.<Long, Integer>newHashMap(other.multiLangData);
+        this.XPath = other.XPath;
+        this.xpathPrefix = other.xpathPrefix;
+        this.readOnly = other.readOnly;
+        this.changeListener = other.changeListener;
+    }
+
     /**
      * One-time operation to flag this FxValue as read only.
      * This is not reversible!

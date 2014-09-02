@@ -87,7 +87,7 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      */
     public final MappedType encode(BaseType value) {
         final MappedType encodedValue = doEncode(value);
-        encodedValue.setXPath(value.getXPath());
+        encodedValue.setInternalProperties(value);
         return encodedValue;
     }
 
@@ -100,7 +100,7 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      */
     public final BaseType decode(MappedType value) {
         final BaseType decodedValue = doDecode(value);
-        decodedValue.setXPath(value.getXPath());
+        decodedValue.setInternalProperties(value);
         return decodedValue;
     }
 
