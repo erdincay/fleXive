@@ -199,6 +199,9 @@ public class XPathElement implements Serializable {
                 elements = SHARED_SPLIT_PATHS.get(XPath);
 
                 if (elements == null) {
+                    if (!isValidXPath(XPath)) {
+                        throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
+                    }
                     final int length = XPath.length();
                     List<XPathElement> values = new ArrayList<XPathElement>(10);
                     int pos = XPath.indexOf('/') + 1;    //skip first '/' to avoid empty entries
