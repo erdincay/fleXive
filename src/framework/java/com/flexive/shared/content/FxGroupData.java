@@ -822,10 +822,16 @@ public class FxGroupData extends FxData {
         return null;
     }
 
-    public void replaceChild(XPathElement xpath, FxData data) {
+    /**
+     * Replace a child of this group data.
+     *
+     * @param xpathElem    the XPath element to replace
+     * @param data         the new data instance (will be copied to set all internal fields accordingly)
+     */
+    public void replaceChild(XPathElement xpathElem, FxData data) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).equalToXPathElement(xpath)) {
-                this.data.set(i, data);
+            if (this.data.get(i).equalToXPathElement(xpathElem)) {
+                this.data.set(i, data.copy(this));
                 valueChanged(data.getXPathFull(), FxValueChangeListener.ChangeType.Update);
                 return;
             }

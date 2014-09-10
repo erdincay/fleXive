@@ -1,6 +1,7 @@
 package com.flexive.tests.embedded.persistence;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
@@ -12,6 +13,7 @@ import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 
 /**
@@ -44,6 +46,31 @@ public class FxDataTest {
 
             group.setChildPosition(b, count / 2);
             assertPositions(group, a, count - 1, b, count / 2, c, 0, d, 1);
+        } finally {
+            FxTestUtils.logout();
+        }
+    }
+
+    @Test(groups = {"ejb", "fxdata"})
+    public void replaceChildTest() throws FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException, FxApplicationException {
+        FxTestUtils.login(TestUsers.REGULAR);
+        try {
+            final FxContent co = EJBLookup.getContentEngine().initialize("ARTICLE");
+
+            final FxGroupData copy = new FxGroupData(co.getRootGroup(), null);
+            FxData titleCopy = null;
+            for (FxData data : copy.getChildren()) {
+                if ("TITLE".equals(data.getAlias())) {
+                    titleCopy = data;
+                    break;
+                }
+            }
+            assertNotNull(titleCopy);
+            assertSame(titleCopy.getParent(), copy);
+
+            co.getRootGroup().replaceChild(XPathElement.toElement("TITLE[1]", "TITLE"), titleCopy);
+
+            assertSame(co.getData("/TITLE").get(0).getParent(), co.getRootGroup());
         } finally {
             FxTestUtils.logout();
         }
