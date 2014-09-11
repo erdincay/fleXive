@@ -327,6 +327,20 @@ public class FxCacheProxy implements FxCacheMBean {
         }
     }
 
+    @Override
+    public boolean isNodeLockedInTx(String path) throws FxCacheException {
+        try {
+            return (Boolean) server.invoke(name, "isNodeLockedInTx", new Object[]{divisionEncodePath(path)},
+                    new String[]{"java.lang.String"});
+        } catch (InstanceNotFoundException e) {
+            throw newNotFoundException(e);
+        } catch (MBeanException e) {
+            throw newMBeanException(e);
+        } catch (ReflectionException e) {
+            throw newReflectionException(e);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */

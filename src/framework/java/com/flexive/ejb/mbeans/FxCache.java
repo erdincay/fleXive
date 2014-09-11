@@ -456,6 +456,14 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      * {@inheritDoc}
      */
     @Override
+    public boolean isNodeLockedInTx(String path) throws FxCacheException {
+        return getBackingCache().isNodeLockedInTx(path);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Object invoke(String actionName, Object params[], String signature[]) throws MBeanException, ReflectionException {
         try {
             if ("get".equals(actionName)) {
@@ -499,6 +507,8 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
                         (Boolean) params[5]);
             } else if ("cleanupAfterRequest".equals(actionName)) {
                 cleanupAfterRequest();
+            } else if ("isNodeLockedInTx".equals(actionName)) {
+                return isNodeLockedInTx((String) params[0]);
             } else {
                 LOG.warn("Tried to call [" + actionName + "] which is not implemented!");
             }

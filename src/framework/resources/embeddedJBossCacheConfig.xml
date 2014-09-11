@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jbosscache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:jboss:jbosscache-core:config:3.2">
+<jbosscache xmlns="urn:jboss:jbosscache-core:config:3.2">
 
    <!-- Configure the TransactionManager -->
     <transaction transactionManagerLookupClass="org.jboss.cache.transaction.GenericTransactionManagerLookup"/>
+
+    <!--
+        Using READ_COMMITTED instead of REPEATABLE_READ allows flexive to populate data caches outside
+        potentially long-running transactions, which greatly reduces the risks of introducing deadlocks due
+        to MVCC write locks.
+
+        Lock striping is disabled to prevent random deadlocks between unrelated requests, which are quite likely
+        when using flexive APIs in long-running transactions.
+    -->
+    <locking isolationLevel="READ_COMMITTED" useLockStriping="false"/>
 
    <!--
       wakeUpInterval: time interval (millis) when the eviction thread kicks in.

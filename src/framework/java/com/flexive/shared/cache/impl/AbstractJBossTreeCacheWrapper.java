@@ -35,6 +35,7 @@ import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxCacheException;
 import org.jboss.cache.CacheException;
 import org.jboss.cache.Fqn;
+import org.jboss.cache.InvocationContext;
 import org.jboss.cache.Node;
 
 import java.util.HashSet;
@@ -136,6 +137,15 @@ public abstract class AbstractJBossTreeCacheWrapper implements FxBackingCache {
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isNodeLockedInTx(String path) throws FxCacheException {
+        final InvocationContext ctx = getCache().getInvocationContext();
+        return ctx != null && ctx.hasLock(Fqn.fromString(path));
     }
 
     protected Node<Object, Object> getNode(String path) throws FxCacheException {

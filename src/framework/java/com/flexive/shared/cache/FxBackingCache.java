@@ -114,6 +114,15 @@ public interface FxBackingCache {
     Set getChildrenNames(String path) throws FxCacheException;
 
     /**
+     * Check if the given cache node is locked by the current transaction (if possible).
+     *
+     * @param path    path
+     * @return  true if the current transaction contains a lock for the given node
+     * @since 3.2.1
+     */
+    boolean isNodeLockedInTx(String path) throws FxCacheException;
+
+    /**
      * Get the wrapped cache
      *
      * @return TreeCache

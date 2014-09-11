@@ -43,6 +43,7 @@ import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
+import com.flexive.shared.interfaces.TransCacheEngine;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
 import com.thoughtworks.xstream.XStream;
@@ -281,7 +282,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             if (cachePath != null) {
                 putCache(cachePath, key, value != null ?
                         (Serializable) SerializationUtils.clone(value)
-                        : new NullParameter());
+                        : new NullParameter(), true);
             }
             StringBuilder sbHistory = new StringBuilder(1000);
             sbHistory.append("<parameter type=\"").append(parameter.getScope().name()).append("\">\n");
@@ -368,7 +369,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         Serializable value = loadParameterFromDb(path, key, parameter.isCached());
         if (parameter.isCached() && cachePath != null) {
             // add value to cache
-            putCache(cachePath, key, (Serializable) parameter.getValue(value));
+            putCache(cachePath, key, (Serializable) parameter.getValue(value), false);
         }
         return value;
     }
@@ -647,7 +648,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                 String cachePath = getCachePath(path);
                 if (cachePath != null && cached) {
                     // store null object in cache to avoid hitting the DB every time
-                    putCache(cachePath, key, new UnsetParameter());
+                    putCache(cachePath, key, new UnsetParameter(), false);
                 }
                 throw new FxNotFoundException("ex.configuration.parameter.notfound", path, key);
             }
@@ -661,16 +662,22 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
 
     /**
      * Store the given value in the cache.
-     *
-     * @param path  the parameter path
+     *  @param path  the parameter path
      * @param key   the parameter key
      * @param value the serializable value to be stored
+     * @param fromUpdate when true, the new value was passed in by the user (i.e. it's not the "static" value stored in the DB)
      */
-    protected void putCache(String path, String key, Serializable value) {
+    protected void putCache(String path, String key, Serializable value, boolean fromUpdate) {
         try {
-            CacheAdmin.getInstance().put(path, key, value);
+            if (fromUpdate || CacheAdmin.getInstance().isNodeLockedInTx(path)) {
+                // stay in transaction
+                CacheAdmin.getInstance().put(path, key, value);
+            } else {
+                // we don't care about this transaction if we only cache the read-only value
+                EJBLookup.getEngine(TransCacheEngine.class).putNewTx(path, key, value);
+            }
         } catch (FxCacheException e) {
-            LOG.error("Failed to update cache (ignored): " + e.getMessage());
+            LOG.warn("Failed to update cache (ignored): " + e.getMessage());
         }
     }
 

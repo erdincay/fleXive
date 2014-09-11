@@ -365,7 +365,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
             divisionIds[ctr++] = Integer.parseInt(divisionId);
         }
         Arrays.sort(divisionIds);
-        putCache(getBeanPath(CACHE_DIVISIONS), "allDivisions", divisionIds);
+        putCache(getBeanPath(CACHE_DIVISIONS), "allDivisions", divisionIds, false);
         return divisionIds;
     }
 
@@ -415,7 +415,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         String domainRegEx = get(SystemParameters.GLOBAL_DIVISIONS_DOMAINS, "" + division);
         DivisionData data = createDivisionData(division, dataSource, domainRegEx);
         // put in cache
-        putCache(getBeanPath(CACHE_DIVISIONS), "" + division, data);
+        putCache(getBeanPath(CACHE_DIVISIONS), "" + division, data, false);
         return data;
     }
 
@@ -597,7 +597,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      * {@inheritDoc}
      */
     @Override
-    protected void putCache(String path, String key, Serializable value) {
+    protected void putCache(String path, String key, Serializable value, boolean fromUpdate) {
         // put parameter in the global (without division data) cache
         try {
             CacheAdmin.getInstance().globalPut(path, key, value);
@@ -669,7 +669,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         }
         if (timestamp == null) {
             timestamp = System.currentTimeMillis();
-            putCache(getBeanPath(""), CACHE_TIMESTAMP, timestamp);
+            putCache(getBeanPath(""), CACHE_TIMESTAMP, timestamp, false);
         }
         return timestamp;
     }
@@ -678,7 +678,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      * Update the division data table timestamp.
      */
     private void updateTimestamp() {
-        putCache(getBeanPath(""), CACHE_TIMESTAMP, System.currentTimeMillis());
+        putCache(getBeanPath(""), CACHE_TIMESTAMP, System.currentTimeMillis(), true);
     }
 
     /**

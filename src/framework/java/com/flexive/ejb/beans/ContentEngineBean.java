@@ -201,7 +201,6 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         PreparedStatement ps = null;
         try {
             if (cachedContent == null) {
-//                System.out.println("=> Cache miss for " + pk);
                 ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
                 StringBuilder sql = new StringBuilder(2000);
                 con = Database.getDbConnection();
@@ -211,10 +210,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 rawContent.updateLock(securityInfo.getLock());
 
                 cachedContent = new FxCachedContent(rawContent, securityInfo);
-                CacheAdmin.cacheContent(cachedContent);
-//                System.out.println("=> Cached " + pk);
-            } else {
-//                System.out.println("=> Cache hit for " + pk);
+                CacheAdmin.cacheContent(cachedContent, false);
             }
             FxContent content = cachedContent.getContent().copy();
 
@@ -250,7 +246,6 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
-//            System.out.println("=> Load time: " + (System.currentTimeMillis() - time));
         }
     }
 
@@ -525,11 +520,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             throw new FxCreateException(e);
         } catch (Exception e) {
             EJBUtils.rollback(ctx);
-            System.out.println("===> generic exception!!! " + e.getClass().getCanonicalName());
             throw new FxCreateException(LOG, e);
         } catch (Throwable t) {
             EJBUtils.rollback(ctx);
-            System.out.println("===> generic throwable!!! " + t.getClass().getCanonicalName());
             throw new FxCreateException(LOG, t);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);

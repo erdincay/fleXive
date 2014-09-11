@@ -40,6 +40,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.interfaces.TransCacheEngine;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import com.flexive.shared.mbeans.FxCacheProxy;
 import com.flexive.shared.mbeans.MBeanHelper;
@@ -326,6 +327,18 @@ public class CacheAdmin {
      * @param content the content to cache
      */
     public static void cacheContent(FxCachedContent content) {
+        cacheContent(content, true);
+    }
+
+    /**
+     * Put a content and its security info in the cache
+     *
+     * @param content the content to cache
+     * @param fromUpdate when true, the content is being updated (and the caching operation should stay in the current transaction)
+     *
+     * @since 3.2.1
+     */
+    public static void cacheContent(FxCachedContent content, boolean fromUpdate) {
         if (!isCacheAllVersions() && !(content.getContent().isMaxVersion() || content.getContent().isLiveVersion())) {
             return;
         }
@@ -336,7 +349,15 @@ public class CacheAdmin {
                 container.add(content);
             } else
                 container = new FxCachedContentContainer(content);
-            getInstance().put(cachePath, CONTENTCACHE_KEY_STORE, container);
+
+            if (fromUpdate || getInstance().isNodeLockedInTx(cachePath)) {
+                // use current transaction (if any) when the node is being updated with potentially uncommitted data,
+                // or if the cache node was modified in the current transaction (e.g. from a previous content update)
+
+                getInstance().put(cachePath, CONTENTCACHE_KEY_STORE, container);
+            } else {
+                EJBLookup.getEngine(TransCacheEngine.class).putNewTx(cachePath, CONTENTCACHE_KEY_STORE, container);
+            }
         } catch (FxCacheException e) {
             LOG.warn(e.getMessage(), e);
         }
