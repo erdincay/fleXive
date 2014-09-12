@@ -143,9 +143,24 @@ public abstract class AbstractJBossTreeCacheWrapper implements FxBackingCache {
      * {@inheritDoc}
      */
     @Override
-    public boolean isNodeLockedInTx(String path) throws FxCacheException {
+    public boolean isPathLockedInTx(String path) throws FxCacheException {
         final InvocationContext ctx = getCache().getInvocationContext();
-        return ctx != null && ctx.hasLock(Fqn.fromString(path));
+        if (ctx == null) {
+            return false;
+        }
+        int pos = 0;
+        final int length = path.length();
+        while (pos < length) {
+            pos = path.indexOf('/', pos + 1);
+            if (pos == -1) {
+                pos = length;
+            }
+            final String subPath = path.substring(0, pos);
+            if (ctx.hasLock(Fqn.fromString(subPath))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected Node<Object, Object> getNode(String path) throws FxCacheException {

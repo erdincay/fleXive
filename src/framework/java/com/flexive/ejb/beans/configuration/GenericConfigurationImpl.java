@@ -669,12 +669,12 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      */
     protected void putCache(String path, String key, Serializable value, boolean fromUpdate) {
         try {
-            if (fromUpdate || CacheAdmin.getInstance().isNodeLockedInTx(path)) {
+            if (fromUpdate || CacheAdmin.getInstance().isPathLockedInTx(path)) {
                 // stay in transaction
                 CacheAdmin.getInstance().put(path, key, value);
             } else {
                 // we don't care about this transaction if we only cache the read-only value
-                EJBLookup.getEngine(TransCacheEngine.class).putNewTx(path, key, value);
+                EJBLookup.getEngine(TransCacheEngine.class).putNoTx(path, key, value);
             }
         } catch (FxCacheException e) {
             LOG.warn("Failed to update cache (ignored): " + e.getMessage());

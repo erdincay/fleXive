@@ -350,13 +350,13 @@ public class CacheAdmin {
             } else
                 container = new FxCachedContentContainer(content);
 
-            if (fromUpdate || getInstance().isNodeLockedInTx(cachePath)) {
+            if (fromUpdate || getInstance().isPathLockedInTx(cachePath)) {
                 // use current transaction (if any) when the node is being updated with potentially uncommitted data,
                 // or if the cache node was modified in the current transaction (e.g. from a previous content update)
 
                 getInstance().put(cachePath, CONTENTCACHE_KEY_STORE, container);
             } else {
-                EJBLookup.getEngine(TransCacheEngine.class).putNewTx(cachePath, CONTENTCACHE_KEY_STORE, container);
+                EJBLookup.getEngine(TransCacheEngine.class).putNoTx(cachePath, CONTENTCACHE_KEY_STORE, container);
             }
         } catch (FxCacheException e) {
             LOG.warn(e.getMessage(), e);

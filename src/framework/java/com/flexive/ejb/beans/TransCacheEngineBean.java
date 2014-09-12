@@ -15,9 +15,9 @@ import javax.ejb.*;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TransCacheEngineBean implements TransCacheEngine, TransCacheEngineLocal{
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     @Override
-    public void putNewTx(String path, Object key, Object value) throws FxCacheException {
+    public void putNoTx(String path, Object key, Object value) throws FxCacheException {
         CacheAdmin.getInstance().put(path, key, value);
     }
 }

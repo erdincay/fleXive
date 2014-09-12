@@ -16,7 +16,7 @@ import javax.ejb.Remote;
 public interface TransCacheEngine {
 
     /**
-     * Store a parameter and use a new transaction. This is used to prevent deadlocks due to caching of read-only
+     * Store a parameter non-transactionally. This is used to prevent deadlocks due to caching of read-only
      * data (e.g. when initially caching a configuration parameter read from the DB.
      *
      * @param path  path
@@ -24,5 +24,5 @@ public interface TransCacheEngine {
      * @param value value
      * @throws FxCacheException on cache errors
      */
-    void putNewTx(String path, Object key, Object value) throws FxCacheException;
+    void putNoTx(String path, Object key, Object value) throws FxCacheException;
 }

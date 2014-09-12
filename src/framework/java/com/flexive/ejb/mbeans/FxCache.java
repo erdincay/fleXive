@@ -456,8 +456,8 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      * {@inheritDoc}
      */
     @Override
-    public boolean isNodeLockedInTx(String path) throws FxCacheException {
-        return getBackingCache().isNodeLockedInTx(path);
+    public boolean isPathLockedInTx(String path) throws FxCacheException {
+        return getBackingCache().isPathLockedInTx(path);
     }
 
     /**
@@ -507,8 +507,8 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
                         (Boolean) params[5]);
             } else if ("cleanupAfterRequest".equals(actionName)) {
                 cleanupAfterRequest();
-            } else if ("isNodeLockedInTx".equals(actionName)) {
-                return isNodeLockedInTx((String) params[0]);
+            } else if ("isPathLockedInTx".equals(actionName)) {
+                return isPathLockedInTx((String) params[0]);
             } else {
                 LOG.warn("Tried to call [" + actionName + "] which is not implemented!");
             }
