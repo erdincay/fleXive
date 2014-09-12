@@ -844,6 +844,11 @@ public class XPathElement implements Serializable {
         return indices.toString();
     }
 
-
+    /**
+     * Internal method to clear the thread-based XPath lookup cache.
+     */
+    public static void clearRequestCache() {
+        CACHED_SPLIT_PATHS.remove();
+    }
 
 }

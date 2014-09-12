@@ -33,7 +33,6 @@ package com.flexive.shared;
 
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.content.FxData;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
@@ -783,7 +782,7 @@ public class FxContext implements Serializable {
         }
 
         // clear request-only XPath cache
-        FxData.clearXPathCache();
+        XPathElement.clearRequestCache();
 
         // remove FxContext threadlocal
         if (info.get() != null) {
