@@ -32,6 +32,8 @@
 package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Array;
@@ -87,17 +89,17 @@ public class FxArrayUtils {
      */
     public static long[] toLongArray(String list, char separator) throws FxInvalidParameterException {
         if (list == null || list.length() == 0) return new long[0];
-        String sInts[] = StringUtils.split(list, separator);
-        long iInts[] = new long[sInts.length];
-        for (int i = 0; i < sInts.length; i++) {
+        String sLongs[] = StringUtils.split(list, separator);
+        long result[] = new long[sLongs.length];
+        for (int i = 0; i < sLongs.length; i++) {
             try {
-                iInts[i] = Integer.parseInt(sInts[i]);
+                result[i] = Long.parseLong(sLongs[i]);
             } catch (Exception exc) {
                 throw new FxInvalidParameterException("'" + list + "' can not be converted to a long[] array using separator '" +
-                        separator + "'", sInts[i]);
+                        separator + "'", sLongs[i]);
             }
         }
-        return iInts;
+        return result;
     }
 
     /**
@@ -107,10 +109,7 @@ public class FxArrayUtils {
      * @return Long[]
      */
     public static Long[] toLongArray(List<Long> items) {
-        Long[] res = new Long[items.size()];
-        for (int i = 0; i < res.length; i++)
-            res[i] = items.get(i);
-        return res;
+        return items.toArray(new Long[items.size()]);
     }
 
     /**
@@ -307,12 +306,7 @@ public class FxArrayUtils {
      * @return String representation of the array
      */
     public static String toStringArray(Object[] elements, char separator) {
-        StringBuilder sb = new StringBuilder((elements.length + 20));
-        for (Object element : elements) {
-            sb.append(String.valueOf(element));
-            sb.append(separator);
-        }
-        return sb.substring(0, sb.length() - 1);
+        return StringUtils.join(elements, separator);
     }
 
     /**
@@ -323,12 +317,7 @@ public class FxArrayUtils {
      * @return String representation of the array
      */
     public static String toStringArray(int[] elements, char separator) {
-        StringBuilder sb = new StringBuilder(elements.length + 20);
-        for (int element : elements) {
-            sb.append(String.valueOf(element));
-            sb.append(separator);
-        }
-        return sb.substring(0, sb.length() - 1);
+        return Ints.join(String.valueOf(separator), elements);
     }
 
     /**
@@ -340,12 +329,7 @@ public class FxArrayUtils {
      * @since 3.2.0
      */
     public static String toStringArray(long[] elements, char separator) {
-        StringBuilder sb = new StringBuilder(elements.length + 20);
-        for (long element : elements) {
-            sb.append(String.valueOf(element));
-            sb.append(separator);
-        }
-        return sb.substring(0, sb.length() - 1);
+        return Longs.join(String.valueOf(separator), elements);
     }
 
     /**
@@ -356,12 +340,7 @@ public class FxArrayUtils {
      * @return String representation of the array
      */
     public static String toStringArray(Object[] elements, String separator) {
-        StringBuilder sb = new StringBuilder((elements.length + separator.length() * 20));
-        for (Object element : elements) {
-            sb.append(String.valueOf(element));
-            sb.append(separator);
-        }
-        return sb.substring(0, sb.length() - separator.length());
+        return StringUtils.join(elements, separator);
     }
 
     /**

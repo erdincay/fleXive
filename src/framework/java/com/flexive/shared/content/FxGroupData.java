@@ -734,7 +734,17 @@ public class FxGroupData extends FxData {
         }
     }
 
-    private FxGroupData findGroup(long assignmentId) {
+    /**
+     * Search for a group with the given assignment, return null if it doesn't exist.
+     *
+     * @param assignmentId    the group assignment ID
+     * @return         the group data, or null if it doesn't exist
+     * @since 3.2.1
+     */
+    public FxGroupData findGroup(long assignmentId) {
+        if (getAssignmentId() == assignmentId) {
+            return this;
+        }
         for (FxData child : data) {
             if (child.isGroup()) {
                 if (child.getAssignmentId() == assignmentId) {
@@ -1134,17 +1144,15 @@ public class FxGroupData extends FxData {
             return;
         }
         boolean found = false;
-        int maxPos = Math.min(data.size(), newPos + 1);
-        for (int i = 0; i < data.size(); i++) {
+        final int dataCount = data.size();
+
+        for (int i = 0; i < dataCount; i++) {
             if (data.get(i) == child) {
                 if (i == newPos) {
                     return; // may happen when the positions were not compacted
                 }
                 data.remove(i);
                 found = true;
-                if (i > newPos) {
-                    maxPos = i + 1;
-                }
                 break;
             }
         }
@@ -1152,10 +1160,10 @@ public class FxGroupData extends FxData {
             throw new FxInvalidParameterException("child", "ex.content.group.child", child.getXPath(), getXPath()).asRuntimeException();
         }
 
-        data.add(Math.min(data.size(), newPos), child);
+        data.add(Math.min(dataCount - 1, newPos), child);
 
         // fix positions
-        for (int i = 0; i < maxPos; i++) {
+        for (int i = 0; i < dataCount; i++) {
             data.get(i).setPos(i);
         }
     }

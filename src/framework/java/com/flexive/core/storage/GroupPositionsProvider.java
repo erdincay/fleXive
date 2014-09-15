@@ -1,6 +1,7 @@
 package com.flexive.core.storage;
 
 import com.flexive.shared.FxArrayUtils;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,8 +32,9 @@ public class GroupPositionsProvider {
         if (StringUtils.isBlank(groupPos)) {
             this.positions = Collections.emptyMap();
         } else {
-            this.positions = Maps.newHashMap();
-            for (String keyValue : StringUtils.split(groupPos, SEP_ASSIGNMENTS)) {
+            final String[] pairs = StringUtils.split(groupPos, SEP_ASSIGNMENTS);
+            this.positions = Maps.newHashMapWithExpectedSize(pairs.length);
+            for (String keyValue : pairs) {
                 final String[] parts = StringUtils.split(keyValue, SEP_ASS_DATA);
                 if (parts.length != 2) {
                     if (LOG.isWarnEnabled()) {
@@ -43,8 +45,9 @@ public class GroupPositionsProvider {
                 try {
                     final long assignmentId = Long.parseLong(parts[0]);
                     // get indices/positions mapping
-                    final Map<String, Integer> mappings = Maps.newHashMap();
-                    for (String entry : StringUtils.split(parts[1], SEP_POS)) {
+                    final String[] entries = StringUtils.split(parts[1], SEP_POS);
+                    Map<String, Integer> mappings = null;
+                    for (String entry : entries) {
                         final String[] entryParts = StringUtils.splitPreserveAllTokens(entry, SEP_XMULT_POS);
                         if (entryParts.length != 2) {
                             if (LOG.isWarnEnabled()) {
@@ -70,7 +73,16 @@ public class GroupPositionsProvider {
                             }
                             xmult = sb.toString();
                         }
-                        mappings.put(xmult, Integer.parseInt(entryParts[1]));
+                        final int value = Integer.parseInt(entryParts[1]);
+                        if (entries.length == 1) {
+                            // optimize for the common case (group without a multiplicity of 1)
+                            mappings = ImmutableMap.of(xmult, value);
+                        } else {
+                            if (mappings == null) {
+                                mappings = Maps.newHashMapWithExpectedSize(entries.length);
+                            }
+                            mappings.put(xmult, value);
+                        }
                     }
                     positions.put(assignmentId, mappings);
                 } catch (NumberFormatException e) {

@@ -1913,13 +1913,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 final long assignmentId = entry.getKey();
                 final FxGroupAssignment groupAssignment = (FxGroupAssignment) env.getAssignment(assignmentId);
 
-                final Set<String> existingMults = Sets.newHashSet();
-                try {
-                    for (FxData data : root.getGroup(assignmentId).getElements()) {
+                final Set<String> existingMults;
+                final FxGroupData group = root.findGroup(assignmentId);
+                if (group != null) {
+                    existingMults = Sets.newHashSet();
+                    for (FxData data : group.getElements()) {
                         existingMults.add(FxArrayUtils.toStringArray(data.getIndices(), ','));
                     }
-                } catch (FxRuntimeException e) {
-                    // group not found
+                } else {
+                    existingMults = Collections.emptySet();
                 }
                 for (Map.Entry<String, Integer> position : entry.getValue().entrySet()) {
                     final String xmult = position.getKey();
