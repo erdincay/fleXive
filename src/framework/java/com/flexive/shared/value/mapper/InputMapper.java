@@ -87,7 +87,7 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      */
     public final MappedType encode(BaseType value) {
         final MappedType encodedValue = doEncode(value);
-        encodedValue.setInternalProperties(value);
+        encodedValue.setInternalProperties(value, true);
         return encodedValue;
     }
 
@@ -100,7 +100,7 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      */
     public final BaseType decode(MappedType value) {
         final BaseType decodedValue = doDecode(value);
-        decodedValue.setInternalProperties(value);
+        decodedValue.setInternalProperties(value, !preserveValueData());
         return decodedValue;
     }
 
@@ -201,5 +201,17 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
             newValue.setReadOnly();
         }
         return newValue;
+    }
+
+    /**
+     * @return  when true, the value data ({@link com.flexive.shared.value.FxValue#getValueData()}) returned
+     * from {@link #decode(com.flexive.shared.value.FxValue)} is preserved,
+     * otherwise it is taken from the mapped value. Return true if your implementation of
+     * {@link #doDecode(com.flexive.shared.value.FxValue)} modifies the value data in some way. (default: false)
+     *
+     * @since 3.2.1
+     */
+    protected boolean preserveValueData() {
+        return false;
     }
 }

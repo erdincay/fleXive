@@ -348,16 +348,20 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * Copy the internal "meta" properties associated with a value into this instance (XPath, value data).
      *
      * @param other    the instance to copy the data from
+     * @param copyValueData if the value data should be copied as well (optional since technically the valueData is
+     *                      not an internal bookkeeping property, but associated with the wrapped value).
      * @since 3.2.1
      */
     @SuppressWarnings("unchecked")
-    public void setInternalProperties(FxValue other) {
-        this.valueData = other.valueData;
-        this.multiLangData = other.multiLangData == null ? null : Maps.<Long, Integer>newHashMap(other.multiLangData);
+    public void setInternalProperties(FxValue other, boolean copyValueData) {
         this.XPath = other.XPath;
         this.xpathPrefix = other.xpathPrefix;
         this.readOnly = other.readOnly;
         this.changeListener = other.changeListener;
+        if (copyValueData) {
+            this.valueData = other.valueData;
+            this.multiLangData = other.multiLangData == null ? null : Maps.<Long, Integer>newHashMap(other.multiLangData);
+        }
     }
 
     /**
