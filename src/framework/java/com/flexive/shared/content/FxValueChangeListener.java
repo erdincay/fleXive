@@ -32,7 +32,8 @@
 package com.flexive.shared.content;
 
 /**
- * Listener that is called when values of a group have changed, changes are propagated to parent groups
+ * Listener that is called when values of a group have changed, changes are propagated to parent groups.
+ * Group add/remove events are broadcast as well.
  *
  * @author Markus Plesser (markus.plesser@ucs.at), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -52,8 +53,9 @@ public interface FxValueChangeListener {
     }
 
     /**
-     * Value change event
-     * @param xpath affected xpath
+     * Value change event.
+     *
+     * @param xpath affected group or property xpath
      * @param changeType type of change
      */
     void onValueChanged(String xpath, ChangeType changeType);

@@ -693,9 +693,8 @@ public class XPathElement implements Serializable {
      * @return XPath without leading type
      */
     public static String stripType(String XPath) {
-        assert XPath != null : "XPath was null!";
         final int pos = XPath.indexOf('/');
-        return pos != -1 ? xpToUpperCase(XPath.substring(pos)) : "";
+        return pos != -1 ? xpToUpperCase(pos == 0 ? XPath : XPath.substring(pos)) : "";
     }
 
     /**

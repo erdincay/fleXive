@@ -884,12 +884,16 @@ public class FxGroupData extends FxData {
         List<XPathElement> xp = XPathElement.split(xPath);
         XPathElement addy = xp.get(xp.size() - 1);
         FxGroupData currGroup = getRootGroup(), tmp;
-//        System.out.println("adding group(s): " + xPath);
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         for (XPathElement curr : xp) {
             if ((tmp = (FxGroupData) currGroup.containsChild(curr)) != null) {
                 currGroup = tmp;
             } else {
-                FxGroupAssignment gaNew = (FxGroupAssignment) fxGroupAssignment.getAssignedType().getAssignment(XPathElement.buildXPath(true, currGroup.getXPath(), curr.getAlias()));
+                FxGroupAssignment gaNew = (FxGroupAssignment) env.getAssignment(
+                        fxGroupAssignment.getAssignedType().getName()
+                                + (currGroup.getParent() == null ? "" : currGroup.getXPath())
+                                + '/' + curr.getAlias()
+                );
                 final boolean finalGroup = addy.equalData(curr);
                 final AddGroupOptions addOptions = finalGroup || options.middleGroupOptions == null ? options : options.middleGroupOptions;
                 FxData gdNew = gaNew.createEmptyData(currGroup, curr.getIndex(), gaNew.getPosition(), addOptions.onlySystemInternal, addOptions.onlyRequiredGroups);
@@ -914,7 +918,7 @@ public class FxGroupData extends FxData {
 
         if (!this.data.remove(data)) //was: if (!data.getParent().data.remove(data))
             throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull()).asRuntimeException();
-        if(hasChangeListener() && !data.isEmpty())
+        if(hasChangeListener())
             valueChanged(data.getXPathFull(), FxValueChangeListener.ChangeType.Remove);
         data.compact();
         compactPositions(false);
