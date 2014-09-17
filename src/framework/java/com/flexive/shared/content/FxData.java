@@ -570,14 +570,13 @@ public abstract class FxData implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!(obj instanceof FxData))
+        if (obj == null || getClass() != obj.getClass())
             return false;
         FxData comp = (FxData) obj;
-        return this.getPos() == comp.getPos() &&
-                !(!this.getXPathFull().equals(comp.getXPathFull()) ||
-                        this.getAssignmentId() != comp.getAssignmentId() ||
-                        this.isEmpty() != comp.isEmpty()
-                );
+        return pos == comp.pos
+                && assignmentId == comp.assignmentId
+                && XPathFull.equals(comp.XPathFull)
+                && this.isEmpty() == comp.isEmpty();
     }
 
     @Override

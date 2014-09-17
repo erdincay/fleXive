@@ -271,7 +271,7 @@ public class FxGroupData extends FxData {
      * @param child FxData to add
      * @return the child
      */
-    public synchronized FxData addChild(FxData child) {
+    public FxData addChild(FxData child) {
         if (data.contains(child)) //TODO: change to containsChild()?
             return child;
         if (hasChangeListener()) {
@@ -299,19 +299,20 @@ public class FxGroupData extends FxData {
         child.setPos(pos);
         //check if the position is taken (if so move the child and successors at the given position one place down)
         for (int i = 0; i < data.size(); i++) {
-            if (data.get(i).getPos() < pos)
+            final FxData elem = data.get(i);
+            if (elem.getPos() < pos)
                 continue;
-            if (data.get(i).getPos() > pos) {
+            if (elem.getPos() > pos) {
                 if (i > 0 && data.get(i - 1).getPos() < pos)
                     data.add(i, child);
                 else
                     data.add((i - 1 < 0 ? 0 : i - 1), child);
                 return child;
             }
-            if (data.get(i).getPos() == pos) {
+            if (elem.getPos() == pos) {
                 //move successors down
                 int lastPos = pos + 1;
-                data.get(i).setPos(lastPos);
+                elem.setPos(lastPos);
                 for (int j = i + 1; j < data.size(); j++) {
                     if (!(data.get(j).getPos() > lastPos))
                         data.get(j).setPos(lastPos + 1);
