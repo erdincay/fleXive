@@ -331,7 +331,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
                     setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
         final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
                 XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
-                position, parent, this.getEmptyValue(), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
+                position, parent, this.getEmptyValue(), this.isSystemInternal(), null);
         //Flag if the value is set from the assignments default value
         data.setContainsDefaultValue(!data.getValue().isEmpty());
         return data;
@@ -350,7 +350,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
                     setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
         return new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
                 XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
-                this.getPosition(), parent, this.getProperty().getDataType().getRandomValue(rnd, this), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
+                this.getPosition(), parent, this.getProperty().getDataType().getRandomValue(rnd, this), this.isSystemInternal(), null);
     }
 
     /**
