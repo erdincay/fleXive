@@ -220,9 +220,36 @@ public class FxRestApiUtils {
         }
 
         /**
+         * Put a collection value into the response but only if it is not empty. For XML formats an element name is supplied, to render
+         * something like "&lt;rows>&lt;row>...&lt;/row>&lt;row>...&lt;/row>...&lt;/rows>". In JSON this information
+         * is not used and the collection is written to the response directly.
+         *
+         * @param key         the collection name
+         * @param values      all values
+         * @param elemName    the name of an element for XML
+         * @return
+         */
+        public ResponseMapBuilder putNonEmpty(String key, Iterable<?> values, String elemName) {
+            if(values == null || !values.iterator().hasNext())
+                return this;
+            putAll(processIterable(values, key, elemName));
+            return this;
+        }
+
+        /**
          * @see #put(String, Iterable, String)
          */
         public <T> ResponseMapBuilder put(String key, T[] values, String elemName) {
+            putAll(processIterable(Arrays.asList(values), key, elemName));
+            return this;
+        }
+
+        /**
+         * @see #putNonEmpty(String, Iterable, String)
+         */
+        public <T> ResponseMapBuilder putNonEmpty(String key, T[] values, String elemName) {
+            if(values == null || values.length == 0)
+                return this;
             putAll(processIterable(Arrays.asList(values), key, elemName));
             return this;
         }
