@@ -43,10 +43,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.ContentEngine;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -462,13 +459,21 @@ public class FxContentView extends UIOutput {
                         return getMaxIndex(xpath);
                     }
                 }
-                if (content.isGroupXPath(path)) {
+                // check the assignment type in the static structure data
+                final FxEnvironment env = CacheAdmin.getEnvironment();
+                final FxAssignment assignment = env.getAssignment(env.getType(content.getTypeId()).getName() + path);
+                if (assignment instanceof FxGroupAssignment) {
                     return new ContentMap(content, path);
                 } else {
                     return content.getValue(path);
                 }
             } catch (FxNotFoundException e) {
                 return null;
+            } catch (FxRuntimeException e) {
+                if (e.getCause() instanceof FxNotFoundException) {
+                    return null;
+                }
+                return e;
             } catch (FxInvalidParameterException e) {
                 return new FxString("?" + key + "?");
             }
