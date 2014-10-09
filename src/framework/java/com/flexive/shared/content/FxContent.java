@@ -607,14 +607,14 @@ public class FxContent implements Serializable {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupData getGroupData(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
-        XPath = XPathElement.stripType(XPathElement.toXPathMult(XPath));
+        XPath = XPathElement.stripType(XPath);
         //this is a slightly modified version of getData() but since groups may not contain children its safer
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return getRootGroup();
         List<FxData> currChildren = data.getChildren();
         FxGroupData group = null;
         boolean found;
-        for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
+        for (XPathElement xpe : XPathElement.split(XPath)) {
             found = false;
             for (FxData curr : currChildren) {
                 if (curr.equalToXPathElement(xpe)) {
@@ -1093,21 +1093,37 @@ public class FxContent implements Serializable {
      * @since 3.1
      */
     public boolean containsXPath(String XPath) {
+        return findXPathData(XPath) != null;
+    }
+
+    /**
+     * Returns the {@link com.flexive.shared.content.FxData} instance for the XPath.
+     *
+     * @param XPath    the XPath
+     * @return  the {@link com.flexive.shared.content.FxData} instance if it exists, {@link null} otherwise
+     * @since 3.2.1
+     */
+    public FxData findXPathData(String XPath) {
         if(StringUtils.isEmpty(XPath)) {
-            return false;
+            return null;
         }
         if ("/".equals(XPath)) {
-            return true;
+            return data;
         }
         // optimized implementation to avoid exceptions and don't create unnecessary objects
         // since this method tends to be used often in hot spots for determining the structure of the content
         List<FxData> currentChildren = data.getChildren();
-        for (XPathElement xpe : XPathElement.split(XPathElement.xpToUpperCase(XPath))) {
+        final List<XPathElement> elems = XPathElement.split(XPathElement.xpToUpperCase(XPath));
+        FxData lastCurr = null;
+        for (int i = 0; i < elems.size(); i++) {
+            XPathElement xpe = elems.get(i);
             boolean found = false;
             for (FxData curr : currentChildren) {
+                lastCurr = curr;
                 if (curr.equalToXPathElement(xpe)) {
                     if (curr.isProperty()) {
-                        return true;
+                        // true if this is the last part of the XPath
+                        return i == elems.size() - 1 ? curr : null;
                     } else {
                         currentChildren = ((FxGroupData) curr).getChildren();
                         found = true;
@@ -1116,9 +1132,9 @@ public class FxContent implements Serializable {
                 }
             }
             if (!found)
-                return false;
+                return null;
         }
-        return true;
+        return lastCurr;
     }
 
     /**
