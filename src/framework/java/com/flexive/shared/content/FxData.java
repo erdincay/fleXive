@@ -178,11 +178,29 @@ public abstract class FxData implements Serializable {
     }
 
     /**
+     * Change the index of this group or property data (also updates all child groups and properties).
+     *
+     * @param index    the new index
+     * @since 3.2.1
+     */
+    public void setIndex(int index) {
+        if (this.xpIndex != index) {
+            this.xpIndex = index;
+            setXPathFull(
+                    (parent == null || parent.isRootGroup() ? "/" : parent.getXPathFull() + '/')
+                            + getXPathElement().toString()
+            );
+            applyIndices();
+        }
+    }
+
+
+    /**
      * Set the index of this data entry
      *
      * @param index the index to set
      */
-    private void setIndex(int index) {
+    private void _setIndexInternal(int index) {
         this.xpIndex = index;
         this.applyIndices();
     }
@@ -367,12 +385,12 @@ public abstract class FxData implements Serializable {
         for (FxData curr : parent.getChildren()) {
             curr.setPos(pos++);
             if (curr.getAssignmentId() == this.assignmentId) {
-                curr.setIndex(idx++);
+                curr._setIndexInternal(idx++);
                 foundOther = true;
             }
         }
         if (!foundOther && this.getIndex() > 1)
-            this.setIndex(1);
+            this._setIndexInternal(1);
     }
 
     /**

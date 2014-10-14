@@ -1171,6 +1171,49 @@ public class ContentEngineTest {
         assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]"));
     }
 
+    @Test(groups = {"ejb", "content"})
+    public void modifyXPathTest() throws Exception {
+        final FxContent test = ce.initialize(CacheAdmin.getEnvironment().getType(TEST_TYPE).getId());
+        test.setValue("/TestProperty3", "1");
+        test.setValue("/TestProperty3[2]", "2");
+        test.setValue("/TestProperty3[3]", "3");
+
+        assertEquals(test.getValue("/TESTPROPERTY3").toString(), "1");
+        assertEquals(test.getValue("/TESTPROPERTY3[2]").toString(), "2");
+        assertEquals(test.getValue("/TESTPROPERTY3[3]").toString(), "3");
+
+        final FxPropertyData pd1 = test.getPropertyData("/TESTPROPERTY3");
+        final FxPropertyData pd2 = test.getPropertyData("/TESTPROPERTY3[2]");
+        final FxPropertyData pd3 = test.getPropertyData("/TESTPROPERTY3[3]");
+
+        assertEquals(pd1.getValue().toString(), "1");
+        assertEquals(pd2.getValue().toString(), "2");
+        assertEquals(pd3.getValue().toString(), "3");
+
+        pd1.setIndex(3);
+        pd3.setIndex(1);
+
+        assertEquals(test.getValue("/TESTPROPERTY3").toString(), "3");
+        assertEquals(test.getValue("/TESTPROPERTY3[2]").toString(), "2");
+        assertEquals(test.getValue("/TESTPROPERTY3[3]").toString(), "1");
+
+        test.setValue("/TestGroup1/TestGroup1_2/TestProperty1_2_2", "A");
+        test.setValue("/TestGroup1/TestGroup1_2/TestProperty1_2_2[2]", "B");
+        test.setValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_2", "X");
+        test.setValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_2[2]", "Y");
+
+        final FxGroupData gd1 = test.getGroupData("/TestGroup1/TestGroup1_2");
+        final FxGroupData gd2 = test.getGroupData("/TestGroup1/TestGroup1_2[2]");
+
+        gd1.setIndex(2);
+        gd2.setIndex(1);
+
+        assertEquals(test.getValue("/TestGroup1/TestGroup1_2/TestProperty1_2_2").toString(), "X");
+        assertEquals(test.getValue("/TestGroup1/TestGroup1_2/TestProperty1_2_2[2]").toString(), "Y");
+        assertEquals(test.getValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_2").toString(), "A");
+        assertEquals(test.getValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_2[2]").toString(), "B");
+    }
+
     /**
      * Test the maxLength property f. contents
      *
