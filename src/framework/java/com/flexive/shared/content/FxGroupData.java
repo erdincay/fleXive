@@ -387,9 +387,9 @@ public class FxGroupData extends FxData {
             List<XPathElement> elements = XPathElement.split(this.getXPathFull());
             if (elements.get(elements.size() - 1).getIndex() == this.getIndex())
                 return;
-            elements = XPathElement.splitNew(this.getXPathFull());
+            elements = Lists.newArrayList(elements);
             int pos = elements.size() - 1;
-            elements.get(pos).setIndex(this.getIndex());
+            elements.set(pos, getXPathElement());
             setXPathFull(XPathElement.toXPath(elements));
             if (this.getChildren() != null)
                 _changeIndex(this.getChildren(), pos, this.getIndex());

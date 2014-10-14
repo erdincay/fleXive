@@ -186,10 +186,6 @@ public abstract class FxData implements Serializable {
     public void setIndex(int index) {
         if (this.xpIndex != index) {
             this.xpIndex = index;
-            setXPathFull(
-                    (parent == null || parent.isRootGroup() ? "/" : parent.getXPathFull() + '/')
-                            + getXPathElement().toString()
-            );
             applyIndices();
         }
     }

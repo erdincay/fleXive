@@ -41,6 +41,7 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.structure.GroupMode;
 import com.flexive.shared.value.*;
+import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -225,9 +226,10 @@ public class FxPropertyData extends FxData {
     @Override
     protected void applyIndices() {
         List<XPathElement> elements = XPathElement.split(this.getXPathFull());
-        if (elements.get(elements.size() - 1).getIndex() != this.getIndex()) {
-            elements = XPathElement.splitNew(this.getXPathFull());
-            elements.get(elements.size() - 1).setIndex(this.getIndex());
+        final int lastIdx = elements.size() - 1;
+        if (elements.get(lastIdx).getIndex() != this.getIndex()) {
+            elements = Lists.newArrayList(elements);
+            elements.set(lastIdx, this.getXPathElement());
             setXPathFull(XPathElement.toXPath(elements));
         }
     }
