@@ -34,6 +34,7 @@ package com.flexive.faces.components.content;
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
@@ -480,9 +481,9 @@ public class FxContentView extends UIOutput {
         }
 
         private String getCanonicalPath(String path) {
-            if (StringUtils.isBlank(prefix) && path.indexOf('/') != -1 && path.charAt(0) != '/') {
+            if (path.startsWith("@")) {
                 // strip type/PK information if this is an absolute XPath and we're at the root level
-                return path.substring(path.indexOf('/'));
+                return XPathElement.stripType(path);
             }
             return prefix + (path.startsWith("/") ? path : '/' + path);
         }
