@@ -675,7 +675,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Check both nodes (this throws an Exception if they do not exist)
         FxTreeNodeInfo node = getTreeNodeInfo(con, mode, nodeId);
         FxTreeNodeInfoSpreaded destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, newParentId);
-        final FxTreeNodeInfo parent = getTreeNodeInfo(con, mode, node.getParentId());
+        final FxTreeNodeInfo parent = getTreeNodeInfo(con, mode, newParentId);
 
         acquireLocksForUpdate(con, mode, Arrays.asList(nodeId, newParentId, node.getParentId()));
 
