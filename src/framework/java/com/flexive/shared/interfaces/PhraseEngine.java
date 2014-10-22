@@ -483,6 +483,7 @@ public interface PhraseEngine {
      * Assign a phrase to a node.
      * If the assignment already exists, the position is updated if needed
      *
+     * @param category         category
      * @param assignmentOwner  mandator which is the "owner" of this assignment
      * @param nodeId           node id
      * @param nodeMandator     node mandator
@@ -493,10 +494,44 @@ public interface PhraseEngine {
      * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
      * @throws FxNotFoundException if either the node or phrase were not found
      */
+    public void assignPhrase(int category, long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException;
+
+    /**
+     * Assign a phrase to a node.
+     * If the assignment already exists, the position is updated if needed
+     *
+     * @param assignmentOwner  mandator which is the "owner" of this assignment
+     * @param nodeId           node id
+     * @param nodeMandator     node mandator
+     * @param phraseId         phrase id
+     * @param phraseMandator   phrase mandator
+     * @param pos              position
+     * @param checkPositioning insert at the given position moving other nodes or just write the position without any moving around
+     * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
+     * @throws FxNotFoundException if either the node or phrase were not found
+     * @deprecated
+     */
     public void assignPhrase(long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException;
 
     /**
      * Assign a phrase to a node.
+     * If the assignment already exists, the position is updated if needed
+     *
+     * @param category         category
+     * @param assignmentOwner  mandator which is the "owner" of this assignment
+     * @param nodeId           node id
+     * @param nodeMandator     node mandator
+     * @param phraseKey        phrase key
+     * @param phraseMandator   phrase mandator
+     * @param pos              position
+     * @param checkPositioning insert at the given position moving other nodes or just write the position without any moving around
+     * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
+     * @throws FxNotFoundException if either the node or phrase were not found
+     */
+    public void assignPhrase(int category, long assignmentOwner, long nodeId, long nodeMandator, String phraseKey, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException;
+
+    /**
+     * Assign a phrase to a node for the default category.
      * If the assignment already exists, the position is updated if needed
      *
      * @param assignmentOwner  mandator which is the "owner" of this assignment
@@ -508,11 +543,25 @@ public interface PhraseEngine {
      * @param checkPositioning insert at the given position moving other nodes or just write the position without any moving around
      * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
      * @throws FxNotFoundException if either the node or phrase were not found
+     * @deprecated
      */
     public void assignPhrase(long assignmentOwner, long nodeId, long nodeMandator, String phraseKey, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException;
 
     /**
      * Assign phrases at a given position to a node
+     *
+     * @param category        category
+     * @param position        requested position
+     * @param assignmentOwner mandator which is the "owner" of this assignment
+     * @param nodeId          node id
+     * @param nodeMandator    node mandator
+     * @param phrases         phrases to assign
+     * @throws FxApplicationException on errors
+     */
+    public void assignPhrases(int category, long position, long assignmentOwner, long nodeId, long nodeMandator, FxPhrase[] phrases) throws FxApplicationException;
+
+    /**
+     * Assign phrases at a given position to a node for the default category
      *
      * @param position        requested position
      * @param assignmentOwner mandator which is the "owner" of this assignment
@@ -520,6 +569,7 @@ public interface PhraseEngine {
      * @param nodeMandator    node mandator
      * @param phrases         phrases to assign
      * @throws FxApplicationException on errors
+     * @deprecated
      */
     public void assignPhrases(long position, long assignmentOwner, long nodeId, long nodeMandator, FxPhrase[] phrases) throws FxApplicationException;
 
@@ -533,7 +583,7 @@ public interface PhraseEngine {
     public void buildPhraseChildMapping(long mandator, int category);
 
     /**
-     * "Move" the position of an assignment
+     * "Move" the position of an assignment for the default category
      *
      * @param assignmentOwner mandator which is the "owner" of this assignment
      * @param nodeId          node id
@@ -543,6 +593,7 @@ public interface PhraseEngine {
      * @param delta           delta to move
      * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
      * @throws FxNotFoundException if either the node or phrase were not found
+     * @deprecated
      */
     void moveTreeNodeAssignment(long assignmentOwner, long nodeId, long nodeMandatorId, long phraseId, long phraseMandator, int delta) throws FxNotFoundException, FxNoAccessException;
 
@@ -562,7 +613,7 @@ public interface PhraseEngine {
     void moveTreeNodeAssignment(int category, long assignmentOwner, long nodeId, long nodeMandatorId, long phraseId, long phraseMandator, int delta) throws FxNotFoundException, FxNoAccessException;
 
     /**
-     * Remove an assign of a phrase from a node.
+     * Remove an assign of a phrase from a node for the default category.
      *
      * @param assignmentOwner mandator which is the "owner" of this assignment
      * @param nodeId          node id
@@ -572,6 +623,7 @@ public interface PhraseEngine {
      * @return if an assignment was found that could be removed
      * @throws FxNoAccessException if the requested assignmentOwner is not the callers mandator
      * @throws FxNotFoundException if either the node or phrase were not found
+     * @deprecated
      */
     public boolean removePhraseAssignment(long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator) throws FxNotFoundException, FxNoAccessException;
 
@@ -591,11 +643,12 @@ public interface PhraseEngine {
     public boolean removePhraseAssignment(int category, long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator) throws FxNotFoundException, FxNoAccessException;
 
     /**
-     * Remove all phrase assignments from a node.
+     * Remove all phrase assignments from a node for the default category.
      * If the calling user is the owner of the node, all assignments will be removed, if not only the phrases assigned by the calling users mandator
      *
      * @param nodeId       node id
      * @param nodeMandator node mandator id
+     * @deprecated use #removeAssignmentsFromNode(int,long,long)
      */
     public void removeAssignmentsFromNode(long nodeId, long nodeMandator);
 

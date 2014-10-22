@@ -32,8 +32,6 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import com.flexive.core.storage.DBStorage;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.PhraseEngine;
@@ -51,9 +49,7 @@ import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.flexive.core.DatabaseConst.*;
 
@@ -1634,27 +1630,27 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignPhrase(long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException {
+        assignPhrase(FxPhraseCategorySelection.CATEGORY_DEFAULT, assignmentOwner, nodeId, nodeMandator, phraseId, phraseMandator, pos, checkPositioning);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void assignPhrase(int category, long assignmentOwner, long nodeId, long nodeMandator, long phraseId, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException {
         checkMandatorAccess(assignmentOwner, FxContext.getUserTicket());
         Connection con = null;
         PreparedStatement ps = null;
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            //check if category for the phrase and node matches
-            ps = con.prepareStatement("SELECT CAT FROM " + TBL_PHRASE + " WHERE ID=? AND MANDATOR=?");
-            ps.setLong(1, phraseId);
-            ps.setLong(2, phraseMandator);
-            ResultSet rs = ps.executeQuery();
-            if (rs == null || !(rs.next()))
-                throw new FxNotFoundException("ex.phrases.notFound.id", phraseId, phraseMandator);
-            final int category = rs.getInt(1);
-            ps.close();
-            //check if a node with this id and same category as the phrase exists
+
             ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=? AND CAT=?");
             ps.setLong(1, nodeId);
             ps.setLong(2, nodeMandator);
             ps.setInt(3, category);
-            rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
             if (rs == null || !(rs.next()))
                 throw new FxNotFoundException("ex.phrases.node.notFound.id", nodeId, nodeMandator);
             ps.close();
@@ -1760,6 +1756,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
      */
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void assignPhrase(int category, long assignmentOwner, long nodeId, long nodeMandator, String phraseKey, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException {
+        assignPhrase(category, assignmentOwner, nodeId, nodeMandator, loadPhrase(phraseKey, phraseMandator).getId(), phraseMandator, pos, checkPositioning);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignPhrase(long assignmentOwner, long nodeId, long nodeMandator, String phraseKey, long phraseMandator, long pos, boolean checkPositioning) throws FxNotFoundException, FxNoAccessException {
         assignPhrase(assignmentOwner, nodeId, nodeMandator, loadPhrase(phraseKey, phraseMandator).getId(), phraseMandator, pos, checkPositioning);
     }
@@ -1770,6 +1775,15 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignPhrases(long position, long assignmentOwner, long nodeId, long nodeMandator, FxPhrase[] phrases) throws FxApplicationException {
+        assignPhrases(FxPhraseCategorySelection.CATEGORY_DEFAULT, position, assignmentOwner, nodeId, nodeMandator, phrases);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void assignPhrases(int category, long position, long assignmentOwner, long nodeId, long nodeMandator, FxPhrase[] phrases) throws FxApplicationException {
         if (phrases == null || phrases.length == 0)
             return;
         checkMandatorAccess(assignmentOwner, FxContext.getUserTicket());
@@ -1779,16 +1793,13 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
             //check categories
-            ps = con.prepareStatement("SELECT CAT FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=?");
+            ps = con.prepareStatement("SELECT ID FROM " + TBL_PHRASE_TREE + " WHERE ID=? AND MANDATOR=? AND CAT=?");
             ps.setLong(1, nodeId);
             ps.setLong(2, nodeMandator);
+            ps.setInt(3, category);
             ResultSet rs = ps.executeQuery();
             if (rs == null || !(rs.next()))
                 throw new FxNotFoundException("ex.phrases.node.notFound.id", nodeId, nodeMandator);
-            final int category = rs.getInt(1);
-            for (FxPhrase phrase : phrases)
-                if (category != phrase.getCategory())
-                    throw new FxInvalidParameterException("phrase", "ex.phrase.tree.category.mismatch").asRuntimeException();
             ps.close();
             long startPhraseId = -1, startPhraseMandator = -1;
             ps = con.prepareStatement("SELECT PHRASEID,PMANDATOR FROM " + TBL_PHRASE_MAP + " WHERE MANDATOR=? AND NODEID=? AND NODEMANDATOR=? AND POS>=? AND CAT=? AND DIRECT=TRUE ORDER BY POS ASC");
@@ -2423,14 +2434,21 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 sql.append(", " + TBL_PHRASE_MAP + " m");
             sql.append(" WHERE ");
             final String categoryRestriction;
-            if (query.getCategories().isSingleCategory())
-                categoryRestriction = "p.CAT=" + query.getCategories().getSingleCategory();
-            else
-                categoryRestriction = "p.CAT IN(" + categoriesList(query.getCategories()) + ")";
-            if (query.isIncludeHidden())
+            if (treeNodeRestricted) {
+                if (query.getCategories().isSingleCategory())
+                    categoryRestriction = "m.CAT=" + query.getCategories().getSingleCategory();
+                else
+                    categoryRestriction = "m.CAT IN(" + categoriesList(query.getCategories()) + ")";
                 sql.append(categoryRestriction);
-            else
-                sql.append(categoryRestriction).append(" AND p.HID=FALSE");
+            } else {
+                if (query.getCategories().isSingleCategory())
+                    categoryRestriction = "p.CAT=" + query.getCategories().getSingleCategory();
+                else
+                    categoryRestriction = "p.CAT IN(" + categoriesList(query.getCategories()) + ")";
+                sql.append(categoryRestriction);
+            }
+            if (!query.isIncludeHidden())
+                sql.append(" AND p.HID=FALSE");
 
             if (query.isKeyMatchRestricted()) {
                 sql.append(" AND UPPER(p.PKEY)");
@@ -2455,31 +2473,12 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     sql.append(" IN(").append(FxArrayUtils.toStringArray(query.getPhraseMandators(), ',')).append(")");
             }
             if (treeNodeRestricted) {
-                sql.append(" AND m.CAT=p.CAT");
                 sql.append(" AND m.NODEID=").append(query.getTreeNode()).append(" AND m.NODEMANDATOR=").
                         append(query.getTreeNodeMandator()).append(" AND m.MANDATOR IN(").
                         append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).
                         append(")AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
                 if (!query.isIncludeChildNodes())
                     sql.append(" AND m.DIRECT=TRUE");
-                /*if (!query.isIncludeChildNodes()) {
-                    sql.append(" AND m.NODEID=").append(query.getTreeNode()).append(" AND m.NODEMANDATOR=").
-                            append(query.getTreeNodeMandator()).append(" AND m.MANDATOR IN(").
-                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).
-                            append(")AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
-                } else {
-                    sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(").
-                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).append(")");
-                    String cr;
-                    if (query.getCategories().isSingleCategory())
-                        cr = "CAT=" + query.getCategories().getSingleCategory();
-                    else
-                        cr = "CAT IN(" + categoriesList(query.getCategories()) + ")";
-                    ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=? AND " + cr);
-                    sql.append("AND(1=2 ");
-                    buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
-                    sql.append(")");
-                } */
             } else if (query.isOnlyUnassignedPhrases()) {
                 Long[] man;
                 if (query.isTreeNodeMappingOwnerRestricted())
@@ -2698,14 +2697,21 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
             sql.append(" WHERE ");
 
             final String categoryRestriction;
-            if (query.getCategories().isSingleCategory())
-                categoryRestriction = "p.CAT=" + query.getCategories().getSingleCategory();
-            else
-                categoryRestriction = "p.CAT IN(" + categoriesList(query.getCategories()) + ")";
-            if (query.isIncludeHidden())
+            if (treeNodeRestricted) {
+                if (query.getCategories().isSingleCategory())
+                    categoryRestriction = "m.CAT=" + query.getCategories().getSingleCategory();
+                else
+                    categoryRestriction = "m.CAT IN(" + categoriesList(query.getCategories()) + ")";
                 sql.append(categoryRestriction);
-            else
-                sql.append(categoryRestriction).append(" AND p.HID=FALSE");
+            } else {
+                if (query.getCategories().isSingleCategory())
+                    categoryRestriction = "p.CAT=" + query.getCategories().getSingleCategory();
+                else
+                    categoryRestriction = "p.CAT IN(" + categoriesList(query.getCategories()) + ")";
+                sql.append(categoryRestriction);
+            }
+            if (!query.isIncludeHidden())
+                sql.append(" AND p.HID=FALSE");
 
             if (needValueTable)
                 sql.append(" AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
@@ -2721,32 +2727,12 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     sql.append(" IN(").append(FxArrayUtils.toStringArray(query.getPhraseMandators(), ',')).append(")");
             }
             if (treeNodeRestricted) {
-                sql.append(" AND m.CAT=p.CAT");
                 sql.append(" AND m.NODEID=").append(query.getTreeNode()).append(" AND m.NODEMANDATOR=").
                         append(query.getTreeNodeMandator()).append(" AND m.MANDATOR IN(").
                         append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).
                         append(")AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
                 if (!query.isIncludeChildNodes())
                     sql.append(" AND m.DIRECT=TRUE");
-                /*if (!query.isIncludeChildNodes()) {
-                    sql.append(" AND m.NODEID=").append(query.getTreeNode()).append(" AND m.NODEMANDATOR=").
-                            append(query.getTreeNodeMandator()).append(" AND m.MANDATOR IN(").
-                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).
-                            append(")AND m.PHRASEID=p.ID AND m.PMANDATOR=p.MANDATOR");
-                } else {
-                    sql.append(" AND m.PHRASEID=p.ID AND p.MANDATOR=m.PMANDATOR AND m.MANDATOR IN(").
-                            append(FxArrayUtils.toStringArray(query.getTreeNodeMappingOwner(), ',')).append(")");
-                    String cr;
-                    if (query.getCategories().isSingleCategory())
-                        cr = "CAT=" + query.getCategories().getSingleCategory();
-                    else
-                        cr = "CAT IN(" + categoriesList(query.getCategories()) + ")";
-
-                    ps = con.prepareStatement("SELECT ID,MANDATOR FROM " + TBL_PHRASE_TREE + " WHERE PARENTID=? AND PARENTMANDATOR=? AND " + cr);
-                    sql.append("AND(1=2 ");
-                    buildNodeTreeSelect(sql, ps, query.getTreeNode(), query.getTreeNodeMandator());
-                    sql.append(")");
-                }*/
             } else if (query.isOnlyUnassignedPhrases()) {
                 Long[] man;
                 if (query.isTreeNodeMappingOwnerRestricted())
