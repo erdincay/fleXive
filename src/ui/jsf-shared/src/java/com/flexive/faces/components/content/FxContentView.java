@@ -480,6 +480,10 @@ public class FxContentView extends UIOutput {
         }
 
         private String getCanonicalPath(String path) {
+            if (StringUtils.isBlank(prefix) && path.indexOf('/') != -1 && path.charAt(0) != '/') {
+                // strip type/PK information if this is an absolute XPath and we're at the root level
+                return path.substring(path.indexOf('/'));
+            }
             return prefix + (path.startsWith("/") ? path : '/' + path);
         }
 
