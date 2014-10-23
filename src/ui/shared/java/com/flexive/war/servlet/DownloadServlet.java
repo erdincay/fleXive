@@ -42,6 +42,8 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
@@ -65,6 +67,8 @@ import java.net.URLEncoder;
  * Optional parameters can be appended to the requested path (e.g. {@code ?param=value&param2}):
  * <ul>
  * <li><strong>inline=true</strong> to download the content "inline" (i.e. skip the attachment response header)
+ * <li><strong>hintBinaryId=[id]</strong> hint at the expected binary ID. Used from UI content editors that may change
+ * the order of binaries (the binary will only be returned if it's actually present in the content, to preserve security)</li>
  * </ul>
  *
  *
@@ -174,13 +178,28 @@ public class DownloadServlet implements Servlet {
             }
         }
 
+        final String binaryIdParam = request.getParameter("hintBinaryId");
+        final long hintBinaryId = StringUtils.isNumeric(binaryIdParam) ? Long.parseLong(binaryIdParam) : -1;
+
         // get binary descriptor
         final BinaryDescriptor descriptor;
-        try {
-            descriptor = (BinaryDescriptor) content.getValue(xpath).getBestTranslation();
-        } catch (Exception e) {
-            FxServletUtils.sendErrorMessage(response, "Failed to load binary value: " + e.getMessage());
-            return;
+
+        if (hintBinaryId != -1) {
+            final BinaryDescriptor foundDescriptor = findBinaryDescriptor(content, hintBinaryId);
+
+            if (foundDescriptor == null) {
+                FxServletUtils.sendErrorMessage(response, "Expected binary ID not present in content" + pk + ": " + hintBinaryId);
+                return;
+            }
+
+            descriptor = foundDescriptor;
+        } else {
+            try {
+                descriptor = (BinaryDescriptor) content.getValue(xpath).getBestTranslation();
+            } catch (Exception e) {
+                FxServletUtils.sendErrorMessage(response, "Failed to load binary value: " + e.getMessage());
+                return;
+            }
         }
         // stream content
         try {
@@ -252,4 +271,18 @@ public class DownloadServlet implements Servlet {
     public static String getLink(String downloadServletPath, String fullXPath, String filename) {
         return getLink(downloadServletPath, XPathElement.getPK(fullXPath), XPathElement.stripType(fullXPath), filename);
     }
+
+    static BinaryDescriptor findBinaryDescriptor(FxContent content, long hintBinaryId) {
+        for (String xp : content.getAllPropertyXPaths()) {
+            final FxValue value = content.getValue(xp);
+            if (value instanceof FxBinary) {
+                final BinaryDescriptor val = (BinaryDescriptor) value.getBestTranslation();
+                if (val.getId() == hintBinaryId) {
+                    return val;
+                }
+            }
+        }
+        return null;
+    }
+
 }

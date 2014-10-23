@@ -559,8 +559,13 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
             final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
             if (!descriptor.isNewBinary()) {
                 final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, stripForm(clientId) + "_thumb", HtmlGraphicImage.COMPONENT_TYPE, true);
-                image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));
+                final String link = ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language)
+                        // prevent caching when binaries of the same content switch position
+                        + "?md5sum=" + descriptor.getMd5sum()
+                        + "&hintBinaryId=" + descriptor.getId();
+
+                image.setUrl(link);
                 if (component.isReadOnlyShowTranslations()) {
                     //TODO: might add another attribute to indicate if description should be visible
                     image.setStyle("padding: 5px;");

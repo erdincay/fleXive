@@ -33,6 +33,7 @@ package com.flexive.war.servlet;
 
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -83,6 +84,12 @@ import java.net.URLEncoder;
  * <li><code>cropx{x}y{y}w{w}h{h}</code> - crop a box from image defined by x,y,w(idth),h(eight), scaling applies to cropped image!</li>
  * </ul>
  * <p/>
+ * Optional query parameters:
+ * <ul>
+ * <li><code>hintBinaryId={id}</code> - explicitly select the binary ID from the content (same as the {@link DownloadServlet} parameter)</li>
+ * </ul>
+ * <p/>
+ *
  * Sizes for the <code>s</code> parameters:
  * 0 ... original image
  * 1 ... image scaled to fit a 42x42 box
@@ -194,9 +201,23 @@ public class ThumbnailServlet implements Servlet {
                         binaryId = BinaryDescriptor.SYS_UNKNOWN;
                 }
             } else {
-                //authorization check and binary lookup
-                binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()),
-                        conf.getLanguage(), conf.useLangFallback());
+                final String hintBinaryParam = request.getParameter("hintBinaryId");
+                final long hintBinaryId = StringUtils.isNumeric(hintBinaryParam) ? Long.parseLong(hintBinaryParam) : -1;
+                if (hintBinaryId != -1) {
+                    // load the content to check if the binary belongs to that content (version)
+                    final FxContent content = EJBLookup.getContentEngine().load(conf.getPK());
+                    final BinaryDescriptor binaryDescriptor = DownloadServlet.findBinaryDescriptor(content, hintBinaryId);
+                    if (binaryDescriptor == null) {
+                        LOG.warn("Invalid hintBinaryId for thumbnail of " + conf.getPK() + ": " + hintBinaryId);
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    }
+
+                    binaryId = hintBinaryId;
+                } else {
+                    //authorization check and binary lookup
+                    binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()),
+                            conf.getLanguage(), conf.useLangFallback());
+                }
             }
         } catch (FxNoAccessException na) {
             binaryId = BinaryDescriptor.SYS_NOACCESS;

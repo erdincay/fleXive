@@ -251,7 +251,9 @@ public class RenderHelperUtils {
                 if (!descriptor.isNewBinary() && downloadLink) {
                     final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.createComponent(HtmlOutputLink.COMPONENT_TYPE);
                     link.setId(facesContext.getViewRoot().createUniqueId());
-                    final String downloadURL = DownloadServlet.getLink(downloadServletPath, value.getXPath(), descriptor.getName());
+                    final String downloadURL = DownloadServlet.getLink(downloadServletPath, value.getXPath(), descriptor.getName())
+                            + "?md5sum=" + descriptor.getMd5sum()
+                            + "&hintBinaryId=" + descriptor.getId();
                     link.setValue(FxJsfUtils.getServletContext().getContextPath() +downloadURL);
 
                     final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, facesContext.getViewRoot().createUniqueId(), HtmlGraphicImage.COMPONENT_TYPE);
