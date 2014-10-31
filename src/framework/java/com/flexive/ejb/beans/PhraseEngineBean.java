@@ -1208,9 +1208,8 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                     " WHERE MANDATOR=? AND CAT=? AND PARENTID IS NULL AND PARENTMANDATOR IS NULL ORDER BY POS");
             /* 1 .. id 2 .. lang 3 .. val 4 .. tag 5 .. mandator 6 .. key 7 .. hidden 8 .. category*/
             psPhrase = con.prepareStatement("SELECT p.ID,v.LANG,v.PVAL,v.TAG,p.MANDATOR,p.PKEY,p.HID,p.CAT FROM " + TBL_PHRASE + " p, " +
-                    TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND p.CAT=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
+                    TBL_PHRASE_VALUES + " v WHERE p.ID=? AND p.MANDATOR=? AND v.ID=p.ID AND v.MANDATOR=p.MANDATOR");
             ps.setInt(2, category);
-            psPhrase.setInt(3, category);
             for (long mandator : mandators) {
                 ps.setLong(1, mandator);
                 ResultSet rs = ps.executeQuery();
