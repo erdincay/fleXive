@@ -121,6 +121,8 @@ public class FxPhraseTreeNode implements Serializable {
         checkChildrenCategory();
     }
 
+
+
     /**
      * Create a root node for the callers mandator (not persisted!)
      *
@@ -171,6 +173,19 @@ public class FxPhraseTreeNode implements Serializable {
      */
     public static FxPhraseTreeNode createRootNode(long nodeMandator, int category, String phraseKey, long phraseMandator) throws FxNotFoundException {
         return new FxPhraseTreeNode(NOT_SET, nodeMandator, category, NOT_SET, NOT_SET, phraseKey, phraseMandator, null);
+    }
+
+    /**
+     * Create a new root node (not persisted!)
+     *
+     * @param nodeMandator   node mandator
+     * @param category       phrase category
+     * @param phrase         phrase
+     * @return FxPhraseTreeNode
+     * @throws FxNotFoundException if the phrase does not exist
+     */
+    public static FxPhraseTreeNode createRootNode(long nodeMandator, int category, FxPhrase phrase) throws FxNotFoundException {
+        return new FxPhraseTreeNode(NOT_SET, nodeMandator, category, NOT_SET, NOT_SET, phrase, null);
     }
 
     /**
