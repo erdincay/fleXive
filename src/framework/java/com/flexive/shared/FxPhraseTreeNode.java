@@ -182,9 +182,8 @@ public class FxPhraseTreeNode implements Serializable {
      * @param category       phrase category
      * @param phrase         phrase
      * @return FxPhraseTreeNode
-     * @throws FxNotFoundException if the phrase does not exist
      */
-    public static FxPhraseTreeNode createRootNode(long nodeMandator, int category, FxPhrase phrase) throws FxNotFoundException {
+    public static FxPhraseTreeNode createRootNode(long nodeMandator, int category, FxPhrase phrase) {
         return new FxPhraseTreeNode(NOT_SET, nodeMandator, category, NOT_SET, NOT_SET, phrase, null);
     }
 

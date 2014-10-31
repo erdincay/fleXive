@@ -1011,7 +1011,7 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
 
         checkMandatorAccess(node.getMandatorId(), FxContext.getUserTicket());
         //load the node's phrase to check if it exists
-        FxPhrase checkPhrase = loadPhrase(node.getCategory(), node.getPhrase().getKey(), node.getPhrase().getMandator());
+        FxPhrase checkPhrase = loadPhrase(node.getPhrase().getCategory(), node.getPhrase().getKey(), node.getPhrase().getMandator());
         if (!checkPhrase.hasId())
             throw new FxNotFoundException("ex.phrases.noId");
         try {
