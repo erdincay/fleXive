@@ -570,7 +570,7 @@ public class SqlQueryBuilder implements Serializable {
         if (index == -1) {
             filterBriefcase(briefcaseId);
         } else {
-            filters.set(index, filters.get(index) + "," + briefcaseId);
+            filters.set(index, filters.get(index) + "|" + briefcaseId);
         }
         return this;
     }

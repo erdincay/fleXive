@@ -358,7 +358,10 @@ public class GenericSQLDataSelector extends DataSelector {
             if (briefcaseFilter.length == 0) {
                 throw new FxSqlSearchException("ex.sqlSearch.briefcase.metadata.empty");
             } else if (briefcaseFilter.length > 1) {
-                throw new FxSqlSearchException("ex.sqlSearch.briefcase.metadata.ambiguous");
+                // used to be an error before version 3.2.1, but there are use cases where this might make sense
+                // - selecting a "master briefcase" first, and then adding sub-briefcases as refinement
+
+                LOG.debug("Multiple briefcases selected, using first briefcase to select @metadata");
             }
             // select metadata (if structured properly, you can also sort based on metadata)
             final String sel = "(SELECT metadata FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)";
