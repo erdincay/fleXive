@@ -1020,7 +1020,15 @@ public class FxContent implements Serializable {
         //   throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
         final FxEnvironment env = CacheAdmin.getEnvironment();
         long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
-        FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
+
+        final FxData xpData = findXPathData(XPathElement.stripLastElement(XPath));
+        if (xpData == null) {
+            return Collections.emptyList();
+        } else if (!(xpData instanceof FxGroupData)) {
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath).asRuntimeException();
+        }
+        FxGroupData group = (FxGroupData) xpData;
+
         List<FxPropertyData> values = new ArrayList<FxPropertyData>(10);
         for (FxData data : group.getChildren()) {
             if (data.isGroup())
@@ -1047,7 +1055,15 @@ public class FxContent implements Serializable {
     public <T extends FxValue> List<T> getValues(Class<T> clazz, String XPath) {
         final FxEnvironment env = CacheAdmin.getEnvironment();
         long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
-        FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
+
+        final FxData xpData = findXPathData(XPathElement.stripLastElement(XPath));
+        if (xpData == null) {
+            return Collections.emptyList();
+        } else if (!(xpData instanceof FxGroupData)) {
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath).asRuntimeException();
+        }
+        FxGroupData group = (FxGroupData) xpData;
+
         List<FxPropertyData> values = new ArrayList<FxPropertyData>(10);
         for (FxData data : group.getChildren()) {
             if (data.isGroup())
