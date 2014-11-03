@@ -197,7 +197,6 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     @Override
     public void build() throws FxSqlSearchException, SQLException {
-        final long maxRows = search.getFxStatement().getMaxResultRows();
         Statement stmt = null;
         String sql = null;
         try {
@@ -256,8 +255,8 @@ public class GenericSQLDataFilter extends DataFilter {
                         + ") data2\n"
                         + (StringUtils.isNotBlank(securityFilter)
                         // Limit by the specified max items
-                        ? "WHERE " + securityFilter + search.getStorage().getLimit(true, maxRows)
-                        : search.getStorage().getLimit(false, maxRows));
+                        ? "WHERE " + securityFilter + getResultRowsLimit(true)
+                        : getResultRowsLimit(false));
             }
             this.dataSelectSql = dataSelect;
 
@@ -289,8 +288,15 @@ public class GenericSQLDataFilter extends DataFilter {
     private String selectOnMainTable(String filters, String tableAlias) {
         return "SELECT " + search.getSearchId() + " AS search_id,id,ver,tdef,created_by,step,acl,mandator FROM " + tableMain + " " + tableAlias + "\n"
                 + (StringUtils.isNotBlank(filters)
-                ? "WHERE " + filters + search.getStorage().getLimit(true, search.getFxStatement().getMaxResultRows()) + "\n"
-                : search.getStorage().getLimit(false, search.getFxStatement().getMaxResultRows()));
+                ? "WHERE " + filters + getResultRowsLimit(true) + "\n"
+                : getResultRowsLimit(false));
+    }
+
+    private String getResultRowsLimit(boolean hasWhereClause) {
+        final int maxResultRows = search.getFxStatement().getMaxResultRows();
+        return maxResultRows == Integer.MAX_VALUE
+                ? ""
+                : search.getStorage().getLimit(hasWhereClause, maxResultRows);
     }
 
     protected String getSecurityFilter(String tableAlias) {
