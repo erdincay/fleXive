@@ -43,6 +43,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Abstract base class for property and group data
@@ -545,15 +548,28 @@ public abstract class FxData implements Serializable {
      */
     static String xpCached(String xpath) {
         final WeakReference<String> cached;
-        synchronized (XP_LOCK) {
+        XP_READ.lock();
+        try {
             cached = XP_CACHE.get(xpath);
+        } finally {
+            XP_READ.unlock();
         }
         final String cachedValue = cached != null ? cached.get() : null;
         if (cachedValue != null) {
             return cachedValue;
         }
-        synchronized (XP_LOCK) {
-            XP_CACHE.put(xpath, new WeakReference<String>(xpath));
+        XP_WRITE.lock();
+        try {
+            // check if the value was cached in the meantime
+            final WeakReference<String> currentCache = XP_CACHE.get(xpath);
+            final String currentValue = currentCache != null ? currentCache.get() : null;
+            if (currentValue != null) {
+                return currentValue;
+            } else {
+                XP_CACHE.put(xpath, new WeakReference<String>(xpath));
+            }
+        } finally {
+            XP_WRITE.unlock();
         }
         return xpath;
     }
@@ -562,12 +578,17 @@ public abstract class FxData implements Serializable {
      * Remove all cached XPaths.
      */
     public static void clearXPathCache() {
-        synchronized (XP_LOCK) {
+        XP_WRITE.lock();
+        try {
             XP_CACHE.clear();
+        } finally {
+            XP_WRITE.unlock();
         }
     }
 
-    private static final Object XP_LOCK = new Object();
+    private static final ReadWriteLock XP_UPDATE_LOCK = new ReentrantReadWriteLock();
+    private static final Lock XP_READ = XP_UPDATE_LOCK.readLock();
+    private static final Lock XP_WRITE = XP_UPDATE_LOCK.writeLock();
 
     /**
      * {@inheritDoc}
