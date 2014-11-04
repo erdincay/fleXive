@@ -1129,7 +1129,7 @@ public class FxContent implements Serializable {
         // optimized implementation to avoid exceptions and don't create unnecessary objects
         // since this method tends to be used often in hot spots for determining the structure of the content
         List<FxData> currentChildren = data.getChildren();
-        final List<XPathElement> elems = XPathElement.split(XPathElement.xpToUpperCase(XPath));
+        final List<XPathElement> elems = XPathElement.split(XPathElement.stripType(XPath));
         FxData lastCurr = null;
         for (int i = 0; i < elems.size(); i++) {
             XPathElement xpe = elems.get(i);
