@@ -464,10 +464,11 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                     XStream customInstance = instances.get(className);
                     if (customInstance == null) {
                         // check prefix matches
+                        String longestPrefix = "";
                         for (String name : instances.keySet()) {
-                            if (name.endsWith("*") && className.startsWith(name.substring(0, name.length() - 1))) {
+                            if (name.endsWith("*") && className.startsWith(name.substring(0, name.length() - 1)) && name.length() > longestPrefix.length()) {
                                 customInstance = instances.get(name);
-                                break;
+                                longestPrefix = name;
                             }
                         }
                     }
