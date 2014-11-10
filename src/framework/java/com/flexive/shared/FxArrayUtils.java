@@ -403,7 +403,9 @@ public class FxArrayUtils {
         try {
             if (index == 0) {
                 final int sep = array.indexOf(separator);
-                return sep == 0 ? Integer.MIN_VALUE : Integer.parseInt(array.substring(0, sep));
+                return sep == 0
+                        ? Integer.MIN_VALUE
+                        : Integer.parseInt(sep == -1 ? array : array.substring(0, sep));
             }
             int curr = 0;
             int start = 0;
@@ -433,7 +435,7 @@ public class FxArrayUtils {
      * Get an integer element from a string array containing hexadecimal values
      *
      * @param array     the string array containing hexadecimal values
-     * @param separator seperator character
+     * @param separator separator character
      * @param index     index to get the element at
      * @return element  or <code>null</code> if not set
      */
@@ -441,15 +443,19 @@ public class FxArrayUtils {
         try {
             if (StringUtils.isBlank(array))
                 return null;
-            if (index == 0)
-                return evalIntValue(array.substring(0, array.indexOf(separator)), 16);
+            if (index == 0) {
+                final int sep = array.indexOf(separator);
+                return evalIntValue(sep == -1 ? array : array.substring(0, sep), 16);
+            }
             int curr = 0;
             int start = 0;
-            for (char c : array.toCharArray()) {
+            int len = array.length();
+            for (int i = 0; i < len; i++) {
+                final char c = array.charAt(i);
                 if (c == separator)
                     curr++;
                 if (curr == index) {
-                    int end = array.substring(start + 1).indexOf(',');
+                    int end = array.substring(start + 1).indexOf(separator);
                     if (end == -1)
                         return evalIntValue(array.substring(start + 1), 16);
                     else if (end == 0)

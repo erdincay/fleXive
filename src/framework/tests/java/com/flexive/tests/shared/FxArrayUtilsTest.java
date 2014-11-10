@@ -38,11 +38,22 @@ public class FxArrayUtilsTest {
         Assert.assertEquals(FxArrayUtils.getIntElementAt(a, ',', 1), 11);
         Assert.assertEquals(FxArrayUtils.getIntElementAt(a, ',', 2), 12);
         Assert.assertEquals(FxArrayUtils.getIntElementAt(a, ',', 5), 42);
+        Assert.assertEquals(FxArrayUtils.getIntElementAt("", ',', 0), Integer.MIN_VALUE);
+        Assert.assertEquals(FxArrayUtils.getIntElementAt("25", ',', 0), 25);
+
         try {
             FxArrayUtils.getIntElementAt(a, ',', 6);
             Assert.fail("Wrong index should throw exception!");
         } catch (ArrayIndexOutOfBoundsException e) {
             //expected
         }
+
+        // tests for single-element arrays
+        Assert.assertEquals(FxArrayUtils.getHexIntElementAt("", ',', 0), null);
+        Assert.assertEquals(FxArrayUtils.getHexIntElementAt("25", ',', 0), Integer.valueOf(0x25));
+        Assert.assertEquals(FxArrayUtils.getHexIntElementAt(",1", ',', 1), Integer.valueOf(1));
+
+        Assert.assertEquals(FxArrayUtils.replaceElement("", ',', 0, "1"), "1");
+        Assert.assertEquals(FxArrayUtils.replaceElement("25", ',', 0, "1"), "1");
     }
 }
