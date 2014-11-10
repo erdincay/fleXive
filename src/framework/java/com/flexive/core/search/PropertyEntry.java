@@ -546,12 +546,10 @@ public class PropertyEntry {
                     assignment = (FxPropertyAssignment) environment.getAssignment(searchProperty.getPropertyName());
                 }
             } catch (ClassCastException ce) {
-                throw new FxSqlSearchException(LOG, ce, "ex.sqlSearch.query.unknownAssignment",
-                        searchProperty.getPropertyName());
+                throw unknownAssignmentException(searchProperty, ce);
             } catch (FxRuntimeException e) {
                 if (e.getConverted() instanceof FxNotFoundException) {
-                    throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.query.unknownAssignment",
-                            searchProperty.getPropertyName());
+                    throw unknownAssignmentException(searchProperty, e);
                 } else {
                     throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.query.failedToResolveAssignment",
                             searchProperty.getPropertyName(), e.getMessage());
@@ -691,6 +689,15 @@ public class PropertyEntry {
             // use outmost function result type
             this.overrideDataType = this.functions.get(0).getOverrideDataType();
         }
+    }
+
+    private FxSqlSearchException unknownAssignmentException(Property searchProperty, Exception cause) {
+        final FxSqlSearchException ex = new FxSqlSearchException(LOG, cause, "ex.sqlSearch.query.unknownAssignment",
+                searchProperty.getPropertyName());
+
+        ex.setAffectedXPath(searchProperty.getPropertyName(), FxContentExceptionCause.InvalidXPath);
+
+        return ex;
     }
 
     public PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType) {

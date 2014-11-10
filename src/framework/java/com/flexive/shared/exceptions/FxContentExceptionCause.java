@@ -64,6 +64,10 @@ public enum FxContentExceptionCause implements ObjectWithLabel {
      */
     InvalidIndex,
     /**
+     * An invalid XPath
+     */
+    InvalidXPath,
+    /**
      * An assignment with a maximum length restriction has been assigned a value that is too large
      */
     MaxlengthViolated,
