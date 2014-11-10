@@ -77,6 +77,13 @@ public class FxStructureOption implements Serializable {
      */
     public final static String OPTION_MIMETYPE = "MIMETYPE";
     public final static String OPTION_MULTILINE = "MULTILINE";
+
+    /**
+     * Assume that the contents are already stored in upper case, disable automatic/DB-side upper case transformations
+     * @since 3.2.1
+     */
+    public static final String OPTION_IN_UPPERCASE = "IN_UPPERCASE";
+
     public final static String VALUE_TRUE = "1";
     public final static String VALUE_FALSE = "0";
     

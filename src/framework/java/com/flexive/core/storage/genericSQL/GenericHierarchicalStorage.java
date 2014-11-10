@@ -429,8 +429,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return -1;
         switch (prop.getDataType()) {
             case String1024:
+                if (prop.getOption(FxStructureOption.OPTION_IN_UPPERCASE).isValueTrue()) {
+                    return -1;  // upper case column disabled
+                }
                 return insert ? 24 : 13; //UFTEXT1024
             case Text:
+                if (prop.getOption(FxStructureOption.OPTION_IN_UPPERCASE).isValueTrue()) {
+                    return -1;  // upper case column disabled
+                }
                 return insert ? 27 : 16; //UFCLOB
             default:
                 return -1;

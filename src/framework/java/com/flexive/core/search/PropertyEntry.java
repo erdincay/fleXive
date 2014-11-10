@@ -644,7 +644,7 @@ public class PropertyEntry {
 
         if (assignment != null && assignment.isFlatStorageEntry()) {
             final String column = StorageManager.getStorageImpl().escapeFlatStorageColumn(assignment.getFlatStorageMapping().getColumn());
-            this.filterColumn = !ignoreCase
+            this.filterColumn = !ignoreCase || assignment.getOption(FxStructureOption.OPTION_IN_UPPERCASE).isValueTrue()
                     || (this.property.getDataType() != FxDataType.String1024
                     && this.property.getDataType() != FxDataType.Text
                     && this.property.getDataType() != FxDataType.HTML)
@@ -656,7 +656,9 @@ public class PropertyEntry {
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.flatMappingIndex", searchProperty);
             }
         } else {
-            String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
+            String fcol = ignoreCase && !this.property.getOption(FxStructureOption.OPTION_IN_UPPERCASE).isValueTrue()
+                    ? storage.getQueryUppercaseColumn(this.property)
+                    : this.readColumns[0];
             if (fcol == null) {
                 fcol = this.readColumns == null ? null : this.readColumns[0];
             }
