@@ -1204,6 +1204,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          * @throws FxApplicationException on errors
          */
         void setPropertyAssignmentAttributes(FxPropertyAssignmentEdit pa) throws FxApplicationException {
+            if(attributes.containsKey("structureOptions"))
+                    pa.setOptions(structureOptions);
+
             if (attributes.containsKey("label") || attributes.containsKey("description"))
                 pa.setLabel(label);
 
@@ -1271,9 +1274,6 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 }
             }
 
-            if(attributes.containsKey("structureOptions"))
-                    pa.setOptions(structureOptions);
-
             // set non-generic property-assignment options
             for (Object oEntry : attributes.entrySet()) {
                 final Map.Entry entry = (Map.Entry) oEntry;
@@ -1300,6 +1300,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
 
         void setGroupAssignmentAttributes(FxGroupAssignmentEdit ga) throws FxApplicationException {
             ga.setDefaultMultiplicity(defaultMultiplicity);
+            if(attributes.containsKey("structureOptions"))
+                ga.setOptions(structureOptions);
             if (attributes.containsKey("label") || attributes.containsKey("description"))
                 ga.setLabel(label);
             if (attributes.containsKey("hint"))
@@ -1316,8 +1318,6 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 ga.setEnabled(enabled);
             if (attributes.containsKey("groupMode"))
                 ga.setMode(groupMode);
-            if(attributes.containsKey("structureOptions"))
-                ga.setOptions(structureOptions);
 
             // set options
             for (Object oEntry : attributes.entrySet()) {
@@ -1343,6 +1343,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          * @param property the instance of FxPropertyEdit t.b. changed
          */
         void setPropertyAttributes(FxPropertyEdit property) {
+            if(attributes.containsKey("structureOptions"))
+                property.setOptions(structureOptions);
             property.setAutoUniquePropertyName(autoUniquePropertyName);
             property.setAssignmentDefaultMultiplicity(defaultMultiplicity);
             // optional
@@ -1394,8 +1396,6 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 property.setReferencedType(referencedType);
             if (attributes.containsKey("referencedList"))
                 property.setReferencedList(referencedList);
-            if(attributes.containsKey("structureOptions"))
-                property.setOptions(structureOptions);
 
             for (Object oEntry : attributes.entrySet()) {
                 final Map.Entry entry = (Map.Entry) oEntry;
