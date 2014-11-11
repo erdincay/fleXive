@@ -193,6 +193,61 @@ public class FxValueTest {
         assertEquals(val, val2);
     }
 
+    @Test
+    public void valueDataTest() {
+        final FxString val = new FxString(false, "");
+        assertFalse(val.hasValueData());
+        val.setValueData(21);
+        assertEquals(val.getValueData(), (Integer) 21);
+        val.clearValueData();
+        assertFalse(val.hasValueData());
+    }
+
+    @Test
+    public void valueDataTestML() {
+        final FxString val = new FxString(true, FxLanguage.ENGLISH, "en");
+        assertFalse(val.hasValueData());
+        assertFalse(val.hasValueData(FxLanguage.ENGLISH));
+
+        val.setValueData(FxLanguage.ENGLISH, 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+
+        // this seems unintuitive at first, but setting a language-specific value in a content that had no value data
+        // before causes this value to be used for all other languages as well
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 1);
+        assertTrue(val.hasValueData(FxLanguage.GERMAN));
+
+        val.clearValueData(FxLanguage.ENGLISH);
+        assertFalse(val.hasValueData());
+        assertFalse(val.hasValueData(FxLanguage.ENGLISH));
+    }
+
+    @Test
+    public void valueDataTestMLDefault() {
+        final FxString val = new FxString(true, FxLanguage.ENGLISH, "en");
+        val.setValueData(0);
+
+        val.setValueData(FxLanguage.ENGLISH, 1);
+
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+
+        // fallback value
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 0);
+
+        val.clearValueData(FxLanguage.GERMAN);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 0);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+
+        val.clearValueData(FxLanguage.ENGLISH);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 0);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 0);
+
+        // clearing a value when no specific value was set
+        val.clearValueData(FxLanguage.ENGLISH);
+        assertNull(val.getValueDataRaw(FxLanguage.ENGLISH));
+        assertNull(val.getValueDataRaw(FxLanguage.GERMAN));
+    }
+
     @DataProvider(name = "testInstances")
     private Object[][] getTestInstances() {
         return testInstances;

@@ -1239,11 +1239,17 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             if (this.valueData == null) {
                 this.valueData = valueData;
             }
-            if (valueData != null && !valueData.equals(this.valueData)) {
-                // store only "non-default" flags in the hashmap
-                if (multiLangData == null)
-                    multiLangData = Maps.newHashMap();
-                multiLangData.put(language, valueData);
+            if (valueData != null) {
+                final Integer specValue = multiLangData != null ? multiLangData.get(language) : null;
+                if (specValue != null) {
+                    // replace existing value
+                    multiLangData.put(language, valueData);
+                } else if (!valueData.equals(this.valueData)) {
+                    // store only "non-default" flags in the hashmap
+                    if (multiLangData == null)
+                        multiLangData = Maps.newHashMap();
+                    multiLangData.put(language, valueData);
+                }
             }
         } else
             this.valueData = valueData;
@@ -1266,11 +1272,13 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @since 3.2
      */
     public void clearValueData(long language) {
-        this.valueData = VALUE_NODATA;
-        if(multiLangData != null)
-            multiLangData.put(language, VALUE_NODATA);
-        else
+        if(multiLangData != null && multiLangData.containsKey(language))
+            multiLangData.remove(language);
+        else if (multiLangData == null || multiLangData.isEmpty()) {
+            // reset only when there are no other values
             this.multiLangData = null;
+            this.valueData = VALUE_NODATA;
+        }
     }
 
 
