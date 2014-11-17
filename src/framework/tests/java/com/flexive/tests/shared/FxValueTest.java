@@ -246,6 +246,18 @@ public class FxValueTest {
         val.clearValueData(FxLanguage.ENGLISH);
         assertNull(val.getValueDataRaw(FxLanguage.ENGLISH));
         assertNull(val.getValueDataRaw(FxLanguage.GERMAN));
+
+        val.setValueData(FxLanguage.GERMAN, 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+
+        val.setValueData(FxLanguage.ENGLISH, null);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+
+        val.setValueData(FxLanguage.ENGLISH, 0);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 0);
     }
 
     @DataProvider(name = "testInstances")

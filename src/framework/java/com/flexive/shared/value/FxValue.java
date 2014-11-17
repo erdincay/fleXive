@@ -48,6 +48,7 @@ import com.google.common.primitives.Longs;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1089,11 +1090,28 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             return false;
         if(!hasValueData())
             return true;
-        if(!isMultiLanguage())
+        if (isMultiLanguage()) {
+            if (!Objects.equal(valueData, otherValue.valueData)) {
+                return false;
+            }
+            // check if value data is equal, taking into account that the "default value" (the main valuData field) can
+            // be used as fallback. The other direction (otherValue -> this) does not need to be checked, because if the number
+            // of translations does not match, the equality check will return false anyway.
+
+            final Map<Long, Integer> thisML = multiLangData != null ? multiLangData : Collections.<Long, Integer>emptyMap();
+            final Map<Long, Integer> otherML = otherValue.multiLangData != null ? otherValue.multiLangData : Collections.<Long, Integer>emptyMap();
+            for (Entry<Long, Integer> entry : thisML.entrySet()) {
+                final Integer value = entry.getValue();
+                final Integer other = otherML.get(entry.getKey());
+                if (value != null && value.equals(valueData)) {
+                    if (other != null && !value.equals(other)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
             return valueData.equals(otherValue.valueData);
-        else {
-            return Objects.equal(valueData, otherValue.valueData)
-                    && Objects.equal(multiLangData, otherValue.multiLangData);
         }
     }
 
@@ -1239,13 +1257,15 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             if (this.valueData == null) {
                 this.valueData = valueData;
             }
-            if (valueData != null) {
+            if (valueData == null) {
+                clearValueData(language);
+            } else {
                 final Integer specValue = multiLangData != null ? multiLangData.get(language) : null;
                 if (specValue != null) {
                     // replace existing value
                     multiLangData.put(language, valueData);
-                } else if (!valueData.equals(this.valueData)) {
-                    // store only "non-default" flags in the hashmap
+                } else if (!valueData.equals(this.valueData) || multiLangData == null || multiLangData.isEmpty()) {
+                    // store only "non-default" flags (and the initial value) in the hashmap
                     if (multiLangData == null)
                         multiLangData = Maps.newHashMap();
                     multiLangData.put(language, valueData);
@@ -1272,9 +1292,15 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @since 3.2
      */
     public void clearValueData(long language) {
-        if(multiLangData != null && multiLangData.containsKey(language))
-            multiLangData.remove(language);
-        else if (multiLangData == null || multiLangData.isEmpty()) {
+        if(this.multiLangData != null && this.multiLangData.containsKey(language)) {
+            final Integer oldValue = this.multiLangData.remove(language);
+            if (this.multiLangData.isEmpty()) {
+                this.multiLangData = null;
+                if (oldValue != null && oldValue.equals(this.valueData)) {
+                    this.valueData = VALUE_NODATA;
+                }
+            }
+        } else if (multiLangData == null || multiLangData.isEmpty()) {
             // reset only when there are no other values
             this.multiLangData = null;
             this.valueData = VALUE_NODATA;
