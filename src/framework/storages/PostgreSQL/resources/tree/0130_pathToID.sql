@@ -25,9 +25,9 @@ BEGIN
     END IF;
 
     IF _live THEN
-      SELECT id INTO _result FROM FXS_TREE_LIVE WHERE name=_current AND parent=_result;
+      SELECT id INTO _result FROM FXS_TREE_LIVE WHERE name=_current AND parent=_result LIMIT 1;
     ELSE
-      SELECT id INTO _result FROM FXS_TREE WHERE name=_current AND parent=_result;
+      SELECT id INTO _result FROM FXS_TREE WHERE name=_current AND parent=_result LIMIT 1;
     END IF;
     IF NOT FOUND THEN
       notfound = TRUE;

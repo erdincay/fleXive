@@ -22,9 +22,9 @@ BEGIN
 
 
     IF _live THEN
-      select id into _result from FXS_TREE_LIVE where name=_current and parent=_result;
+      select id into _result from FXS_TREE_LIVE where name=_current and parent=_result LIMIT 1;
     ELSE
-      select id into _result from FXS_TREE where name=_current and parent=_result;
+      select id into _result from FXS_TREE where name=_current and parent=_result LIMIT 1;
     END IF;
 
     IF notfound THEN
