@@ -106,7 +106,9 @@ public class MessageBean extends HashMap {
     private final List<FxSharedUtils.BundleReference> resourceBundles = new CopyOnWriteArrayList<FxSharedUtils.BundleReference>();
     private final ConcurrentMap<String, ResourceBundle> cachedBundles = new ConcurrentHashMap<String, ResourceBundle>();
     private final ConcurrentMap<FxSharedUtils.MessageKey, String> cachedMessages = new ConcurrentHashMap<FxSharedUtils.MessageKey, String>();
+
     private volatile boolean initialized = false;
+    private volatile boolean logMissingKeys = true;
 
     public MessageBean() {
         initialize();
@@ -186,7 +188,9 @@ public class MessageBean extends HashMap {
             }
             return result;
         } catch (MissingResourceException e) {
-            LOG.warn("Unknown message key: " + key);
+            if (logMissingKeys) {
+                LOG.warn("Unknown message key: " + key);
+            }
             return "??" + key + "??";
         }
     }
@@ -246,6 +250,15 @@ public class MessageBean extends HashMap {
         throw new MissingResourceException("Resource not found", "MessageBean", key);
     }
 
+    /**
+     * Enable or disable the logging of keys without a translation (default: enabled).
+     *
+     * @param logMissingKeys    whether logging should be enabled
+     * @since 3.2.1
+     */
+    public void setLogMissingKeys(boolean logMissingKeys) {
+        this.logMissingKeys = logMissingKeys;
+    }
 
     /**
      * Return the resource bundle in the given locale. Uses caching to speed up
