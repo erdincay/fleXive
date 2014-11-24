@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.timer.jobs;
 
+import com.flexive.core.timer.FxQuartz;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
@@ -57,13 +58,8 @@ public class MaintenanceJob implements Job {
      */
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-//        System.out.println("===\nExecuting " + this.getClass().getCanonicalName() + " - " + this);
-//        System.out.println("Last: " + context.getPreviousFireTime() + " Next: " + context.getNextFireTime() + " Refire count: " + context.getRefireCount());
-//        System.out.println("My Thread: " + Thread.currentThread() + " I am: " + FxContext.get());
-        FxContext ctx = null;
         try {
-            ctx = ((FxContext) context.getScheduler().getContext().get("com.flexive.ctx")).copy();
-            ctx.replace();
+            FxQuartz.getFxContext(context).replace();
 
             if (CacheAdmin.isNewInstallation()) {
                 LOG.info("Skipping maintenance job until [fleXive] is fully initialized ...");

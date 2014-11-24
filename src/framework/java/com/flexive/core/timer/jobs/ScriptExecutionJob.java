@@ -1,5 +1,6 @@
 package com.flexive.core.timer.jobs;
 
+import com.flexive.core.timer.FxQuartz;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
@@ -37,7 +38,7 @@ public class ScriptExecutionJob implements Job {
         String scriptName="";
         try {
             try {
-                ctx = ((FxContext) jobExecutionContext.getScheduler().getContext().get("com.flexive.ctx")).copy();
+                ctx = FxQuartz.getFxContext(jobExecutionContext);
                 ctx.replace();
             }
             catch (Exception e) {

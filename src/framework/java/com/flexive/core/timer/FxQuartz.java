@@ -68,6 +68,7 @@ public class FxQuartz {
     /** A system property to disable the Quartz-based timer service (e.g. for tests) */
     public static final String PROP_DISABLE = "flexive.quartz.disable";
     private static final String SCHEDULER_PREFIX = "FxQuartzScheduler_Division_";
+    private static final String SCHEDCONTEXT_FX_CONTEXT = "com.flexive.ctx";
 
     /**
      * Get the Scheduler for the current division
@@ -153,7 +154,7 @@ public class FxQuartz {
         FxContext ctx = FxContext._getEJBContext(currCtx);
         ctx.overrideTicket(UserTicketImpl.getGuestTicket().cloneAsGlobalSupervisor());
         ctx.clearCachedAttributes();
-        scheduler.getContext().put("com.flexive.ctx", ctx);
+        scheduler.getContext().put(SCHEDCONTEXT_FX_CONTEXT, ctx);
         // and start it off
         scheduler.start();
 
@@ -325,5 +326,32 @@ public class FxQuartz {
      */
     public static boolean isInstalled() {
         return getScheduler() != null;
+    }
+
+    /**
+     * Return a {@link com.flexive.shared.FxContext} instance with supervisor privileges to be used in background tasks.
+     *
+     * @param jobContext    a Quartz job context
+     * @return              a FxContext instance with supervisor privileges
+     * @throws SchedulerException   on Quartz errors
+     * @since 3.2.1
+     */
+    public static FxContext getFxContext(JobExecutionContext jobContext) throws SchedulerException {
+        return getFxContext(jobContext.getScheduler().getContext());
+    }
+
+    /**
+     * Return a {@link com.flexive.shared.FxContext} instance with supervisor privileges to be used in background tasks.
+     *
+     * @param schedulerContext    a Quartz scheduler context
+     * @return              a FxContext instance with supervisor privileges
+     * @since 3.2.1
+     */
+    public static FxContext getFxContext(SchedulerContext schedulerContext) {
+        final FxContext ctx = (FxContext) schedulerContext.get(SCHEDCONTEXT_FX_CONTEXT);
+        if (ctx == null) {
+            throw new IllegalStateException("Scheduler error: system FxContext instance not found");
+        }
+        return ctx.copy();
     }
 }
