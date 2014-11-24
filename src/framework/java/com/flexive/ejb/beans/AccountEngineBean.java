@@ -1607,7 +1607,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     public List<ACLAssignment> loadAccountAssignments(long accountId) throws
             FxApplicationException {
         Connection con = null;
-        Statement stmt = null;
+        PreparedStatement stmt = null;
         String curSql;
         UserTicket ticket = getRequestTicket();
 
@@ -1635,23 +1635,24 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Fetch assignments
             //                            1             2       3         4         5           6           7
             curSql = "SELECT DISTINCT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
-                    //   8            9            10             11             12              13
-                    "ass.PCREATE, acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
-                    "FROM " + TBL_ACLS_ASSIGNMENT + " ass, " + TBL_ASSIGN_GROUPS + " grp, " + TBL_ACLS + " acl " +
-                    "WHERE acl.ID=ass.ACL AND ((ass.USERGROUP=grp.USERGROUP AND grp.ACCOUNT=" + accountId +
-                    ")OR(ass.USERGROUP=" + UserGroup.GROUP_OWNER + "))";
+                    //   8
+                    "ass.PCREATE, " +
+                    // 9
+                    "(SELECT acl.CAT_TYPE FROM " + TBL_ACLS + " acl WHERE acl.ID=ass.ACL)" +
+                    // 10             11             12              13
+                    ",ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
+                    "FROM " + TBL_ACLS_ASSIGNMENT + " ass " +
+                    "WHERE ass.USERGROUP IN (SELECT grp.USERGROUP FROM " + TBL_ASSIGN_GROUPS + " grp WHERE grp.ACCOUNT=?)" +
+                    " OR ass.USERGROUP=" + UserGroup.GROUP_OWNER;
 
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(curSql);
+            stmt = con.prepareStatement(curSql);
+            stmt.setLong(1, accountId);
+            ResultSet rs = stmt.executeQuery();
 
             // Read the data
-            ArrayList<ACLAssignment> result = new ArrayList<ACLAssignment>(20);
+            List<ACLAssignment> result = new ArrayList<ACLAssignment>(50);
             while (rs != null && rs.next()) {
                 long groupId = rs.getLong(1);
-                /*if (groupId == UserGroup.GROUP_OWNER) {
-                    // skip
-                    continue;
-                }*/
                 result.add(new ACLAssignment(rs.getLong(2), groupId,
                         rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(7), rs.getBoolean(5),
                         rs.getBoolean(6), rs.getBoolean(8), ACLCategory.getById(rs.getByte(9)),
