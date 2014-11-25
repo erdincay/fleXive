@@ -394,12 +394,18 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         }
 
         protected void renderSubtree(List<FxTreeNode> nodes) throws IOException {
-            out.startElement("ul", null);
-            out.writeAttribute("class", CSS_TREE, null);
+            boolean tagOpened = false;
 
             for (FxTreeNode child : nodes) {
                 if (!isNodeRendered(child)) {
                     continue;
+                }
+
+                if (!tagOpened) {
+                    // write opening tag only if there are rendered nodes
+                    out.startElement("ul", null);
+                    out.writeAttribute("class", CSS_TREE, null);
+                    tagOpened = true;
                 }
 
                 out.startElement("li", null);
@@ -413,8 +419,10 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
                 }
                 out.endElement("li");
             }
-            
-            out.endElement("ul");
+
+            if (tagOpened) {
+                out.endElement("ul");
+            }
         }
 
         protected void renderMenuItem(FxTreeNode node) throws IOException {
