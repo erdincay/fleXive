@@ -209,7 +209,7 @@ public class FxValueTest {
         assertFalse(val.hasValueData());
         assertFalse(val.hasValueData(FxLanguage.ENGLISH));
 
-        val.setValueData(FxLanguage.ENGLISH, 1);
+        val.setValueData(FxLanguage.ENGLISH, 1, true);
         assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
 
         // this seems unintuitive at first, but setting a language-specific value in a content that had no value data
@@ -247,7 +247,7 @@ public class FxValueTest {
         assertNull(val.getValueDataRaw(FxLanguage.ENGLISH));
         assertNull(val.getValueDataRaw(FxLanguage.GERMAN));
 
-        val.setValueData(FxLanguage.GERMAN, 1);
+        val.setValueData(FxLanguage.GERMAN, 1, true);
         assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 1);
         assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
 
@@ -258,6 +258,42 @@ public class FxValueTest {
         val.setValueData(FxLanguage.ENGLISH, 0);
         assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 1);
         assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 0);
+    }
+
+    @Test
+    public void valueDataTestMLDefaultCleanup() {
+        final FxString val = new FxString(true, FxLanguage.ENGLISH, "en");
+
+        val.setValueData(FxLanguage.ENGLISH, 1, true);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 1);  // fallback
+
+        val.setValueData(FxLanguage.ENGLISH, 2, true);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 2);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 2);  // fallback
+
+        val.setValueData(FxLanguage.ENGLISH, null);
+        assertNull(val.getValueDataRaw(FxLanguage.ENGLISH));
+        assertNull(val.getValueDataRaw(FxLanguage.GERMAN));
+    }
+
+    @Test
+    public void valueDataTestMLNoFallback() {
+        final FxString val = new FxString(true, FxLanguage.ENGLISH, "en");
+
+        val.setValueData(FxLanguage.ENGLISH, 1, false);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), null);  // no fallback
+
+        val.setValueData(FxLanguage.GERMAN, 2, true);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 1);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 2);
+        assertEquals(val.getValueDataRaw(FxLanguage.ITALIAN), (Integer) 2);
+
+        val.clearValueData(FxLanguage.ENGLISH);
+        assertEquals(val.getValueDataRaw(FxLanguage.ENGLISH), (Integer) 2);
+        assertEquals(val.getValueDataRaw(FxLanguage.GERMAN), (Integer) 2);
+        assertEquals(val.getValueDataRaw(FxLanguage.ITALIAN), (Integer) 2);
     }
 
     @DataProvider(name = "testInstances")

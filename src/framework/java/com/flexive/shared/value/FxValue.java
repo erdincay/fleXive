@@ -41,7 +41,6 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Longs;
@@ -1091,9 +1090,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if(!hasValueData())
             return true;
         if (isMultiLanguage()) {
-            if (!Objects.equal(valueData, otherValue.valueData)) {
-                return false;
-            }
             // check if value data is equal, taking into account that the "default value" (the main valuData field) can
             // be used as fallback. The other direction (otherValue -> this) does not need to be checked, because if the number
             // of translations does not match, the equality check will return false anyway.
@@ -1253,13 +1249,29 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @since 3.2.1
      */
     public TDerived setValueData(long language, Integer valueData) {
-        if(isMultiLanguage()) {
-            if (this.valueData == null) {
+        return setValueData(language, valueData, false);
+    }
+
+    /**
+     * Attach additional data per language to this value instance
+     *
+     * @param language language to attach data for
+     * @param valueData value data to attach
+     * @param allowUseAsFallback if the value may be used as a fallback for other languages (only relevant when no other value data is set)
+     * @return this
+     * @since 3.2.1
+     */
+    public TDerived setValueData(long language, Integer valueData, boolean allowUseAsFallback) {
+        if (isMultiLanguage()) {
+            if (multiLangData != null && multiLangData.containsKey(language)) {
+                // clean reset of the default value to avoid losing the association with
+                // the fallback valueData instance - which needs to be cleared if this value was the last one
+                clearValueData(language);
+            }
+            if (this.valueData == null && allowUseAsFallback) {
                 this.valueData = valueData;
             }
-            if (valueData == null) {
-                clearValueData(language);
-            } else {
+            if (valueData != null) {
                 final Integer specValue = multiLangData != null ? multiLangData.get(language) : null;
                 if (specValue != null) {
                     // replace existing value
