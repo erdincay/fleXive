@@ -1130,11 +1130,19 @@ public class PropertyEntry {
                     // optionally allow to select by type name (FX-613)
                     value = "" + getEnvironment().getType(FxSharedUtils.stripQuotes(constantValue, '\'')).getId();
                 } else {
-                    value = "" + FxFormatUtils.toLong(constantValue);
+                    try {
+                        value = String.valueOf(Long.parseLong(FxFormatUtils.unquote(constantValue)));
+                    } catch (NumberFormatException e) {
+                        throw new FxConversionException("ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), constantValue, e.getMessage()).asRuntimeException();
+                    }
                 }
                 break;
             case Number:
-                value = "" + FxFormatUtils.toInteger(constantValue);
+                try {
+                    value = String.valueOf(Integer.parseInt(FxFormatUtils.unquote(constantValue)));
+                } catch (NumberFormatException e) {
+                    throw new FxConversionException("ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), constantValue, e.getMessage()).asRuntimeException();
+                }
                 break;
             case Double:
                 value = "" + FxFormatUtils.toDouble(constantValue);

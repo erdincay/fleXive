@@ -247,10 +247,10 @@ public class SqlSearch {
 
             // Wildcard handling depending on the found entries
             replaceWildcard(df);
-            if (statement.getOrderByValues().isEmpty()) {
+            if (statement.getOrderByValues().isEmpty() && !(params.isIgnoreResultPreferences() && params.isNoInternalSort())) {
                 // add user-defined order by
                 final List<ResultOrderByInfo> orderByColumns;
-                if (getParams().isIgnoreResultPreferences()) {
+                if (params.isIgnoreResultPreferences()) {
                     orderByColumns = Arrays.asList(new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.ASCENDING));
                 } else {
                     orderByColumns = getResultPreferences(df).getOrderByColumns();
@@ -271,7 +271,7 @@ public class SqlSearch {
 
             // If specified create a briefcase with the found data
             long createdBriefcaseId = -1;
-            if (params.getWillCreateBriefcase()) {
+            if (this.params.getWillCreateBriefcase()) {
                 createdBriefcaseId = copyToBriefcase(con, ds, df);
             }
 
@@ -293,7 +293,7 @@ public class SqlSearch {
                 }
             }
 
-            if (params.isHintNoResultInfo() && storage.isDirectSearchSupported()) {
+            if (this.params.isHintNoResultInfo() && storage.isDirectSearchSupported()) {
                 // take the filter SQL and select directly
                 cacheTbl = "(" + df.getDataSelectSql() + ")";
             }
@@ -303,7 +303,7 @@ public class SqlSearch {
 
             stmt = con.createStatement();
             if (df.isQueryTimeoutSupported())
-                stmt.setQueryTimeout(params.getQueryTimeout());
+                stmt.setQueryTimeout(this.params.getQueryTimeout());
             df.setVariable(stmt, "rownr", "1");
             // Fetch the result
             ResultSet rs = stmt.executeQuery(selectSql);
@@ -313,7 +313,7 @@ public class SqlSearch {
                     getTypeFilter() != null ? getTypeFilter().getId() : -1,
                     createdBriefcaseId);
             fx_result.setUserWildcardIndex(indexOfUserPropsWildcard != -1 ? indexOfUserPropsWildcard + 1 : -1);
-            fx_result.setTotalRowCount(params.isHintNoResultInfo() ? -1 : df.getFoundEntries());
+            fx_result.setTotalRowCount(this.params.isHintNoResultInfo() ? -1 : df.getFoundEntries());
             fx_result.setTruncated(df.isTruncated());
 
             final long fetchStart = java.lang.System.currentTimeMillis();
