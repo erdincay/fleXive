@@ -45,6 +45,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
 import com.flexive.shared.interfaces.TransCacheEngine;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Primitives;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -64,6 +65,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -547,7 +549,23 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
-        return getAll(parameter).keySet();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        final ParameterData<T> data = parameter.getData();
+        final List<String> keys = Lists.newArrayList();
+        try {
+            conn = getConnection();
+            stmt = getSelectStatement(conn, data.getPath().getValue());
+            ResultSet rs = stmt.executeQuery();
+            while (rs != null && rs.next()) {
+                keys.add(rs.getString(1));
+            }
+            return keys;
+        } catch (SQLException se) {
+            throw new FxLoadException(LOG, se, "ex.db.sqlError", se.getMessage());
+        } finally {
+            Database.closeObjects(GenericConfigurationImpl.class, conn, stmt);
+        }
     }
 
     /**

@@ -37,6 +37,7 @@ import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
+import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.XStream;
 
 import javax.ejb.*;
@@ -217,7 +218,18 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
-        return getAll(parameter).keySet();
+        List<GenericConfigurationEngine> configs;
+        try {
+            configs = getAvailableConfigurations(parameter.getScope());
+        } catch (FxInvalidParameterException e) {
+            throw new FxLoadException("ex.configuration.parameter.load.ex", e);
+        }
+        final List<String> result = Lists.newArrayList();
+        for (GenericConfigurationEngine config : configs) {
+            final Collection<String> keys = config.getKeys(parameter);
+            result.addAll(keys);
+        }
+        return result;
     }
 
     /**
