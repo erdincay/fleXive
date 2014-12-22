@@ -1090,7 +1090,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if(!hasValueData())
             return true;
         if (isMultiLanguage()) {
-            // check if value data is equal, taking into account that the "default value" (the main valuData field) can
+            // check if value data is equal, taking into account that the "default value" (the main valueData field) can
             // be used as fallback. The other direction (otherValue -> this) does not need to be checked, because if the number
             // of translations does not match, the equality check will return false anyway.
 
@@ -1099,10 +1099,12 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             for (Entry<Long, Integer> entry : thisML.entrySet()) {
                 final Integer value = entry.getValue();
                 final Integer other = otherML.get(entry.getKey());
-                if (value != null && value.equals(valueData)) {
-                    if (other != null && !value.equals(other)) {
-                        return false;
-                    }
+                final Integer checkValue = value == null ? valueData : value;
+                final Integer checkOther = other == null ? otherValue.valueData : other;
+                if (checkValue != null && !checkValue.equals(checkOther)) {
+                    return false;
+                } else if (checkValue == null && checkOther != null) {
+                    return false;
                 }
             }
             return true;
