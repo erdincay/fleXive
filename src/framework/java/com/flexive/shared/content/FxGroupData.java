@@ -1235,5 +1235,7 @@ public class FxGroupData extends FxData {
         }
     }
 
-    static final AddGroupOptions DEFAULT_ADD_OPTIONS = new AddGroupOptions();
+    static final AddGroupOptions DEFAULT_ADD_OPTIONS = new AddGroupOptions().middleGroupOptions(
+            new AddGroupOptions().onlyRequiredGroups()
+    );
 }
