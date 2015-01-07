@@ -77,7 +77,6 @@ import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA_ITEM;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLocal {
     private static final Log LOG = LogFactory.getLog(BriefcaseEngineBean.class);
-    private static final int MAX_METADATA_LENGTH = 4096;
 
     @Resource
     javax.ejb.SessionContext ctx;
@@ -500,9 +499,6 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
 
             for (FxReferenceMetaData<FxPK> metaData : metadata) {
                 final String meta = metaData.getSerializedForm();
-                if (meta.length() > MAX_METADATA_LENGTH) {
-                    throw new FxUpdateException("ex.briefcase.metadata.size", MAX_METADATA_LENGTH);
-                }
                 stmt.setString(1, meta);
                 stmt.setLong(3, metaData.getReference().getId());
                 stmt.addBatch();
@@ -527,7 +523,6 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void mergeMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metaData) throws FxApplicationException {
         checkEditBriefcase(load(id));
-        PreparedStatement stmt = null;
         Connection con = null;
         boolean success = false;
         try {
@@ -563,7 +558,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             if (!success) {
                 EJBUtils.rollback(ctx);
             }
-            closeObjects(BriefcaseEngineBean.class, con, stmt);
+            closeObjects(BriefcaseEngineBean.class, con, null);
         }
 
     }

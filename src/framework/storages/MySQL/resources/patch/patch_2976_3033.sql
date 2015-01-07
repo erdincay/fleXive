@@ -1,0 +1,3 @@
+# Remove length limit for briefcase metadata entries
+
+ALTER TABLE FXS_BRIEFCASE_DATA CHANGE METADATA METADATA TEXT CHARACTER SET UTF8 NULL;
