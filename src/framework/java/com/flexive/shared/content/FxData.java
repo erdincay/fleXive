@@ -101,11 +101,17 @@ public abstract class FxData implements Serializable {
      */
     protected String xpPrefix;
 
-    protected FxData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices, long assignmentId,
-                     FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent, boolean systemInternal) {
+    protected FxData(String xpPrefix, String alias, int index, String xPath, String xPathFull, long assignmentId,
+                     int pos, FxGroupData parent, boolean skipXPathSanitize) {
         this.xpPrefix = xpPrefix;
-        this.XPath = xpCached(XPathElement.stripType(xPath));
-        this.XPathFull = xpCached(XPathElement.stripType(xPathFull));
+        if (skipXPathSanitize) {
+            // called from a "structure source" - xPath is shared with the assignment, xPathFull is not
+            this.XPath = xPath;
+            this.XPathFull = xpCached(xPathFull);
+        } else {
+            this.XPath = xpCached(XPathElement.stripType(xPath));
+            this.XPathFull = xpCached(XPathElement.stripType(xPathFull));
+        }
         this.assignmentId = assignmentId;
         this.pos = pos;
         this.parent = parent;

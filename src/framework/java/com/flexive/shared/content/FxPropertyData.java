@@ -36,7 +36,6 @@ import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxContentExceptionCause;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
-import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.structure.GroupMode;
@@ -60,10 +59,9 @@ public class FxPropertyData extends FxData {
     private FxValue value;
     private boolean containsDefaultValue;
 
-    public FxPropertyData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
-                          long assignmentId, long propertyId, FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent,
-                          FxValue value, boolean systemInternal, FxStructureOption maxLength) {
-        super(xpPrefix, alias, index, xPath, xPathFull, indices, assignmentId, assignmentMultiplicity, pos, parent, systemInternal);
+    public FxPropertyData(String xpPrefix, String alias, int index, String xPath, String xPathFull,
+                          long assignmentId, int pos, FxGroupData parent, FxValue value, boolean skipXPathSanitize) {
+        super(xpPrefix, alias, index, xPath, xPathFull, assignmentId, pos, parent, skipXPathSanitize);
         this.value = value;
         this.containsDefaultValue = false;
         if (this.value != null) {

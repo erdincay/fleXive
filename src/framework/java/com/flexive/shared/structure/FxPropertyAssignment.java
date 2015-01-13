@@ -321,17 +321,19 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      */
     @Override
     public FxData createEmptyData(FxGroupData parent, int index, int position, boolean onlySystemInternal, boolean onlyRequiredGroups) {
-        String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias();
-        String XPath = XPathElement.stripType(getXPath());
+        String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias() + '[' + index + ']';
+
         final FxMultiplicity fxMultiplicity = this.getMultiplicity();
         // if we need to check minMulti then it has to be valid otherwise it has only valid maxMulti
         if (!fxMultiplicity.isValidMax(index))
             //noinspection ThrowableInstanceNeverThrown
             throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
                     setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
-        final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
-                XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
-                position, parent, this.getEmptyValue(), this.isSystemInternal(), null);
+
+        final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index,
+                XPathNoType, XPathFull,
+                this.getId(), position, parent, this.getEmptyValue(), true);
+
         //Flag if the value is set from the assignments default value
         data.setContainsDefaultValue(!data.getValue().isEmpty());
         return data;
@@ -349,8 +351,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
             throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
                     setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
         return new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
-                XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
-                this.getPosition(), parent, this.getProperty().getDataType().getRandomValue(rnd, this), this.isSystemInternal(), null);
+                this.getId(),
+                this.getPosition(), parent, this.getProperty().getDataType().getRandomValue(rnd, this), false);
     }
 
     /**

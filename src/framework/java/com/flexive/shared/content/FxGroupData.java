@@ -55,11 +55,9 @@ public class FxGroupData extends FxData {
     private List<FxData> data;
     private FxValueChangeListener changeListener = null;
 
-    public FxGroupData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
-                       long assignmentId, FxMultiplicity assignmentMultiplicity, int pos,
-                       FxGroupData parent, List<FxData> data, boolean systemInternal) throws FxInvalidParameterException {
-        super(xpPrefix, alias, index, xPath, xPathFull, indices, assignmentId, assignmentMultiplicity,
-                pos, parent, systemInternal);
+    public FxGroupData(String xpPrefix, String alias, int index, String xPath, String xPathFull,
+                       long assignmentId, int pos, FxGroupData parent, List<FxData> data, boolean skipXPathSanitize) throws FxInvalidParameterException {
+        super(xpPrefix, alias, index, xPath, xPathFull, assignmentId, pos, parent, skipXPathSanitize);
         this.data = data;
     }
 
@@ -210,7 +208,7 @@ public class FxGroupData extends FxData {
     public static FxGroupData createVirtualRootGroup(String xpPrefix) throws FxInvalidParameterException {
         // note: multiplicity and other settings are no longer used by FxGroupData, they are supplied
         // by the virtual root assignment created in FxData#getAssignment
-        return new FxGroupData(xpPrefix, "", 1, "/", "/", new int[0], -1, FxMultiplicity.of(1, 1), -1, null, new ArrayList<FxData>(), false);
+        return new FxGroupData(xpPrefix, "", 1, "/", "/", -1, -1, null, new ArrayList<FxData>(), false);
     }
 
     /**
@@ -504,7 +502,7 @@ public class FxGroupData extends FxData {
             toRemove.clear();
             removeAll = true;
             // First we need to check if we could remove an element (then add to the toRemove set) else add all other groups to the currentGroups List
-            List<FxData> currentData = currentGroup.data;
+            final List<FxData> currentData = currentGroup.data;
             for (FxData curr : currentData) {
                 boolean propCheck = false; 
                 if (curr.isProperty()) {
@@ -512,6 +510,7 @@ public class FxGroupData extends FxData {
                     propCheck |= prop.isContainsDefaultValue();
                 }
                 // if we got something to remove, just put it in to the list otherwise set removeAll to false
+                final FxMultiplicity mult = curr.getAssignmentMultiplicity();
                 if ((curr.isEmpty() || propCheck)
                         // for groups, don't remove them when they contain required properties
                         && ((curr.isGroup() && !curr.isRequiredPropertiesPresent())
@@ -523,7 +522,7 @@ public class FxGroupData extends FxData {
                     if (curr instanceof FxGroupData) {
                         currentGroups.add((FxGroupData) curr);
                     }
-                    if (!curr.getAssignmentMultiplicity().isOptional() && !curr.isSystemInternal()) {
+                    if (!mult.isOptional() && !curr.isSystemInternal()) {
                         long id = curr.getAssignmentId();
                         Integer amount = notRemoved.get(id);
                         if (amount == null) {
@@ -533,7 +532,7 @@ public class FxGroupData extends FxData {
                         notRemoved.put(id, amount);
                     }
                 }
-                if (!curr.getAssignmentMultiplicity().isOptional()) {
+                if (!mult.isOptional()) {
                     removeAll = false;
                 }
             }
@@ -573,7 +572,7 @@ public class FxGroupData extends FxData {
                 toCompact.put(curr.getAssignmentId(), curr);
 //                curr.compact();
             }
-            // compact after all elements have been removed, and compact multiple data with same ID only once            
+            // compact after all elements have been removed, and compact multiple data with same ID only once
             for (FxData curr : toCompact.values()) {
                 curr.compact();
             }
@@ -795,9 +794,9 @@ public class FxGroupData extends FxData {
         }
         int index = elements.get(elements.size() - 1).getIndex();
         FxPropertyData data = new FxPropertyData(this.xpPrefix, assignment.getAlias(), index,
-                assignment.getXPath(), xPath, XPathElement.getIndices(xPath), assignment.getId(), assignment.getProperty().getId(),
-                assignment.getMultiplicity(), pos, parentGroup, value, assignment.isSystemInternal(),
-                null);
+                assignment.getXPath(), xPath, assignment.getId(),
+                pos, parentGroup, value, false
+        );
 
         FxData check = parentGroup.containsChild(data.getXPathElement());
         if (check != null)
@@ -990,10 +989,10 @@ public class FxGroupData extends FxData {
             childAssignments = type.getConnectedAssignments("/");
             checkOneOf = false;
         } else {
-            type = CacheAdmin.getEnvironment().getAssignment(this.getAssignmentId()).getAssignedType();
-            FxGroupAssignment thisAssignment = ((FxGroupAssignment) type.getAssignment(this.getXPath()));
+            FxGroupAssignment thisAssignment = getGroupAssignment();
             childAssignments = thisAssignment.getAssignments();
             checkOneOf = thisAssignment.getMode() == GroupMode.OneOf;
+            type = thisAssignment.getAssignedType();
         }
 
         int count;

@@ -127,6 +127,8 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      */
     protected String XPath;
 
+    protected String XPathNoType;
+
     /**
      * (optional) alias, if not defined the name of the assigned element
      */
@@ -330,19 +332,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      *
      * @return XPath of this assignment without indices
      */
-    public synchronized String getXPath() {
-        if (XPath != null)
-            return XPath;
-        //build XPath
-        StringBuilder sbXPath = new StringBuilder(200);
-        sbXPath.append(this.getAlias());
-        FxAssignment parent = this.getParentGroupAssignment();
-        while (parent != null) {
-            sbXPath.insert(0, parent.getAlias() + "/");
-            parent = parent.getParentGroupAssignment();
-        }
-        sbXPath.insert(0, getAssignedType().getName() + "/");
-        XPath = sbXPath.toString();
+    public String getXPath() {
         return XPath;
     }
 
@@ -645,6 +635,17 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
                 }
             }
         }
+
+        //build XPath
+        StringBuilder sbXPath = new StringBuilder(200);
+        sbXPath.append(alias);
+        FxAssignment parent = parentGroupAssignment;
+        while (parent != null) {
+            sbXPath.insert(0, parent.alias + "/");
+            parent = parent.parentGroupAssignment;
+        }
+        XPathNoType = '/' + sbXPath.toString();
+        XPath = (assignedTypeId == -1 ? "ROOT" : environment.getType(assignedTypeId).getName()) + XPathNoType;
     }
 
     /**

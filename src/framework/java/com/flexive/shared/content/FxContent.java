@@ -43,6 +43,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
@@ -544,16 +545,15 @@ public class FxContent implements Serializable {
         List<FxData> ret = base;
         boolean found;
         final List<XPathElement> elems = XPathElement.split(XPathElement.xpToUpperCase(XPath));
-        for (int i = 0; i < elems.size(); i++) {
+        final int elemCount = elems.size();
+        for (int i = 0; i < elemCount; i++) {
             XPathElement xpe = elems.get(i);
             found = false;
             for (FxData curr : ret) {
                 if (curr.equalToXPathElement(xpe)) {
                     if (curr.isProperty()) {
-                        if (i == elems.size() - 1) {
-                            ret = new ArrayList<FxData>(1);
-                            ret.add(curr);
-                            return ret;
+                        if (i == elemCount - 1) {
+                            return ImmutableList.of(curr);
                         } else {
                             return null;
                         }
@@ -1130,8 +1130,9 @@ public class FxContent implements Serializable {
         // since this method tends to be used often in hot spots for determining the structure of the content
         List<FxData> currentChildren = data.getChildren();
         final List<XPathElement> elems = XPathElement.split(XPathElement.stripType(XPath));
+        final int elemCount = elems.size();
         FxData lastCurr = null;
-        for (int i = 0; i < elems.size(); i++) {
+        for (int i = 0; i < elemCount; i++) {
             XPathElement xpe = elems.get(i);
             boolean found = false;
             for (FxData curr : currentChildren) {
@@ -1139,7 +1140,7 @@ public class FxContent implements Serializable {
                 if (curr.equalToXPathElement(xpe)) {
                     if (curr.isProperty()) {
                         // true if this is the last part of the XPath
-                        return i == elems.size() - 1 ? curr : null;
+                        return i == elemCount - 1 ? curr : null;
                     } else {
                         currentChildren = ((FxGroupData) curr).getChildren();
                         found = true;

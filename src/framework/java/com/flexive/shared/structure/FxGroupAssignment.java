@@ -253,10 +253,9 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             // if we need to check minMulti then it has to be valid otherwise it has only valid maxMulti
             if (!fxMultiplicity.isValidMax(index))
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
-            final String xPathFull = XPathElement.stripType(parent.getXPathFull() + (parent.isRootGroup() ? "" : "/") + this.getAlias() + "[" + index + "]");
-            thisGroup = new FxGroupData(parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
-                    xPathFull, XPathElement.getIndices(xPathFull),
-                    this.getId(), this.getMultiplicity(), position, parent, new ArrayList<FxData>(), this.isSystemInternal());
+            final String xPathFull = parent.getXPathFull() + (parent.isRootGroup() ? "" : "/") + this.getAlias() + "[" + index + "]";
+            thisGroup = new FxGroupData(parent.getXPathPrefix(), this.getAlias(), index, XPathNoType,
+                    xPathFull, this.getId(), position, parent, new ArrayList<FxData>(assignments.size()), true);
             final FxType type = getAssignedType();
             if (this.getMode() == GroupMode.OneOf) {
                 //if One-Of more find the first non-optional child and create it (should not happen if correctly setup
@@ -332,8 +331,8 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         try {
             final UserTicket ticket = FxContext.getUserTicket();
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
-                    XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
-                    this.getId(), this.getMultiplicity(), this.getPosition(), parent, new ArrayList<FxData>(), this.isSystemInternal());
+                    XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())),
+                    this.getId(), this.getPosition(), parent, new ArrayList<FxData>(), false);
             int count;
             for (FxAssignment as : assignments) {
                 if (!as.isEnabled()
@@ -364,15 +363,20 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      * @throws FxNotFoundException if no assignment was found
      */
     public FxAssignment getAssignment(List<XPathElement> XPath, String fullXPath) throws FxNotFoundException {
-        XPathElement curr = XPath.get(0);
-        if (curr.getAlias().equals(this.getAlias()) && XPath.size() == 1)
+        return getAssignment(XPath, 0, fullXPath);
+    }
+
+    private FxAssignment getAssignment(List<XPathElement> XPath, int index, String fullXPath) throws FxNotFoundException {
+        XPathElement elem = XPath.get(index);
+        final int next = index + 1;
+        if (elem.getAlias().equals(this.getAlias()) && XPath.size() == next)
             return this; //ok, its us
-        if (XPath.size() > 1) {
-            curr = XPath.get(1);
+        if (XPath.size() > next) {
+            elem = XPath.get(next);
             for (FxAssignment as : assignments)
-                if (as.getAlias().equals(curr.getAlias())) {
+                if (as.getAlias().equals(elem.getAlias())) {
                     if (as instanceof FxGroupAssignment)
-                        return ((FxGroupAssignment) as).getAssignment(XPath.subList(1, XPath.size()), fullXPath);
+                        return ((FxGroupAssignment) as).getAssignment(XPath, next, fullXPath);
                     else
                         return as;
                 }
