@@ -2147,8 +2147,10 @@ public class PhraseEngineBean implements PhraseEngine, PhraseEngineLocal {
                 updatePhrasePosition(con, category, assignmentOwner, nodeId, nodeMandator, phraseId, phraseMandator, 0, true);
             }
             rebuildPhraseChildMapping(con, nodeMandator, category, phraseId, phraseMandator);
-            if(nodeMandator != phraseMandator)
+            if (nodeMandator != phraseMandator)
                 rebuildPhraseChildMapping(con, phraseMandator, category, phraseId, phraseMandator);
+            else if (assignmentOwner != nodeMandator)
+                rebuildPhraseChildMapping(con, assignmentOwner, category, phraseId, phraseMandator);
             return found;
         } catch (SQLException exc) {
             EJBUtils.rollback(ctx);
